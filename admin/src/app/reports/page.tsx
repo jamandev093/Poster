@@ -1,11 +1,5 @@
-import SimplePlaceholderPage from "@/components/admin/SimplePlaceholderPage";
+import ReportsManager from "@/features/reports/ReportsManager";
 
-export default function Page() {
-  return (
-    <SimplePlaceholderPage
-      title="Reports"
-      description="See only reports that may need action."
-      note="Copyright routes to Copyright automatically. Low-priority feedback stays stored for analytics instead of becoming manual work."
-    />
-  );
+export default function ReportsPage() {
+  return <ReportsManager />;
 }
