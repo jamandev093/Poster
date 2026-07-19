@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ReactNode,
-  useEffect,
   useState,
 } from "react";
 
@@ -42,14 +41,14 @@ export default function AdminShell({
   const [open, setOpen] =
     useState(false);
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
   const title =
     items.find(([href]) =>
       active(pathname, href)
     )?.[1] ?? "Poster Admin";
+
+  const closeNavigation = () => {
+    setOpen(false);
+  };
 
   return (
     <div className="shell">
@@ -67,7 +66,7 @@ export default function AdminShell({
 
           <div className="brand-copy">
             <strong>Poster</strong>
-            <span>Administration</span>
+            <span>Admin</span>
           </div>
         </div>
 
@@ -87,15 +86,18 @@ export default function AdminShell({
                 <Link
                   key={href}
                   href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
                   className={`nav-link ${
                     isActive
                       ? "nav-active"
                       : ""
                   }`}
-                  aria-current={
-                    isActive
-                      ? "page"
-                      : undefined
+                  onClick={
+                    closeNavigation
                   }
                 >
                   <span className="nav-dot" />
@@ -131,8 +133,8 @@ export default function AdminShell({
           type="button"
           className="backdrop"
           aria-label="Close navigation"
-          onClick={() =>
-            setOpen(false)
+          onClick={
+            closeNavigation
           }
         />
       ) : null}
@@ -143,10 +145,16 @@ export default function AdminShell({
             <button
               type="button"
               className="menu"
-              aria-label="Open navigation"
+              aria-label={
+                open
+                  ? "Close navigation"
+                  : "Open navigation"
+              }
+              aria-expanded={open}
               onClick={() =>
-                setOpen((value) =>
-                  !value
+                setOpen(
+                  (value) =>
+                    !value
                 )
               }
             >
@@ -160,7 +168,9 @@ export default function AdminShell({
                 Poster operations
               </small>
 
-              <h1>{title}</h1>
+              <h1>
+                {title}
+              </h1>
             </div>
           </div>
 
@@ -170,7 +180,10 @@ export default function AdminShell({
             </div>
 
             <div>
-              <strong>Admin</strong>
+              <strong>
+                Admin
+              </strong>
+
               <span>
                 Single operator
               </span>

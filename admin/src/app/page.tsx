@@ -41,7 +41,7 @@ const attention = [
   [
     "Reports",
     "3 content reports",
-    "Only reports marked as needing action are shown.",
+    "Only reports that need operator action are shown.",
     "/reports",
     "low",
   ],
@@ -79,10 +79,10 @@ export default function DashboardPage() {
           </h2>
 
           <p>
-            Platform status,
-            operational exceptions,
-            and recent administrative
-            activity.
+            Monitor Poster operations,
+            review exceptions, and handle
+            the actions that require your
+            attention.
           </p>
         </div>
 
@@ -111,7 +111,9 @@ export default function DashboardPage() {
               key={label}
               className="stat"
             >
-              <span>{label}</span>
+              <span>
+                {label}
+              </span>
 
               <strong>
                 {value}
@@ -130,11 +132,11 @@ export default function DashboardPage() {
           <div className="panel-head">
             <div>
               <div className="eyebrow">
-                Exception queue
+                Needs attention
               </div>
 
               <h3>
-                Needs attention
+                Exceptions
               </h3>
             </div>
 
@@ -190,7 +192,7 @@ export default function DashboardPage() {
           <div className="panel-head">
             <div>
               <div className="eyebrow">
-                Audit trail
+                Activity
               </div>
 
               <h3>
@@ -232,24 +234,20 @@ export default function DashboardPage() {
       <section className="operator-note">
         <div>
           <strong>
-            Exception-based operation
+            Poster handles routine operations automatically.
           </strong>
 
           <p>
-            Normal ingestion,
-            taxonomy evolution,
-            ranking, and routine
-            processing remain
-            automatic. Admin is
-            reserved for decisions
-            that require operator
-            attention.
+            Admin is focused on exceptions,
+            legal requests, source issues,
+            reports, campaigns, and essential
+            account actions.
           </p>
         </div>
 
         <Link
-          className="primary"
           href="/copyright"
+          className="primary"
         >
           Review copyright
         </Link>
