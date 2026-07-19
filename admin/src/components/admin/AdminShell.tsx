@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 
 interface AdminShellProps {
   children: ReactNode;
@@ -18,49 +22,165 @@ const items = [
   ["/users", "Users"],
 ] as const;
 
-function active(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+function active(
+  pathname: string,
+  href: string
+) {
+  return href === "/"
+    ? pathname === "/"
+    : pathname === href ||
+        pathname.startsWith(
+          `${href}/`
+        );
 }
 
-export default function AdminShell({ children }: AdminShellProps) {
+export default function AdminShell({
+  children,
+}: AdminShellProps) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [pathname]);
-  const title = items.find(([href]) => active(pathname, href))?.[1] ?? "Poster Admin";
+
+  const [open, setOpen] =
+    useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  const title =
+    items.find(([href]) =>
+      active(pathname, href)
+    )?.[1] ?? "Poster Admin";
 
   return (
     <div className="shell">
-      <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
+      <aside
+        className={`sidebar ${
+          open
+            ? "sidebar-open"
+            : ""
+        }`}
+      >
         <div className="brand">
-          <div className="brand-mark">P</div>
-          <div><strong>Poster</strong><span>Admin</span></div>
+          <div className="brand-mark">
+            P
+          </div>
+
+          <div className="brand-copy">
+            <strong>Poster</strong>
+            <span>Administration</span>
+          </div>
         </div>
 
-        <nav className="nav" aria-label="Admin navigation">
-          {items.map(([href, label]) => (
-            <Link key={href} href={href} className={`nav-link ${active(pathname, href) ? "nav-active" : ""}`}>
-              <span className="nav-dot" />
-              {label}
-            </Link>
-          ))}
+        <nav
+          className="nav"
+          aria-label="Admin navigation"
+        >
+          {items.map(
+            ([href, label]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
         </nav>
 
         <div className="sidebar-foot">
-          <div className="health"><i /><div><strong>Systems normal</strong><span>No critical issues</span></div></div>
+          <div className="health">
+            <i />
+
+            <div>
+              <strong>
+                Systems normal
+              </strong>
+
+              <span>
+                No critical issues
+              </span>
+            </div>
+          </div>
         </div>
       </aside>
 
-      {open ? <button className="backdrop" aria-label="Close navigation" onClick={() => setOpen(false)} /> : null}
+      {open ? (
+        <button
+          type="button"
+          className="backdrop"
+          aria-label="Close navigation"
+          onClick={() =>
+            setOpen(false)
+          }
+        />
+      ) : null}
 
       <div className="workspace">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="menu" aria-label="Open navigation" onClick={() => setOpen(v => !v)}><span/><span/><span/></button>
-            <div><small>Poster Operations</small><h1>{title}</h1></div>
+            <button
+              type="button"
+              className="menu"
+              aria-label="Open navigation"
+              onClick={() =>
+                setOpen((value) =>
+                  !value
+                )
+              }
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+
+            <div className="topbar-copy">
+              <small>
+                Poster operations
+              </small>
+
+              <h1>{title}</h1>
+            </div>
           </div>
-          <div className="operator"><div className="avatar">A</div><div><strong>Admin</strong><span>Single operator</span></div></div>
+
+          <div className="operator">
+            <div className="operator-mark">
+              A
+            </div>
+
+            <div>
+              <strong>Admin</strong>
+              <span>
+                Single operator
+              </span>
+            </div>
+          </div>
         </header>
-        <main className="main">{children}</main>
+
+        <main className="main">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -4,11 +4,21 @@ interface Props {
   eyebrow?: string;
 }
 
-export default function PageHeader({ title, description, eyebrow }: Props) {
+export default function PageHeader({
+  title,
+  description,
+  eyebrow,
+}: Props) {
   return (
     <header className="page-header">
-      {eyebrow ? <div className="eyebrow">{eyebrow}</div> : null}
+      {eyebrow ? (
+        <div className="eyebrow">
+          {eyebrow}
+        </div>
+      ) : null}
+
       <h2>{title}</h2>
+
       <p>{description}</p>
     </header>
   );
