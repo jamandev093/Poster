@@ -3,66 +3,82 @@ import Link from "next/link";
 const stats = [
   [
     "Active content",
-    "18,420",
-    "Currently discoverable",
+    "2",
+    "Currently discoverable records",
   ],
   [
     "Active sources",
-    "134",
-    "Connected publishers",
+    "2",
+    "Sources currently active",
   ],
   [
-    "Users",
+    "Registered users",
     "8,250",
-    "Registered accounts",
+    "Total Poster accounts",
   ],
   [
     "Active campaigns",
     "3",
-    "Commercial placements",
+    "Commercial placements running",
   ],
 ] as const;
 
 const attention = [
-  [
-    "Copyright",
-    "Copyright strike by BBC",
-    "1 article requires takedown review.",
-    "/copyright",
-    "high",
-  ],
-  [
-    "Source health",
-    "1 source needs attention",
-    "A publisher feed has not synced successfully.",
-    "/sources",
-    "medium",
-  ],
-  [
-    "Reports",
-    "3 content reports",
-    "Only reports that need operator action are shown.",
-    "/reports",
-    "low",
-  ],
+  {
+    label: "Copyright",
+    reference: "CR-1001 · CNT-2001",
+    title: "Copyright strike by BBC",
+    description:
+      "Verified rights request awaiting an operator decision.",
+    href: "/copyright",
+    severity: "high",
+  },
+
+  {
+    label: "Source health",
+    reference: "SRC-1003",
+    title: "Example News is paused",
+    description:
+      "Authorized RSS source has a sync issue and should be reviewed before enabling.",
+    href: "/sources?record=SRC-1003",
+    severity: "medium",
+  },
+
+  {
+    label: "Reports",
+    reference: "RPT queue",
+    title: "Actionable reports need review",
+    description:
+      "Review serious content, source, commercial, and copyright-related exceptions.",
+    href: "/reports",
+    severity: "low",
+  },
 ] as const;
 
 const activity = [
-  [
-    "Article removed",
-    "Copyright request · Example Media",
-    "18 min ago",
-  ],
-  [
-    "Source paused",
-    "RSS unavailable · Example News",
-    "1 hr ago",
-  ],
-  [
-    "Campaign activated",
-    "Poster promotion",
-    "Today",
-  ],
+  {
+    title: "Copyright request verified",
+    detail: "CR-1001 · CNT-2001 · BBC",
+    time: "Today",
+  },
+
+  {
+    title: "Content removed",
+    detail: "CR-1000 · CNT-2000 · Example Media",
+    time: "18 min ago",
+  },
+
+  {
+    title: "Source paused",
+    detail: "SRC-1003 · Example News · Sync issue",
+    time: "1 hr ago",
+  },
+
+  {
+    title: "Report received",
+    detail: "RPT-2046 · CNT-2003 · Misleading content",
+    time: "Today",
+  },
 ] as const;
 
 export default function DashboardPage() {
@@ -71,7 +87,7 @@ export default function DashboardPage() {
       <section className="hero">
         <div>
           <div className="eyebrow">
-            Overview
+            Operations overview
           </div>
 
           <h2>
@@ -79,20 +95,19 @@ export default function DashboardPage() {
           </h2>
 
           <p>
-            Monitor Poster operations,
-            review exceptions, and handle
-            the actions that require your
-            attention.
+            See Poster&apos;s current operational state,
+            review exceptions, and move directly to the
+            records that require attention.
           </p>
         </div>
 
         <div className="hero-status">
           <span className="system-state">
-            Systems normal
+            Admin frontend healthy
           </span>
 
           <span>
-            5 items need attention
+            3 areas need attention
           </span>
         </div>
       </section>
@@ -141,21 +156,22 @@ export default function DashboardPage() {
             </div>
 
             <span className="count">
-              5
+              3
             </span>
           </div>
 
           <div>
             {attention.map(
-              ([
+              ({
                 label,
+                reference,
                 title,
                 description,
                 href,
                 severity,
-              ]) => (
+              }) => (
                 <Link
-                  key={title}
+                  key={`${label}-${reference}`}
                   href={href}
                   className="attention"
                 >
@@ -166,6 +182,8 @@ export default function DashboardPage() {
                   <div>
                     <small>
                       {label}
+                      {" · "}
+                      {reference}
                     </small>
 
                     <strong>
@@ -173,9 +191,7 @@ export default function DashboardPage() {
                     </strong>
 
                     <p>
-                      {
-                        description
-                      }
+                      {description}
                     </p>
                   </div>
 
@@ -203,12 +219,14 @@ export default function DashboardPage() {
 
           <div className="activity">
             {activity.map(
-              ([
+              ({
                 title,
                 detail,
                 time,
-              ]) => (
-                <div key={title}>
+              }) => (
+                <div
+                  key={`${title}-${detail}`}
+                >
                   <i />
 
                   <p>
@@ -234,22 +252,23 @@ export default function DashboardPage() {
       <section className="operator-note">
         <div>
           <strong>
-            Poster handles routine operations automatically.
+            System health has its own dedicated view.
           </strong>
 
           <p>
-            Admin is focused on exceptions,
-            legal requests, source issues,
-            reports, campaigns, and essential
-            account actions.
+            Monitor Admin tools, APIs, RSS ingestion,
+            database connectivity, AI services, and
+            notification health from System Status.
+            Dashboard stays focused on operational
+            exceptions and recent activity.
           </p>
         </div>
 
         <Link
-          href="/copyright"
+          href="/system-status"
           className="primary"
         >
-          Review copyright
+          View System Status
         </Link>
       </section>
     </div>

@@ -19,6 +19,7 @@ const items = [
   ["/monetization", "Monetization"],
   ["/reports", "Reports"],
   ["/users", "Users"],
+  ["/system-status", "System Status"],
 ] as const;
 
 function active(
@@ -54,21 +55,9 @@ export default function AdminShell({
   const [
     open,
     setOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
-  /*
-   * Public-facing routes must not inherit
-   * the Admin sidebar, topbar, operator UI,
-   * or Admin workspace container.
-   *
-   * Keeping the prefix check also allows
-   * future routes such as:
-   *
-   * /copyright-request/status
-   * /copyright-request/confirmation
-   *
-   * without exposing the Admin shell.
-   */
   if (
     isPublicRoute(
       pathname
