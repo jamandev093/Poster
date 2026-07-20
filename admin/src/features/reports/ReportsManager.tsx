@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
 
 import styles from "./ReportsManager.module.css";
 
@@ -23,6 +26,11 @@ type ReportAction =
   | "dismiss"
   | "route_copyright";
 
+type AffectedKind =
+  | "Content"
+  | "Source"
+  | "Campaign";
+
 interface AuditEntry {
   id: string;
   action: string;
@@ -32,210 +40,431 @@ interface AuditEntry {
 
 interface ReportRecord {
   id: string;
+
   type: ReportType;
+
   reporter: string;
   reporterReference: string;
-  affectedKind: string;
+
+  affectedKind:
+    AffectedKind;
+
+  affectedId: string;
+
   affectedTitle: string;
   affectedMeta: string;
-  affectedHref: string;
+
   reason: string;
+
   receivedAt: string;
-  status: ReportStatus;
-  routedToCopyright: boolean;
-  audit: AuditEntry[];
+
+  status:
+    ReportStatus;
+
+  routedToCopyright:
+    boolean;
+
+  audit:
+    AuditEntry[];
 }
 
-const INITIAL_REPORTS: ReportRecord[] = [
+const INITIAL_REPORTS:
+  ReportRecord[] = [
   {
     id: "RPT-2046",
-    type: "misleading_content",
-    reporter: "Aarav S.",
-    reporterReference: "User U-8250",
-    affectedKind: "Content",
+
+    type:
+      "misleading_content",
+
+    reporter:
+      "Aarav S.",
+
+    reporterReference:
+      "User U-8250",
+
+    affectedKind:
+      "Content",
+
+    affectedId:
+      "CNT-2003",
+
     affectedTitle:
-      "AI breakthrough claims raise questions",
+      "AI agents are changing software workflows",
+
     affectedMeta:
-      "Example Technology · Article record",
-    affectedHref: "/content",
+      "Example Tech · Article record",
+
     reason:
       "The report says the headline overstates the source material and may give readers a misleading impression of the underlying research.",
-    receivedAt: "19 Jul 2026 · 12:14",
-    status: "needs_action",
-    routedToCopyright: false,
+
+    receivedAt:
+      "19 Jul 2026 · 12:14",
+
+    status:
+      "needs_action",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2046-1",
-        action: "Report received",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 12:14",
+        id:
+          "RPT-2046-1",
+
+        action:
+          "Report received",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 12:14",
       },
     ],
   },
+
   {
     id: "RPT-2045",
-    type: "broken_link",
-    reporter: "Meera K.",
-    reporterReference: "User U-7811",
-    affectedKind: "Content",
+
+    type:
+      "broken_link",
+
+    reporter:
+      "Meera K.",
+
+    reporterReference:
+      "User U-7811",
+
+    affectedKind:
+      "Content",
+
+    affectedId:
+      "CNT-2002",
+
     affectedTitle:
-      "Global energy transition report",
+      "New climate research explained",
+
     affectedMeta:
-      "Example Journal · External URL",
-    affectedHref: "/content",
+      "Example Science · External URL",
+
     reason:
       "The original publisher URL returns an unavailable page and the content can no longer be opened from Poster.",
-    receivedAt: "19 Jul 2026 · 11:42",
-    status: "needs_action",
-    routedToCopyright: false,
+
+    receivedAt:
+      "19 Jul 2026 · 11:42",
+
+    status:
+      "needs_action",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2045-1",
-        action: "Broken-link report received",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 11:42",
+        id:
+          "RPT-2045-1",
+
+        action:
+          "Broken-link report received",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 11:42",
       },
     ],
   },
+
   {
     id: "RPT-2044",
-    type: "publisher_issue",
-    reporter: "Publisher representative",
+
+    type:
+      "publisher_issue",
+
+    reporter:
+      "Publisher representative",
+
     reporterReference:
       "Example News · publisher contact",
-    affectedKind: "Source",
-    affectedTitle: "Example News",
+
+    affectedKind:
+      "Source",
+
+    affectedId:
+      "SRC-1003",
+
+    affectedTitle:
+      "Example News",
+
     affectedMeta:
-      "RSS source · Sync requires review",
-    affectedHref: "/sources",
+      "Authorized RSS · Sync requires review",
+
     reason:
       "The publisher reported that its feed configuration has changed and requested that Poster verify the current source before further synchronization.",
-    receivedAt: "19 Jul 2026 · 10:31",
-    status: "needs_action",
-    routedToCopyright: false,
+
+    receivedAt:
+      "19 Jul 2026 · 10:31",
+
+    status:
+      "needs_action",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2044-1",
-        action: "Publisher issue received",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 10:31",
+        id:
+          "RPT-2044-1",
+
+        action:
+          "Publisher issue received",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 10:31",
       },
     ],
   },
+
   {
     id: "RPT-2043",
-    type: "commercial_report",
-    reporter: "Nisha P.",
-    reporterReference: "User U-6504",
-    affectedKind: "Campaign",
+
+    type:
+      "commercial_report",
+
+    reporter:
+      "Nisha P.",
+
+    reporterReference:
+      "User U-6504",
+
+    affectedKind:
+      "Campaign",
+
+    affectedId:
+      "CMP-3001",
+
     affectedTitle:
       "Cloud Skills Direct Sponsorship",
+
     affectedMeta:
       "Direct sponsorship · Home placement",
-    affectedHref: "/monetization",
+
     reason:
       "The user reported that the commercial destination appeared unrelated to the disclosure shown on the card.",
-    receivedAt: "19 Jul 2026 · 09:48",
-    status: "needs_action",
-    routedToCopyright: false,
+
+    receivedAt:
+      "19 Jul 2026 · 09:48",
+
+    status:
+      "needs_action",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2043-1",
-        action: "Commercial report received",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 09:48",
+        id:
+          "RPT-2043-1",
+
+        action:
+          "Commercial report received",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 09:48",
       },
     ],
   },
+
   {
     id: "RPT-2042",
-    type: "copyright",
-    reporter: "Rights contact",
+
+    type:
+      "copyright",
+
+    reporter:
+      "Rights contact",
+
     reporterReference:
-      "Example Media · rights department",
-    affectedKind: "Content",
+      "BBC · rights department",
+
+    affectedKind:
+      "Content",
+
+    affectedId:
+      "CNT-2001",
+
     affectedTitle:
-      "Market analysis article",
+      "AI regulation story",
+
     affectedMeta:
-      "Example Media · Copyright concern",
-    affectedHref: "/content",
+      "BBC · Copyright concern",
+
     reason:
       "The reporter states that the content preview may be subject to a publisher removal request and should be reviewed through the dedicated copyright workflow.",
-    receivedAt: "19 Jul 2026 · 09:22",
-    status: "needs_action",
-    routedToCopyright: false,
+
+    receivedAt:
+      "19 Jul 2026 · 09:22",
+
+    status:
+      "needs_action",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2042-1",
+        id:
+          "RPT-2042-1",
+
         action:
           "Potential copyright report received",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 09:22",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 09:22",
       },
     ],
   },
+
   {
     id: "RPT-2041",
-    type: "inappropriate_content",
-    reporter: "Rohan D.",
-    reporterReference: "User U-5410",
-    affectedKind: "Content",
+
+    type:
+      "inappropriate_content",
+
+    reporter:
+      "Rohan D.",
+
+    reporterReference:
+      "User U-5410",
+
+    affectedKind:
+      "Content",
+
+    affectedId:
+      "CNT-2041",
+
     affectedTitle:
       "Historical conflict documentary",
+
     affectedMeta:
       "Example Documentary · Content record",
-    affectedHref: "/content",
+
     reason:
       "The report was reviewed and the content was found to be legitimate educational and historical material rather than prohibited content.",
-    receivedAt: "18 Jul 2026 · 18:16",
-    status: "dismissed",
-    routedToCopyright: false,
+
+    receivedAt:
+      "18 Jul 2026 · 18:16",
+
+    status:
+      "dismissed",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2041-2",
+        id:
+          "RPT-2041-2",
+
         action:
           "Dismissed — legitimate educational context",
-        actor: "Admin",
-        timestamp: "18 Jul 2026 · 18:29",
+
+        actor:
+          "Admin",
+
+        timestamp:
+          "18 Jul 2026 · 18:29",
       },
+
       {
-        id: "RPT-2041-1",
+        id:
+          "RPT-2041-1",
+
         action:
           "Inappropriate-content report received",
-        actor: "System",
-        timestamp: "18 Jul 2026 · 18:16",
+
+        actor:
+          "System",
+
+        timestamp:
+          "18 Jul 2026 · 18:16",
       },
     ],
   },
+
   {
     id: "RPT-2040",
-    type: "broken_link",
-    reporter: "System-assisted report",
-    reporterReference: "User U-4108",
-    affectedKind: "Content",
+
+    type:
+      "broken_link",
+
+    reporter:
+      "System-assisted report",
+
+    reporterReference:
+      "User U-4108",
+
+    affectedKind:
+      "Content",
+
+    affectedId:
+      "CNT-2040",
+
     affectedTitle:
       "Research publication archive",
+
     affectedMeta:
       "Example Research · External URL",
-    affectedHref: "/content",
+
     reason:
       "The affected URL was checked and the destination was restored by the publisher.",
-    receivedAt: "18 Jul 2026 · 15:03",
-    status: "resolved",
-    routedToCopyright: false,
+
+    receivedAt:
+      "18 Jul 2026 · 15:03",
+
+    status:
+      "resolved",
+
+    routedToCopyright:
+      false,
+
     audit: [
       {
-        id: "RPT-2040-2",
+        id:
+          "RPT-2040-2",
+
         action:
           "Resolved — destination available again",
-        actor: "Admin",
-        timestamp: "18 Jul 2026 · 15:20",
+
+        actor:
+          "Admin",
+
+        timestamp:
+          "18 Jul 2026 · 15:20",
       },
+
       {
-        id: "RPT-2040-1",
-        action: "Broken-link report received",
-        actor: "System",
-        timestamp: "18 Jul 2026 · 15:03",
+        id:
+          "RPT-2040-1",
+
+        action:
+          "Broken-link report received",
+
+        actor:
+          "System",
+
+        timestamp:
+          "18 Jul 2026 · 15:03",
       },
     ],
   },
@@ -280,21 +509,50 @@ function typeLabel(
   }
 }
 
+function affectedRecordHref(
+  report: ReportRecord
+): string {
+  const encodedId =
+    encodeURIComponent(
+      report.affectedId
+    );
+
+  switch (
+    report.affectedKind
+  ) {
+    case "Content":
+      return `/content?record=${encodedId}`;
+
+    case "Source":
+      return `/sources?record=${encodedId}`;
+
+    case "Campaign":
+      return `/monetization?record=${encodedId}`;
+  }
+}
+
 function nowLabel(): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
     }
-  ).format(new Date());
+  ).format(
+    new Date()
+  );
 }
 
 export default function ReportsManager() {
   const [
     reports,
     setReports,
-  ] = useState<ReportRecord[]>(
+  ] = useState<
+    ReportRecord[]
+  >(
     INITIAL_REPORTS
   );
 
@@ -302,13 +560,18 @@ export default function ReportsManager() {
     activeFilter,
     setActiveFilter,
   ] = useState<
-    "all" | ReportStatus
-  >("needs_action");
+    "all" |
+      ReportStatus
+  >(
+    "needs_action"
+  );
 
   const [
     selectedReportId,
     setSelectedReportId,
-  ] = useState<string | null>(
+  ] = useState<
+    string | null
+  >(
     null
   );
 
@@ -317,18 +580,23 @@ export default function ReportsManager() {
     setPendingAction,
   ] = useState<
     ReportAction | null
-  >(null);
+  >(
+    null
+  );
 
   const visibleReports =
     useMemo(() => {
       if (
-        activeFilter === "all"
+        activeFilter ===
+        "all"
       ) {
         return reports;
       }
 
       return reports.filter(
-        (report) =>
+        (
+          report
+        ) =>
           report.status ===
           activeFilter
       );
@@ -341,10 +609,13 @@ export default function ReportsManager() {
     useMemo(
       () =>
         reports.find(
-          (report) =>
+          (
+            report
+          ) =>
             report.id ===
             selectedReportId
         ) ?? null,
+
       [
         reports,
         selectedReportId,
@@ -354,44 +625,65 @@ export default function ReportsManager() {
   const counts =
     useMemo(
       () => ({
-        all: reports.length,
+        all:
+          reports.length,
 
         needs_action:
           reports.filter(
-            (report) =>
+            (
+              report
+            ) =>
               report.status ===
               "needs_action"
           ).length,
 
         resolved:
           reports.filter(
-            (report) =>
+            (
+              report
+            ) =>
               report.status ===
               "resolved"
           ).length,
 
         dismissed:
           reports.filter(
-            (report) =>
+            (
+              report
+            ) =>
               report.status ===
               "dismissed"
           ).length,
       }),
-      [reports]
+
+      [
+        reports,
+      ]
     );
 
   const updateReport = (
     reportId: string,
+
     updater: (
-      report: ReportRecord
+      report:
+        ReportRecord
     ) => ReportRecord
   ) => {
-    setReports((current) =>
-      current.map((report) =>
-        report.id === reportId
-          ? updater(report)
-          : report
-      )
+    setReports(
+      (
+        current
+      ) =>
+        current.map(
+          (
+            report
+          ) =>
+            report.id ===
+            reportId
+              ? updater(
+                  report
+                )
+              : report
+        )
     );
   };
 
@@ -402,12 +694,16 @@ export default function ReportsManager() {
       reportId
     );
 
-    setPendingAction(null);
+    setPendingAction(
+      null
+    );
   };
 
   const beginAction = (
     reportId: string,
-    action: ReportAction
+
+    action:
+      ReportAction
   ) => {
     setSelectedReportId(
       reportId
@@ -418,102 +714,117 @@ export default function ReportsManager() {
     );
   };
 
-  const closeDrawer = () => {
-    setSelectedReportId(
-      null
-    );
+  const closeDrawer =
+    () => {
+      setSelectedReportId(
+        null
+      );
 
-    setPendingAction(null);
-  };
+      setPendingAction(
+        null
+      );
+    };
 
-  const executeAction = () => {
-    if (
-      !selectedReport ||
-      !pendingAction
-    ) {
-      return;
-    }
-
-    const action =
-      pendingAction;
-
-    updateReport(
-      selectedReport.id,
-      (current) => {
-        const auditBase = {
-          id:
-            `${current.id}-${Date.now()}`,
-          actor: "Admin",
-          timestamp:
-            nowLabel(),
-        };
-
-        switch (action) {
-          case "resolve":
-            return {
-              ...current,
-
-              status:
-                "resolved",
-
-              audit: [
-                {
-                  ...auditBase,
-
-                  action:
-                    "Report resolved",
-                },
-
-                ...current.audit,
-              ],
-            };
-
-          case "dismiss":
-            return {
-              ...current,
-
-              status:
-                "dismissed",
-
-              audit: [
-                {
-                  ...auditBase,
-
-                  action:
-                    "Report dismissed — no further action",
-                },
-
-                ...current.audit,
-              ],
-            };
-
-          case "route_copyright":
-            return {
-              ...current,
-
-              status:
-                "resolved",
-
-              routedToCopyright:
-                true,
-
-              audit: [
-                {
-                  ...auditBase,
-
-                  action:
-                    "Routed to Copyright management",
-                },
-
-                ...current.audit,
-              ],
-            };
-        }
+  const executeAction =
+    () => {
+      if (
+        !selectedReport ||
+        !pendingAction
+      ) {
+        return;
       }
-    );
 
-    setPendingAction(null);
-  };
+      const action =
+        pendingAction;
+
+      updateReport(
+        selectedReport.id,
+
+        (
+          current
+        ) => {
+          const auditBase =
+            {
+              id:
+                `${current.id}-${Date.now()}`,
+
+              actor:
+                "Admin",
+
+              timestamp:
+                nowLabel(),
+            };
+
+          switch (
+            action
+          ) {
+            case "resolve":
+              return {
+                ...current,
+
+                status:
+                  "resolved",
+
+                audit: [
+                  {
+                    ...auditBase,
+
+                    action:
+                      "Report resolved",
+                  },
+
+                  ...current.audit,
+                ],
+              };
+
+            case "dismiss":
+              return {
+                ...current,
+
+                status:
+                  "dismissed",
+
+                audit: [
+                  {
+                    ...auditBase,
+
+                    action:
+                      "Report dismissed — no further action",
+                  },
+
+                  ...current.audit,
+                ],
+              };
+
+            case "route_copyright":
+              return {
+                ...current,
+
+                status:
+                  "resolved",
+
+                routedToCopyright:
+                  true,
+
+                audit: [
+                  {
+                    ...auditBase,
+
+                    action:
+                      `Routed ${current.affectedId} to Copyright management`,
+                  },
+
+                  ...current.audit,
+                ],
+              };
+          }
+        }
+      );
+
+      setPendingAction(
+        null
+      );
+    };
 
   return (
     <div
@@ -543,9 +854,9 @@ export default function ReportsManager() {
             Review only reports
             that may require an
             operator decision.
-            Low-priority feedback
-            remains outside the
-            manual action queue.
+            Every report keeps an
+            exact affected record
+            reference.
           </p>
         </div>
 
@@ -588,9 +899,9 @@ export default function ReportsManager() {
 
           <p>
             Copyright-related
-            reports can be sent
-            to Copyright instead
-            of creating a second,
+            reports are routed to
+            Copyright instead of
+            creating a second
             parallel takedown
             system.
           </p>
@@ -652,7 +963,11 @@ export default function ReportsManager() {
                 {label}
 
                 <span>
-                  {counts[key]}
+                  {
+                    counts[
+                      key
+                    ]
+                  }
                 </span>
               </button>
             )
@@ -676,9 +991,13 @@ export default function ReportsManager() {
             </div>
           ) : (
             visibleReports.map(
-              (report) => (
+              (
+                report
+              ) => (
                 <article
-                  key={report.id}
+                  key={
+                    report.id
+                  }
                   className={
                     styles.reportCard
                   }
@@ -705,6 +1024,10 @@ export default function ReportsManager() {
                         >
                           {
                             report.id
+                          }
+                          {" · "}
+                          {
+                            report.affectedId
                           }
                         </span>
 
@@ -774,12 +1097,12 @@ export default function ReportsManager() {
 
                     <div>
                       <span>
-                        Affected
+                        Record ID
                       </span>
 
                       <strong>
                         {
-                          report.affectedKind
+                          report.affectedId
                         }
                       </strong>
                     </div>
@@ -844,9 +1167,9 @@ export default function ReportsManager() {
                     </button>
 
                     <Link
-                      href={
-                        report.affectedHref
-                      }
+                      href={affectedRecordHref(
+                        report
+                      )}
                       className={
                         styles.secondaryLink
                       }
@@ -949,6 +1272,10 @@ export default function ReportsManager() {
                   {
                     selectedReport.id
                   }
+                  {" · "}
+                  {
+                    selectedReport.affectedId
+                  }
                 </span>
 
                 <h3>
@@ -1044,9 +1371,9 @@ export default function ReportsManager() {
                   </h4>
 
                   <Link
-                    href={
-                      selectedReport.affectedHref
-                    }
+                    href={affectedRecordHref(
+                      selectedReport
+                    )}
                     className={
                       styles.inlineLink
                     }
@@ -1060,6 +1387,18 @@ export default function ReportsManager() {
                     styles.detailList
                   }
                 >
+                  <div>
+                    <dt>
+                      Record ID
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedReport.affectedId
+                      }
+                    </dd>
+                  </div>
+
                   <div>
                     <dt>
                       Record type
@@ -1145,7 +1484,7 @@ export default function ReportsManager() {
                         selectedReport.routedToCopyright
                           ? "Routed"
                           : selectedReport.type ===
-                            "copyright"
+                              "copyright"
                           ? "Needs routing"
                           : "Not applicable"
                       }
@@ -1167,17 +1506,19 @@ export default function ReportsManager() {
                   </strong>
 
                   <p>
-                    This report should
-                    not become a
-                    separate legal
-                    takedown record
-                    here. Copyright
-                    ownership, claimant
-                    identity, removal,
-                    prevent-reimport,
+                    This report
+                    identifies{" "}
+                    {
+                      selectedReport.affectedId
+                    }
+                    . Copyright
+                    ownership,
+                    claimant identity,
+                    removal,
+                    prevent re-import,
                     restoration, and
                     legal audit history
-                    belong in the
+                    remain in the
                     Copyright module.
                   </p>
 
@@ -1207,7 +1548,9 @@ export default function ReportsManager() {
                   }
                 >
                   {selectedReport.audit.map(
-                    (entry) => (
+                    (
+                      entry
+                    ) => (
                       <div
                         key={
                           entry.id
@@ -1252,9 +1595,9 @@ export default function ReportsManager() {
               }
             >
               <Link
-                href={
-                  selectedReport.affectedHref
-                }
+                href={affectedRecordHref(
+                  selectedReport
+                )}
                 className={
                   styles.secondaryLink
                 }
@@ -1386,7 +1729,7 @@ export default function ReportsManager() {
               "resolve"
                 ? "Resolve this report?"
                 : pendingAction ===
-                  "dismiss"
+                    "dismiss"
                 ? "Dismiss this report?"
                 : "Send this report to Copyright?"}
             </h3>
@@ -1397,6 +1740,10 @@ export default function ReportsManager() {
                   selectedReport.id
                 }
               </strong>
+              {" · "}
+              {
+                selectedReport.affectedId
+              }
               {" · "}
               {typeLabel(
                 selectedReport.type
@@ -1431,16 +1778,16 @@ export default function ReportsManager() {
                 }
               >
                 This frontend
-                currently records
-                the routing action
-                locally. The
-                backend will later
-                create or link the
-                corresponding
-                Copyright case and
-                preserve claimant,
-                takedown, exclusion,
-                and audit data.
+                records the routing
+                decision locally for{" "}
+                {
+                  selectedReport.affectedId
+                }
+                . The future backend
+                will create or link
+                the real Copyright
+                case and persist the
+                shared relationship.
               </p>
             ) : null}
 

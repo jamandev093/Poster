@@ -1,9 +1,14 @@
 "use client";
 
 import {
+  Suspense,
   useMemo,
   useState,
 } from "react";
+
+import {
+  useSearchParams,
+} from "next/navigation";
 
 import styles from "./ContentManager.module.css";
 
@@ -30,130 +35,183 @@ interface ContentRecord {
   title: string;
   publisher: string;
   originalUrl: string;
+
   sourceMethod:
     | "API"
     | "RSS"
     | "Embed"
     | "Agreement"
     | "Link-only";
+
   status: ContentStatus;
+
   publishedAt: string;
   addedAt: string;
+
   removalReason?: RemovalReason;
   removalNote?: string;
+
   copyrightCaseId?: string;
   copyrightClaimant?: string;
+
   preventReimport: boolean;
+
   audit: ContentAuditEntry[];
 }
 
 const INITIAL_CONTENT: ContentRecord[] = [
   {
     id: "CNT-2003",
+
     title:
       "AI agents are changing software workflows",
+
     publisher:
       "Example Tech",
+
     originalUrl:
       "https://example.com/ai-agents-workflows",
+
     sourceMethod:
       "RSS",
+
     status:
       "active",
+
     publishedAt:
       "19 Jul 2026",
+
     addedAt:
       "19 Jul 2026",
+
     preventReimport:
       false,
+
     audit: [
       {
         id:
           "audit-2003-1",
+
         action:
           "Added to Poster from authorized RSS",
+
         actor:
           "System",
+
         timestamp:
           "19 Jul 2026 · 08:40",
       },
     ],
   },
+
   {
     id: "CNT-2002",
+
     title:
       "New climate research explained",
+
     publisher:
       "Example Science",
+
     originalUrl:
       "https://example.com/climate-research",
+
     sourceMethod:
       "API",
+
     status:
       "active",
+
     publishedAt:
       "18 Jul 2026",
+
     addedAt:
       "18 Jul 2026",
+
     preventReimport:
       false,
+
     audit: [
       {
         id:
           "audit-2002-1",
+
         action:
           "Added to Poster from official API",
+
         actor:
           "System",
+
         timestamp:
           "18 Jul 2026 · 13:10",
       },
     ],
   },
+
   {
     id: "CNT-2001",
+
     title:
       "AI regulation story",
+
     publisher:
       "BBC",
+
     originalUrl:
       "https://example.com/bbc/ai-regulation",
+
     sourceMethod:
       "RSS",
+
     status:
       "removed",
+
     publishedAt:
       "18 Jul 2026",
+
     addedAt:
       "18 Jul 2026",
+
     removalReason:
       "copyright",
+
     removalNote:
       "Removed after rights-holder request.",
+
     copyrightCaseId:
       "CR-1001",
+
     copyrightClaimant:
       "BBC",
+
     preventReimport:
       true,
+
     audit: [
       {
         id:
           "audit-2001-2",
+
         action:
           "Removed from Poster + prevent re-import",
+
         actor:
           "Admin",
+
         timestamp:
           "19 Jul 2026 · 09:35",
       },
+
       {
         id:
           "audit-2001-1",
+
         action:
           "Copyright strike received from BBC",
+
         actor:
           "System",
+
         timestamp:
           "19 Jul 2026 · 09:20",
       },
@@ -168,30 +226,39 @@ const REMOVAL_REASONS: Array<{
   {
     value:
       "copyright",
+
     label:
       "Copyright complaint",
   },
+
   {
     value:
       "publisher_request",
+
     label:
       "Publisher request",
   },
+
   {
     value:
       "misleading_unsafe",
+
     label:
       "Misleading / unsafe content",
   },
+
   {
     value:
       "broken_unavailable",
+
     label:
       "Broken / unavailable source",
   },
+
   {
     value:
       "other",
+
     label:
       "Other",
   },
@@ -210,17 +277,60 @@ function reasonLabel(
   );
 }
 
+function sourceMethodLabel(
+  method:
+    ContentRecord["sourceMethod"]
+): string {
+  switch (method) {
+    case "API":
+      return "Official API";
+
+    case "RSS":
+      return "Authorized RSS";
+
+    case "Embed":
+      return "Official Embed/oEmbed";
+
+    case "Agreement":
+      return "Publisher Agreement";
+
+    case "Link-only":
+      return "Link-only";
+  }
+}
+
 function nowLabel(): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
     }
-  ).format(new Date());
+  ).format(
+    new Date()
+  );
 }
 
 export default function ContentManager() {
+  return (
+    <Suspense fallback={null}>
+      <ContentManagerContent />
+    </Suspense>
+  );
+}
+
+function ContentManagerContent() {
+  const searchParams =
+    useSearchParams();
+
+  const requestedRecordId =
+    searchParams.get(
+      "record"
+    );
+
   const [
     records,
     setRecords,
@@ -240,21 +350,33 @@ export default function ContentManager() {
     setFilter,
   ] = useState<
     "all" | ContentStatus
-  >("all");
+  >(
+    "all"
+  );
 
   const [
     selectedId,
     setSelectedId,
   ] = useState<
     string | null
-  >(null);
+  >(
+    INITIAL_CONTENT.some(
+      (record) =>
+        record.id ===
+        requestedRecordId
+    )
+      ? requestedRecordId
+      : null
+  );
 
   const [
     removeTargetId,
     setRemoveTargetId,
   ] = useState<
     string | null
-  >(null);
+  >(
+    null
+  );
 
   const [
     removeReason,
@@ -273,7 +395,9 @@ export default function ContentManager() {
   const [
     preventReimport,
     setPreventReimport,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   const normalizedQuery =
     query
@@ -285,7 +409,8 @@ export default function ContentManager() {
       return records.filter(
         (record) => {
           if (
-            filter !== "all" &&
+            filter !==
+              "all" &&
             record.status !==
               filter
           ) {
@@ -299,10 +424,14 @@ export default function ContentManager() {
           }
 
           return [
+            record.id,
             record.title,
             record.publisher,
             record.originalUrl,
             record.sourceMethod,
+            sourceMethodLabel(
+              record.sourceMethod
+            ),
           ].some(
             (value) =>
               value
@@ -327,6 +456,7 @@ export default function ContentManager() {
             record.id ===
             selectedId
         ) ?? null,
+
       [
         records,
         selectedId,
@@ -341,6 +471,7 @@ export default function ContentManager() {
             record.id ===
             removeTargetId
         ) ?? null,
+
       [
         records,
         removeTargetId,
@@ -352,12 +483,14 @@ export default function ContentManager() {
       () => ({
         all:
           records.length,
+
         active:
           records.filter(
             (record) =>
               record.status ===
               "active"
           ).length,
+
         removed:
           records.filter(
             (record) =>
@@ -365,7 +498,10 @@ export default function ContentManager() {
               "removed"
           ).length,
       }),
-      [records]
+
+      [
+        records,
+      ]
     );
 
   const beginRemove = (
@@ -383,6 +519,7 @@ export default function ContentManager() {
     );
 
     setRemoveNote("");
+
     setPreventReimport(
       Boolean(
         record.copyrightCaseId
@@ -390,72 +527,91 @@ export default function ContentManager() {
     );
   };
 
-  const cancelRemove = () => {
-    setRemoveTargetId(null);
-    setRemoveNote("");
-    setPreventReimport(false);
-  };
+  const cancelRemove =
+    () => {
+      setRemoveTargetId(
+        null
+      );
 
-  const confirmRemove = () => {
-    if (!removalRecord) {
-      return;
-    }
+      setRemoveNote("");
 
-    setRecords(
-      (current) =>
-        current.map(
-          (record) => {
-            if (
-              record.id !==
-              removalRecord.id
-            ) {
-              return record;
+      setPreventReimport(
+        false
+      );
+    };
+
+  const confirmRemove =
+    () => {
+      if (
+        !removalRecord
+      ) {
+        return;
+      }
+
+      setRecords(
+        (current) =>
+          current.map(
+            (record) => {
+              if (
+                record.id !==
+                removalRecord.id
+              ) {
+                return record;
+              }
+
+              const claimant =
+                removeReason ===
+                  "copyright"
+                  ? record.copyrightClaimant
+                  : undefined;
+
+              const action =
+                preventReimport
+                  ? "Removed from Poster + prevent re-import"
+                  : "Removed from Poster";
+
+              return {
+                ...record,
+
+                status:
+                  "removed",
+
+                removalReason:
+                  removeReason,
+
+                removalNote:
+                  removeNote
+                    .trim() ||
+                  undefined,
+
+                preventReimport,
+
+                audit: [
+                  {
+                    id:
+                      `${record.id}-${Date.now()}`,
+
+                    action:
+                      claimant
+                        ? `${action} · Copyright strike by ${claimant}`
+                        : action,
+
+                    actor:
+                      "Admin",
+
+                    timestamp:
+                      nowLabel(),
+                  },
+
+                  ...record.audit,
+                ],
+              };
             }
+          )
+      );
 
-            const claimant =
-              removeReason ===
-                "copyright"
-                ? record.copyrightClaimant
-                : undefined;
-
-            const action =
-              preventReimport
-                ? "Removed from Poster + prevent re-import"
-                : "Removed from Poster";
-
-            return {
-              ...record,
-              status:
-                "removed",
-              removalReason:
-                removeReason,
-              removalNote:
-                removeNote
-                  .trim() ||
-                undefined,
-              preventReimport,
-              audit: [
-                {
-                  id:
-                    `${record.id}-${Date.now()}`,
-                  action:
-                    claimant
-                      ? `${action} · Copyright strike by ${claimant}`
-                      : action,
-                  actor:
-                    "Admin",
-                  timestamp:
-                    nowLabel(),
-                },
-                ...record.audit,
-              ],
-            };
-          }
-        )
-    );
-
-    cancelRemove();
-  };
+      cancelRemove();
+    };
 
   const restoreRecord = (
     record:
@@ -469,25 +625,34 @@ export default function ContentManager() {
             record.id
               ? {
                   ...item,
+
                   status:
                     "active",
+
                   removalReason:
                     undefined,
+
                   removalNote:
                     undefined,
+
                   preventReimport:
                     false,
+
                   audit: [
                     {
                       id:
                         `${item.id}-${Date.now()}`,
+
                       action:
                         "Content restored to Poster",
+
                       actor:
                         "Admin",
+
                       timestamp:
                         nowLabel(),
                     },
+
                     ...item.audit,
                   ],
                 }
@@ -557,11 +722,13 @@ export default function ContentManager() {
           }
         >
           <input
-            value={query}
+            value={
+              query
+            }
             className={
               styles.search
             }
-            placeholder="Search title, publisher or URL..."
+            placeholder="Search ID, title, publisher or URL..."
             aria-label="Search content"
             onChange={(
               event
@@ -584,10 +751,12 @@ export default function ContentManager() {
                   "all",
                   "All",
                 ],
+
                 [
                   "active",
                   "Active",
                 ],
+
                 [
                   "removed",
                   "Removed",
@@ -599,7 +768,9 @@ export default function ContentManager() {
                 label,
               ]) => (
                 <button
-                  key={key}
+                  key={
+                    key
+                  }
                   type="button"
                   className={
                     filter ===
@@ -613,7 +784,9 @@ export default function ContentManager() {
                     )
                   }
                 >
-                  {label}
+                  {
+                    label
+                  }
 
                   <span>
                     {
@@ -664,7 +837,9 @@ export default function ContentManager() {
 
             <tbody>
               {visibleRecords.map(
-                (record) => (
+                (
+                  record
+                ) => (
                   <tr
                     key={
                       record.id
@@ -686,6 +861,16 @@ export default function ContentManager() {
                           record.title
                         }
                       </button>
+
+                      <span
+                        className={
+                          styles.website
+                        }
+                      >
+                        {
+                          record.id
+                        }
+                      </span>
 
                       {record.copyrightClaimant ? (
                         <span
@@ -709,9 +894,9 @@ export default function ContentManager() {
                     </td>
 
                     <td>
-                      {
+                      {sourceMethodLabel(
                         record.sourceMethod
-                      }
+                      )}
                     </td>
 
                     <td>
@@ -862,6 +1047,19 @@ export default function ContentManager() {
                 >
                   <div>
                     <dt>
+                      Poster
+                      Content ID
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedRecord.id
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
                       Title
                     </dt>
 
@@ -908,9 +1106,9 @@ export default function ContentManager() {
                     </dt>
 
                     <dd>
-                      {
+                      {sourceMethodLabel(
                         selectedRecord.sourceMethod
-                      }
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -962,7 +1160,7 @@ export default function ContentManager() {
                 </div>
 
                 {selectedRecord.status ===
-                  "removed" ? (
+                "removed" ? (
                   <div
                     className={
                       styles.removalBox
@@ -971,6 +1169,7 @@ export default function ContentManager() {
                     <strong>
                       Removal:
                     </strong>{" "}
+
                     {reasonLabel(
                       selectedRecord.removalReason
                     )}
@@ -982,6 +1181,7 @@ export default function ContentManager() {
                         {
                           selectedRecord.copyrightClaimant
                         }
+
                         {selectedRecord.copyrightCaseId
                           ? ` · ${selectedRecord.copyrightCaseId}`
                           : ""}
@@ -1204,6 +1404,19 @@ export default function ContentManager() {
               }
             </p>
 
+            <p
+              className={
+                styles.modalTitle
+              }
+            >
+              Poster Content ID:{" "}
+              <strong>
+                {
+                  removalRecord.id
+                }
+              </strong>
+            </p>
+
             {removalRecord.copyrightClaimant ? (
               <div
                 className={
@@ -1235,7 +1448,9 @@ export default function ContentManager() {
               </legend>
 
               {REMOVAL_REASONS.map(
-                (reason) => (
+                (
+                  reason
+                ) => (
                   <label
                     key={
                       reason.value

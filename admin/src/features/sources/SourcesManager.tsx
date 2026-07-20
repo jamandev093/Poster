@@ -1,9 +1,14 @@
 "use client";
 
 import {
+  Suspense,
   useMemo,
   useState,
 } from "react";
+
+import {
+  useSearchParams,
+} from "next/navigation";
 
 import styles from "./SourcesManager.module.css";
 
@@ -65,6 +70,7 @@ const INITIAL_SOURCES: SourceRecord[] = [
       },
     ],
   },
+
   {
     id: "SRC-1002",
     name: "BBC",
@@ -85,6 +91,7 @@ const INITIAL_SOURCES: SourceRecord[] = [
       },
     ],
   },
+
   {
     id: "SRC-1003",
     name: "Example News",
@@ -99,16 +106,21 @@ const INITIAL_SOURCES: SourceRecord[] = [
     audit: [
       {
         id: "audit-src-1003-2",
-        action: "Source paused",
-        actor: "Admin",
+        action:
+          "Source paused",
+        actor:
+          "Admin",
         timestamp:
           "19 Jul 2026 · 08:02",
       },
+
       {
-        id: "audit-src-1003-1",
+        id:
+          "audit-src-1003-1",
         action:
           "Repeated RSS sync failures detected",
-        actor: "System",
+        actor:
+          "System",
         timestamp:
           "19 Jul 2026 · 07:58",
       },
@@ -199,6 +211,22 @@ function nowLabel(): string {
 }
 
 export default function SourcesManager() {
+  return (
+    <Suspense fallback={null}>
+      <SourcesManagerContent />
+    </Suspense>
+  );
+}
+
+function SourcesManagerContent() {
+  const searchParams =
+    useSearchParams();
+
+  const requestedRecordId =
+    searchParams.get(
+      "record"
+    );
+
   const [
     sources,
     setSources,
@@ -221,23 +249,31 @@ export default function SourcesManager() {
   const [
     selectedId,
     setSelectedId,
-  ] = useState<string | null>(
-    null
+  ] = useState<
+    string | null
+  >(
+    INITIAL_SOURCES.some(
+      (source) =>
+        source.id ===
+        requestedRecordId
+    )
+      ? requestedRecordId
+      : null
   );
 
   const [
     blockTargetId,
     setBlockTargetId,
-  ] = useState<string | null>(
-    null
-  );
+  ] = useState<
+    string | null
+  >(null);
 
   const [
     unblockTargetId,
     setUnblockTargetId,
-  ] = useState<string | null>(
-    null
-  );
+  ] = useState<
+    string | null
+  >(null);
 
   const [
     removeExistingContent,
@@ -255,16 +291,20 @@ export default function SourcesManager() {
         (source) => {
           if (
             filter !== "all" &&
-            source.status !== filter
+            source.status !==
+              filter
           ) {
             return false;
           }
 
-          if (!normalizedQuery) {
+          if (
+            !normalizedQuery
+          ) {
             return true;
           }
 
           return [
+            source.id,
             source.name,
             source.website,
             source.method,
@@ -356,7 +396,9 @@ export default function SourcesManager() {
               "blocked"
           ).length,
       }),
-      [sources]
+      [
+        sources,
+      ]
     );
 
   const updateSourceStatus = (
@@ -372,17 +414,23 @@ export default function SourcesManager() {
             sourceId
               ? {
                   ...source,
+
                   status,
+
                   audit: [
                     {
                       id:
                         `${source.id}-${Date.now()}`,
+
                       action,
+
                       actor:
                         "Admin",
+
                       timestamp:
                         nowLabel(),
                     },
+
                     ...source.audit,
                   ],
                 }
@@ -442,73 +490,89 @@ export default function SourcesManager() {
     );
   };
 
-  const cancelBlock = () => {
-    setBlockTargetId(null);
+  const cancelBlock =
+    () => {
+      setBlockTargetId(
+        null
+      );
 
-    setRemoveExistingContent(
-      false
-    );
-  };
+      setRemoveExistingContent(
+        false
+      );
+    };
 
-  const confirmBlock = () => {
-    if (!blockTarget) {
-      return;
-    }
+  const confirmBlock =
+    () => {
+      if (
+        !blockTarget
+      ) {
+        return;
+      }
 
-    const action =
-      removeExistingContent
-        ? "Source blocked and existing content marked for removal"
-        : "Source blocked";
+      const action =
+        removeExistingContent
+          ? "Source blocked and existing content marked for removal"
+          : "Source blocked";
 
-    setSources(
-      (current) =>
-        current.map(
-          (source) =>
-            source.id ===
-            blockTarget.id
-              ? {
-                  ...source,
-                  status:
-                    "blocked",
-                  audit: [
-                    {
-                      id:
-                        `${source.id}-${Date.now()}`,
-                      action,
-                      actor:
-                        "Admin",
-                      timestamp:
-                        nowLabel(),
-                    },
-                    ...source.audit,
-                  ],
-                }
-              : source
-        )
-    );
+      setSources(
+        (current) =>
+          current.map(
+            (source) =>
+              source.id ===
+              blockTarget.id
+                ? {
+                    ...source,
 
-    cancelBlock();
-  };
+                    status:
+                      "blocked",
 
-  const cancelUnblock = () => {
-    setUnblockTargetId(
-      null
-    );
-  };
+                    audit: [
+                      {
+                        id:
+                          `${source.id}-${Date.now()}`,
 
-  const confirmUnblock = () => {
-    if (!unblockTarget) {
-      return;
-    }
+                        action,
 
-    updateSourceStatus(
-      unblockTarget.id,
-      "active",
-      "Source unblocked and enabled"
-    );
+                        actor:
+                          "Admin",
 
-    cancelUnblock();
-  };
+                        timestamp:
+                          nowLabel(),
+                      },
+
+                      ...source.audit,
+                    ],
+                  }
+                : source
+          )
+      );
+
+      cancelBlock();
+    };
+
+  const cancelUnblock =
+    () => {
+      setUnblockTargetId(
+        null
+      );
+    };
+
+  const confirmUnblock =
+    () => {
+      if (
+        !unblockTarget
+      ) {
+        return;
+      }
+
+      updateSourceStatus(
+        unblockTarget.id,
+        "active",
+        "Source unblocked and enabled"
+      );
+
+      cancelUnblock();
+    };
 
   return (
     <div
@@ -572,11 +636,13 @@ export default function SourcesManager() {
           }
         >
           <input
-            value={query}
+            value={
+              query
+            }
             className={
               styles.search
             }
-            placeholder="Search source or website..."
+            placeholder="Search ID, source or website..."
             aria-label="Search sources"
             onChange={(
               event
@@ -599,14 +665,17 @@ export default function SourcesManager() {
                   "all",
                   "All",
                 ],
+
                 [
                   "active",
                   "Active",
                 ],
+
                 [
                   "paused",
                   "Paused",
                 ],
+
                 [
                   "blocked",
                   "Blocked",
@@ -618,7 +687,9 @@ export default function SourcesManager() {
                 label,
               ]) => (
                 <button
-                  key={key}
+                  key={
+                    key
+                  }
                   type="button"
                   className={
                     filter ===
@@ -632,7 +703,9 @@ export default function SourcesManager() {
                     )
                   }
                 >
-                  {label}
+                  {
+                    label
+                  }
 
                   <span>
                     {
@@ -687,7 +760,9 @@ export default function SourcesManager() {
 
             <tbody>
               {visibleSources.map(
-                (source) => (
+                (
+                  source
+                ) => (
                   <tr
                     key={
                       source.id
@@ -725,8 +800,12 @@ export default function SourcesManager() {
                           styles.website
                         }
                       >
-                        {source.activeContentCount.toLocaleString()}{" "}
-                        active content
+                        {
+                          source.id
+                        }
+                        {" · "}
+                        {source.activeContentCount.toLocaleString()}
+                        {" active content"}
                       </span>
                     </td>
 
@@ -924,6 +1003,18 @@ export default function SourcesManager() {
                 >
                   <div>
                     <dt>
+                      Source ID
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedSource.id
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
                       Website
                     </dt>
 
@@ -1002,7 +1093,8 @@ export default function SourcesManager() {
 
                   <div>
                     <dt>
-                      Active content
+                      Active
+                      content
                     </dt>
 
                     <dd>
