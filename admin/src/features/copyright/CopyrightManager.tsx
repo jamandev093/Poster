@@ -18,6 +18,18 @@ type CopyrightAction =
   | "dismiss"
   | "restore";
 
+type CopyrightRequestType =
+  | "copyright_strike"
+  | "copyright_request"
+  | "publisher_removal";
+
+type AcquisitionMethod =
+  | "API"
+  | "RSS"
+  | "Embed"
+  | "Agreement"
+  | "Link-only";
+
 interface AuditEntry {
   id: string;
   action: string;
@@ -27,72 +39,172 @@ interface AuditEntry {
 
 interface CopyrightCase {
   id: string;
+
+  requestType:
+    CopyrightRequestType;
+
   claimant: string;
   claimantType: string;
   claimantContact?: string;
   reference?: string;
+
+  contentId: string;
   contentTitle: string;
   publisher: string;
   originalUrl: string;
+
+  acquisitionMethod:
+    AcquisitionMethod;
+
   reason: string;
   receivedAt: string;
+
   status: CopyrightStatus;
+
   preventReimport: boolean;
+
   actionTaken?: string;
+
   audit: AuditEntry[];
 }
 
 const INITIAL_CASES: CopyrightCase[] = [
   {
     id: "CR-1001",
+
+    requestType:
+      "copyright_strike",
+
     claimant: "BBC",
-    claimantType: "Publisher / rights holder",
-    claimantContact: "rights@example-bbc.test",
-    reference: "BBC-RIGHTS-2026-0719",
-    contentTitle: "AI regulation story",
-    publisher: "BBC",
-    originalUrl: "https://example.com/bbc/ai-regulation",
+
+    claimantType:
+      "Publisher / rights holder",
+
+    claimantContact:
+      "rights@example-bbc.test",
+
+    reference:
+      "BBC-RIGHTS-2026-0719",
+
+    contentId:
+      "CNT-2001",
+
+    contentTitle:
+      "AI regulation story",
+
+    publisher:
+      "BBC",
+
+    originalUrl:
+      "https://example.com/bbc/ai-regulation",
+
+    acquisitionMethod:
+      "RSS",
+
     reason:
       "Rights holder requested that this specific content record no longer be displayed by Poster.",
-    receivedAt: "19 Jul 2026",
-    status: "needs_action",
-    preventReimport: false,
+
+    receivedAt:
+      "19 Jul 2026",
+
+    status:
+      "needs_action",
+
+    preventReimport:
+      false,
+
     audit: [
       {
-        id: "audit-1001-1",
-        action: "Copyright strike received from BBC",
-        actor: "System",
-        timestamp: "19 Jul 2026 · 09:20",
+        id:
+          "audit-1001-1",
+
+        action:
+          "Copyright strike received from BBC",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 09:20",
       },
     ],
   },
+
   {
     id: "CR-1000",
-    claimant: "Example Media",
-    claimantType: "Publisher",
-    claimantContact: "legal@example-media.test",
-    reference: "EM-4471",
-    contentTitle: "Market analysis article",
-    publisher: "Example Media",
-    originalUrl: "https://example.com/market-analysis",
+
+    requestType:
+      "publisher_removal",
+
+    claimant:
+      "Example Media",
+
+    claimantType:
+      "Publisher",
+
+    claimantContact:
+      "legal@example-media.test",
+
+    reference:
+      "EM-4471",
+
+    contentId:
+      "CNT-2000",
+
+    contentTitle:
+      "Market analysis article",
+
+    publisher:
+      "Example Media",
+
+    originalUrl:
+      "https://example.com/market-analysis",
+
+    acquisitionMethod:
+      "API",
+
     reason:
       "Publisher requested removal and exclusion from future ingestion.",
-    receivedAt: "18 Jul 2026",
-    status: "removed",
-    preventReimport: true,
-    actionTaken: "Removed from Poster + prevent re-import",
+
+    receivedAt:
+      "18 Jul 2026",
+
+    status:
+      "removed",
+
+    preventReimport:
+      true,
+
+    actionTaken:
+      "Removed from Poster + prevent re-import",
+
     audit: [
       {
-        id: "audit-1000-2",
-        action: "Removed from Poster + prevent re-import",
-        actor: "Admin",
-        timestamp: "18 Jul 2026 · 16:42",
+        id:
+          "audit-1000-2",
+
+        action:
+          "Removed from Poster + prevent re-import",
+
+        actor:
+          "Admin",
+
+        timestamp:
+          "18 Jul 2026 · 16:42",
       },
+
       {
-        id: "audit-1000-1",
-        action: "Copyright request received from Example Media",
-        actor: "System",
-        timestamp: "18 Jul 2026 · 16:31",
+        id:
+          "audit-1000-1",
+
+        action:
+          "Copyright request received from Example Media",
+
+        actor:
+          "System",
+
+        timestamp:
+          "18 Jul 2026 · 16:31",
       },
     ],
   },
@@ -104,10 +216,84 @@ function statusLabel(
   switch (status) {
     case "needs_action":
       return "Needs action";
+
     case "removed":
       return "Removed";
+
     case "resolved":
       return "Resolved";
+  }
+}
+
+function requestTypeLabel(
+  type: CopyrightRequestType
+): string {
+  switch (type) {
+    case "copyright_strike":
+      return "Copyright strike";
+
+    case "copyright_request":
+      return "Copyright request";
+
+    case "publisher_removal":
+      return "Publisher removal request";
+  }
+}
+
+function requestHeadline(
+  item: CopyrightCase
+): string {
+  switch (item.requestType) {
+    case "copyright_strike":
+      return `Copyright strike by ${item.claimant}`;
+
+    case "copyright_request":
+      return `Copyright request by ${item.claimant}`;
+
+    case "publisher_removal":
+      return `Publisher removal request by ${item.claimant}`;
+  }
+}
+
+function acquisitionMethodLabel(
+  method: AcquisitionMethod
+): string {
+  switch (method) {
+    case "API":
+      return "Official API";
+
+    case "RSS":
+      return "Authorized RSS";
+
+    case "Embed":
+      return "Official Embed/oEmbed";
+
+    case "Agreement":
+      return "Publisher Agreement";
+
+    case "Link-only":
+      return "Link-only";
+  }
+}
+
+function displayPolicyLabel(
+  method: AcquisitionMethod
+): string {
+  switch (method) {
+    case "API":
+      return "Provider-permitted API fields and preview data only.";
+
+    case "RSS":
+      return "Fields permitted by the authorized publisher feed only.";
+
+    case "Embed":
+      return "Provider-controlled official embed or oEmbed.";
+
+    case "Agreement":
+      return "Display rights defined by the publisher agreement.";
+
+    case "Link-only":
+      return "Minimal link-only discovery with no extracted preview or media.";
   }
 }
 
@@ -153,7 +339,8 @@ export default function CopyrightManager() {
   const visibleCases =
     useMemo(() => {
       if (
-        activeFilter === "all"
+        activeFilter ===
+        "all"
       ) {
         return cases;
       }
@@ -216,27 +403,38 @@ export default function CopyrightManager() {
         const auditBase = {
           id:
             `${current.id}-${Date.now()}`,
+
           actor:
             "Admin",
+
           timestamp:
             nowLabel(),
         };
 
         if (
-          action === "remove"
+          action ===
+          "remove"
         ) {
           return {
             ...current,
-            status: "removed",
-            preventReimport: false,
+
+            status:
+              "removed",
+
+            preventReimport:
+              false,
+
             actionTaken:
               "Removed from Poster",
+
             audit: [
               {
                 ...auditBase,
+
                 action:
                   "Removed from Poster",
               },
+
               ...current.audit,
             ],
           };
@@ -248,36 +446,53 @@ export default function CopyrightManager() {
         ) {
           return {
             ...current,
-            status: "removed",
-            preventReimport: true,
+
+            status:
+              "removed",
+
+            preventReimport:
+              true,
+
             actionTaken:
               "Removed from Poster + prevent re-import",
+
             audit: [
               {
                 ...auditBase,
+
                 action:
                   "Removed from Poster + prevent re-import",
               },
+
               ...current.audit,
             ],
           };
         }
 
         if (
-          action === "dismiss"
+          action ===
+          "dismiss"
         ) {
           return {
             ...current,
-            status: "resolved",
-            preventReimport: false,
+
+            status:
+              "resolved",
+
+            preventReimport:
+              false,
+
             actionTaken:
               "Dismissed / no action",
+
             audit: [
               {
                 ...auditBase,
+
                 action:
                   "Case dismissed with no takedown action",
               },
+
               ...current.audit,
             ],
           };
@@ -285,23 +500,33 @@ export default function CopyrightManager() {
 
         return {
           ...current,
-          status: "resolved",
-          preventReimport: false,
+
+          status:
+            "resolved",
+
+          preventReimport:
+            false,
+
           actionTaken:
             "Content restored",
+
           audit: [
             {
               ...auditBase,
+
               action:
                 "Content restored to Poster",
             },
+
             ...current.audit,
           ],
         };
       }
     );
 
-    setPendingAction(null);
+    setPendingAction(
+      null
+    );
   };
 
   const counts =
@@ -309,18 +534,21 @@ export default function CopyrightManager() {
       () => ({
         all:
           cases.length,
+
         needs_action:
           cases.filter(
             (item) =>
               item.status ===
               "needs_action"
           ).length,
+
         removed:
           cases.filter(
             (item) =>
               item.status ===
               "removed"
           ).length,
+
         resolved:
           cases.filter(
             (item) =>
@@ -330,6 +558,16 @@ export default function CopyrightManager() {
       }),
       [cases]
     );
+
+  const closeDetails = () => {
+    setSelectedCaseId(
+      null
+    );
+
+    setPendingAction(
+      null
+    );
+  };
 
   return (
     <div
@@ -357,10 +595,11 @@ export default function CopyrightManager() {
 
           <p>
             See who issued each
-            copyright strike,
-            remove affected content,
-            and prevent re-import
-            when required.
+            copyright or publisher
+            removal request, identify
+            the exact Poster content,
+            and remove or prevent
+            re-import when required.
           </p>
         </div>
 
@@ -397,14 +636,17 @@ export default function CopyrightManager() {
                 "needs_action",
                 "Needs action",
               ],
+
               [
                 "removed",
                 "Removed",
               ],
+
               [
                 "resolved",
                 "Resolved",
               ],
+
               [
                 "all",
                 "All",
@@ -482,14 +724,16 @@ export default function CopyrightManager() {
                         {
                           copyrightCase.id
                         }
+                        {" · "}
+                        {
+                          copyrightCase.contentId
+                        }
                       </span>
 
                       <h3>
-                        Copyright
-                        strike by{" "}
-                        {
-                          copyrightCase.claimant
-                        }
+                        {requestHeadline(
+                          copyrightCase
+                        )}
                       </h3>
 
                       <p>
@@ -655,15 +899,9 @@ export default function CopyrightManager() {
               styles.backdrop
             }
             aria-label="Close copyright details"
-            onClick={() => {
-              setSelectedCaseId(
-                null
-              );
-
-              setPendingAction(
-                null
-              );
-            }}
+            onClick={
+              closeDetails
+            }
           />
 
           <aside
@@ -682,14 +920,16 @@ export default function CopyrightManager() {
                   {
                     selectedCase.id
                   }
+                  {" · "}
+                  {
+                    selectedCase.contentId
+                  }
                 </span>
 
                 <h3>
-                  Copyright strike
-                  by{" "}
-                  {
-                    selectedCase.claimant
-                  }
+                  {requestHeadline(
+                    selectedCase
+                  )}
                 </h3>
               </div>
 
@@ -699,15 +939,9 @@ export default function CopyrightManager() {
                   styles.closeButton
                 }
                 aria-label="Close"
-                onClick={() => {
-                  setSelectedCaseId(
-                    null
-                  );
-
-                  setPendingAction(
-                    null
-                  );
-                }}
+                onClick={
+                  closeDetails
+                }
               >
                 ×
               </button>
@@ -741,6 +975,18 @@ export default function CopyrightManager() {
                       {
                         selectedCase.claimant
                       }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Request type
+                    </dt>
+
+                    <dd>
+                      {requestTypeLabel(
+                        selectedCase.requestType
+                      )}
                     </dd>
                   </div>
 
@@ -802,6 +1048,19 @@ export default function CopyrightManager() {
                 >
                   <div>
                     <dt>
+                      Poster
+                      Content ID
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedCase.contentId
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
                       Title
                     </dt>
 
@@ -821,6 +1080,32 @@ export default function CopyrightManager() {
                       {
                         selectedCase.publisher
                       }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Acquisition
+                      method
+                    </dt>
+
+                    <dd>
+                      {acquisitionMethodLabel(
+                        selectedCase.acquisitionMethod
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Display
+                      policy
+                    </dt>
+
+                    <dd>
+                      {displayPolicyLabel(
+                        selectedCase.acquisitionMethod
+                      )}
                     </dd>
                   </div>
 
@@ -890,6 +1175,31 @@ export default function CopyrightManager() {
                         selectedCase.preventReimport
                           ? "Yes"
                           : "No"
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Action taken
+                    </span>
+
+                    <strong>
+                      {
+                        selectedCase.actionTaken ??
+                        "No action taken yet"
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Received
+                    </span>
+
+                    <strong>
+                      {
+                        selectedCase.receivedAt
                       }
                     </strong>
                   </div>
@@ -1080,14 +1390,25 @@ export default function CopyrightManager() {
             </h3>
 
             <p>
-              Copyright strike
-              by{" "}
+              {requestTypeLabel(
+                selectedCase.requestType
+              )}
+              {" by "}
               <strong>
                 {
                   selectedCase.claimant
                 }
               </strong>
               .
+            </p>
+
+            <p>
+              Poster Content ID:{" "}
+              <strong>
+                {
+                  selectedCase.contentId
+                }
+              </strong>
             </p>
 
             {pendingAction ===
@@ -1097,13 +1418,14 @@ export default function CopyrightManager() {
                   styles.confirmWarning
                 }
               >
-                The backend will
-                later store this
-                content identifier
-                on an exclusion list
-                so automated
-                ingestion cannot
-                bring it back.
+                This frontend
+                currently records
+                the prevent
+                re-import decision
+                locally. The future
+                backend will enforce
+                the real exclusion
+                registry.
               </p>
             ) : null}
 
