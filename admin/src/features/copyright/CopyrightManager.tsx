@@ -30,6 +30,23 @@ type AcquisitionMethod =
   | "Agreement"
   | "Link-only";
 
+type VerificationCheckStatus =
+  | "passed"
+  | "review"
+  | "failed";
+
+type VerificationStatus =
+  | "pending"
+  | "verified"
+  | "needs_review";
+
+interface VerificationCheck {
+  id: string;
+  label: string;
+  status: VerificationCheckStatus;
+  detail: string;
+}
+
 interface AuditEntry {
   id: string;
   action: string;
@@ -45,11 +62,15 @@ interface CopyrightCase {
 
   claimant: string;
   claimantType: string;
+
   claimantContact?: string;
+  claimantWebsite?: string;
+
   reference?: string;
 
   contentId: string;
   contentTitle: string;
+
   publisher: string;
   originalUrl: string;
 
@@ -59,29 +80,40 @@ interface CopyrightCase {
   reason: string;
   receivedAt: string;
 
-  status: CopyrightStatus;
+  status:
+    CopyrightStatus;
 
-  preventReimport: boolean;
+  preventReimport:
+    boolean;
 
   actionTaken?: string;
 
-  audit: AuditEntry[];
+  verificationChecks:
+    VerificationCheck[];
+
+  audit:
+    AuditEntry[];
 }
 
 const INITIAL_CASES: CopyrightCase[] = [
   {
-    id: "CR-1001",
+    id:
+      "CR-1001",
 
     requestType:
       "copyright_strike",
 
-    claimant: "BBC",
+    claimant:
+      "BBC",
 
     claimantType:
       "Publisher / rights holder",
 
     claimantContact:
-      "rights@example-bbc.test",
+      "rights@bbc.test",
+
+    claimantWebsite:
+      "https://www.bbc.com",
 
     reference:
       "BBC-RIGHTS-2026-0719",
@@ -113,7 +145,107 @@ const INITIAL_CASES: CopyrightCase[] = [
     preventReimport:
       false,
 
+    verificationChecks: [
+      {
+        id:
+          "verify-1001-content",
+
+        label:
+          "Poster content matched",
+
+        status:
+          "passed",
+
+        detail:
+          "CNT-2001 resolves to the affected Poster content record.",
+      },
+
+      {
+        id:
+          "verify-1001-work",
+
+        label:
+          "Original work matched",
+
+        status:
+          "passed",
+
+        detail:
+          "The submitted original-work information matches the publisher and affected content context.",
+      },
+
+      {
+        id:
+          "verify-1001-claimant",
+
+        label:
+          "Claimant identity matched",
+
+        status:
+          "passed",
+
+        detail:
+          "The claimant organization matches the publisher / rights-holder identity associated with the request.",
+      },
+
+      {
+        id:
+          "verify-1001-contact",
+
+        label:
+          "Business contact reviewed",
+
+        status:
+          "passed",
+
+        detail:
+          "The submitted business contact and organization information are consistent with the claimant identity.",
+      },
+
+      {
+        id:
+          "verify-1001-source",
+
+        label:
+          "Source context matched",
+
+        status:
+          "passed",
+
+        detail:
+          "Poster source metadata and acquisition context match the affected publisher record.",
+      },
+
+      {
+        id:
+          "verify-1001-reference",
+
+        label:
+          "Supporting reference reviewed",
+
+        status:
+          "passed",
+
+        detail:
+          "The claimant supplied a rights reference that is associated with this request.",
+      },
+    ],
+
     audit: [
+      {
+        id:
+          "audit-1001-2",
+
+        action:
+          "Cross-verification completed",
+
+        actor:
+          "System",
+
+        timestamp:
+          "19 Jul 2026 · 09:22",
+      },
+
       {
         id:
           "audit-1001-1",
@@ -131,7 +263,8 @@ const INITIAL_CASES: CopyrightCase[] = [
   },
 
   {
-    id: "CR-1000",
+    id:
+      "CR-1000",
 
     requestType:
       "publisher_removal",
@@ -144,6 +277,9 @@ const INITIAL_CASES: CopyrightCase[] = [
 
     claimantContact:
       "legal@example-media.test",
+
+    claimantWebsite:
+      "https://example.com",
 
     reference:
       "EM-4471",
@@ -178,10 +314,96 @@ const INITIAL_CASES: CopyrightCase[] = [
     actionTaken:
       "Removed from Poster + prevent re-import",
 
+    verificationChecks: [
+      {
+        id:
+          "verify-1000-content",
+
+        label:
+          "Poster content matched",
+
+        status:
+          "passed",
+
+        detail:
+          "CNT-2000 resolves to the affected Poster content record.",
+      },
+
+      {
+        id:
+          "verify-1000-work",
+
+        label:
+          "Original work matched",
+
+        status:
+          "passed",
+
+        detail:
+          "Original work and publisher information match the affected record.",
+      },
+
+      {
+        id:
+          "verify-1000-claimant",
+
+        label:
+          "Claimant identity matched",
+
+        status:
+          "passed",
+
+        detail:
+          "Claimant information is consistent with the recorded publisher.",
+      },
+
+      {
+        id:
+          "verify-1000-contact",
+
+        label:
+          "Business contact reviewed",
+
+        status:
+          "passed",
+
+        detail:
+          "Business contact information was consistent with the organization identity.",
+      },
+
+      {
+        id:
+          "verify-1000-source",
+
+        label:
+          "Source context matched",
+
+        status:
+          "passed",
+
+        detail:
+          "Poster acquisition metadata is consistent with the publisher record.",
+      },
+
+      {
+        id:
+          "verify-1000-reference",
+
+        label:
+          "Supporting reference reviewed",
+
+        status:
+          "passed",
+
+        detail:
+          "Publisher reference EM-4471 was included with the request.",
+      },
+    ],
+
     audit: [
       {
         id:
-          "audit-1000-2",
+          "audit-1000-3",
 
         action:
           "Removed from Poster + prevent re-import",
@@ -195,10 +417,24 @@ const INITIAL_CASES: CopyrightCase[] = [
 
       {
         id:
+          "audit-1000-2",
+
+        action:
+          "Cross-verification completed",
+
+        actor:
+          "System",
+
+        timestamp:
+          "18 Jul 2026 · 16:35",
+      },
+
+      {
+        id:
           "audit-1000-1",
 
         action:
-          "Copyright request received from Example Media",
+          "Publisher removal request received from Example Media",
 
         actor:
           "System",
@@ -297,21 +533,93 @@ function displayPolicyLabel(
   }
 }
 
+function verificationStatus(
+  checks: VerificationCheck[]
+): VerificationStatus {
+  if (
+    checks.length ===
+    0
+  ) {
+    return "pending";
+  }
+
+  if (
+    checks.some(
+      (check) =>
+        check.status ===
+          "failed" ||
+        check.status ===
+          "review"
+    )
+  ) {
+    return "needs_review";
+  }
+
+  if (
+    checks.every(
+      (check) =>
+        check.status ===
+        "passed"
+    )
+  ) {
+    return "verified";
+  }
+
+  return "pending";
+}
+
+function verificationLabel(
+  status: VerificationStatus
+): string {
+  switch (status) {
+    case "verified":
+      return "Verified";
+
+    case "needs_review":
+      return "Needs review";
+
+    case "pending":
+      return "Pending";
+  }
+}
+
+function verificationCheckLabel(
+  status: VerificationCheckStatus
+): string {
+  switch (status) {
+    case "passed":
+      return "Passed";
+
+    case "review":
+      return "Review";
+
+    case "failed":
+      return "Failed";
+  }
+}
+
 function nowLabel(): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
     }
-  ).format(new Date());
+  ).format(
+    new Date()
+  );
 }
 
 export default function CopyrightManager() {
   const [
     cases,
     setCases,
-  ] = useState<CopyrightCase[]>(
+  ] = useState<
+    CopyrightCase[]
+  >(
     INITIAL_CASES
   );
 
@@ -319,13 +627,18 @@ export default function CopyrightManager() {
     activeFilter,
     setActiveFilter,
   ] = useState<
-    "all" | CopyrightStatus
-  >("needs_action");
+    "all" |
+      CopyrightStatus
+  >(
+    "needs_action"
+  );
 
   const [
     selectedCaseId,
     setSelectedCaseId,
-  ] = useState<string | null>(
+  ] = useState<
+    string | null
+  >(
     null
   );
 
@@ -334,7 +647,9 @@ export default function CopyrightManager() {
     setPendingAction,
   ] = useState<
     CopyrightAction | null
-  >(null);
+  >(
+    null
+  );
 
   const visibleCases =
     useMemo(() => {
@@ -363,171 +678,12 @@ export default function CopyrightManager() {
             item.id ===
             selectedCaseId
         ) ?? null,
+
       [
         cases,
         selectedCaseId,
       ]
     );
-
-  const updateCase = (
-    caseId: string,
-    updater: (
-      item: CopyrightCase
-    ) => CopyrightCase
-  ) => {
-    setCases(
-      (current) =>
-        current.map(
-          (item) =>
-            item.id === caseId
-              ? updater(item)
-              : item
-        )
-    );
-  };
-
-  const executeAction = () => {
-    if (
-      !selectedCase ||
-      !pendingAction
-    ) {
-      return;
-    }
-
-    const action =
-      pendingAction;
-
-    updateCase(
-      selectedCase.id,
-      (current) => {
-        const auditBase = {
-          id:
-            `${current.id}-${Date.now()}`,
-
-          actor:
-            "Admin",
-
-          timestamp:
-            nowLabel(),
-        };
-
-        if (
-          action ===
-          "remove"
-        ) {
-          return {
-            ...current,
-
-            status:
-              "removed",
-
-            preventReimport:
-              false,
-
-            actionTaken:
-              "Removed from Poster",
-
-            audit: [
-              {
-                ...auditBase,
-
-                action:
-                  "Removed from Poster",
-              },
-
-              ...current.audit,
-            ],
-          };
-        }
-
-        if (
-          action ===
-          "remove_prevent_reimport"
-        ) {
-          return {
-            ...current,
-
-            status:
-              "removed",
-
-            preventReimport:
-              true,
-
-            actionTaken:
-              "Removed from Poster + prevent re-import",
-
-            audit: [
-              {
-                ...auditBase,
-
-                action:
-                  "Removed from Poster + prevent re-import",
-              },
-
-              ...current.audit,
-            ],
-          };
-        }
-
-        if (
-          action ===
-          "dismiss"
-        ) {
-          return {
-            ...current,
-
-            status:
-              "resolved",
-
-            preventReimport:
-              false,
-
-            actionTaken:
-              "Dismissed / no action",
-
-            audit: [
-              {
-                ...auditBase,
-
-                action:
-                  "Case dismissed with no takedown action",
-              },
-
-              ...current.audit,
-            ],
-          };
-        }
-
-        return {
-          ...current,
-
-          status:
-            "resolved",
-
-          preventReimport:
-            false,
-
-          actionTaken:
-            "Content restored",
-
-          audit: [
-            {
-              ...auditBase,
-
-              action:
-                "Content restored to Poster",
-            },
-
-            ...current.audit,
-          ],
-        };
-      }
-    );
-
-    setPendingAction(
-      null
-    );
-  };
 
   const counts =
     useMemo(
@@ -556,18 +712,190 @@ export default function CopyrightManager() {
               "resolved"
           ).length,
       }),
-      [cases]
+
+      [
+        cases,
+      ]
     );
 
-  const closeDetails = () => {
-    setSelectedCaseId(
-      null
-    );
+  const updateCase = (
+    caseId: string,
 
-    setPendingAction(
-      null
+    updater: (
+      item:
+        CopyrightCase
+    ) => CopyrightCase
+  ) => {
+    setCases(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id ===
+            caseId
+              ? updater(
+                  item
+                )
+              : item
+        )
     );
   };
+
+  const executeAction =
+    () => {
+      if (
+        !selectedCase ||
+        !pendingAction
+      ) {
+        return;
+      }
+
+      const action =
+        pendingAction;
+
+      updateCase(
+        selectedCase.id,
+
+        (current) => {
+          const auditBase =
+            {
+              id:
+                `${current.id}-${Date.now()}`,
+
+              actor:
+                "Admin",
+
+              timestamp:
+                nowLabel(),
+            };
+
+          if (
+            action ===
+            "remove"
+          ) {
+            return {
+              ...current,
+
+              status:
+                "removed",
+
+              preventReimport:
+                false,
+
+              actionTaken:
+                "Removed from Poster",
+
+              audit: [
+                {
+                  ...auditBase,
+
+                  action:
+                    "Removed from Poster",
+                },
+
+                ...current.audit,
+              ],
+            };
+          }
+
+          if (
+            action ===
+            "remove_prevent_reimport"
+          ) {
+            return {
+              ...current,
+
+              status:
+                "removed",
+
+              preventReimport:
+                true,
+
+              actionTaken:
+                "Removed from Poster + prevent re-import",
+
+              audit: [
+                {
+                  ...auditBase,
+
+                  action:
+                    "Removed from Poster + prevent re-import",
+                },
+
+                ...current.audit,
+              ],
+            };
+          }
+
+          if (
+            action ===
+            "dismiss"
+          ) {
+            return {
+              ...current,
+
+              status:
+                "resolved",
+
+              preventReimport:
+                false,
+
+              actionTaken:
+                "Dismissed / no action",
+
+              audit: [
+                {
+                  ...auditBase,
+
+                  action:
+                    "Case dismissed with no takedown action",
+                },
+
+                ...current.audit,
+              ],
+            };
+          }
+
+          return {
+            ...current,
+
+            status:
+              "resolved",
+
+            preventReimport:
+              false,
+
+            actionTaken:
+              "Content restored",
+
+            audit: [
+              {
+                ...auditBase,
+
+                action:
+                  "Content restored to Poster",
+              },
+
+              ...current.audit,
+            ],
+          };
+        }
+      );
+
+      setPendingAction(
+        null
+      );
+    };
+
+  const closeDetails =
+    () => {
+      setSelectedCaseId(
+        null
+      );
+
+      setPendingAction(
+        null
+      );
+    };
 
   return (
     <div
@@ -594,12 +922,12 @@ export default function CopyrightManager() {
           </h2>
 
           <p>
-            See who issued each
-            copyright or publisher
-            removal request, identify
-            the exact Poster content,
+            Verify each rights
+            request, identify the
+            exact Poster content,
             and remove or prevent
-            re-import when required.
+            re-import only when
+            appropriate.
           </p>
         </div>
 
@@ -672,10 +1000,16 @@ export default function CopyrightManager() {
                   )
                 }
               >
-                {label}
+                {
+                  label
+                }
 
                 <span>
-                  {counts[key]}
+                  {
+                    counts[
+                      key
+                    ]
+                  }
                 </span>
               </button>
             )
@@ -701,187 +1035,206 @@ export default function CopyrightManager() {
             visibleCases.map(
               (
                 copyrightCase
-              ) => (
-                <article
-                  key={
-                    copyrightCase.id
-                  }
-                  className={
-                    styles.caseCard
-                  }
-                >
-                  <div
+              ) => {
+                const verification =
+                  verificationStatus(
+                    copyrightCase.verificationChecks
+                  );
+
+                return (
+                  <article
+                    key={
+                      copyrightCase.id
+                    }
                     className={
-                      styles.caseTop
+                      styles.caseCard
                     }
                   >
-                    <div>
+                    <div
+                      className={
+                        styles.caseTop
+                      }
+                    >
+                      <div>
+                        <span
+                          className={
+                            styles.caseId
+                          }
+                        >
+                          {
+                            copyrightCase.id
+                          }
+                          {" · "}
+                          {
+                            copyrightCase.contentId
+                          }
+                        </span>
+
+                        <h3>
+                          {requestHeadline(
+                            copyrightCase
+                          )}
+                        </h3>
+
+                        <p>
+                          {
+                            copyrightCase.claimantType
+                          }
+                        </p>
+                      </div>
+
                       <span
+                        className={`${styles.status} ${
+                          copyrightCase.status ===
+                          "needs_action"
+                            ? styles.statusAttention
+                            : copyrightCase.status ===
+                              "removed"
+                            ? styles.statusRemoved
+                            : styles.statusResolved
+                        }`}
+                      >
+                        {statusLabel(
+                          copyrightCase.status
+                        )}
+                      </span>
+                    </div>
+
+                    <div
+                      className={
+                        styles.metaGrid
+                      }
+                    >
+                      <div>
+                        <span>
+                          Affected
+                          content
+                        </span>
+
+                        <strong>
+                          {
+                            copyrightCase.contentTitle
+                          }
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Publisher
+                        </span>
+
+                        <strong>
+                          {
+                            copyrightCase.publisher
+                          }
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Verification
+                        </span>
+
+                        <strong>
+                          {verificationLabel(
+                            verification
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Received
+                        </span>
+
+                        <strong>
+                          {
+                            copyrightCase.receivedAt
+                          }
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Prevent
+                          re-import
+                        </span>
+
+                        <strong>
+                          {
+                            copyrightCase.preventReimport
+                              ? "Yes"
+                              : "No"
+                          }
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div
+                      className={
+                        styles.cardActions
+                      }
+                    >
+                      <button
+                        type="button"
                         className={
-                          styles.caseId
+                          styles.secondaryButton
+                        }
+                        onClick={() =>
+                          setSelectedCaseId(
+                            copyrightCase.id
+                          )
                         }
                       >
-                        {
-                          copyrightCase.id
-                        }
-                        {" · "}
-                        {
-                          copyrightCase.contentId
-                        }
-                      </span>
+                        View details
+                      </button>
 
-                      <h3>
-                        {requestHeadline(
-                          copyrightCase
-                        )}
-                      </h3>
+                      {copyrightCase.status ===
+                      "needs_action" ? (
+                        <>
+                          <button
+                            type="button"
+                            className={
+                              styles.softDangerButton
+                            }
+                            onClick={() => {
+                              setSelectedCaseId(
+                                copyrightCase.id
+                              );
 
-                      <p>
-                        {
-                          copyrightCase.claimantType
-                        }
-                      </p>
+                              setPendingAction(
+                                "remove"
+                              );
+                            }}
+                          >
+                            Remove
+                          </button>
+
+                          <button
+                            type="button"
+                            className={
+                              styles.dangerButton
+                            }
+                            onClick={() => {
+                              setSelectedCaseId(
+                                copyrightCase.id
+                              );
+
+                              setPendingAction(
+                                "remove_prevent_reimport"
+                              );
+                            }}
+                          >
+                            Remove +
+                            prevent
+                            re-import
+                          </button>
+                        </>
+                      ) : null}
                     </div>
-
-                    <span
-                      className={`${styles.status} ${
-                        copyrightCase.status ===
-                        "needs_action"
-                          ? styles.statusAttention
-                          : copyrightCase.status ===
-                            "removed"
-                          ? styles.statusRemoved
-                          : styles.statusResolved
-                      }`}
-                    >
-                      {statusLabel(
-                        copyrightCase.status
-                      )}
-                    </span>
-                  </div>
-
-                  <div
-                    className={
-                      styles.metaGrid
-                    }
-                  >
-                    <div>
-                      <span>
-                        Affected
-                        content
-                      </span>
-
-                      <strong>
-                        {
-                          copyrightCase.contentTitle
-                        }
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Publisher
-                      </span>
-
-                      <strong>
-                        {
-                          copyrightCase.publisher
-                        }
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Received
-                      </span>
-
-                      <strong>
-                        {
-                          copyrightCase.receivedAt
-                        }
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Prevent
-                        re-import
-                      </span>
-
-                      <strong>
-                        {
-                          copyrightCase.preventReimport
-                            ? "Yes"
-                            : "No"
-                        }
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div
-                    className={
-                      styles.cardActions
-                    }
-                  >
-                    <button
-                      type="button"
-                      className={
-                        styles.secondaryButton
-                      }
-                      onClick={() =>
-                        setSelectedCaseId(
-                          copyrightCase.id
-                        )
-                      }
-                    >
-                      View details
-                    </button>
-
-                    {copyrightCase.status ===
-                    "needs_action" ? (
-                      <>
-                        <button
-                          type="button"
-                          className={
-                            styles.softDangerButton
-                          }
-                          onClick={() => {
-                            setSelectedCaseId(
-                              copyrightCase.id
-                            );
-
-                            setPendingAction(
-                              "remove"
-                            );
-                          }}
-                        >
-                          Remove
-                        </button>
-
-                        <button
-                          type="button"
-                          className={
-                            styles.dangerButton
-                          }
-                          onClick={() => {
-                            setSelectedCaseId(
-                              copyrightCase.id
-                            );
-
-                            setPendingAction(
-                              "remove_prevent_reimport"
-                            );
-                          }}
-                        >
-                          Remove +
-                          prevent
-                          re-import
-                        </button>
-                      </>
-                    ) : null}
-                  </div>
-                </article>
-              )
+                  </article>
+                );
+              }
             )
           )}
         </div>
@@ -908,7 +1261,6 @@ export default function CopyrightManager() {
             className={
               styles.drawer
             }
-            aria-label={`Copyright case ${selectedCase.id}`}
           >
             <div
               className={
@@ -992,8 +1344,7 @@ export default function CopyrightManager() {
 
                   <div>
                     <dt>
-                      Claimant
-                      type
+                      Claimant type
                     </dt>
 
                     <dd>
@@ -1005,12 +1356,29 @@ export default function CopyrightManager() {
 
                   <div>
                     <dt>
-                      Contact
+                      Business email
                     </dt>
 
                     <dd>
                       {
                         selectedCase.claimantContact ??
+                        "Not provided"
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Organization website
+                    </dt>
+
+                    <dd
+                      className={
+                        styles.breakText
+                      }
+                    >
+                      {
+                        selectedCase.claimantWebsite ??
                         "Not provided"
                       }
                     </dd>
@@ -1028,6 +1396,65 @@ export default function CopyrightManager() {
                       }
                     </dd>
                   </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Cross-verification
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Verification
+                      status
+                    </dt>
+
+                    <dd>
+                      {verificationLabel(
+                        verificationStatus(
+                          selectedCase.verificationChecks
+                        )
+                      )}
+                    </dd>
+                  </div>
+
+                  {selectedCase.verificationChecks.map(
+                    (
+                      check
+                    ) => (
+                      <div
+                        key={
+                          check.id
+                        }
+                      >
+                        <dt>
+                          {
+                            check.label
+                          }
+                        </dt>
+
+                        <dd>
+                          {verificationCheckLabel(
+                            check.status
+                          )}
+                          {" · "}
+                          {
+                            check.detail
+                          }
+                        </dd>
+                      </div>
+                    )
+                  )}
                 </dl>
               </section>
 
@@ -1111,8 +1538,7 @@ export default function CopyrightManager() {
 
                   <div>
                     <dt>
-                      Original
-                      URL
+                      Original URL
                     </dt>
 
                     <dd
@@ -1166,6 +1592,20 @@ export default function CopyrightManager() {
 
                   <div>
                     <span>
+                      Verification
+                    </span>
+
+                    <strong>
+                      {verificationLabel(
+                        verificationStatus(
+                          selectedCase.verificationChecks
+                        )
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
                       Prevent
                       re-import
                     </span>
@@ -1188,18 +1628,6 @@ export default function CopyrightManager() {
                       {
                         selectedCase.actionTaken ??
                         "No action taken yet"
-                      }
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Received
-                    </span>
-
-                    <strong>
-                      {
-                        selectedCase.receivedAt
                       }
                     </strong>
                   </div>
@@ -1411,6 +1839,17 @@ export default function CopyrightManager() {
               </strong>
             </p>
 
+            <p>
+              Verification:{" "}
+              <strong>
+                {verificationLabel(
+                  verificationStatus(
+                    selectedCase.verificationChecks
+                  )
+                )}
+              </strong>
+            </p>
+
             {pendingAction ===
             "remove_prevent_reimport" ? (
               <p
@@ -1419,13 +1858,12 @@ export default function CopyrightManager() {
                 }
               >
                 This frontend
-                currently records
-                the prevent
+                records the prevent
                 re-import decision
-                locally. The future
-                backend will enforce
-                the real exclusion
-                registry.
+                locally. Real
+                exclusion enforcement
+                will be implemented
+                in Backend later.
               </p>
             ) : null}
 

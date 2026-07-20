@@ -33,22 +33,68 @@ function active(
         );
 }
 
+function isPublicRoute(
+  pathname: string
+) {
+  return (
+    pathname ===
+      "/copyright-request" ||
+    pathname.startsWith(
+      "/copyright-request/"
+    )
+  );
+}
+
 export default function AdminShell({
   children,
 }: AdminShellProps) {
-  const pathname = usePathname();
+  const pathname =
+    usePathname();
 
-  const [open, setOpen] =
-    useState(false);
+  const [
+    open,
+    setOpen,
+  ] = useState(false);
+
+  /*
+   * Public-facing routes must not inherit
+   * the Admin sidebar, topbar, operator UI,
+   * or Admin workspace container.
+   *
+   * Keeping the prefix check also allows
+   * future routes such as:
+   *
+   * /copyright-request/status
+   * /copyright-request/confirmation
+   *
+   * without exposing the Admin shell.
+   */
+  if (
+    isPublicRoute(
+      pathname
+    )
+  ) {
+    return (
+      <>
+        {children}
+      </>
+    );
+  }
 
   const title =
-    items.find(([href]) =>
-      active(pathname, href)
-    )?.[1] ?? "Poster Admin";
+    items.find(
+      ([href]) =>
+        active(
+          pathname,
+          href
+        )
+    )?.[1] ??
+    "Poster Admin";
 
-  const closeNavigation = () => {
-    setOpen(false);
-  };
+  const closeNavigation =
+    () => {
+      setOpen(false);
+    };
 
   return (
     <div className="shell">
@@ -65,8 +111,13 @@ export default function AdminShell({
           </div>
 
           <div className="brand-copy">
-            <strong>Poster</strong>
-            <span>Admin</span>
+            <strong>
+              Poster
+            </strong>
+
+            <span>
+              Admin
+            </span>
           </div>
         </div>
 
@@ -75,7 +126,10 @@ export default function AdminShell({
           aria-label="Admin navigation"
         >
           {items.map(
-            ([href, label]) => {
+            ([
+              href,
+              label,
+            ]) => {
               const isActive =
                 active(
                   pathname,
@@ -150,7 +204,9 @@ export default function AdminShell({
                   ? "Close navigation"
                   : "Open navigation"
               }
-              aria-expanded={open}
+              aria-expanded={
+                open
+              }
               onClick={() =>
                 setOpen(
                   (value) =>
