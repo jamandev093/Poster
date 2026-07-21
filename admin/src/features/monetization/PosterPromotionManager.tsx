@@ -1,199 +1,65 @@
 "use client";
 
+import Link from "next/link";
 import {
-  Suspense,
   useMemo,
   useState,
 } from "react";
 
-import {
-  useSearchParams,
-} from "next/navigation";
+import styles from "./PosterPromotionManager.module.css";
 
-import styles from "./MonetizationManager.module.css";
-
-type CampaignType =
-  | "poster_promotion"
-  | "affiliate"
-  | "direct_sponsorship"
-  | "programmatic";
-
-type CampaignStatus =
+type PromotionStatus =
   | "scheduled"
   | "active"
   | "paused"
-  | "ended"
-  | "disabled";
+  | "ended";
 
-type CampaignPlacement =
+type Placement =
   | "Home"
   | "Search"
   | "Trending";
 
-interface CampaignAuditEntry {
+interface AuditEntry {
   id: string;
   action: string;
   actor: string;
   timestamp: string;
 }
 
-interface CampaignRecord {
+interface PosterPromotionRecord {
   id: string;
 
   name: string;
-
-  type: CampaignType;
-
-  partner?: string;
+  purpose: string;
 
   destinationUrl: string;
 
-  disclosure: string;
+  placement: Placement;
 
-  placement: CampaignPlacement;
-
-  status: CampaignStatus;
+  status: PromotionStatus;
 
   startAt: string;
-
   endAt?: string;
 
-  clicks: number;
-
   impressions: number;
-
+  clicks: number;
   conversions: number;
 
-  audit: CampaignAuditEntry[];
+  audit: AuditEntry[];
 }
 
-const INITIAL_CAMPAIGNS: CampaignRecord[] = [
-  {
-    id: "CMP-3001",
-
-    name:
-      "Cloud Skills Direct Sponsorship",
-
-    type:
-      "direct_sponsorship",
-
-    partner:
-      "Example Cloud",
-
-    destinationUrl:
-      "https://example.com/cloud-skills",
-
-    disclosure:
-      "Sponsored by Example Cloud",
-
-    placement:
-      "Trending",
-
-    status:
-      "active",
-
-    startAt:
-      "17 Jul 2026",
-
-    endAt:
-      "31 Jul 2026",
-
-    clicks:
-      1842,
-
-    impressions:
-      72800,
-
-    conversions:
-      216,
-
-    audit: [
-      {
-        id:
-          "audit-cmp-3001-1",
-
-        action:
-          "Direct sponsorship activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "17 Jul 2026 · 12:15",
-      },
-    ],
-  },
-
-  {
-    id: "CMP-3002",
-
-    name:
-      "Learning Partner Offer",
-
-    type:
-      "affiliate",
-
-    partner:
-      "Example Learning",
-
-    destinationUrl:
-      "https://example.com/learning-offer",
-
-    disclosure:
-      "Affiliate · Poster may earn a commission",
-
-    placement:
-      "Search",
-
-    status:
-      "active",
-
-    startAt:
-      "16 Jul 2026",
-
-    endAt:
-      "31 Jul 2026",
-
-    clicks:
-      3400,
-
-    impressions:
-      82000,
-
-    conversions:
-      164,
-
-    audit: [
-      {
-        id:
-          "audit-cmp-3002-1",
-
-        action:
-          "Affiliate campaign activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "16 Jul 2026 · 10:30",
-      },
-    ],
-  },
-
+const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
   {
     id: "CMP-3003",
 
     name:
       "Poster Premium Discovery",
 
-    type:
-      "poster_promotion",
+    purpose:
+      "Introduce users to Poster Premium Discovery and measure interest in the enhanced discovery experience.",
 
     destinationUrl:
       "https://poster.example/premium-discovery",
-
-    disclosure:
-      "Promoted by Poster",
 
     placement:
       "Home",
@@ -204,11 +70,11 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     startAt:
       "15 Jul 2026",
 
-    clicks:
-      4210,
-
     impressions:
       124500,
+
+    clicks:
+      4210,
 
     conversions:
       840,
@@ -216,10 +82,10 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     audit: [
       {
         id:
-          "audit-cmp-3003-2",
+          "promotion-3003-2",
 
         action:
-          "Campaign paused",
+          "Poster promotion paused",
 
         actor:
           "Admin",
@@ -230,7 +96,7 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
 
       {
         id:
-          "audit-cmp-3003-1",
+          "promotion-3003-1",
 
         action:
           "Poster promotion activated",
@@ -250,14 +116,11 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     name:
       "Career Growth Collection",
 
-    type:
-      "poster_promotion",
+    purpose:
+      "Promote a curated Poster knowledge collection focused on professional learning and career development.",
 
     destinationUrl:
       "https://poster.example/career-growth",
-
-    disclosure:
-      "Promoted by Poster",
 
     placement:
       "Home",
@@ -271,10 +134,10 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     endAt:
       "10 Aug 2026",
 
-    clicks:
+    impressions:
       0,
 
-    impressions:
+    clicks:
       0,
 
     conversions:
@@ -283,10 +146,10 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     audit: [
       {
         id:
-          "audit-cmp-3004-1",
+          "promotion-3004-1",
 
         action:
-          "Campaign scheduled",
+          "Poster promotion scheduled",
 
         actor:
           "Admin",
@@ -296,78 +159,10 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
       },
     ],
   },
-
-  {
-    id: "CMP-3005",
-
-    name:
-      "Programmatic Advertising",
-
-    type:
-      "programmatic",
-
-    destinationUrl:
-      "",
-
-    disclosure:
-      "Programmatic disclosure managed by provider",
-
-    placement:
-      "Home",
-
-    status:
-      "disabled",
-
-    startAt:
-      "Not configured",
-
-    clicks:
-      0,
-
-    impressions:
-      0,
-
-    conversions:
-      0,
-
-    audit: [
-      {
-        id:
-          "audit-cmp-3005-1",
-
-        action:
-          "Programmatic advertising remains disabled for initial release",
-
-        actor:
-          "System",
-
-        timestamp:
-          "19 Jul 2026 · 00:00",
-      },
-    ],
-  },
 ];
 
-function campaignTypeLabel(
-  type: CampaignType
-): string {
-  switch (type) {
-    case "poster_promotion":
-      return "Poster Promotion";
-
-    case "affiliate":
-      return "Affiliate";
-
-    case "direct_sponsorship":
-      return "Direct Sponsorship";
-
-    case "programmatic":
-      return "Programmatic";
-  }
-}
-
 function statusLabel(
-  status: CampaignStatus
+  status: PromotionStatus
 ): string {
   switch (status) {
     case "scheduled":
@@ -381,17 +176,23 @@ function statusLabel(
 
     case "ended":
       return "Ended";
-
-    case "disabled":
-      return "Disabled";
   }
 }
 
-function ctr(
-  campaign: CampaignRecord
+function formatNumber(
+  value: number
+): string {
+  return new Intl.NumberFormat(
+    "en-IN"
+  ).format(value);
+}
+
+function calculateCtr(
+  clicks: number,
+  impressions: number
 ): string {
   if (
-    campaign.impressions ===
+    impressions ===
     0
   ) {
     return "0.00%";
@@ -399,8 +200,28 @@ function ctr(
 
   return `${(
     (
-      campaign.clicks /
-      campaign.impressions
+      clicks /
+      impressions
+    ) *
+    100
+  ).toFixed(2)}%`;
+}
+
+function conversionRate(
+  conversions: number,
+  clicks: number
+): string {
+  if (
+    clicks ===
+    0
+  ) {
+    return "0.00%";
+  }
+
+  return `${(
+    (
+      conversions /
+      clicks
     ) *
     100
   ).toFixed(2)}%`;
@@ -421,30 +242,14 @@ function nowLabel(): string {
   );
 }
 
-export default function MonetizationManager() {
-  return (
-    <Suspense fallback={null}>
-      <CampaignsContent />
-    </Suspense>
-  );
-}
-
-function CampaignsContent() {
-  const searchParams =
-    useSearchParams();
-
-  const requestedRecordId =
-    searchParams.get(
-      "record"
-    );
-
+export default function PosterPromotionManager() {
   const [
-    campaigns,
-    setCampaigns,
+    promotions,
+    setPromotions,
   ] = useState<
-    CampaignRecord[]
+    PosterPromotionRecord[]
   >(
-    INITIAL_CAMPAIGNS
+    INITIAL_PROMOTIONS
   );
 
   const [
@@ -457,7 +262,7 @@ function CampaignsContent() {
     setFilter,
   ] = useState<
     "all" |
-      CampaignStatus
+      PromotionStatus
   >(
     "all"
   );
@@ -468,13 +273,7 @@ function CampaignsContent() {
   ] = useState<
     string | null
   >(
-    INITIAL_CAMPAIGNS.some(
-      (campaign) =>
-        campaign.id ===
-        requestedRecordId
-    )
-      ? requestedRecordId
-      : null
+    null
   );
 
   const [
@@ -491,16 +290,16 @@ function CampaignsContent() {
       .trim()
       .toLowerCase();
 
-  const visibleCampaigns =
+  const visiblePromotions =
     useMemo(() => {
-      return campaigns.filter(
+      return promotions.filter(
         (
-          campaign
+          promotion
         ) => {
           if (
             filter !==
               "all" &&
-            campaign.status !==
+            promotion.status !==
               filter
           ) {
             return false;
@@ -513,14 +312,10 @@ function CampaignsContent() {
           }
 
           return [
-            campaign.id,
-            campaign.name,
-            campaign.partner ??
-              "",
-            campaignTypeLabel(
-              campaign.type
-            ),
-            campaign.placement,
+            promotion.id,
+            promotion.name,
+            promotion.purpose,
+            promotion.placement,
           ].some(
             (
               value
@@ -534,24 +329,24 @@ function CampaignsContent() {
         }
       );
     }, [
-      campaigns,
+      promotions,
       filter,
       normalizedQuery,
     ]);
 
-  const selectedCampaign =
+  const selectedPromotion =
     useMemo(
       () =>
-        campaigns.find(
+        promotions.find(
           (
-            campaign
+            promotion
           ) =>
-            campaign.id ===
+            promotion.id ===
             selectedId
         ) ?? null,
 
       [
-        campaigns,
+        promotions,
         selectedId,
       ]
     );
@@ -559,16 +354,16 @@ function CampaignsContent() {
   const endTarget =
     useMemo(
       () =>
-        campaigns.find(
+        promotions.find(
           (
-            campaign
+            promotion
           ) =>
-            campaign.id ===
+            promotion.id ===
             endTargetId
         ) ?? null,
 
       [
-        campaigns,
+        promotions,
         endTargetId,
       ]
     );
@@ -577,85 +372,131 @@ function CampaignsContent() {
     useMemo(
       () => ({
         all:
-          campaigns.length,
+          promotions.length,
 
         scheduled:
-          campaigns.filter(
+          promotions.filter(
             (
-              campaign
+              promotion
             ) =>
-              campaign.status ===
+              promotion.status ===
               "scheduled"
           ).length,
 
         active:
-          campaigns.filter(
+          promotions.filter(
             (
-              campaign
+              promotion
             ) =>
-              campaign.status ===
+              promotion.status ===
               "active"
           ).length,
 
         paused:
-          campaigns.filter(
+          promotions.filter(
             (
-              campaign
+              promotion
             ) =>
-              campaign.status ===
+              promotion.status ===
               "paused"
           ).length,
 
         ended:
-          campaigns.filter(
+          promotions.filter(
             (
-              campaign
+              promotion
             ) =>
-              campaign.status ===
+              promotion.status ===
               "ended"
-          ).length,
-
-        disabled:
-          campaigns.filter(
-            (
-              campaign
-            ) =>
-              campaign.status ===
-              "disabled"
           ).length,
       }),
 
       [
-        campaigns,
+        promotions,
+      ]
+    );
+
+  const totalImpressions =
+    useMemo(
+      () =>
+        promotions.reduce(
+          (
+            total,
+            promotion
+          ) =>
+            total +
+            promotion.impressions,
+          0
+        ),
+
+      [
+        promotions,
+      ]
+    );
+
+  const totalClicks =
+    useMemo(
+      () =>
+        promotions.reduce(
+          (
+            total,
+            promotion
+          ) =>
+            total +
+            promotion.clicks,
+          0
+        ),
+
+      [
+        promotions,
+      ]
+    );
+
+  const totalConversions =
+    useMemo(
+      () =>
+        promotions.reduce(
+          (
+            total,
+            promotion
+          ) =>
+            total +
+            promotion.conversions,
+          0
+        ),
+
+      [
+        promotions,
       ]
     );
 
   const updateStatus = (
-    campaignId: string,
+    id: string,
 
-    status: CampaignStatus,
+    status:
+      PromotionStatus,
 
     action: string
   ) => {
-    setCampaigns(
+    setPromotions(
       (
         current
       ) =>
         current.map(
           (
-            campaign
+            promotion
           ) =>
-            campaign.id ===
-            campaignId
+            promotion.id ===
+            id
               ? {
-                  ...campaign,
+                  ...promotion,
 
                   status,
 
                   audit: [
                     {
                       id:
-                        `${campaign.id}-${Date.now()}`,
+                        `${promotion.id}-${Date.now()}`,
 
                       action,
 
@@ -666,76 +507,67 @@ function CampaignsContent() {
                         nowLabel(),
                     },
 
-                    ...campaign.audit,
+                    ...promotion.audit,
                   ],
                 }
-              : campaign
+              : promotion
         )
     );
   };
 
-  const pauseCampaign = (
-    campaign:
-      CampaignRecord
+  const pausePromotion = (
+    promotion:
+      PosterPromotionRecord
   ) => {
     if (
-      campaign.status !==
+      promotion.status !==
       "active"
     ) {
       return;
     }
 
     updateStatus(
-      campaign.id,
+      promotion.id,
       "paused",
-      "Campaign paused"
+      "Poster promotion paused"
     );
   };
 
-  const resumeCampaign = (
-    campaign:
-      CampaignRecord
+  const resumePromotion = (
+    promotion:
+      PosterPromotionRecord
   ) => {
     if (
-      campaign.status !==
-        "paused" ||
-      campaign.type ===
-        "programmatic"
+      promotion.status !==
+      "paused"
     ) {
       return;
     }
 
     updateStatus(
-      campaign.id,
+      promotion.id,
       "active",
-      "Campaign resumed"
+      "Poster promotion resumed"
     );
   };
 
   const requestEnd = (
-    campaign:
-      CampaignRecord
+    promotion:
+      PosterPromotionRecord
   ) => {
     if (
-      campaign.status !==
+      promotion.status !==
         "active" &&
-      campaign.status !==
+      promotion.status !==
         "paused"
     ) {
       return;
     }
 
     setEndTargetId(
-      campaign.id
+      promotion.id
     );
   };
-
-  const cancelEnd =
-    () => {
-      setEndTargetId(
-        null
-      );
-    };
 
   const confirmEnd =
     () => {
@@ -748,7 +580,7 @@ function CampaignsContent() {
       updateStatus(
         endTarget.id,
         "ended",
-        "Campaign ended"
+        "Poster promotion ended"
       );
 
       setEndTargetId(
@@ -777,35 +609,106 @@ function CampaignsContent() {
           </div>
 
           <h2>
-            Campaigns
+            Poster Promotion
           </h2>
 
           <p>
-            Control every Poster
-            commercial campaign from
-            one place. Commercial
-            placement stays separate
-            from organic discovery and
-            requires Poster approval.
+            Manage campaigns created
+            and controlled by Poster
+            itself, including product,
+            collection, learning, and
+            strategic discovery
+            promotions.
           </p>
         </div>
+      </header>
 
-        <div
+      <section
+        className={
+          styles.summaryGrid
+        }
+        aria-label="Poster promotion summary"
+      >
+        <article
           className={
-            styles.summary
+            styles.summaryCard
           }
         >
+          <span>
+            Active promotions
+          </span>
+
           <strong>
             {
               counts.active
             }
           </strong>
 
+          <small>
+            Poster-controlled campaigns running
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
           <span>
-            active campaigns
+            Impressions
           </span>
-        </div>
-      </header>
+
+          <strong>
+            {formatNumber(
+              totalImpressions
+            )}
+          </strong>
+
+          <small>
+            Demonstration exposure data
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Clicks
+          </span>
+
+          <strong>
+            {formatNumber(
+              totalClicks
+            )}
+          </strong>
+
+          <small>
+            Demonstration engagement
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Conversions
+          </span>
+
+          <strong>
+            {formatNumber(
+              totalConversions
+            )}
+          </strong>
+
+          <small>
+            Goal completions
+          </small>
+        </article>
+      </section>
 
       <section
         className={
@@ -824,8 +727,8 @@ function CampaignsContent() {
             value={
               query
             }
-            placeholder="Search campaign ID, name or partner..."
-            aria-label="Search campaigns"
+            placeholder="Search campaign ID or promotion..."
+            aria-label="Search Poster promotions"
             onChange={(
               event
             ) =>
@@ -866,11 +769,6 @@ function CampaignsContent() {
                 [
                   "ended",
                   "Ended",
-                ],
-
-                [
-                  "disabled",
-                  "Disabled",
                 ],
               ] as const
             ).map(
@@ -925,11 +823,7 @@ function CampaignsContent() {
             <thead>
               <tr>
                 <th>
-                  Campaign
-                </th>
-
-                <th>
-                  Type
+                  Promotion
                 </th>
 
                 <th>
@@ -941,7 +835,19 @@ function CampaignsContent() {
                 </th>
 
                 <th>
-                  Performance
+                  Impressions
+                </th>
+
+                <th>
+                  Clicks
+                </th>
+
+                <th>
+                  CTR
+                </th>
+
+                <th>
+                  Conversions
                 </th>
 
                 <th>
@@ -955,13 +861,13 @@ function CampaignsContent() {
             </thead>
 
             <tbody>
-              {visibleCampaigns.map(
+              {visiblePromotions.map(
                 (
-                  campaign
+                  promotion
                 ) => (
                   <tr
                     key={
-                      campaign.id
+                      promotion.id
                     }
                   >
                     <td>
@@ -972,102 +878,91 @@ function CampaignsContent() {
                         }
                         onClick={() =>
                           setSelectedId(
-                            campaign.id
+                            promotion.id
                           )
                         }
                       >
                         {
-                          campaign.name
+                          promotion.name
                         }
                       </button>
 
                       <span
                         className={
-                          styles.partner
+                          styles.secondaryText
                         }
                       >
                         {
-                          campaign.id
+                          promotion.id
                         }
-
-                        {campaign.partner
-                          ? ` · ${campaign.partner}`
-                          : " · Poster"}
+                        {" · Promoted by Poster"}
                       </span>
                     </td>
 
                     <td>
-                      {campaignTypeLabel(
-                        campaign.type
-                      )}
-                    </td>
-
-                    <td>
                       {
-                        campaign.placement
+                        promotion.placement
                       }
                     </td>
 
                     <td>
                       {
-                        campaign.startAt
+                        promotion.startAt
                       }
 
-                      {campaign.endAt
-                        ? ` → ${campaign.endAt}`
+                      {promotion.endAt
+                        ? ` → ${promotion.endAt}`
                         : ""}
                     </td>
 
                     <td>
-                      <strong
-                        className={
-                          styles.performanceMain
-                        }
-                      >
-                        {ctr(
-                          campaign
-                        )}
-                        {" CTR"}
-                      </strong>
+                      {formatNumber(
+                        promotion.impressions
+                      )}
+                    </td>
 
-                      <span
-                        className={
-                          styles.performanceSub
-                        }
-                      >
-                        {campaign.impressions.toLocaleString()}
-                        {" imp · "}
-                        {campaign.clicks.toLocaleString()}
-                        {" clicks"}
-                      </span>
+                    <td>
+                      {formatNumber(
+                        promotion.clicks
+                      )}
+                    </td>
+
+                    <td>
+                      {calculateCtr(
+                        promotion.clicks,
+                        promotion.impressions
+                      )}
+                    </td>
+
+                    <td>
+                      {formatNumber(
+                        promotion.conversions
+                      )}
                     </td>
 
                     <td>
                       <span
                         className={`${styles.status} ${
-                          campaign.status ===
+                          promotion.status ===
                           "active"
                             ? styles.statusActive
-                            : campaign.status ===
+                            : promotion.status ===
                               "paused"
                             ? styles.statusPaused
-                            : campaign.status ===
+                            : promotion.status ===
                               "scheduled"
                             ? styles.statusScheduled
-                            : campaign.status ===
-                              "ended"
-                            ? styles.statusEnded
-                            : styles.statusDisabled
+                            : styles.statusEnded
                         }`}
                       >
                         {statusLabel(
-                          campaign.status
+                          promotion.status
                         )}
                       </span>
                     </td>
 
                     <td>
-                      {campaign.status ===
+                      {promotion.status ===
                       "active" ? (
                         <button
                           type="button"
@@ -1075,14 +970,14 @@ function CampaignsContent() {
                             styles.actionButton
                           }
                           onClick={() =>
-                            pauseCampaign(
-                              campaign
+                            pausePromotion(
+                              promotion
                             )
                           }
                         >
                           Pause
                         </button>
-                      ) : campaign.status ===
+                      ) : promotion.status ===
                         "paused" ? (
                         <button
                           type="button"
@@ -1090,8 +985,8 @@ function CampaignsContent() {
                             styles.actionButton
                           }
                           onClick={() =>
-                            resumeCampaign(
-                              campaign
+                            resumePromotion(
+                              promotion
                             )
                           }
                         >
@@ -1105,7 +1000,7 @@ function CampaignsContent() {
                           }
                           onClick={() =>
                             setSelectedId(
-                              campaign.id
+                              promotion.id
                             )
                           }
                         >
@@ -1119,14 +1014,14 @@ function CampaignsContent() {
             </tbody>
           </table>
 
-          {visibleCampaigns.length ===
+          {visiblePromotions.length ===
           0 ? (
             <div
               className={
                 styles.empty
               }
             >
-              No campaigns found.
+              No Poster promotions found.
             </div>
           ) : null}
         </div>
@@ -1139,29 +1034,20 @@ function CampaignsContent() {
       >
         <div>
           <strong>
-            Programmatic advertising
+            Poster Promotion is always clearly disclosed.
           </strong>
 
           <p>
-            Programmatic advertising
-            remains structurally supported
-            but disabled until provider,
-            privacy, consent, SDK and
-            production requirements are
-            ready.
+            These campaigns use the disclosure
+            “Promoted by Poster”. They remain
+            separate from organic ranking and
+            should not be disguised as ordinary
+            recommendations.
           </p>
         </div>
-
-        <span
-          className={
-            styles.disabledBadge
-          }
-        >
-          Disabled
-        </span>
       </section>
 
-      {selectedCampaign ? (
+      {selectedPromotion ? (
         <div
           className={
             styles.drawerLayer
@@ -1172,7 +1058,7 @@ function CampaignsContent() {
             className={
               styles.backdrop
             }
-            aria-label="Close campaign details"
+            aria-label="Close Poster promotion details"
             onClick={() =>
               setSelectedId(
                 null
@@ -1193,13 +1079,13 @@ function CampaignsContent() {
               <div>
                 <span>
                   {
-                    selectedCampaign.id
+                    selectedPromotion.id
                   }
                 </span>
 
                 <h3>
                   {
-                    selectedCampaign.name
+                    selectedPromotion.name
                   }
                 </h3>
               </div>
@@ -1231,7 +1117,7 @@ function CampaignsContent() {
                 }
               >
                 <h4>
-                  Campaign
+                  Promotion
                 </h4>
 
                 <dl
@@ -1246,33 +1132,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.id
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Type
-                    </dt>
-
-                    <dd>
-                      {campaignTypeLabel(
-                        selectedCampaign.type
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Partner /
-                      advertiser
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCampaign.partner ??
-                        "Poster"
+                        selectedPromotion.id
                       }
                     </dd>
                   </div>
@@ -1283,8 +1143,18 @@ function CampaignsContent() {
                     </dt>
 
                     <dd>
+                      Promoted by Poster
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Purpose
+                    </dt>
+
+                    <dd>
                       {
-                        selectedCampaign.disclosure
+                        selectedPromotion.purpose
                       }
                     </dd>
                   </div>
@@ -1296,7 +1166,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.placement
+                        selectedPromotion.placement
                       }
                     </dd>
                   </div>
@@ -1308,7 +1178,7 @@ function CampaignsContent() {
 
                     <dd>
                       {statusLabel(
-                        selectedCampaign.status
+                        selectedPromotion.status
                       )}
                     </dd>
                   </div>
@@ -1320,7 +1190,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.startAt
+                        selectedPromotion.startAt
                       }
                     </dd>
                   </div>
@@ -1332,7 +1202,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.endAt ??
+                        selectedPromotion.endAt ??
                         "No fixed end"
                       }
                     </dd>
@@ -1349,8 +1219,7 @@ function CampaignsContent() {
                       }
                     >
                       {
-                        selectedCampaign.destinationUrl ||
-                        "Not configured"
+                        selectedPromotion.destinationUrl
                       }
                     </dd>
                   </div>
@@ -1363,7 +1232,7 @@ function CampaignsContent() {
                 }
               >
                 <h4>
-                  Performance snapshot
+                  Performance
                 </h4>
 
                 <div
@@ -1377,7 +1246,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.impressions.toLocaleString()}
+                      {formatNumber(
+                        selectedPromotion.impressions
+                      )}
                     </strong>
                   </div>
 
@@ -1387,7 +1258,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.clicks.toLocaleString()}
+                      {formatNumber(
+                        selectedPromotion.clicks
+                      )}
                     </strong>
                   </div>
 
@@ -1397,8 +1270,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {ctr(
-                        selectedCampaign
+                      {calculateCtr(
+                        selectedPromotion.clicks,
+                        selectedPromotion.impressions
                       )}
                     </strong>
                   </div>
@@ -1409,7 +1283,22 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.conversions.toLocaleString()}
+                      {formatNumber(
+                        selectedPromotion.conversions
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Conversion rate
+                    </span>
+
+                    <strong>
+                      {conversionRate(
+                        selectedPromotion.conversions,
+                        selectedPromotion.clicks
+                      )}
                     </strong>
                   </div>
                 </div>
@@ -1421,7 +1310,7 @@ function CampaignsContent() {
                 }
               >
                 <h4>
-                  Commercial integrity
+                  Discovery integrity
                 </h4>
 
                 <p
@@ -1429,14 +1318,12 @@ function CampaignsContent() {
                     styles.integrityNote
                   }
                 >
-                  This commercial campaign
-                  is separate from Poster&apos;s
-                  organic recommendation
-                  ranking. Sponsorship value,
-                  affiliate commission, or
-                  commercial payment must not
-                  influence organic knowledge
-                  ranking.
+                  Poster-controlled promotion
+                  remains a separate commercial
+                  placement. It must not silently
+                  replace or manipulate organic
+                  knowledge, search, trending, or
+                  recommendation rankings.
                 </p>
               </section>
 
@@ -1454,7 +1341,7 @@ function CampaignsContent() {
                     styles.auditList
                   }
                 >
-                  {selectedCampaign.audit.map(
+                  {selectedPromotion.audit.map(
                     (
                       entry
                     ) => (
@@ -1501,18 +1388,19 @@ function CampaignsContent() {
                 styles.drawerFooter
               }
             >
-              {selectedCampaign.type ===
-              "programmatic" ? (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Programmatic advertising
-                  is intentionally disabled.
-                </span>
-              ) : selectedCampaign.status ===
-                "active" ? (
+              <Link
+                href={`/monetization/campaigns?record=${encodeURIComponent(
+                  selectedPromotion.id
+                )}`}
+                className={
+                  styles.secondaryButton
+                }
+              >
+                Open in Campaigns
+              </Link>
+
+              {selectedPromotion.status ===
+              "active" ? (
                 <>
                   <button
                     type="button"
@@ -1520,8 +1408,8 @@ function CampaignsContent() {
                       styles.secondaryButton
                     }
                     onClick={() =>
-                      pauseCampaign(
-                        selectedCampaign
+                      pausePromotion(
+                        selectedPromotion
                       )
                     }
                   >
@@ -1535,14 +1423,14 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       requestEnd(
-                        selectedCampaign
+                        selectedPromotion
                       )
                     }
                   >
                     End campaign
                   </button>
                 </>
-              ) : selectedCampaign.status ===
+              ) : selectedPromotion.status ===
                 "paused" ? (
                 <>
                   <button
@@ -1551,8 +1439,8 @@ function CampaignsContent() {
                       styles.primaryButton
                     }
                     onClick={() =>
-                      resumeCampaign(
-                        selectedCampaign
+                      resumePromotion(
+                        selectedPromotion
                       )
                     }
                   >
@@ -1566,33 +1454,31 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       requestEnd(
-                        selectedCampaign
+                        selectedPromotion
                       )
                     }
                   >
                     End campaign
                   </button>
                 </>
-              ) : selectedCampaign.status ===
+              ) : selectedPromotion.status ===
                 "scheduled" ? (
                 <span
                   className={
-                    styles.programmaticNote
+                    styles.footerNote
                   }
                 >
-                  Campaign is scheduled and
-                  will begin according to its
-                  configured start date.
+                  Scheduled campaigns begin according
+                  to their configured start date.
                 </span>
               ) : (
                 <span
                   className={
-                    styles.programmaticNote
+                    styles.footerNote
                   }
                 >
-                  Ended campaigns remain
-                  historical records and are
-                  not reactivated directly.
+                  Ended campaigns remain historical
+                  records.
                 </span>
               )}
             </div>
@@ -1611,9 +1497,11 @@ function CampaignsContent() {
             className={
               styles.confirmBackdrop
             }
-            aria-label="Cancel end campaign"
-            onClick={
-              cancelEnd
+            aria-label="Cancel end Poster promotion"
+            onClick={() =>
+              setEndTargetId(
+                null
+              )
             }
           />
 
@@ -1623,20 +1511,20 @@ function CampaignsContent() {
             }
             role="dialog"
             aria-modal="true"
-            aria-labelledby="end-campaign-title"
+            aria-labelledby="end-promotion-title"
           >
             <span
               className={
                 styles.confirmEyebrow
               }
             >
-              Campaign action
+              Poster Promotion
             </span>
 
             <h3
-              id="end-campaign-title"
+              id="end-promotion-title"
             >
-              End this campaign?
+              End this promotion?
             </h3>
 
             <p>
@@ -1656,10 +1544,9 @@ function CampaignsContent() {
                 styles.confirmWarning
               }
             >
-              Ending preserves the
-              campaign as a historical
-              record. It should not be
-              resumed directly afterward.
+              Ending preserves campaign
+              performance and audit history
+              as a historical record.
             </p>
 
             <div
@@ -1672,8 +1559,10 @@ function CampaignsContent() {
                 className={
                   styles.secondaryButton
                 }
-                onClick={
-                  cancelEnd
+                onClick={() =>
+                  setEndTargetId(
+                    null
+                  )
                 }
               >
                 Cancel
@@ -1688,7 +1577,7 @@ function CampaignsContent() {
                   confirmEnd
                 }
               >
-                End campaign
+                End promotion
               </button>
             </div>
           </div>

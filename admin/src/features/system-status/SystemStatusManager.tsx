@@ -2,120 +2,69 @@ import styles from "./SystemStatusManager.module.css";
 
 type HealthStatus =
   | "healthy"
-  | "ready"
-  | "attention"
   | "not_connected";
 
-interface SystemTool {
+interface SystemService {
   name: string;
   area: string;
   status: HealthStatus;
   statusLabel: string;
-  detail: string;
-  lastChecked: string;
+  description: string;
 }
 
-interface StatusGroup {
+interface ServiceGroup {
   title: string;
   description: string;
-  tools: SystemTool[];
+  services: SystemService[];
 }
 
-const groups: StatusGroup[] = [
+const groups: ServiceGroup[] = [
   {
-    title: "Admin & public tools",
+    title: "Core services",
 
     description:
-      "Frontend tools currently available to the Poster operator and rights holders.",
+      "Essential application and persistence services.",
 
-    tools: [
+    services: [
       {
-        name: "Admin frontend",
-        area: "Operations UI",
+        name: "Admin UI",
+        area: "Operations",
+
         status: "healthy",
-        statusLabel: "Healthy",
-        detail:
-          "Admin routes, navigation, TypeScript, lint, and production build are working.",
-        lastChecked: "Current build",
+
+        statusLabel:
+          "Healthy",
+
+        description:
+          "Poster Admin is available and the current frontend build is operating normally.",
       },
 
-      {
-        name: "Content controls",
-        area: "Admin tool",
-        status: "healthy",
-        statusLabel: "Healthy",
-        detail:
-          "Search, content details, removal, restoration, prevent re-import decisions, and exact record opening are available.",
-        lastChecked: "Current build",
-      },
-
-      {
-        name: "Sources controls",
-        area: "Admin tool",
-        status: "healthy",
-        statusLabel: "Healthy",
-        detail:
-          "Source search, health display, pause, enable, block, unblock, and exact source opening are available.",
-        lastChecked: "Current build",
-      },
-
-      {
-        name: "Copyright workflow",
-        area: "Rights tool",
-        status: "healthy",
-        statusLabel: "Healthy",
-        detail:
-          "Content IDs, claimant details, cross-verification, removal decisions, prevent re-import decisions, and audit history are available.",
-        lastChecked: "Current build",
-      },
-
-      {
-        name: "Reports linking",
-        area: "Admin tool",
-        status: "healthy",
-        statusLabel: "Healthy",
-        detail:
-          "Reports carry exact Content, Source, and Campaign references. Content and Source deep linking are available.",
-        lastChecked: "Current build",
-      },
-
-      {
-        name: "Public rights request form",
-        area: "Public tool",
-        status: "ready",
-        statusLabel: "Frontend ready",
-        detail:
-          "Claimant details, affected content identification, declarations, validation, supporting information, and electronic-signature UI are available.",
-        lastChecked: "Current build",
-      },
-    ],
-  },
-
-  {
-    title: "Core platform services",
-
-    description:
-      "Backend and persistence services that will power the real production platform.",
-
-    tools: [
       {
         name: "Backend API",
-        area: "Core service",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Real Poster API endpoints and shared server-side business logic are intentionally deferred to the Backend phase.",
-        lastChecked: "Development state",
+        area: "Application service",
+
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Server-side APIs and shared business logic have not been connected yet.",
       },
 
       {
-        name: "PostgreSQL database",
+        name: "PostgreSQL Database",
         area: "Persistence",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Permanent users, content, sources, reports, campaigns, copyright cases, exclusions, and audit records are not connected to PostgreSQL yet.",
-        lastChecked: "Development state",
+
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Permanent platform data is not connected to PostgreSQL yet.",
       },
     ],
   },
@@ -124,66 +73,73 @@ const groups: StatusGroup[] = [
     title: "Content ingestion",
 
     description:
-      "External source integrations and ingestion services used to discover permitted content.",
+      "Services responsible for receiving permitted external content.",
 
-    tools: [
+    services: [
       {
         name: "Provider APIs",
         area: "External integrations",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Official provider API adapters, developer credentials, quotas, and live provider health checks have not been implemented yet.",
-        lastChecked: "Development state",
+
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Official publisher and provider API integrations are not connected yet.",
       },
 
       {
-        name: "RSS ingestion engine",
-        area: "Content ingestion",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Authorized RSS scheduling, worker heartbeats, retries, feed synchronization, and live failure monitoring are deferred to Backend.",
-        lastChecked: "Development state",
-      },
+        name: "RSS Ingestion",
+        area: "Feed synchronization",
 
-      {
-        name: "Embed / oEmbed services",
-        area: "Content ingestion",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Official embed and oEmbed provider adapters have not been connected yet.",
-        lastChecked: "Development state",
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Authorized RSS scheduling, synchronization, retries, and live feed monitoring are not connected yet.",
       },
     ],
   },
 
   {
-    title: "Intelligence & communication",
+    title:
+      "Intelligence & communication",
 
     description:
-      "AI processing and outbound communication services that will be connected later.",
+      "Essential intelligence and outbound communication services.",
 
-    tools: [
+    services: [
       {
-        name: "AI services",
+        name: "AI Services",
         area: "Intelligence",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Classification, ranking, recommendation, global taxonomy intelligence, and other Python AI services are intentionally deferred.",
-        lastChecked: "Development state",
+
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Classification, ranking, recommendation, and taxonomy intelligence services are not connected yet.",
       },
 
       {
-        name: "Email notifications",
+        name: "Email Notifications",
         area: "Communication",
-        status: "not_connected",
-        statusLabel: "Not connected",
-        detail:
-          "Automatic copyright claimant decision emails, delivery retries, and notification audit records will be connected during Backend development.",
-        lastChecked: "Development state",
+
+        status:
+          "not_connected",
+
+        statusLabel:
+          "Not connected",
+
+        description:
+          "Automatic copyright, commercial, client, and operational email delivery is not connected yet.",
       },
     ],
   },
@@ -192,41 +148,30 @@ const groups: StatusGroup[] = [
 function statusClass(
   status: HealthStatus
 ): string {
-  switch (status) {
-    case "healthy":
-      return styles.statusHealthy;
-
-    case "ready":
-      return styles.statusReady;
-
-    case "attention":
-      return styles.statusAttention;
-
-    case "not_connected":
-      return styles.statusDisconnected;
-  }
+  return status ===
+    "healthy"
+    ? styles.statusHealthy
+    : styles.statusDisconnected;
 }
 
 export default function SystemStatusManager() {
-  const allTools =
+  const services =
     groups.flatMap(
       (group) =>
-        group.tools
+        group.services
     );
 
-  const healthyCount =
-    allTools.filter(
-      (tool) =>
-        tool.status ===
-          "healthy" ||
-        tool.status ===
-          "ready"
+  const operationalCount =
+    services.filter(
+      (service) =>
+        service.status ===
+        "healthy"
     ).length;
 
   const pendingCount =
-    allTools.filter(
-      (tool) =>
-        tool.status ===
+    services.filter(
+      (service) =>
+        service.status ===
         "not_connected"
     ).length;
 
@@ -255,11 +200,9 @@ export default function SystemStatusManager() {
           </h2>
 
           <p>
-            See the current state of
-            Poster&apos;s operational tools,
-            APIs, ingestion services,
-            persistence, AI systems, and
-            notification services.
+            Operational status of
+            Poster&apos;s essential
+            platform services.
           </p>
         </div>
       </header>
@@ -268,7 +211,7 @@ export default function SystemStatusManager() {
         className={
           styles.summaryGrid
         }
-        aria-label="System status summary"
+        aria-label="Platform status summary"
       >
         <article
           className={
@@ -276,17 +219,17 @@ export default function SystemStatusManager() {
           }
         >
           <span>
-            Total tools
+            Essential services
           </span>
 
           <strong>
             {
-              allTools.length
+              services.length
             }
           </strong>
 
           <small>
-            Tracked platform components
+            Core services monitored
           </small>
         </article>
 
@@ -296,17 +239,17 @@ export default function SystemStatusManager() {
           }
         >
           <span>
-            Ready now
+            Operational
           </span>
 
           <strong>
             {
-              healthyCount
+              operationalCount
             }
           </strong>
 
           <small>
-            Frontend / operator tools
+            Currently available
           </small>
         </article>
 
@@ -316,7 +259,7 @@ export default function SystemStatusManager() {
           }
         >
           <span>
-            Not connected
+            Pending
           </span>
 
           <strong>
@@ -326,7 +269,7 @@ export default function SystemStatusManager() {
           </strong>
 
           <small>
-            Deferred platform services
+            Not connected yet
           </small>
         </article>
       </section>
@@ -347,17 +290,18 @@ export default function SystemStatusManager() {
 
         <div>
           <strong>
-            Current statuses reflect the
+            Status reflects the real
             development state.
           </strong>
 
           <p>
-            Backend API, real provider APIs,
-            RSS workers, PostgreSQL, AI
-            services, and email delivery are
-            not connected yet. They are shown
-            as Not connected instead of being
-            incorrectly reported as healthy.
+            Services that are not yet
+            implemented or connected are
+            shown as Not connected rather
+            than being reported as healthy.
+            Live health checks will replace
+            these development states when
+            Backend services are available.
           </p>
         </div>
       </section>
@@ -395,89 +339,76 @@ export default function SystemStatusManager() {
                     }
                   </p>
                 </div>
-
-                <span
-                  className={
-                    styles.groupCount
-                  }
-                >
-                  {
-                    group.tools.length
-                  }
-                </span>
               </div>
 
               <div
                 className={
-                  styles.toolList
+                  styles.serviceList
                 }
               >
-                {group.tools.map(
-                  (tool) => (
+                {group.services.map(
+                  (
+                    service
+                  ) => (
                     <article
                       key={
-                        tool.name
+                        service.name
                       }
                       className={
-                        styles.toolRow
+                        styles.serviceRow
                       }
                     >
                       <div
                         className={
-                          styles.toolIdentity
+                          styles.serviceIdentity
                         }
                       >
                         <span
                           className={`${styles.statusDot} ${statusClass(
-                            tool.status
+                            service.status
                           )}`}
+                          aria-hidden="true"
                         />
 
                         <div>
                           <strong>
                             {
-                              tool.name
+                              service.name
                             }
                           </strong>
 
                           <span>
                             {
-                              tool.area
+                              service.area
                             }
                           </span>
                         </div>
                       </div>
 
-                      <div
+                      <p
                         className={
-                          styles.toolDescription
+                          styles.serviceDescription
                         }
                       >
                         {
-                          tool.detail
+                          service.description
                         }
-                      </div>
+                      </p>
 
                       <div
                         className={
-                          styles.toolMeta
+                          styles.serviceMeta
                         }
                       >
                         <span
                           className={`${styles.statusBadge} ${statusClass(
-                            tool.status
+                            service.status
                           )}`}
                         >
                           {
-                            tool.statusLabel
+                            service.statusLabel
                           }
                         </span>
-
-                        <small>
-                          {
-                            tool.lastChecked
-                          }
-                        </small>
                       </div>
                     </article>
                   )
@@ -487,6 +418,28 @@ export default function SystemStatusManager() {
           )
         )}
       </div>
+
+      <section
+        className={
+          styles.footerNote
+        }
+      >
+        <div>
+          <strong>
+            Live monitoring comes later.
+          </strong>
+
+          <p>
+            Response time, uptime,
+            last-checked timestamps, API
+            health, worker failures, and
+            service alerts will be populated
+            from real monitoring only after
+            the corresponding services are
+            implemented.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

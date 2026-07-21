@@ -1,5 +1,9 @@
-import MonetizationManager from "@/features/monetization/MonetizationManager";
+import {
+  redirect,
+} from "next/navigation";
 
 export default function MonetizationPage() {
-  return <MonetizationManager />;
+  redirect(
+    "/monetization/campaigns"
+  );
 }

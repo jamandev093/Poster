@@ -1,90 +1,70 @@
 "use client";
 
 import {
-  Suspense,
   useMemo,
   useState,
 } from "react";
 
-import {
-  useSearchParams,
-} from "next/navigation";
+import Link from "next/link";
 
-import styles from "./MonetizationManager.module.css";
+import styles from "./DirectSponsorshipManager.module.css";
 
-type CampaignType =
-  | "poster_promotion"
-  | "affiliate"
-  | "direct_sponsorship"
-  | "programmatic";
-
-type CampaignStatus =
+type SponsorshipStatus =
   | "scheduled"
   | "active"
   | "paused"
-  | "ended"
-  | "disabled";
+  | "ended";
 
-type CampaignPlacement =
+type Placement =
   | "Home"
   | "Search"
   | "Trending";
 
-interface CampaignAuditEntry {
+interface AuditEntry {
   id: string;
   action: string;
   actor: string;
   timestamp: string;
 }
 
-interface CampaignRecord {
+interface SponsorshipRecord {
   id: string;
 
   name: string;
-
-  type: CampaignType;
-
-  partner?: string;
+  advertiser: string;
 
   destinationUrl: string;
 
-  disclosure: string;
+  placement: Placement;
 
-  placement: CampaignPlacement;
-
-  status: CampaignStatus;
+  status: SponsorshipStatus;
 
   startAt: string;
+  endAt: string;
 
-  endAt?: string;
+  contractValue: number;
+
+  deliveryTarget: number;
+  delivered: number;
 
   clicks: number;
-
-  impressions: number;
-
   conversions: number;
 
-  audit: CampaignAuditEntry[];
+  audit: AuditEntry[];
 }
 
-const INITIAL_CAMPAIGNS: CampaignRecord[] = [
+const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
   {
     id: "CMP-3001",
 
     name:
       "Cloud Skills Direct Sponsorship",
 
-    type:
-      "direct_sponsorship",
-
-    partner:
+    advertiser:
       "Example Cloud",
 
     destinationUrl:
       "https://example.com/cloud-skills",
-
-    disclosure:
-      "Sponsored by Example Cloud",
 
     placement:
       "Trending",
@@ -98,19 +78,39 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     endAt:
       "31 Jul 2026",
 
-    clicks:
-      1842,
+    contractValue:
+      500000,
 
-    impressions:
-      72800,
+    deliveryTarget:
+      1000000,
+
+    delivered:
+      728000,
+
+    clicks:
+      18240,
 
     conversions:
-      216,
+      620,
 
     audit: [
       {
         id:
-          "audit-cmp-3001-1",
+          "sponsor-3001-2",
+
+        action:
+          "Delivery reached 70% of contracted target",
+
+        actor:
+          "System",
+
+        timestamp:
+          "20 Jul 2026 · 09:15",
+      },
+
+      {
+        id:
+          "sponsor-3001-1",
 
         action:
           "Direct sponsorship activated",
@@ -125,139 +125,16 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
   },
 
   {
-    id: "CMP-3002",
+    id: "CMP-3010",
 
     name:
-      "Learning Partner Offer",
+      "Professional Learning Campaign",
 
-    type:
-      "affiliate",
-
-    partner:
-      "Example Learning",
+    advertiser:
+      "Example University",
 
     destinationUrl:
-      "https://example.com/learning-offer",
-
-    disclosure:
-      "Affiliate · Poster may earn a commission",
-
-    placement:
-      "Search",
-
-    status:
-      "active",
-
-    startAt:
-      "16 Jul 2026",
-
-    endAt:
-      "31 Jul 2026",
-
-    clicks:
-      3400,
-
-    impressions:
-      82000,
-
-    conversions:
-      164,
-
-    audit: [
-      {
-        id:
-          "audit-cmp-3002-1",
-
-        action:
-          "Affiliate campaign activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "16 Jul 2026 · 10:30",
-      },
-    ],
-  },
-
-  {
-    id: "CMP-3003",
-
-    name:
-      "Poster Premium Discovery",
-
-    type:
-      "poster_promotion",
-
-    destinationUrl:
-      "https://poster.example/premium-discovery",
-
-    disclosure:
-      "Promoted by Poster",
-
-    placement:
-      "Home",
-
-    status:
-      "paused",
-
-    startAt:
-      "15 Jul 2026",
-
-    clicks:
-      4210,
-
-    impressions:
-      124500,
-
-    conversions:
-      840,
-
-    audit: [
-      {
-        id:
-          "audit-cmp-3003-2",
-
-        action:
-          "Campaign paused",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 · 08:40",
-      },
-
-      {
-        id:
-          "audit-cmp-3003-1",
-
-        action:
-          "Poster promotion activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "15 Jul 2026 · 09:00",
-      },
-    ],
-  },
-
-  {
-    id: "CMP-3004",
-
-    name:
-      "Career Growth Collection",
-
-    type:
-      "poster_promotion",
-
-    destinationUrl:
-      "https://poster.example/career-growth",
-
-    disclosure:
-      "Promoted by Poster",
+      "https://example.edu/professional-learning",
 
     placement:
       "Home",
@@ -269,12 +146,18 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
       "25 Jul 2026",
 
     endAt:
-      "10 Aug 2026",
+      "15 Aug 2026",
 
-    clicks:
+    contractValue:
+      320000,
+
+    deliveryTarget:
+      600000,
+
+    delivered:
       0,
 
-    impressions:
+    clicks:
       0,
 
     conversions:
@@ -283,91 +166,93 @@ const INITIAL_CAMPAIGNS: CampaignRecord[] = [
     audit: [
       {
         id:
-          "audit-cmp-3004-1",
+          "sponsor-3010-1",
 
         action:
-          "Campaign scheduled",
+          "Direct sponsorship scheduled",
 
         actor:
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 14:10",
+          "19 Jul 2026 · 14:40",
       },
     ],
   },
 
   {
-    id: "CMP-3005",
+    id: "CMP-3011",
 
     name:
-      "Programmatic Advertising",
+      "Developer Certification Campaign",
 
-    type:
-      "programmatic",
+    advertiser:
+      "Example Academy",
 
     destinationUrl:
-      "",
-
-    disclosure:
-      "Programmatic disclosure managed by provider",
+      "https://example.org/developer-certification",
 
     placement:
-      "Home",
+      "Search",
 
     status:
-      "disabled",
+      "paused",
 
     startAt:
-      "Not configured",
+      "10 Jul 2026",
+
+    endAt:
+      "30 Jul 2026",
+
+    contractValue:
+      210000,
+
+    deliveryTarget:
+      420000,
+
+    delivered:
+      188000,
 
     clicks:
-      0,
-
-    impressions:
-      0,
+      4860,
 
     conversions:
-      0,
+      210,
 
     audit: [
       {
         id:
-          "audit-cmp-3005-1",
+          "sponsor-3011-2",
 
         action:
-          "Programmatic advertising remains disabled for initial release",
+          "Campaign paused for advertiser review",
 
         actor:
-          "System",
+          "Admin",
 
         timestamp:
-          "19 Jul 2026 · 00:00",
+          "19 Jul 2026 · 16:05",
+      },
+
+      {
+        id:
+          "sponsor-3011-1",
+
+        action:
+          "Direct sponsorship activated",
+
+        actor:
+          "Admin",
+
+        timestamp:
+          "10 Jul 2026 · 08:00",
       },
     ],
   },
 ];
 
-function campaignTypeLabel(
-  type: CampaignType
-): string {
-  switch (type) {
-    case "poster_promotion":
-      return "Poster Promotion";
-
-    case "affiliate":
-      return "Affiliate";
-
-    case "direct_sponsorship":
-      return "Direct Sponsorship";
-
-    case "programmatic":
-      return "Programmatic";
-  }
-}
-
 function statusLabel(
-  status: CampaignStatus
+  status: SponsorshipStatus
 ): string {
   switch (status) {
     case "scheduled":
@@ -381,17 +266,36 @@ function statusLabel(
 
     case "ended":
       return "Ended";
-
-    case "disabled":
-      return "Disabled";
   }
 }
 
-function ctr(
-  campaign: CampaignRecord
+function formatNumber(
+  value: number
+): string {
+  return new Intl.NumberFormat(
+    "en-IN"
+  ).format(value);
+}
+
+function formatMoney(
+  value: number
+): string {
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }
+  ).format(value);
+}
+
+function calculateCtr(
+  clicks: number,
+  impressions: number
 ): string {
   if (
-    campaign.impressions ===
+    impressions ===
     0
   ) {
     return "0.00%";
@@ -399,11 +303,32 @@ function ctr(
 
   return `${(
     (
-      campaign.clicks /
-      campaign.impressions
+      clicks /
+      impressions
     ) *
     100
   ).toFixed(2)}%`;
+}
+
+function deliveryProgress(
+  delivered: number,
+  target: number
+): number {
+  if (
+    target ===
+    0
+  ) {
+    return 0;
+  }
+
+  return Math.min(
+    100,
+    (
+      delivered /
+      target
+    ) *
+      100
+  );
 }
 
 function nowLabel(): string {
@@ -421,30 +346,14 @@ function nowLabel(): string {
   );
 }
 
-export default function MonetizationManager() {
-  return (
-    <Suspense fallback={null}>
-      <CampaignsContent />
-    </Suspense>
-  );
-}
-
-function CampaignsContent() {
-  const searchParams =
-    useSearchParams();
-
-  const requestedRecordId =
-    searchParams.get(
-      "record"
-    );
-
+export default function DirectSponsorshipManager() {
   const [
-    campaigns,
-    setCampaigns,
+    sponsorships,
+    setSponsorships,
   ] = useState<
-    CampaignRecord[]
+    SponsorshipRecord[]
   >(
-    INITIAL_CAMPAIGNS
+    INITIAL_SPONSORSHIPS
   );
 
   const [
@@ -457,7 +366,7 @@ function CampaignsContent() {
     setFilter,
   ] = useState<
     "all" |
-      CampaignStatus
+      SponsorshipStatus
   >(
     "all"
   );
@@ -468,13 +377,7 @@ function CampaignsContent() {
   ] = useState<
     string | null
   >(
-    INITIAL_CAMPAIGNS.some(
-      (campaign) =>
-        campaign.id ===
-        requestedRecordId
-    )
-      ? requestedRecordId
-      : null
+    null
   );
 
   const [
@@ -491,16 +394,16 @@ function CampaignsContent() {
       .trim()
       .toLowerCase();
 
-  const visibleCampaigns =
+  const visibleSponsorships =
     useMemo(() => {
-      return campaigns.filter(
+      return sponsorships.filter(
         (
-          campaign
+          sponsorship
         ) => {
           if (
             filter !==
               "all" &&
-            campaign.status !==
+            sponsorship.status !==
               filter
           ) {
             return false;
@@ -513,14 +416,10 @@ function CampaignsContent() {
           }
 
           return [
-            campaign.id,
-            campaign.name,
-            campaign.partner ??
-              "",
-            campaignTypeLabel(
-              campaign.type
-            ),
-            campaign.placement,
+            sponsorship.id,
+            sponsorship.name,
+            sponsorship.advertiser,
+            sponsorship.placement,
           ].some(
             (
               value
@@ -534,24 +433,24 @@ function CampaignsContent() {
         }
       );
     }, [
-      campaigns,
+      sponsorships,
       filter,
       normalizedQuery,
     ]);
 
-  const selectedCampaign =
+  const selectedSponsorship =
     useMemo(
       () =>
-        campaigns.find(
+        sponsorships.find(
           (
-            campaign
+            sponsorship
           ) =>
-            campaign.id ===
+            sponsorship.id ===
             selectedId
         ) ?? null,
 
       [
-        campaigns,
+        sponsorships,
         selectedId,
       ]
     );
@@ -559,16 +458,16 @@ function CampaignsContent() {
   const endTarget =
     useMemo(
       () =>
-        campaigns.find(
+        sponsorships.find(
           (
-            campaign
+            sponsorship
           ) =>
-            campaign.id ===
+            sponsorship.id ===
             endTargetId
         ) ?? null,
 
       [
-        campaigns,
+        sponsorships,
         endTargetId,
       ]
     );
@@ -577,85 +476,74 @@ function CampaignsContent() {
     useMemo(
       () => ({
         all:
-          campaigns.length,
+          sponsorships.length,
 
         scheduled:
-          campaigns.filter(
+          sponsorships.filter(
             (
-              campaign
+              sponsorship
             ) =>
-              campaign.status ===
+              sponsorship.status ===
               "scheduled"
           ).length,
 
         active:
-          campaigns.filter(
+          sponsorships.filter(
             (
-              campaign
+              sponsorship
             ) =>
-              campaign.status ===
+              sponsorship.status ===
               "active"
           ).length,
 
         paused:
-          campaigns.filter(
+          sponsorships.filter(
             (
-              campaign
+              sponsorship
             ) =>
-              campaign.status ===
+              sponsorship.status ===
               "paused"
           ).length,
 
         ended:
-          campaigns.filter(
+          sponsorships.filter(
             (
-              campaign
+              sponsorship
             ) =>
-              campaign.status ===
+              sponsorship.status ===
               "ended"
-          ).length,
-
-        disabled:
-          campaigns.filter(
-            (
-              campaign
-            ) =>
-              campaign.status ===
-              "disabled"
           ).length,
       }),
 
       [
-        campaigns,
+        sponsorships,
       ]
     );
 
   const updateStatus = (
-    campaignId: string,
-
-    status: CampaignStatus,
-
+    id: string,
+    status: SponsorshipStatus,
     action: string
   ) => {
-    setCampaigns(
+    setSponsorships(
       (
         current
       ) =>
         current.map(
           (
-            campaign
+            sponsorship
           ) =>
-            campaign.id ===
-            campaignId
+            sponsorship.id ===
+            id
               ? {
-                  ...campaign,
+                  ...sponsorship,
 
                   status,
 
                   audit: [
                     {
                       id:
-                        `${campaign.id}-${Date.now()}`,
+                        `${sponsorship.id}-${Date.now()}`,
 
                       action,
 
@@ -666,76 +554,67 @@ function CampaignsContent() {
                         nowLabel(),
                     },
 
-                    ...campaign.audit,
+                    ...sponsorship.audit,
                   ],
                 }
-              : campaign
+              : sponsorship
         )
     );
   };
 
   const pauseCampaign = (
-    campaign:
-      CampaignRecord
+    sponsorship:
+      SponsorshipRecord
   ) => {
     if (
-      campaign.status !==
+      sponsorship.status !==
       "active"
     ) {
       return;
     }
 
     updateStatus(
-      campaign.id,
+      sponsorship.id,
       "paused",
-      "Campaign paused"
+      "Direct sponsorship paused"
     );
   };
 
   const resumeCampaign = (
-    campaign:
-      CampaignRecord
+    sponsorship:
+      SponsorshipRecord
   ) => {
     if (
-      campaign.status !==
-        "paused" ||
-      campaign.type ===
-        "programmatic"
+      sponsorship.status !==
+      "paused"
     ) {
       return;
     }
 
     updateStatus(
-      campaign.id,
+      sponsorship.id,
       "active",
-      "Campaign resumed"
+      "Direct sponsorship resumed"
     );
   };
 
   const requestEnd = (
-    campaign:
-      CampaignRecord
+    sponsorship:
+      SponsorshipRecord
   ) => {
     if (
-      campaign.status !==
+      sponsorship.status !==
         "active" &&
-      campaign.status !==
+      sponsorship.status !==
         "paused"
     ) {
       return;
     }
 
     setEndTargetId(
-      campaign.id
+      sponsorship.id
     );
   };
-
-  const cancelEnd =
-    () => {
-      setEndTargetId(
-        null
-      );
-    };
 
   const confirmEnd =
     () => {
@@ -748,13 +627,55 @@ function CampaignsContent() {
       updateStatus(
         endTarget.id,
         "ended",
-        "Campaign ended"
+        "Direct sponsorship ended"
       );
 
       setEndTargetId(
         null
       );
     };
+
+  const activeContractValue =
+    useMemo(
+      () =>
+        sponsorships
+          .filter(
+            (
+              sponsorship
+            ) =>
+              sponsorship.status ===
+              "active"
+          )
+          .reduce(
+            (
+              total,
+              sponsorship
+            ) =>
+              total +
+              sponsorship.contractValue,
+            0
+          ),
+      [
+        sponsorships,
+      ]
+    );
+
+  const totalDelivered =
+    useMemo(
+      () =>
+        sponsorships.reduce(
+          (
+            total,
+            sponsorship
+          ) =>
+            total +
+            sponsorship.delivered,
+          0
+        ),
+      [
+        sponsorships,
+      ]
+    );
 
   return (
     <div
@@ -777,35 +698,85 @@ function CampaignsContent() {
           </div>
 
           <h2>
-            Campaigns
+            Direct Sponsorship
           </h2>
 
           <p>
-            Control every Poster
-            commercial campaign from
-            one place. Commercial
-            placement stays separate
-            from organic discovery and
-            requires Poster approval.
+            Track advertiser campaigns,
+            contracted delivery, placement,
+            performance, and campaign status
+            without introducing a self-service
+            advertising marketplace.
           </p>
         </div>
+      </header>
 
-        <div
+      <section
+        className={
+          styles.summaryGrid
+        }
+        aria-label="Direct sponsorship summary"
+      >
+        <article
           className={
-            styles.summary
+            styles.summaryCard
           }
         >
+          <span>
+            Active sponsorships
+          </span>
+
           <strong>
             {
               counts.active
             }
           </strong>
 
+          <small>
+            Currently running
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
           <span>
-            active campaigns
+            Active contract value
           </span>
-        </div>
-      </header>
+
+          <strong>
+            {formatMoney(
+              activeContractValue
+            )}
+          </strong>
+
+          <small>
+            Demonstration contract values
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Total delivered
+          </span>
+
+          <strong>
+            {formatNumber(
+              totalDelivered
+            )}
+          </strong>
+
+          <small>
+            Contracted impressions delivered
+          </small>
+        </article>
+      </section>
 
       <section
         className={
@@ -824,8 +795,8 @@ function CampaignsContent() {
             value={
               query
             }
-            placeholder="Search campaign ID, name or partner..."
-            aria-label="Search campaigns"
+            placeholder="Search campaign ID, advertiser or campaign..."
+            aria-label="Search direct sponsorships"
             onChange={(
               event
             ) =>
@@ -866,11 +837,6 @@ function CampaignsContent() {
                 [
                   "ended",
                   "Ended",
-                ],
-
-                [
-                  "disabled",
-                  "Disabled",
                 ],
               ] as const
             ).map(
@@ -929,7 +895,7 @@ function CampaignsContent() {
                 </th>
 
                 <th>
-                  Type
+                  Advertiser
                 </th>
 
                 <th>
@@ -937,11 +903,15 @@ function CampaignsContent() {
                 </th>
 
                 <th>
-                  Schedule
+                  Delivery
                 </th>
 
                 <th>
-                  Performance
+                  Contract
+                </th>
+
+                <th>
+                  CTR
                 </th>
 
                 <th>
@@ -955,178 +925,185 @@ function CampaignsContent() {
             </thead>
 
             <tbody>
-              {visibleCampaigns.map(
+              {visibleSponsorships.map(
                 (
-                  campaign
-                ) => (
-                  <tr
-                    key={
-                      campaign.id
-                    }
-                  >
-                    <td>
-                      <button
-                        type="button"
-                        className={
-                          styles.nameButton
-                        }
-                        onClick={() =>
-                          setSelectedId(
-                            campaign.id
-                          )
-                        }
-                      >
-                        {
-                          campaign.name
-                        }
-                      </button>
+                  sponsorship
+                ) => {
+                  const progress =
+                    deliveryProgress(
+                      sponsorship.delivered,
+                      sponsorship.deliveryTarget
+                    );
 
-                      <span
-                        className={
-                          styles.partner
-                        }
-                      >
-                        {
-                          campaign.id
-                        }
-
-                        {campaign.partner
-                          ? ` · ${campaign.partner}`
-                          : " · Poster"}
-                      </span>
-                    </td>
-
-                    <td>
-                      {campaignTypeLabel(
-                        campaign.type
-                      )}
-                    </td>
-
-                    <td>
-                      {
-                        campaign.placement
+                  return (
+                    <tr
+                      key={
+                        sponsorship.id
                       }
-                    </td>
-
-                    <td>
-                      {
-                        campaign.startAt
-                      }
-
-                      {campaign.endAt
-                        ? ` → ${campaign.endAt}`
-                        : ""}
-                    </td>
-
-                    <td>
-                      <strong
-                        className={
-                          styles.performanceMain
-                        }
-                      >
-                        {ctr(
-                          campaign
-                        )}
-                        {" CTR"}
-                      </strong>
-
-                      <span
-                        className={
-                          styles.performanceSub
-                        }
-                      >
-                        {campaign.impressions.toLocaleString()}
-                        {" imp · "}
-                        {campaign.clicks.toLocaleString()}
-                        {" clicks"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`${styles.status} ${
-                          campaign.status ===
-                          "active"
-                            ? styles.statusActive
-                            : campaign.status ===
-                              "paused"
-                            ? styles.statusPaused
-                            : campaign.status ===
-                              "scheduled"
-                            ? styles.statusScheduled
-                            : campaign.status ===
-                              "ended"
-                            ? styles.statusEnded
-                            : styles.statusDisabled
-                        }`}
-                      >
-                        {statusLabel(
-                          campaign.status
-                        )}
-                      </span>
-                    </td>
-
-                    <td>
-                      {campaign.status ===
-                      "active" ? (
+                    >
+                      <td>
                         <button
                           type="button"
                           className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            pauseCampaign(
-                              campaign
-                            )
-                          }
-                        >
-                          Pause
-                        </button>
-                      ) : campaign.status ===
-                        "paused" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            resumeCampaign(
-                              campaign
-                            )
-                          }
-                        >
-                          Resume
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
+                            styles.nameButton
                           }
                           onClick={() =>
                             setSelectedId(
-                              campaign.id
+                              sponsorship.id
                             )
                           }
                         >
-                          View
+                          {
+                            sponsorship.name
+                          }
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                )
+
+                        <span
+                          className={
+                            styles.secondaryText
+                          }
+                        >
+                          {
+                            sponsorship.id
+                          }
+                        </span>
+                      </td>
+
+                      <td>
+                        {
+                          sponsorship.advertiser
+                        }
+                      </td>
+
+                      <td>
+                        {
+                          sponsorship.placement
+                        }
+                      </td>
+
+                      <td>
+                        <strong
+                          className={
+                            styles.deliveryPrimary
+                          }
+                        >
+                          {progress.toFixed(
+                            0
+                          )}
+                          %
+                        </strong>
+
+                        <span
+                          className={
+                            styles.secondaryText
+                          }
+                        >
+                          {formatNumber(
+                            sponsorship.delivered
+                          )}
+                          {" / "}
+                          {formatNumber(
+                            sponsorship.deliveryTarget
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        {formatMoney(
+                          sponsorship.contractValue
+                        )}
+                      </td>
+
+                      <td>
+                        {calculateCtr(
+                          sponsorship.clicks,
+                          sponsorship.delivered
+                        )}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`${styles.status} ${
+                            sponsorship.status ===
+                            "active"
+                              ? styles.statusActive
+                              : sponsorship.status ===
+                                "paused"
+                              ? styles.statusPaused
+                              : sponsorship.status ===
+                                "scheduled"
+                              ? styles.statusScheduled
+                              : styles.statusEnded
+                          }`}
+                        >
+                          {statusLabel(
+                            sponsorship.status
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        {sponsorship.status ===
+                        "active" ? (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              pauseCampaign(
+                                sponsorship
+                              )
+                            }
+                          >
+                            Pause
+                          </button>
+                        ) : sponsorship.status ===
+                          "paused" ? (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              resumeCampaign(
+                                sponsorship
+                              )
+                            }
+                          >
+                            Resume
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              setSelectedId(
+                                sponsorship.id
+                              )
+                            }
+                          >
+                            View
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }
               )}
             </tbody>
           </table>
 
-          {visibleCampaigns.length ===
+          {visibleSponsorships.length ===
           0 ? (
             <div
               className={
                 styles.empty
               }
             >
-              No campaigns found.
+              No direct sponsorships found.
             </div>
           ) : null}
         </div>
@@ -1139,29 +1116,19 @@ function CampaignsContent() {
       >
         <div>
           <strong>
-            Programmatic advertising
+            Poster manually approves every direct sponsorship.
           </strong>
 
           <p>
-            Programmatic advertising
-            remains structurally supported
-            but disabled until provider,
-            privacy, consent, SDK and
-            production requirements are
-            ready.
+            Advertisers cannot publish campaigns
+            automatically. Contract value or commercial
+            payment must never influence organic
+            recommendation ranking.
           </p>
         </div>
-
-        <span
-          className={
-            styles.disabledBadge
-          }
-        >
-          Disabled
-        </span>
       </section>
 
-      {selectedCampaign ? (
+      {selectedSponsorship ? (
         <div
           className={
             styles.drawerLayer
@@ -1172,7 +1139,7 @@ function CampaignsContent() {
             className={
               styles.backdrop
             }
-            aria-label="Close campaign details"
+            aria-label="Close sponsorship details"
             onClick={() =>
               setSelectedId(
                 null
@@ -1193,13 +1160,13 @@ function CampaignsContent() {
               <div>
                 <span>
                   {
-                    selectedCampaign.id
+                    selectedSponsorship.id
                   }
                 </span>
 
                 <h3>
                   {
-                    selectedCampaign.name
+                    selectedSponsorship.name
                   }
                 </h3>
               </div>
@@ -1231,7 +1198,7 @@ function CampaignsContent() {
                 }
               >
                 <h4>
-                  Campaign
+                  Sponsorship
                 </h4>
 
                 <dl
@@ -1246,33 +1213,19 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.id
+                        selectedSponsorship.id
                       }
                     </dd>
                   </div>
 
                   <div>
                     <dt>
-                      Type
-                    </dt>
-
-                    <dd>
-                      {campaignTypeLabel(
-                        selectedCampaign.type
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Partner /
-                      advertiser
+                      Advertiser
                     </dt>
 
                     <dd>
                       {
-                        selectedCampaign.partner ??
-                        "Poster"
+                        selectedSponsorship.advertiser
                       }
                     </dd>
                   </div>
@@ -1283,8 +1236,9 @@ function CampaignsContent() {
                     </dt>
 
                     <dd>
+                      Sponsored by{" "}
                       {
-                        selectedCampaign.disclosure
+                        selectedSponsorship.advertiser
                       }
                     </dd>
                   </div>
@@ -1296,7 +1250,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.placement
+                        selectedSponsorship.placement
                       }
                     </dd>
                   </div>
@@ -1308,7 +1262,7 @@ function CampaignsContent() {
 
                     <dd>
                       {statusLabel(
-                        selectedCampaign.status
+                        selectedSponsorship.status
                       )}
                     </dd>
                   </div>
@@ -1320,7 +1274,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.startAt
+                        selectedSponsorship.startAt
                       }
                     </dd>
                   </div>
@@ -1332,8 +1286,7 @@ function CampaignsContent() {
 
                     <dd>
                       {
-                        selectedCampaign.endAt ??
-                        "No fixed end"
+                        selectedSponsorship.endAt
                       }
                     </dd>
                   </div>
@@ -1349,8 +1302,7 @@ function CampaignsContent() {
                       }
                     >
                       {
-                        selectedCampaign.destinationUrl ||
-                        "Not configured"
+                        selectedSponsorship.destinationUrl
                       }
                     </dd>
                   </div>
@@ -1363,7 +1315,116 @@ function CampaignsContent() {
                 }
               >
                 <h4>
-                  Performance snapshot
+                  Contract & delivery
+                </h4>
+
+                <div
+                  className={
+                    styles.metrics
+                  }
+                >
+                  <div>
+                    <span>
+                      Contract value
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        selectedSponsorship.contractValue
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Delivery target
+                    </span>
+
+                    <strong>
+                      {formatNumber(
+                        selectedSponsorship.deliveryTarget
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Delivered
+                    </span>
+
+                    <strong>
+                      {formatNumber(
+                        selectedSponsorship.delivered
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Remaining
+                    </span>
+
+                    <strong>
+                      {formatNumber(
+                        Math.max(
+                          0,
+                          selectedSponsorship.deliveryTarget -
+                            selectedSponsorship.delivered
+                        )
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    styles.progressBlock
+                  }
+                >
+                  <div
+                    className={
+                      styles.progressHeader
+                    }
+                  >
+                    <span>
+                      Delivery progress
+                    </span>
+
+                    <strong>
+                      {deliveryProgress(
+                        selectedSponsorship.delivered,
+                        selectedSponsorship.deliveryTarget
+                      ).toFixed(
+                        1
+                      )}
+                      %
+                    </strong>
+                  </div>
+
+                  <div
+                    className={
+                      styles.progressTrack
+                    }
+                  >
+                    <span
+                      style={{
+                        width: `${deliveryProgress(
+                          selectedSponsorship.delivered,
+                          selectedSponsorship.deliveryTarget
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Performance
                 </h4>
 
                 <div
@@ -1377,7 +1438,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.impressions.toLocaleString()}
+                      {formatNumber(
+                        selectedSponsorship.delivered
+                      )}
                     </strong>
                   </div>
 
@@ -1387,7 +1450,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.clicks.toLocaleString()}
+                      {formatNumber(
+                        selectedSponsorship.clicks
+                      )}
                     </strong>
                   </div>
 
@@ -1397,8 +1462,9 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {ctr(
-                        selectedCampaign
+                      {calculateCtr(
+                        selectedSponsorship.clicks,
+                        selectedSponsorship.delivered
                       )}
                     </strong>
                   </div>
@@ -1409,35 +1475,12 @@ function CampaignsContent() {
                     </span>
 
                     <strong>
-                      {selectedCampaign.conversions.toLocaleString()}
+                      {formatNumber(
+                        selectedSponsorship.conversions
+                      )}
                     </strong>
                   </div>
                 </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Commercial integrity
-                </h4>
-
-                <p
-                  className={
-                    styles.integrityNote
-                  }
-                >
-                  This commercial campaign
-                  is separate from Poster&apos;s
-                  organic recommendation
-                  ranking. Sponsorship value,
-                  affiliate commission, or
-                  commercial payment must not
-                  influence organic knowledge
-                  ranking.
-                </p>
               </section>
 
               <section
@@ -1454,7 +1497,7 @@ function CampaignsContent() {
                     styles.auditList
                   }
                 >
-                  {selectedCampaign.audit.map(
+                  {selectedSponsorship.audit.map(
                     (
                       entry
                     ) => (
@@ -1501,18 +1544,19 @@ function CampaignsContent() {
                 styles.drawerFooter
               }
             >
-              {selectedCampaign.type ===
-              "programmatic" ? (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Programmatic advertising
-                  is intentionally disabled.
-                </span>
-              ) : selectedCampaign.status ===
-                "active" ? (
+              <Link
+                href={`/monetization/campaigns?record=${encodeURIComponent(
+                  selectedSponsorship.id
+                )}`}
+                className={
+                  styles.secondaryButton
+                }
+              >
+                Open in Campaigns
+              </Link>
+
+              {selectedSponsorship.status ===
+              "active" ? (
                 <>
                   <button
                     type="button"
@@ -1521,7 +1565,7 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       pauseCampaign(
-                        selectedCampaign
+                        selectedSponsorship
                       )
                     }
                   >
@@ -1535,14 +1579,14 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       requestEnd(
-                        selectedCampaign
+                        selectedSponsorship
                       )
                     }
                   >
                     End campaign
                   </button>
                 </>
-              ) : selectedCampaign.status ===
+              ) : selectedSponsorship.status ===
                 "paused" ? (
                 <>
                   <button
@@ -1552,7 +1596,7 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       resumeCampaign(
-                        selectedCampaign
+                        selectedSponsorship
                       )
                     }
                   >
@@ -1566,35 +1610,14 @@ function CampaignsContent() {
                     }
                     onClick={() =>
                       requestEnd(
-                        selectedCampaign
+                        selectedSponsorship
                       )
                     }
                   >
                     End campaign
                   </button>
                 </>
-              ) : selectedCampaign.status ===
-                "scheduled" ? (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Campaign is scheduled and
-                  will begin according to its
-                  configured start date.
-                </span>
-              ) : (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Ended campaigns remain
-                  historical records and are
-                  not reactivated directly.
-                </span>
-              )}
+              ) : null}
             </div>
           </aside>
         </div>
@@ -1611,9 +1634,11 @@ function CampaignsContent() {
             className={
               styles.confirmBackdrop
             }
-            aria-label="Cancel end campaign"
-            onClick={
-              cancelEnd
+            aria-label="Cancel end sponsorship"
+            onClick={() =>
+              setEndTargetId(
+                null
+              )
             }
           />
 
@@ -1623,20 +1648,20 @@ function CampaignsContent() {
             }
             role="dialog"
             aria-modal="true"
-            aria-labelledby="end-campaign-title"
+            aria-labelledby="end-sponsorship-title"
           >
             <span
               className={
                 styles.confirmEyebrow
               }
             >
-              Campaign action
+              Sponsorship action
             </span>
 
             <h3
-              id="end-campaign-title"
+              id="end-sponsorship-title"
             >
-              End this campaign?
+              End this sponsorship?
             </h3>
 
             <p>
@@ -1657,9 +1682,9 @@ function CampaignsContent() {
               }
             >
               Ending preserves the
-              campaign as a historical
-              record. It should not be
-              resumed directly afterward.
+              sponsorship and delivery
+              history as a permanent
+              campaign record.
             </p>
 
             <div
@@ -1672,8 +1697,10 @@ function CampaignsContent() {
                 className={
                   styles.secondaryButton
                 }
-                onClick={
-                  cancelEnd
+                onClick={() =>
+                  setEndTargetId(
+                    null
+                  )
                 }
               >
                 Cancel
@@ -1688,7 +1715,7 @@ function CampaignsContent() {
                   confirmEnd
                 }
               >
-                End campaign
+                End sponsorship
               </button>
             </div>
           </div>

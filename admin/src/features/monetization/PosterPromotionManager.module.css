@@ -3,103 +3,88 @@
   gap: 24px;
 }
 
-.header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.header > div:first-child {
+.header > div {
   max-width: 780px;
 }
 
 .eyebrow,
 .confirmEyebrow {
   color: var(--primary);
-
   font-size: 12px;
   font-weight: 600;
   line-height: 18px;
-
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .header h2 {
   margin: 4px 0 0;
-
   color: var(--text);
-
   font-size: 30px;
   font-weight: 700;
   line-height: 38px;
-
   letter-spacing: -0.025em;
 }
 
 .header p {
   margin: 8px 0 0;
-
   color: var(--text-secondary);
-
   font-size: 14px;
   line-height: 22px;
 }
 
-.summary {
-  min-width: 132px;
-
-  padding: 14px 16px;
-
-  border: 1px solid var(--border);
-  border-radius: 14px;
-
-  background: var(--card);
-
-  text-align: right;
-
-  box-shadow:
-    0 1px 3px
-    rgb(0 0 0 / 0.04);
+.summaryGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.summary strong,
-.summary span {
+.summaryCard {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.04);
+}
+
+.summaryCard span,
+.summaryCard strong,
+.summaryCard small {
   display: block;
 }
 
-.summary strong {
-  color: var(--text);
-
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 32px;
+.summaryCard span {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
 }
 
-.summary span {
-  margin-top: 2px;
+.summaryCard strong {
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 31px;
+}
 
-  color: var(--text-secondary);
-
-  font-size: 11px;
-  line-height: 17px;
+.summaryCard small {
+  margin-top: 4px;
+  color: var(--placeholder);
+  font-size: 10px;
+  line-height: 16px;
 }
 
 .panel,
 .note {
   min-width: 0;
-
   overflow: hidden;
-
   border: 1px solid var(--border);
   border-radius: 16px;
-
   background: var(--card);
-
   box-shadow:
-    0 1px 3px
-    rgb(0 0 0 / 0.04);
+    0 1px 3px rgb(0 0 0 / 0.04);
 }
 
 .toolbar {
@@ -107,27 +92,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
   padding: 14px 16px;
-
   border-bottom: 1px solid var(--border);
 }
 
 .search {
-  width: min(420px, 100%);
+  width: min(430px, 100%);
   min-height: 42px;
-
   padding: 0 12px;
-
   border: 1px solid var(--border);
   border-radius: 10px;
-
   color: var(--text);
-
   background: var(--card);
-
   outline: none;
-
   font: inherit;
   font-size: 13px;
 }
@@ -138,10 +115,8 @@
 
 .search:focus {
   border-color: var(--primary);
-
   box-shadow:
-    0 0 0 3px
-    rgb(91 134 229 / 0.1);
+    0 0 0 3px rgb(91 134 229 / 0.1);
 }
 
 .filters {
@@ -154,23 +129,16 @@
 .filter,
 .filterActive {
   min-height: 35px;
-
   display: inline-flex;
   align-items: center;
   gap: 7px;
-
   padding: 0 11px;
-
   border: 1px solid var(--border);
   border-radius: 999px;
-
   color: var(--text-secondary);
-
   background: var(--card);
-
   font-size: 11px;
   font-weight: 600;
-
   cursor: pointer;
 }
 
@@ -178,23 +146,17 @@
 .filterActive span {
   min-width: 20px;
   height: 20px;
-
   display: inline-grid;
   place-items: center;
-
   border-radius: 999px;
-
   background: var(--surface);
-
   font-size: 10px;
 }
 
 .filterActive {
   color: var(--primary);
-
   border-color:
     rgb(91 134 229 / 0.3);
-
   background:
     rgb(91 134 229 / 0.07);
 }
@@ -205,65 +167,47 @@
 
 .table {
   width: 100%;
-  min-width: 1080px;
-
+  min-width: 1120px;
   border-collapse: collapse;
 }
 
 .table th,
 .table td {
   padding: 14px 16px;
-
   border-top: 1px solid var(--border);
-
   text-align: left;
   vertical-align: middle;
 }
 
 .table thead th {
   border-top: 0;
-
   color: var(--text-secondary);
-
   background: var(--background);
-
   font-size: 10px;
   font-weight: 600;
-
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .table td {
   color: var(--text-secondary);
-
   font-size: 12px;
   line-height: 18px;
 }
 
 .nameButton {
   display: block;
-
   max-width: 300px;
-
   padding: 0;
-
   overflow: hidden;
-
   border: 0;
-
   color: var(--text);
-
   background: transparent;
-
   font-size: 13px;
   font-weight: 600;
-
   text-align: left;
-
   text-overflow: ellipsis;
   white-space: nowrap;
-
   cursor: pointer;
 }
 
@@ -271,145 +215,88 @@
   color: var(--primary);
 }
 
-.partner,
-.performanceSub {
+.secondaryText {
   display: block;
-
   margin-top: 3px;
-
   color: var(--placeholder);
-
   font-size: 10px;
   line-height: 16px;
 }
 
-.performanceMain {
-  display: block;
-
-  color: var(--text);
-
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .status {
   min-height: 27px;
-
   display: inline-flex;
   align-items: center;
-
   padding: 0 9px;
-
   border-radius: 999px;
-
   font-size: 10px;
   font-weight: 600;
-
   white-space: nowrap;
 }
 
 .statusActive {
   color: var(--success);
-
   background:
     rgb(22 163 74 / 0.08);
 }
 
 .statusPaused {
   color: var(--warning);
-
   background:
     rgb(217 119 6 / 0.08);
 }
 
 .statusScheduled {
   color: var(--primary);
-
   background:
     rgb(91 134 229 / 0.09);
 }
 
-.statusEnded,
-.statusDisabled {
+.statusEnded {
   color: var(--text-secondary);
-
   background: var(--surface);
 }
 
 .actionButton {
   padding: 0;
-
   border: 0;
-
   color: var(--primary);
-
   background: transparent;
-
   font-size: 11px;
   font-weight: 600;
-
   cursor: pointer;
 }
 
 .empty {
   min-height: 160px;
-
   display: grid;
   place-items: center;
-
   color: var(--text-secondary);
-
   font-size: 12px;
 }
 
 .note {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-
   padding: 16px;
 }
 
 .note strong {
   color: var(--text);
-
   font-size: 13px;
   font-weight: 600;
 }
 
 .note p {
+  max-width: 840px;
   margin: 4px 0 0;
-
   color: var(--text-secondary);
-
   font-size: 11px;
   line-height: 18px;
-}
-
-.disabledBadge {
-  min-height: 27px;
-
-  display: inline-flex;
-  align-items: center;
-
-  padding: 0 10px;
-
-  border-radius: 999px;
-
-  color: var(--text-secondary);
-
-  background: var(--surface);
-
-  font-size: 10px;
-  font-weight: 600;
 }
 
 .drawerLayer,
 .confirmLayer {
   position: fixed;
   inset: 0;
-
   z-index: 70;
 }
 
@@ -417,59 +304,43 @@
 .confirmBackdrop {
   position: absolute;
   inset: 0;
-
   width: 100%;
-
   border: 0;
-
   background:
     rgb(15 23 42 / 0.42);
-
   cursor: pointer;
 }
 
 .drawer {
   position: absolute;
-
   inset: 0 0 0 auto;
-
-  width: min(580px, 94vw);
-
+  width: min(590px, 94vw);
   display: flex;
   flex-direction: column;
-
   background: var(--card);
-
   box-shadow:
-    -24px 0 70px
-    rgb(15 23 42 / 0.2);
+    -24px 0 70px rgb(15 23 42 / 0.2);
 }
 
 .drawerHeader {
   min-height: 78px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
   padding: 16px 20px;
-
   border-bottom: 1px solid var(--border);
 }
 
 .drawerHeader span {
   color: var(--placeholder);
-
   font-size: 10px;
   font-weight: 600;
 }
 
 .drawerHeader h3 {
   margin: 4px 0 0;
-
   color: var(--text);
-
   font-size: 18px;
   font-weight: 600;
 }
@@ -477,44 +348,33 @@
 .closeButton {
   width: 38px;
   height: 38px;
-
   border: 1px solid var(--border);
   border-radius: 10px;
-
   color: var(--text-secondary);
-
   background: var(--card);
-
   font-size: 22px;
-
   cursor: pointer;
 }
 
 .drawerBody {
   flex: 1;
-
   overflow-y: auto;
-
   padding: 20px;
 }
 
 .detailSection {
   padding: 18px 0;
-
   border-top: 1px solid var(--border);
 }
 
 .detailSection:first-child {
   padding-top: 0;
-
   border-top: 0;
 }
 
 .detailSection h4 {
   margin: 0 0 12px;
-
   color: var(--text);
-
   font-size: 13px;
   font-weight: 600;
 }
@@ -522,39 +382,31 @@
 .detailList {
   display: grid;
   gap: 10px;
-
   margin: 0;
 }
 
 .detailList div,
 .metrics div {
   padding: 11px 12px;
-
   border: 1px solid var(--border);
   border-radius: 10px;
-
   background: var(--background);
 }
 
 .detailList dt,
 .metrics span {
   color: var(--placeholder);
-
   font-size: 9px;
   font-weight: 600;
-
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .detailList dd {
   margin: 5px 0 0;
-
   color: var(--text);
-
   font-size: 12px;
   font-weight: 500;
-
   line-height: 19px;
 }
 
@@ -564,13 +416,8 @@
 
 .metrics {
   display: grid;
-
   grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
-
+    repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -581,27 +428,20 @@
 
 .metrics strong {
   margin-top: 5px;
-
   color: var(--text);
-
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
 }
 
 .integrityNote {
   margin: 0;
-
   padding: 12px;
-
   border: 1px solid
     rgb(91 134 229 / 0.16);
   border-radius: 10px;
-
   color: var(--text-secondary);
-
   background:
     rgb(91 134 229 / 0.05);
-
   font-size: 11px;
   line-height: 18px;
 }
@@ -612,23 +452,17 @@
 
 .auditItem {
   display: grid;
-
   grid-template-columns:
     auto 1fr;
-
   gap: 10px;
-
   padding: 10px 0;
 }
 
 .auditDot {
   width: 8px;
   height: 8px;
-
   margin-top: 5px;
-
   border-radius: 50%;
-
   background: var(--primary);
 }
 
@@ -639,16 +473,13 @@
 
 .auditItem strong {
   color: var(--text);
-
   font-size: 11px;
   font-weight: 600;
 }
 
 .auditItem span {
   margin-top: 3px;
-
   color: var(--text-secondary);
-
   font-size: 10px;
 }
 
@@ -658,115 +489,86 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
-
   padding: 14px 20px;
-
   border-top: 1px solid var(--border);
+}
+
+.footerNote {
+  margin-right: auto;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 18px;
 }
 
 .secondaryButton,
 .primaryButton,
 .dangerButton {
   min-height: 40px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 0 14px;
-
   border-radius: 10px;
-
   font-size: 11px;
   font-weight: 600;
-
+  text-decoration: none;
   cursor: pointer;
 }
 
 .secondaryButton {
   border: 1px solid var(--border);
-
   color: var(--text);
-
   background: var(--card);
 }
 
 .primaryButton {
   border: 1px solid var(--primary);
-
   color: #ffffff;
-
   background: var(--primary);
 }
 
 .dangerButton {
   border: 1px solid var(--danger);
-
   color: #ffffff;
-
   background: var(--danger);
-}
-
-.programmaticNote {
-  margin-right: auto;
-
-  color: var(--text-secondary);
-
-  font-size: 11px;
-  line-height: 18px;
 }
 
 .confirmLayer {
   z-index: 90;
-
   display: grid;
   place-items: center;
-
   padding: 20px;
 }
 
 .confirmDialog {
   position: relative;
   z-index: 1;
-
   width: min(460px, 100%);
-
   padding: 22px;
-
   border-radius: 16px;
-
   background: var(--card);
-
   box-shadow:
-    0 24px 80px
-    rgb(15 23 42 / 0.28);
+    0 24px 80px rgb(15 23 42 / 0.28);
 }
 
 .confirmDialog h3 {
   margin: 7px 0 0;
-
   color: var(--text);
-
   font-size: 19px;
   font-weight: 600;
 }
 
 .confirmDialog p {
   margin: 10px 0 0;
-
   color: var(--text-secondary);
-
   font-size: 12px;
   line-height: 19px;
 }
 
 .confirmWarning {
   padding: 10px 12px;
-
   border-radius: 10px;
-
   color: var(--warning) !important;
-
   background:
     rgb(217 119 6 / 0.07);
 }
@@ -775,7 +577,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-
   margin-top: 20px;
 }
 
@@ -794,22 +595,17 @@
   }
 }
 
-@media (max-width: 680px) {
-  .header,
-  .note {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .summary {
-    width: 100%;
-
-    text-align: left;
-  }
-
-  .metrics {
+@media (max-width: 900px) {
+  .summaryGrid {
     grid-template-columns:
-      1fr;
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .summaryGrid,
+  .metrics {
+    grid-template-columns: 1fr;
   }
 
   .drawerFooter,

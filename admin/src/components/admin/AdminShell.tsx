@@ -11,15 +11,49 @@ interface AdminShellProps {
   children: ReactNode;
 }
 
-const items = [
+const primaryItems = [
   ["/", "Dashboard"],
   ["/content", "Content"],
   ["/sources", "Sources"],
   ["/copyright", "Copyright"],
-  ["/monetization", "Monetization"],
+] as const;
+
+const monetizationItems = [
+  [
+    "/monetization/campaigns",
+    "Campaigns",
+  ],
+  [
+    "/monetization/analytics",
+    "Analytics",
+  ],
+  [
+    "/monetization/sponsorships",
+    "Direct Sponsorship",
+  ],
+  [
+    "/monetization/affiliate",
+    "Affiliate",
+  ],
+  [
+    "/monetization/poster-promotion",
+    "Poster Promotion",
+  ],
+] as const;
+
+const utilityItems = [
   ["/reports", "Reports"],
   ["/users", "Users"],
-  ["/system-status", "System Status"],
+  [
+    "/system-status",
+    "System Status",
+  ],
+] as const;
+
+const titleItems = [
+  ...primaryItems,
+  ...monetizationItems,
+  ...utilityItems,
 ] as const;
 
 function active(
@@ -34,6 +68,7 @@ function active(
         );
 }
 
+
 function isPublicRoute(
   pathname: string
 ) {
@@ -42,6 +77,11 @@ function isPublicRoute(
       "/copyright-request" ||
     pathname.startsWith(
       "/copyright-request/"
+    ) ||
+    pathname ===
+      "/advertise" ||
+    pathname.startsWith(
+      "/advertise/"
     )
   );
 }
@@ -71,7 +111,7 @@ export default function AdminShell({
   }
 
   const title =
-    items.find(
+    titleItems.find(
       ([href]) =>
         active(
           pathname,
@@ -114,7 +154,91 @@ export default function AdminShell({
           className="nav"
           aria-label="Admin navigation"
         >
-          {items.map(
+          {primaryItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+
+          <div className="nav-group">
+            <div className="nav-group-title">
+              Monetization
+            </div>
+
+            {monetizationItems.map(
+              ([
+                href,
+                label,
+              ]) => {
+                const isActive =
+                  active(
+                    pathname,
+                    href
+                  );
+
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={
+                      isActive
+                        ? "page"
+                        : undefined
+                    }
+                    className={`nav-link nav-sub-link ${
+                      isActive
+                        ? "nav-active"
+                        : ""
+                    }`}
+                    onClick={
+                      closeNavigation
+                    }
+                  >
+                    <span className="nav-dot" />
+
+                    <span>
+                      {label}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+
+          {utilityItems.map(
             ([
               href,
               label,
@@ -160,11 +284,11 @@ export default function AdminShell({
 
             <div>
               <strong>
-                Systems normal
+                Admin healthy
               </strong>
 
               <span>
-                No critical issues
+                Platform services pending
               </span>
             </div>
           </div>

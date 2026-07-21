@@ -1,50 +1,82 @@
 .page {
   display: grid;
+
   gap: 24px;
 }
 
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
 .header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
   gap: 24px;
 }
 
 .header > div {
-  max-width: 780px;
+  max-width: 760px;
 }
 
 .eyebrow {
-  color: var(--primary);
+  color:
+    var(--primary);
 
   font-size: 12px;
+
   font-weight: 600;
+
   line-height: 18px;
 
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing:
+    0.04em;
+
+  text-transform:
+    uppercase;
 }
 
 .header h2 {
-  margin: 4px 0 0;
+  margin:
+    4px
+    0
+    0;
 
-  color: var(--text);
+  color:
+    var(--text);
 
   font-size: 30px;
+
   font-weight: 700;
+
   line-height: 38px;
 
-  letter-spacing: -0.025em;
+  letter-spacing:
+    -0.025em;
 }
 
 .header p {
-  margin: 8px 0 0;
+  margin:
+    8px
+    0
+    0;
 
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
   font-size: 14px;
+
   line-height: 22px;
 }
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
 
 .summaryGrid {
   display: grid;
@@ -52,23 +84,40 @@
   grid-template-columns:
     repeat(
       3,
-      minmax(0, 1fr)
+      minmax(
+        0,
+        1fr
+      )
     );
 
   gap: 12px;
 }
 
 .summaryCard {
+  min-width: 0;
+
   padding: 16px;
 
-  border: 1px solid var(--border);
+  border:
+    1px solid
+    var(--border);
+
   border-radius: 14px;
 
-  background: var(--card);
+  background:
+    var(--card);
 
   box-shadow:
-    0 1px 3px
-    rgb(0 0 0 / 0.04);
+    0
+    1px
+    3px
+    rgb(
+      0
+      0
+      0
+      /
+      0.04
+    );
 }
 
 .summaryCard span,
@@ -78,329 +127,490 @@
 }
 
 .summaryCard span {
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
   font-size: 12px;
+
   font-weight: 500;
+
+  line-height: 18px;
 }
 
 .summaryCard strong {
   margin-top: 5px;
 
-  color: var(--text);
+  color:
+    var(--text);
 
   font-size: 26px;
+
   font-weight: 700;
+
   line-height: 32px;
 }
 
 .summaryCard small {
   margin-top: 3px;
 
-  color: var(--placeholder);
+  color:
+    var(--placeholder);
 
   font-size: 11px;
+
   line-height: 17px;
 }
 
+/* =========================================================
+   STATUS NOTICE
+   ========================================================= */
+
 .notice {
   display: flex;
-  align-items: flex-start;
+
+  align-items:
+    flex-start;
+
   gap: 12px;
 
-  padding: 14px 16px;
+  padding:
+    14px
+    16px;
 
-  border: 1px solid
-    rgb(91 134 229 / 0.18);
+  border:
+    1px solid
+    rgb(
+      91
+      134
+      229
+      /
+      0.18
+    );
+
   border-radius: 12px;
 
   background:
-    rgb(91 134 229 / 0.055);
+    rgb(
+      91
+      134
+      229
+      /
+      0.055
+    );
 }
 
 .noticeMark {
   width: 28px;
+
   height: 28px;
 
-  flex: 0 0 auto;
+  flex:
+    0 0 auto;
 
   display: grid;
-  place-items: center;
 
-  border-radius: 999px;
+  place-items:
+    center;
 
-  color: var(--primary);
+  border-radius:
+    999px;
+
+  color:
+    var(--primary);
 
   background:
-    rgb(91 134 229 / 0.11);
+    rgb(
+      91
+      134
+      229
+      /
+      0.11
+    );
 
   font-size: 12px;
+
   font-weight: 700;
 }
 
 .notice strong {
-  color: var(--text);
+  color:
+    var(--text);
 
   font-size: 13px;
+
   font-weight: 600;
-}
 
-.notice p {
-  margin: 4px 0 0;
-
-  color: var(--text-secondary);
-
-  font-size: 12px;
   line-height: 19px;
 }
 
+.notice p {
+  max-width: 900px;
+
+  margin:
+    4px
+    0
+    0;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 12px;
+
+  line-height: 19px;
+}
+
+/* =========================================================
+   SERVICE GROUPS
+   ========================================================= */
+
 .groups {
   display: grid;
+
   gap: 16px;
 }
 
 .panel {
   overflow: hidden;
 
-  border: 1px solid var(--border);
+  border:
+    1px solid
+    var(--border);
+
   border-radius: 16px;
 
-  background: var(--card);
+  background:
+    var(--card);
 
   box-shadow:
-    0 1px 3px
-    rgb(0 0 0 / 0.04);
+    0
+    1px
+    3px
+    rgb(
+      0
+      0
+      0
+      /
+      0.04
+    );
 }
 
 .panelHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
+  padding:
+    16px
+    18px;
 
-  padding: 16px 18px;
+  border-bottom:
+    1px solid
+    var(--border);
 
-  border-bottom: 1px solid var(--border);
-
-  background: var(--background);
+  background:
+    var(--background);
 }
 
 .panelHeader h3 {
   margin: 0;
 
-  color: var(--text);
+  color:
+    var(--text);
 
   font-size: 16px;
+
   font-weight: 600;
+
   line-height: 24px;
 }
 
 .panelHeader p {
   max-width: 720px;
 
-  margin: 4px 0 0;
+  margin:
+    4px
+    0
+    0;
 
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
   font-size: 12px;
+
   line-height: 18px;
 }
 
-.groupCount {
-  min-width: 28px;
-  height: 28px;
+/* =========================================================
+   SERVICE ROWS
+   ========================================================= */
 
-  display: inline-grid;
-  place-items: center;
-
-  padding: 0 8px;
-
-  border-radius: 999px;
-
-  color: var(--text-secondary);
-
-  background: var(--surface);
-
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.toolList {
+.serviceList {
   display: grid;
 }
 
-.toolRow {
+.serviceRow {
   display: grid;
 
   grid-template-columns:
-    minmax(180px, 0.8fr)
-    minmax(280px, 1.8fr)
-    minmax(130px, auto);
+    minmax(
+      190px,
+      0.8fr
+    )
+    minmax(
+      300px,
+      1.8fr
+    )
+    minmax(
+      120px,
+      auto
+    );
 
   gap: 20px;
 
   align-items: center;
 
-  padding: 14px 18px;
+  min-height: 76px;
 
-  border-top: 1px solid var(--border);
+  padding:
+    14px
+    18px;
+
+  border-top:
+    1px solid
+    var(--border);
 }
 
-.toolRow:first-child {
+.serviceRow:first-child {
   border-top: 0;
 }
 
-.toolIdentity {
+.serviceIdentity {
   min-width: 0;
 
   display: flex;
-  align-items: flex-start;
+
+  align-items:
+    flex-start;
+
   gap: 10px;
 }
 
 .statusDot {
   width: 8px;
+
   height: 8px;
 
-  flex: 0 0 auto;
+  flex:
+    0
+    0 auto;
 
   margin-top: 6px;
 
-  border-radius: 999px;
+  border-radius:
+    999px;
 }
 
-.toolIdentity strong,
-.toolIdentity span {
+.serviceIdentity strong,
+.serviceIdentity span {
   display: block;
 }
 
-.toolIdentity strong {
-  color: var(--text);
+.serviceIdentity strong {
+  color:
+    var(--text);
 
   font-size: 13px;
+
   font-weight: 600;
+
   line-height: 19px;
 }
 
-.toolIdentity span {
+.serviceIdentity span {
   margin-top: 2px;
 
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
   font-size: 11px;
+
   line-height: 17px;
 }
 
-.toolDescription {
-  color: var(--text-secondary);
+.serviceDescription {
+  margin: 0;
+
+  color:
+    var(--text-secondary);
 
   font-size: 12px;
+
   line-height: 19px;
 }
 
-.toolMeta {
+.serviceMeta {
   display: grid;
-  justify-items: end;
-  gap: 5px;
 
-  text-align: right;
+  justify-items:
+    end;
 }
 
 .statusBadge {
-  min-height: 27px;
+  min-height: 28px;
 
-  display: inline-flex;
-  align-items: center;
+  display:
+    inline-flex;
 
-  padding: 0 9px;
+  align-items:
+    center;
 
-  border-radius: 999px;
+  justify-content:
+    center;
+
+  padding:
+    0
+    10px;
+
+  border-radius:
+    999px;
 
   font-size: 11px;
+
   font-weight: 600;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 }
 
-.toolMeta small {
-  color: var(--placeholder);
-
-  font-size: 10px;
-  line-height: 16px;
-}
+/* =========================================================
+   STATUS COLORS
+   ========================================================= */
 
 .statusHealthy {
-  color: var(--success);
+  color:
+    var(--success);
 
   background:
-    rgb(22 163 74 / 0.08);
-}
-
-.statusReady {
-  color: var(--primary);
-
-  background:
-    rgb(91 134 229 / 0.09);
-}
-
-.statusAttention {
-  color: var(--warning);
-
-  background:
-    rgb(217 119 6 / 0.08);
+    rgb(
+      22
+      163
+      74
+      /
+      0.08
+    );
 }
 
 .statusDisconnected {
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
-  background: var(--surface);
+  background:
+    var(--surface);
 }
 
 .statusDot.statusHealthy {
-  background: var(--success);
-}
-
-.statusDot.statusReady {
-  background: var(--primary);
-}
-
-.statusDot.statusAttention {
-  background: var(--warning);
+  background:
+    var(--success);
 }
 
 .statusDot.statusDisconnected {
-  background: var(--placeholder);
+  background:
+    var(--placeholder);
 }
 
-@media (max-width: 920px) {
-  .summaryGrid {
-    grid-template-columns: 1fr;
-  }
+/* =========================================================
+   FOOTER NOTE
+   ========================================================= */
 
-  .toolRow {
+.footerNote {
+  padding:
+    14px
+    16px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 12px;
+
+  background:
+    var(--card);
+}
+
+.footerNote strong {
+  display: block;
+
+  color:
+    var(--text);
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  line-height: 18px;
+}
+
+.footerNote p {
+  max-width: 920px;
+
+  margin:
+    4px
+    0
+    0;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 11px;
+
+  line-height: 18px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (
+  max-width: 920px
+) {
+  .summaryGrid {
     grid-template-columns:
       1fr;
   }
 
-  .toolMeta {
-    justify-items: start;
+  .serviceRow {
+    grid-template-columns:
+      1fr;
 
-    text-align: left;
+    gap: 10px;
+  }
+
+  .serviceMeta {
+    justify-items:
+      start;
   }
 }
 
-@media (max-width: 680px) {
+@media (
+  max-width: 680px
+) {
   .page {
     gap: 20px;
+  }
+
+  .header h2 {
+    font-size: 28px;
+
+    line-height: 36px;
   }
 
   .panelHeader {
     padding: 14px;
   }
 
-  .toolRow {
-    gap: 10px;
+  .serviceRow {
+    min-height: auto;
 
     padding: 14px;
+  }
+
+  .notice {
+    padding: 12px;
   }
 }
