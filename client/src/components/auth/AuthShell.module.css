@@ -1,0 +1,233 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns:
+    minmax(360px, 0.85fr)
+    minmax(520px, 1.15fr);
+  background: var(--background);
+}
+
+.brandPanel {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  padding: 34px 42px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(143, 180, 244, 0.35),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      #244b9a 0%,
+      #416ecf 48%,
+      #5b86e5 100%
+    );
+  color: #ffffff;
+}
+
+.brandPanel::after {
+  position: absolute;
+  right: -140px;
+  bottom: -170px;
+  width: 420px;
+  height: 420px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  content: "";
+}
+
+.brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 11px;
+}
+
+.brandMark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-size: 18px;
+  line-height: 23px;
+}
+
+.brand small {
+  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.brandContent {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: auto 0;
+}
+
+.eyebrow {
+  display: block;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.brandContent h1 {
+  margin-top: 11px;
+  font-size: clamp(32px, 3.5vw, 48px);
+  line-height: 1.13;
+  letter-spacing: -0.035em;
+}
+
+.featureList {
+  display: grid;
+  gap: 10px;
+  margin-top: 36px;
+}
+
+.featureList div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.featureList span {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.09);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.brandFooter {
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.formPanel {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 510px;
+}
+
+.formHeader {
+  margin-bottom: 24px;
+}
+
+.formHeader h2 {
+  color: var(--text);
+  font-size: 30px;
+  line-height: 38px;
+  letter-spacing: -0.025em;
+}
+
+.formHeader p {
+  margin-top: 7px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.mobileBrand {
+  display: none;
+}
+
+@media (max-width: 940px) {
+  .page {
+    display: block;
+  }
+
+  .brandPanel {
+    display: none;
+  }
+
+  .formPanel {
+    min-height: 100vh;
+    align-items: flex-start;
+    padding: 26px 22px 40px;
+  }
+
+  .mobileBrand {
+    display: block;
+    width: 100%;
+    max-width: 510px;
+    margin: 0 auto 44px;
+  }
+
+  .mobileBrand a {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .mobileBrand span {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .mobileBrand strong {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .formPanel {
+    padding: 20px 16px 32px;
+  }
+
+  .mobileBrand {
+    margin-bottom: 34px;
+  }
+
+  .formHeader h2 {
+    font-size: 26px;
+    line-height: 34px;
+  }
+}
