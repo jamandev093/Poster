@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  useMemo,
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import styles from "./FindContentMatcher.module.css";
 
@@ -17,17 +11,11 @@ type ContentAvailability =
 
 interface DemoContentRecord {
   contentId: string;
-
   title?: string;
-
   source: string;
-
   posterUrl: string;
-
   originalUrl: string;
-
-  availability:
-    ContentAvailability;
+  availability: ContentAvailability;
 }
 
 type MatchStatus =
@@ -36,200 +24,157 @@ type MatchStatus =
   | "invalid"
   | "duplicate";
 
+type DuplicateReason =
+  | "same_identifier"
+  | "same_content";
+
 interface MatchResult {
   id: string;
-
   input: string;
-
   status: MatchStatus;
-
   record?: DemoContentRecord;
+  duplicateReason?: DuplicateReason;
 }
 
+type NormalizedIdentifier =
+  | {
+      type: "content_id";
+      value: string;
+    }
+  | {
+      type: "url";
+      value: string;
+    };
+
+const MAX_IDENTIFIERS = 100;
+
+const TRACKING_PARAMETERS = new Set([
+  "fbclid",
+  "gclid",
+  "dclid",
+  "msclkid",
+]);
+
 /*
- * Frontend demonstration records only.
+ * Frontend-only demonstration records.
  *
- * Production Find Your Content will query the
- * Backend using identifiers supplied by the
- * claimant. It will never expose or browse the
- * complete Poster content inventory.
+ * Production behavior will use the Backend
+ * content index and identifiers supplied by
+ * the claimant.
+ *
+ * This data must never become a public,
+ * browsable Poster content inventory.
  */
-const DEMO_CONTENT:
-  DemoContentRecord[] = [
+const DEMO_CONTENT: DemoContentRecord[] = [
   {
-    contentId:
-      "CNT-10482",
-
-    title:
-      "Cloud Skills for Professionals",
-
-    source:
-      "Example Publisher",
-
+    contentId: "CNT-10482",
+    title: "Cloud Skills for Professionals",
+    source: "Example Publisher",
     posterUrl:
       "https://poster.example/content/CNT-10482",
-
     originalUrl:
       "https://example.com/cloud-skills",
-
-    availability:
-      "available",
+    availability: "available",
   },
-
   {
-    contentId:
-      "CNT-10510",
-
+    contentId: "CNT-10510",
     title:
       "Modern Learning and Career Development",
-
-    source:
-      "Example Learning",
-
+    source: "Example Learning",
     posterUrl:
       "https://poster.example/content/CNT-10510",
-
     originalUrl:
       "https://example.com/modern-learning",
-
-    availability:
-      "available",
+    availability: "available",
   },
-
   {
-    contentId:
-      "CNT-10672",
-
+    contentId: "CNT-10672",
     title:
       "Artificial Intelligence Research Digest",
-
-    source:
-      "Example Research",
-
+    source: "Example Research",
     posterUrl:
       "https://poster.example/content/CNT-10672",
-
     originalUrl:
       "https://example.com/ai-research-digest",
-
-    availability:
-      "available",
+    availability: "available",
   },
-
   {
-    contentId:
-      "CNT-10840",
-
-    title:
-      "Professional Growth Handbook",
-
-    source:
-      "Example Knowledge",
-
+    contentId: "CNT-10840",
+    title: "Professional Growth Handbook",
+    source: "Example Knowledge",
     posterUrl:
       "https://poster.example/content/CNT-10840",
-
     originalUrl:
       "https://example.com/professional-growth",
-
-    availability:
-      "available",
+    availability: "available",
   },
-
   {
-    contentId:
-      "CNT-10905",
-
-    source:
-      "Example Publisher",
-
+    contentId: "CNT-10905",
+    source: "Example Publisher",
     posterUrl:
       "https://poster.example/content/CNT-10905",
-
     originalUrl:
       "https://example.com/previous-record",
-
-    availability:
-      "unavailable",
+    availability: "unavailable",
   },
 ];
-
-const MAX_IDENTIFIERS =
-  100;
-
-const TRACKING_PARAMETERS =
-  new Set([
-    "fbclid",
-    "gclid",
-    "dclid",
-    "msclkid",
-  ]);
 
 function normalizeUrl(
   value: string
 ): string | null {
   try {
-    const url =
-      new URL(
-        value.trim()
-      );
+    const url = new URL(
+      value.trim()
+    );
 
     if (
-      url.protocol !==
-        "http:" &&
-      url.protocol !==
-        "https:"
+      url.protocol !== "http:" &&
+      url.protocol !== "https:"
     ) {
       return null;
     }
 
-    url.hash =
-      "";
+    // Fragments do not identify a different
+    // publisher resource for matching.
+    url.hash = "";
 
-    const keysToRemove:
-      string[] = [];
+    /*
+     * Remove only known tracking parameters.
+     *
+     * Do not remove arbitrary query parameters:
+     * some publishers use them to identify
+     * genuinely different resources.
+     */
+    const keysToRemove: string[] = [];
 
     url.searchParams.forEach(
-      (
-        _,
-        key
-      ) => {
+      (_value, key) => {
         const normalizedKey =
           key.toLowerCase();
 
         if (
-          normalizedKey.startsWith(
-            "utm_"
-          ) ||
+          normalizedKey.startsWith("utm_") ||
           TRACKING_PARAMETERS.has(
             normalizedKey
           )
         ) {
-          keysToRemove.push(
-            key
-          );
+          keysToRemove.push(key);
         }
       }
     );
 
     keysToRemove.forEach(
-      (
-        key
-      ) =>
-        url.searchParams.delete(
-          key
-        )
+      (key) => {
+        url.searchParams.delete(key);
+      }
     );
 
     url.hostname =
       url.hostname.toLowerCase();
 
     if (
-      url.pathname.length >
-        1 &&
-      url.pathname.endsWith(
-        "/"
-      )
+      url.pathname.length > 1 &&
+      url.pathname.endsWith("/")
     ) {
       url.pathname =
         url.pathname.replace(
@@ -248,22 +193,7 @@ function normalizeUrl(
 
 function normalizeIdentifier(
   value: string
-):
-  | {
-      type:
-        "content_id";
-
-      value:
-        string;
-    }
-  | {
-      type:
-        "url";
-
-      value:
-        string;
-    }
-  | null {
+): NormalizedIdentifier | null {
   const trimmed =
     value.trim();
 
@@ -273,26 +203,20 @@ function normalizeIdentifier(
     )
   ) {
     return {
-      type:
-        "content_id",
-
+      type: "content_id",
       value:
         trimmed.toUpperCase(),
     };
   }
 
   const normalizedUrl =
-    normalizeUrl(
-      trimmed
-    );
+    normalizeUrl(trimmed);
 
   if (
     normalizedUrl
   ) {
     return {
-      type:
-        "url",
-
+      type: "url",
       value:
         normalizedUrl,
     };
@@ -301,7 +225,8 @@ function normalizeIdentifier(
   return null;
 }
 
-function createMatchIndex() {
+function createMatchIndex():
+  Map<string, DemoContentRecord> {
   const index =
     new Map<
       string,
@@ -309,38 +234,36 @@ function createMatchIndex() {
     >();
 
   DEMO_CONTENT.forEach(
-    (
-      record
-    ) => {
+    (record) => {
       index.set(
         `content_id:${record.contentId}`,
         record
       );
 
-      const posterUrl =
+      const normalizedPosterUrl =
         normalizeUrl(
           record.posterUrl
         );
 
-      const originalUrl =
+      const normalizedOriginalUrl =
         normalizeUrl(
           record.originalUrl
         );
 
       if (
-        posterUrl
+        normalizedPosterUrl
       ) {
         index.set(
-          `url:${posterUrl}`,
+          `url:${normalizedPosterUrl}`,
           record
         );
       }
 
       if (
-        originalUrl
+        normalizedOriginalUrl
       ) {
         index.set(
-          `url:${originalUrl}`,
+          `url:${normalizedOriginalUrl}`,
           record
         );
       }
@@ -364,11 +287,31 @@ function statusLabel(
       return "Not found";
 
     case "invalid":
-      return "Invalid identifier";
+      return "Invalid";
 
     case "duplicate":
       return "Duplicate";
   }
+}
+
+function duplicateMessage(
+  result: MatchResult
+): string {
+  if (
+    result.duplicateReason ===
+    "same_content"
+  ) {
+    return (
+      "This identifier resolves to the same " +
+      "Poster content record as another " +
+      "identifier in this lookup."
+    );
+  }
+
+  return (
+    "This identifier was already entered " +
+    "in this lookup."
+  );
 }
 
 export default function FindContentMatcher() {
@@ -378,41 +321,36 @@ export default function FindContentMatcher() {
   const [
     identifiers,
     setIdentifiers,
-  ] =
-    useState(
-      ""
-    );
+  ] = useState("");
 
   const [
     results,
     setResults,
   ] =
-    useState<
-      MatchResult[]
-    >(
-      []
-    );
+    useState<MatchResult[]>([]);
 
+  /*
+   * Selection is keyed by canonical Poster
+   * Content ID.
+   *
+   * One content record therefore cannot be
+   * selected twice even when the claimant
+   * knows several identifiers for it.
+   */
   const [
     selected,
     setSelected,
-  ] =
-    useState<
-      Record<
-        string,
-        DemoContentRecord
-      >
-    >(
-      {}
-    );
+  ] = useState<
+    Record<
+      string,
+      DemoContentRecord
+    >
+  >({});
 
   const [
     error,
     setError,
-  ] =
-    useState(
-      ""
-    );
+  ] = useState("");
 
   const selectedRecords =
     useMemo(
@@ -420,28 +358,31 @@ export default function FindContentMatcher() {
         Object.values(
           selected
         ),
-      [
-        selected,
-      ]
+      [selected]
     );
 
   const selectedCount =
     selectedRecords.length;
 
+  /*
+   * Only unique canonical matches receive
+   * exact_match status.
+   *
+   * Another identifier resolving to the
+   * same Content ID becomes a duplicate.
+   */
   const exactMatches =
     useMemo(
       () =>
         results.filter(
-          (
-            result
-          ) =>
+          (result) =>
             result.status ===
               "exact_match" &&
-            result.record
+            Boolean(
+              result.record
+            )
         ),
-      [
-        results,
-      ]
+      [results]
     );
 
   const exactMatchCount =
@@ -449,75 +390,61 @@ export default function FindContentMatcher() {
 
   const notFoundCount =
     results.filter(
-      (
-        result
-      ) =>
+      (result) =>
         result.status ===
         "not_found"
     ).length;
 
   const invalidCount =
     results.filter(
-      (
-        result
-      ) =>
+      (result) =>
         result.status ===
         "invalid"
     ).length;
 
   const duplicateCount =
     results.filter(
-      (
-        result
-      ) =>
+      (result) =>
         result.status ===
         "duplicate"
     ).length;
 
   const allCurrentMatchesSelected =
-    exactMatchCount >
-      0 &&
+    exactMatchCount > 0 &&
     exactMatches.every(
-      (
-        result
-      ) =>
-        result.record
-          ? Boolean(
-              selected[
-                result.record
-                  .contentId
-              ]
-            )
-          : false
+      (result) => {
+        if (
+          !result.record
+        ) {
+          return false;
+        }
+
+        return Boolean(
+          selected[
+            result.record.contentId
+          ]
+        );
+      }
     );
 
   const findMatches =
     () => {
       const entered =
         identifiers
-          .split(
-            /\r?\n/
-          )
+          .split(/\r?\n/)
           .map(
-            (
-              value
-            ) =>
+            (value) =>
               value.trim()
           )
-          .filter(
-            Boolean
-          );
+          .filter(Boolean);
 
       if (
-        entered.length ===
-        0
+        entered.length === 0
       ) {
+        setResults([]);
+
         setError(
           "Enter at least one Poster Content ID or exact URL."
-        );
-
-        setResults(
-          []
         );
 
         return;
@@ -534,10 +461,31 @@ export default function FindContentMatcher() {
         return;
       }
 
-      const seen =
-        new Set<
-          string
-        >();
+      /*
+       * First layer:
+       * catch repeated/normalized identical input.
+       */
+      const seenIdentifierKeys =
+        new Set<string>();
+
+      /*
+       * Second layer:
+       * after resolution, canonical Content ID
+       * becomes the deduplication key.
+       *
+       * Example:
+       *
+       * CNT-10482
+       * https://example.com/cloud-skills
+       *
+       * Both resolve to CNT-10482.
+       *
+       * Result:
+       * 1 exact match
+       * 1 duplicate
+       */
+      const seenResolvedContentIds =
+        new Set<string>();
 
       const nextResults:
         MatchResult[] =
@@ -557,40 +505,38 @@ export default function FindContentMatcher() {
               return {
                 id:
                   `invalid-${index}`,
-
                 input,
-
                 status:
                   "invalid",
               };
             }
 
-            const lookupKey =
+            const identifierKey =
               `${normalized.type}:${normalized.value}`;
 
             if (
-              seen.has(
-                lookupKey
+              seenIdentifierKeys.has(
+                identifierKey
               )
             ) {
               return {
                 id:
-                  `duplicate-${index}`,
-
+                  `duplicate-identifier-${index}`,
                 input,
-
                 status:
                   "duplicate",
+                duplicateReason:
+                  "same_identifier",
               };
             }
 
-            seen.add(
-              lookupKey
+            seenIdentifierKeys.add(
+              identifierKey
             );
 
             const record =
               MATCH_INDEX.get(
-                lookupKey
+                identifierKey
               );
 
             if (
@@ -599,23 +545,39 @@ export default function FindContentMatcher() {
               return {
                 id:
                   `not-found-${index}`,
-
                 input,
-
                 status:
                   "not_found",
               };
             }
 
+            if (
+              seenResolvedContentIds.has(
+                record.contentId
+              )
+            ) {
+              return {
+                id:
+                  `duplicate-content-${record.contentId}-${index}`,
+                input,
+                status:
+                  "duplicate",
+                record,
+                duplicateReason:
+                  "same_content",
+              };
+            }
+
+            seenResolvedContentIds.add(
+              record.contentId
+            );
+
             return {
               id:
                 `match-${record.contentId}-${index}`,
-
               input,
-
               status:
                 "exact_match",
-
               record,
             };
           }
@@ -625,9 +587,7 @@ export default function FindContentMatcher() {
         nextResults
       );
 
-      setError(
-        ""
-      );
+      setError("");
     };
 
   const toggleRecord = (
@@ -635,9 +595,7 @@ export default function FindContentMatcher() {
       DemoContentRecord
   ) => {
     setSelected(
-      (
-        current
-      ) => {
+      (current) => {
         const next = {
           ...current,
         };
@@ -650,21 +608,23 @@ export default function FindContentMatcher() {
           delete next[
             record.contentId
           ];
-        } else {
-          if (
-            Object.keys(
-              next
-            ).length >=
-            MAX_IDENTIFIERS
-          ) {
-            return current;
-          }
 
-          next[
-            record.contentId
-          ] =
-            record;
+          return next;
         }
+
+        if (
+          Object.keys(
+            next
+          ).length >=
+          MAX_IDENTIFIERS
+        ) {
+          return current;
+        }
+
+        next[
+          record.contentId
+        ] =
+          record;
 
         return next;
       }
@@ -674,9 +634,7 @@ export default function FindContentMatcher() {
   const toggleAllCurrentMatches =
     () => {
       setSelected(
-        (
-          current
-        ) => {
+        (current) => {
           const next = {
             ...current,
           };
@@ -685,15 +643,12 @@ export default function FindContentMatcher() {
             allCurrentMatchesSelected
           ) {
             exactMatches.forEach(
-              (
-                result
-              ) => {
+              (result) => {
                 if (
                   result.record
                 ) {
                   delete next[
-                    result.record
-                      .contentId
+                    result.record.contentId
                   ];
                 }
               }
@@ -703,9 +658,7 @@ export default function FindContentMatcher() {
           }
 
           exactMatches.forEach(
-            (
-              result
-            ) => {
+            (result) => {
               if (
                 !result.record
               ) {
@@ -722,8 +675,7 @@ export default function FindContentMatcher() {
               }
 
               next[
-                result.record
-                  .contentId
+                result.record.contentId
               ] =
                 result.record;
             }
@@ -736,9 +688,7 @@ export default function FindContentMatcher() {
 
   const clearSelected =
     () => {
-      setSelected(
-        {}
-      );
+      setSelected({});
     };
 
   const continueSingleClaim =
@@ -751,9 +701,8 @@ export default function FindContentMatcher() {
       }
 
       const contentId =
-        selectedRecords[
-          0
-        ].contentId;
+        selectedRecords[0]
+          .contentId;
 
       router.push(
         `/request?content=${encodeURIComponent(
@@ -771,21 +720,23 @@ export default function FindContentMatcher() {
         return;
       }
 
-      const ids =
+      /*
+       * Pass canonical Content IDs only.
+       *
+       * Raw claimant input never becomes
+       * the workflow handoff value.
+       */
+      const contentIds =
         selectedRecords
           .map(
-            (
-              record
-            ) =>
+            (record) =>
               record.contentId
           )
-          .join(
-            ","
-          );
+          .join(",");
 
       router.push(
         `/bulk-removal?items=${encodeURIComponent(
-          ids
+          contentIds
         )}`
       );
     };
@@ -811,11 +762,10 @@ export default function FindContentMatcher() {
           </h2>
 
           <p>
-            Enter a Poster Content ID,
-            exact Poster URL, or exact
-            original-source URL. You can
-            enter up to 100 identifiers,
-            one per line.
+            Use a Poster Content ID, exact
+            Poster URL, or exact
+            original-source URL. Up to 100
+            identifiers, one per line.
           </p>
         </div>
 
@@ -824,10 +774,8 @@ export default function FindContentMatcher() {
             styles.restrictionNote
           }
         >
-          Find Your Content performs exact
-          matching only. It does not browse,
-          suggest, or expose Poster&apos;s
-          content inventory.
+          Exact matching only. Poster does not
+          expose or browse its content inventory.
         </div>
 
         <label
@@ -851,8 +799,7 @@ export default function FindContentMatcher() {
             event
           ) =>
             setIdentifiers(
-              event.target
-                .value
+              event.target.value
             )
           }
           placeholder={`CNT-10482
@@ -885,16 +832,14 @@ https://example.com/cloud-skills`}
             className={
               styles.error
             }
+            role="alert"
           >
-            {
-              error
-            }
+            {error}
           </div>
         ) : null}
       </section>
 
-      {results.length >
-      0 ? (
+      {results.length > 0 ? (
         <section
           className={
             styles.resultsCard
@@ -911,9 +856,8 @@ https://example.com/cloud-skills`}
               </h2>
 
               <p>
-                Only records corresponding
-                to the identifiers you
-                supplied are shown.
+                Only identifiers you supplied
+                are checked.
               </p>
             </div>
 
@@ -924,48 +868,35 @@ https://example.com/cloud-skills`}
             >
               <span>
                 <strong>
-                  {
-                    exactMatchCount
-                  }
+                  {exactMatchCount}
                 </strong>
-                {" "}
-                matched
+                {" matched"}
               </span>
 
               <span>
                 <strong>
-                  {
-                    notFoundCount
-                  }
+                  {notFoundCount}
                 </strong>
-                {" "}
-                not found
+                {" not found"}
               </span>
 
               <span>
                 <strong>
-                  {
-                    invalidCount
-                  }
+                  {invalidCount}
                 </strong>
-                {" "}
-                invalid
+                {" invalid"}
               </span>
 
               <span>
                 <strong>
-                  {
-                    duplicateCount
-                  }
+                  {duplicateCount}
                 </strong>
-                {" "}
-                duplicate
+                {" duplicate"}
               </span>
             </div>
           </div>
 
-          {exactMatchCount >
-          0 ? (
+          {exactMatchCount > 0 ? (
             <div
               className={
                 styles.selectBar
@@ -987,15 +918,12 @@ https://example.com/cloud-skills`}
                 />
 
                 <span>
-                  Select all exact matches
-                  from this lookup
+                  Select all matched items
                 </span>
               </label>
 
               <strong>
-                {
-                  selectedCount
-                }
+                {selectedCount}
                 {" selected"}
               </strong>
             </div>
@@ -1007,23 +935,21 @@ https://example.com/cloud-skills`}
             }
           >
             {results.map(
-              (
-                result
-              ) => {
+              (result) => {
                 const record =
                   result.record;
 
                 const selectable =
                   result.status ===
                     "exact_match" &&
-                  record;
+                  Boolean(record);
 
                 const checked =
-                  selectable
+                  selectable &&
+                  record
                     ? Boolean(
                         selected[
-                          record
-                            .contentId
+                          record.contentId
                         ]
                       )
                     : false;
@@ -1042,7 +968,8 @@ https://example.com/cloud-skills`}
                         styles.checkboxCell
                       }
                     >
-                      {selectable ? (
+                      {selectable &&
+                      record ? (
                         <input
                           type="checkbox"
                           checked={
@@ -1069,7 +996,9 @@ https://example.com/cloud-skills`}
                         styles.resultMain
                       }
                     >
-                      {record ? (
+                      {result.status ===
+                        "exact_match" &&
+                      record ? (
                         <>
                           <div
                             className={
@@ -1077,25 +1006,18 @@ https://example.com/cloud-skills`}
                             }
                           >
                             <strong>
-                              {
-                                record.availability ===
-                                "available"
-                                  ? record.title
-                                  : "Previously identified Poster record"
-                              }
+                              {record.availability ===
+                              "available"
+                                ? record.title
+                                : "Previously identified Poster record"}
                             </strong>
 
                             <span
                               className={
-                                result.status ===
-                                "exact_match"
-                                  ? styles.statusMatched
-                                  : styles.statusNeutral
+                                styles.statusMatched
                               }
                             >
-                              {statusLabel(
-                                result.status
-                              )}
+                              Exact match
                             </span>
                           </div>
 
@@ -1124,33 +1046,20 @@ https://example.com/cloud-skills`}
                             </span>
                           </div>
 
-                          {record.availability ===
-                          "available" ? (
-                            <div
-                              className={
-                                styles.original
-                              }
-                            >
-                              Original source:
-                              {" "}
-                              {
-                                new URL(
-                                  record.originalUrl
-                                ).hostname
-                              }
-                            </div>
-                          ) : (
-                            <div
-                              className={
-                                styles.original
-                              }
-                            >
-                              Minimal information is
-                              shown because this
-                              record is no longer
-                              publicly available.
-                            </div>
-                          )}
+                          <div
+                            className={
+                              styles.original
+                            }
+                          >
+                            {record.availability ===
+                            "available"
+                              ? `Original source: ${
+                                  new URL(
+                                    record.originalUrl
+                                  ).hostname
+                                }`
+                              : "Minimal information is shown because this record is no longer publicly available."}
+                          </div>
                         </>
                       ) : (
                         <>
@@ -1190,10 +1099,12 @@ https://example.com/cloud-skills`}
                           >
                             {result.status ===
                             "not_found"
-                              ? "No exact matching Poster record was found. Check the identifier and try again."
+                              ? "No exact matching Poster record was found."
                               : result.status ===
                                 "duplicate"
-                              ? "This identifier was already included in the same lookup."
+                              ? duplicateMessage(
+                                  result
+                                )
                               : "Enter a valid Poster Content ID or a complete http/https URL."}
                           </div>
                         </>
@@ -1207,8 +1118,7 @@ https://example.com/cloud-skills`}
         </section>
       ) : null}
 
-      {selectedCount >
-      0 ? (
+      {selectedCount > 0 ? (
         <section
           className={
             styles.selectionCard
@@ -1216,22 +1126,17 @@ https://example.com/cloud-skills`}
         >
           <div>
             <strong>
-              {
-                selectedCount
-              }
+              {selectedCount}
               {" "}
-              {selectedCount ===
-              1
+              {selectedCount === 1
                 ? "content item selected"
                 : "content items selected"}
             </strong>
 
             <p>
-              Matching a Poster record does
-              not verify copyright ownership.
-              Ownership and authority are
-              reviewed through the copyright
-              claim process.
+              Finding a matching record identifies
+              the affected content. It does not
+              verify copyright ownership.
             </p>
           </div>
 
@@ -1247,11 +1152,10 @@ https://example.com/cloud-skills`}
                 clearSelected
               }
             >
-              Clear selected
+              Clear
             </button>
 
-            {selectedCount ===
-            1 ? (
+            {selectedCount === 1 ? (
               <button
                 type="button"
                 className="secondaryButton"
@@ -1259,7 +1163,7 @@ https://example.com/cloud-skills`}
                   continueSingleClaim
                 }
               >
-                Continue to single claim
+                Submit single claim
               </button>
             ) : null}
 
@@ -1270,36 +1174,26 @@ https://example.com/cloud-skills`}
                 continueBulkClaim
               }
             >
-              Continue to Bulk Removal
+              Bulk request
               {" "}
               (
-              {
-                selectedCount
-              }
+              {selectedCount}
               )
             </button>
           </div>
         </section>
       ) : null}
 
-      <section
+      <div
         className={
           styles.demoNote
         }
       >
-        <strong>
-          Frontend demonstration
-        </strong>
-
         <p>
-          Exact matching currently uses a
-          small demonstration dataset only.
-          Backend integration will later
-          replace the data source while
-          preserving this exact-match-only
-          privacy model.
+          Development environment · Matching data is
+          temporary until backend integration.
         </p>
-      </section>
+      </div>
     </div>
   );
 }

@@ -30,21 +30,17 @@ export default function CopyrightClaimForm({
   const [
     error,
     setError,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     declarations,
     setDeclarations,
   ] =
     useState<DeclarationState>({
-      goodFaith:
-        false,
-
-      accurate:
-        false,
-
-      authorized:
-        false,
+      goodFaith: false,
+      accurate: false,
+      authorized: false,
     });
 
   const submitClaim = (
@@ -68,12 +64,14 @@ export default function CopyrightClaimForm({
     setError("");
 
     /*
-     * Frontend-only workflow for now.
+     * Frontend-only submission flow.
      *
      * Backend integration will later:
+     * - validate the affected content again,
      * - create the permanent CR reference,
-     * - store claimant/evidence/content data,
+     * - store claimant and evidence data,
      * - connect the case to Admin Copyright,
+     * - maintain the audit trail,
      * - send acknowledgement/status emails.
      */
     router.push(
@@ -101,13 +99,11 @@ export default function CopyrightClaimForm({
           }
         >
           <h2>
-            1. Claimant information
+            1. Claimant
           </h2>
 
           <p>
-            Tell us who owns the rights
-            or who is authorized to act
-            for the rights holder.
+            Rights holder or authorized representative.
           </p>
         </div>
 
@@ -196,12 +192,11 @@ export default function CopyrightClaimForm({
           }
         >
           <h2>
-            2. Original copyrighted work
+            2. Original work
           </h2>
 
           <p>
-            Identify the original work
-            you believe is affected.
+            Identify the copyrighted work involved.
           </p>
         </div>
 
@@ -231,8 +226,8 @@ export default function CopyrightClaimForm({
             />
 
             <span className="fieldHelp">
-              Provide the original publisher
-              or source URL when available.
+              Provide the original publisher or
+              source URL when available.
             </span>
           </div>
         </div>
@@ -249,12 +244,11 @@ export default function CopyrightClaimForm({
           }
         >
           <h2>
-            3. Affected Poster content
+            3. Affected content
           </h2>
 
           <p>
-            Identify the Poster content
-            record that should be reviewed.
+            Enter the Poster Content ID or exact URL.
           </p>
         </div>
 
@@ -274,11 +268,9 @@ export default function CopyrightClaimForm({
           />
 
           <span className="fieldHelp">
-            A content selected through
-            Find Your Content can be
-            automatically filled here.
-            For many records, use Bulk
-            Removal Request.
+            A record selected through Find Your Content
+            can be filled automatically here. For multiple
+            affected records, use Bulk Removal Request.
           </span>
         </div>
       </section>
@@ -298,9 +290,7 @@ export default function CopyrightClaimForm({
           </h2>
 
           <p>
-            Provide enough information
-            for the copyright request to
-            be reviewed accurately.
+            Explain the concern and provide supporting evidence.
           </p>
         </div>
 
@@ -320,7 +310,7 @@ export default function CopyrightClaimForm({
 
           <div className="formField">
             <label htmlFor="evidence">
-              Supporting evidence or references
+              Supporting evidence / references
             </label>
 
             <textarea
@@ -330,9 +320,8 @@ export default function CopyrightClaimForm({
             />
 
             <span className="fieldHelp">
-              Supporting information can
-              help Poster verify the claim
-              accurately.
+              Supporting information can help Poster
+              verify the claim accurately.
             </span>
           </div>
         </div>
@@ -353,9 +342,7 @@ export default function CopyrightClaimForm({
           </h2>
 
           <p>
-            Confirm the accuracy and
-            authority of this copyright
-            request.
+            Confirm the request before submission.
           </p>
         </div>
 
@@ -382,7 +369,6 @@ export default function CopyrightClaimForm({
                     current
                   ) => ({
                     ...current,
-
                     goodFaith:
                       event.target.checked,
                   })
@@ -391,9 +377,8 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I have a good-faith basis
-              for submitting this
-              copyright request.
+              I have a good-faith basis for submitting
+              this copyright request.
             </span>
           </label>
 
@@ -415,7 +400,6 @@ export default function CopyrightClaimForm({
                     current
                   ) => ({
                     ...current,
-
                     accurate:
                       event.target.checked,
                   })
@@ -424,11 +408,9 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I confirm that the
-              information supplied in
-              this request is accurate
-              to the best of my
-              knowledge.
+              I confirm that the information supplied
+              in this request is accurate to the best
+              of my knowledge.
             </span>
           </label>
 
@@ -450,7 +432,6 @@ export default function CopyrightClaimForm({
                     current
                   ) => ({
                     ...current,
-
                     authorized:
                       event.target.checked,
                   })
@@ -459,10 +440,8 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I am the rights holder or
-              am authorized to act on
-              behalf of the rights
-              holder.
+              I am the rights holder or am authorized
+              to act on behalf of the rights holder.
             </span>
           </label>
 
@@ -479,10 +458,8 @@ export default function CopyrightClaimForm({
             />
 
             <span className="fieldHelp">
-              Used to confirm the person
-              making this copyright
-              request. No Poster account
-              is created.
+              Used to confirm the person making this
+              copyright request. No Poster account is created.
             </span>
           </div>
         </div>

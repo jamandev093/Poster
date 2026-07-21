@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  ChangeEvent,
   FormEvent,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -14,9 +16,7 @@ import styles from "./CopyrightForms.module.css";
 
 interface BulkItem {
   id: string;
-
   value: string;
-
   selected: boolean;
 }
 
@@ -26,14 +26,22 @@ interface BulkRemovalFormProps {
 
 interface DeclarationState {
   goodFaith: boolean;
-
   accurate: boolean;
-
   authorized: boolean;
+}
+
+interface ImportResult {
+  added: number;
+  duplicates: number;
+  invalid: number;
+  limitSkipped: number;
 }
 
 const MAX_BULK_ITEMS =
   100;
+
+const MAX_FILE_SIZE_BYTES =
+  1024 * 1024;
 
 function normalizeItem(
   value: string
@@ -52,12 +60,101 @@ function normalizeItem(
   return trimmed;
 }
 
+function isValidContentId(
+  value: string
+): boolean {
+  return /^CNT-\d+$/i.test(
+    value.trim()
+  );
+}
+
+function isValidHttpUrl(
+  value: string
+): boolean {
+  try {
+    const url =
+      new URL(
+        value.trim()
+      );
+
+    return (
+      url.protocol ===
+        "http:" ||
+      url.protocol ===
+        "https:"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isValidIdentifier(
+  value: string
+): boolean {
+  return (
+    isValidContentId(
+      value
+    ) ||
+    isValidHttpUrl(
+      value
+    )
+  );
+}
+
 function itemComparisonKey(
   value: string
 ): string {
-  return normalizeItem(
-    value
-  ).toLowerCase();
+  const normalized =
+    normalizeItem(
+      value
+    );
+
+  if (
+    isValidContentId(
+      normalized
+    )
+  ) {
+    return normalized.toUpperCase();
+  }
+
+  if (
+    isValidHttpUrl(
+      normalized
+    )
+  ) {
+    try {
+      const url =
+        new URL(
+          normalized
+        );
+
+      url.hash =
+        "";
+
+      url.hostname =
+        url.hostname.toLowerCase();
+
+      if (
+        url.pathname.length >
+          1 &&
+        url.pathname.endsWith(
+          "/"
+        )
+      ) {
+        url.pathname =
+          url.pathname.replace(
+            /\/+$/,
+            ""
+          );
+      }
+
+      return url.toString();
+    } catch {
+      return normalized;
+    }
+  }
+
+  return normalized.toLowerCase();
 }
 
 function createInitialItems(
@@ -71,7 +168,7 @@ function createInitialItems(
       normalizeItem
     )
     .filter(
-      Boolean
+      isValidIdentifier
     )
     .filter(
       (
@@ -117,11 +214,243 @@ function createInitialItems(
     );
 }
 
+/*
+ * Small CSV parser that understands quoted cells.
+ * We only use it to extract claimant-supplied
+ * Content IDs and URLs from simple CSV files.
+ */
+function parseCsvLine(
+  line: string
+): string[] {
+  const cells:
+    string[] = [];
+
+  let current =
+    "";
+
+  let insideQuotes =
+    false;
+
+  for (
+    let index = 0;
+    index < line.length;
+    index += 1
+  ) {
+    const character =
+      line[index];
+
+    if (
+      character ===
+      "\""
+    ) {
+      const nextCharacter =
+        line[
+          index +
+            1
+        ];
+
+      if (
+        insideQuotes &&
+        nextCharacter ===
+          "\""
+      ) {
+        current +=
+          "\"";
+
+        index +=
+          1;
+      } else {
+        insideQuotes =
+          !insideQuotes;
+      }
+
+      continue;
+    }
+
+    if (
+      character ===
+        "," &&
+      !insideQuotes
+    ) {
+      cells.push(
+        current.trim()
+      );
+
+      current =
+        "";
+
+      continue;
+    }
+
+    current +=
+      character;
+  }
+
+  cells.push(
+    current.trim()
+  );
+
+  return cells;
+}
+
+function isPossibleHeader(
+  value: string
+): boolean {
+  const normalized =
+    value
+      .trim()
+      .toLowerCase()
+      .replace(
+        /[\s_-]+/g,
+        ""
+      );
+
+  return [
+    "content",
+    "contentid",
+    "postercontentid",
+    "url",
+    "contenturl",
+    "posterurl",
+    "originalurl",
+  ].includes(
+    normalized
+  );
+}
+
+function extractIdentifiersFromFile(
+  fileName: string,
+  text: string
+): string[] {
+  const lowerName =
+    fileName.toLowerCase();
+
+  if (
+    lowerName.endsWith(
+      ".csv"
+    )
+  ) {
+    return text
+      .split(
+        /\r?\n/
+      )
+      .flatMap(
+        (
+          line
+        ) =>
+          parseCsvLine(
+            line
+          )
+      )
+      .map(
+        (
+          value
+        ) =>
+          value.trim()
+      )
+      .filter(
+        Boolean
+      )
+      .filter(
+        (
+          value
+        ) =>
+          !isPossibleHeader(
+            value
+          )
+      );
+  }
+
+  return text
+    .split(
+      /\r?\n/
+    )
+    .map(
+      (
+        value
+      ) =>
+        value.trim()
+    )
+    .filter(
+      Boolean
+    )
+    .filter(
+      (
+        value
+      ) =>
+        !isPossibleHeader(
+          value
+        )
+    );
+}
+
+function importSummaryText(
+  result: ImportResult
+): string {
+  const parts:
+    string[] = [];
+
+  parts.push(
+    `${result.added} ${
+      result.added ===
+      1
+        ? "item"
+        : "items"
+    } added`
+  );
+
+  if (
+    result.duplicates >
+    0
+  ) {
+    parts.push(
+      `${result.duplicates} ${
+        result.duplicates ===
+        1
+          ? "duplicate"
+          : "duplicates"
+      } skipped`
+    );
+  }
+
+  if (
+    result.invalid >
+    0
+  ) {
+    parts.push(
+      `${result.invalid} invalid ${
+        result.invalid ===
+        1
+          ? "identifier"
+          : "identifiers"
+      } skipped`
+    );
+  }
+
+  if (
+    result.limitSkipped >
+    0
+  ) {
+    parts.push(
+      `${result.limitSkipped} skipped because the ${MAX_BULK_ITEMS}-item limit was reached`
+    );
+  }
+
+  return parts.join(
+    " · "
+  );
+}
+
 export default function BulkRemovalForm({
   initialItems = [],
 }: BulkRemovalFormProps) {
   const router =
     useRouter();
+
+  const fileInputRef =
+    useRef<HTMLInputElement>(
+      null
+    );
 
   const [
     rawItems,
@@ -145,6 +474,12 @@ export default function BulkRemovalForm({
   const [
     error,
     setError,
+  ] =
+    useState("");
+
+  const [
+    importMessage,
+    setImportMessage,
   ] =
     useState("");
 
@@ -192,98 +527,113 @@ export default function BulkRemovalForm({
     selectedCount ===
       items.length;
 
-  const addItems =
-    () => {
-      const entered =
-        rawItems
-          .split(
-            /\r?\n/
-          )
-          .map(
-            normalizeItem
-          )
-          .filter(
-            Boolean
+  const processIdentifiers = (
+    incomingValues:
+      string[]
+  ): ImportResult => {
+    const existingKeys =
+      new Set(
+        items.map(
+          (
+            item
+          ) =>
+            itemComparisonKey(
+              item.value
+            )
+        )
+      );
+
+    const incomingKeys =
+      new Set<string>();
+
+    const validUnique:
+      string[] = [];
+
+    let duplicates =
+      0;
+
+    let invalid =
+      0;
+
+    incomingValues.forEach(
+      (
+        rawValue
+      ) => {
+        const value =
+          normalizeItem(
+            rawValue
           );
 
-      if (
-        entered.length ===
-        0
-      ) {
-        setError(
-          "Paste at least one Poster URL or Content ID."
-        );
+        if (
+          !value
+        ) {
+          return;
+        }
 
-        return;
-      }
-
-      const existingKeys =
-        new Set(
-          items.map(
-            (
-              item
-            ) =>
-              itemComparisonKey(
-                item.value
-              )
-          )
-        );
-
-      const batchKeys =
-        new Set<string>();
-
-      const uniqueNewItems =
-        entered.filter(
-          (
+        if (
+          !isValidIdentifier(
             value
-          ) => {
-            const key =
-              itemComparisonKey(
-                value
-              );
+          )
+        ) {
+          invalid +=
+            1;
 
-            if (
-              existingKeys.has(
-                key
-              ) ||
-              batchKeys.has(
-                key
-              )
-            ) {
-              return false;
-            }
+          return;
+        }
 
-            batchKeys.add(
-              key
-            );
+        const key =
+          itemComparisonKey(
+            value
+          );
 
-            return true;
-          }
+        if (
+          existingKeys.has(
+            key
+          ) ||
+          incomingKeys.has(
+            key
+          )
+        ) {
+          duplicates +=
+            1;
+
+          return;
+        }
+
+        incomingKeys.add(
+          key
         );
 
-      if (
-        uniqueNewItems.length ===
-        0
-      ) {
-        setError(
-          "No new unique items were found. Duplicate entries were not added."
+        validUnique.push(
+          value
         );
-
-        return;
       }
+    );
 
-      if (
-        items.length +
-          uniqueNewItems.length >
-        MAX_BULK_ITEMS
-      ) {
-        setError(
-          `A bulk request can contain up to ${MAX_BULK_ITEMS} affected items in the current version. Remove some items or submit another bulk request.`
-        );
+    const availableSlots =
+      Math.max(
+        0,
+        MAX_BULK_ITEMS -
+          items.length
+      );
 
-        return;
-      }
+    const accepted =
+      validUnique.slice(
+        0,
+        availableSlots
+      );
 
+    const limitSkipped =
+      Math.max(
+        0,
+        validUnique.length -
+          accepted.length
+      );
+
+    if (
+      accepted.length >
+      0
+    ) {
       const timestamp =
         Date.now();
 
@@ -293,13 +643,13 @@ export default function BulkRemovalForm({
         ) => [
           ...current,
 
-          ...uniqueNewItems.map(
+          ...accepted.map(
             (
               value,
               index
             ) => ({
               id:
-                `${timestamp}-${index}`,
+                `${timestamp}-${index}-${value}`,
 
               value,
 
@@ -309,14 +659,224 @@ export default function BulkRemovalForm({
           ),
         ]
       );
+    }
 
-      setRawItems("");
+    setConfirmSubmission(
+      false
+    );
 
-      setError("");
+    return {
+      added:
+        accepted.length,
 
-      setConfirmSubmission(
-        false
+      duplicates,
+
+      invalid,
+
+      limitSkipped,
+    };
+  };
+
+  const addPastedItems =
+    () => {
+      const entered =
+        rawItems
+          .split(
+            /\r?\n/
+          )
+          .map(
+            (
+              value
+            ) =>
+              value.trim()
+          )
+          .filter(
+            Boolean
+          );
+
+      if (
+        entered.length ===
+        0
+      ) {
+        setImportMessage(
+          ""
+        );
+
+        setError(
+          "Paste at least one Poster Content ID or exact http/https URL."
+        );
+
+        return;
+      }
+
+      const result =
+        processIdentifiers(
+          entered
+        );
+
+      setImportMessage(
+        importSummaryText(
+          result
+        )
       );
+
+      if (
+        result.added >
+        0
+      ) {
+        setRawItems(
+          ""
+        );
+
+        setError(
+          ""
+        );
+      } else if (
+        result.invalid >
+        0
+      ) {
+        setError(
+          "No valid new items were added. Use Poster Content IDs such as CNT-10482 or complete http/https URLs."
+        );
+      } else {
+        setError(
+          "No new unique items were added."
+        );
+      }
+    };
+
+  const openFilePicker =
+    () => {
+      fileInputRef.current?.click();
+    };
+
+  const handleFileUpload =
+    async (
+      event:
+        ChangeEvent<HTMLInputElement>
+    ) => {
+      const file =
+        event.target.files?.[
+          0
+        ];
+
+      /*
+       * Reset immediately so the same
+       * file can be selected again later.
+       */
+      event.target.value =
+        "";
+
+      if (
+        !file
+      ) {
+        return;
+      }
+
+      const lowerName =
+        file.name.toLowerCase();
+
+      const supported =
+        lowerName.endsWith(
+          ".txt"
+        ) ||
+        lowerName.endsWith(
+          ".csv"
+        );
+
+      if (
+        !supported
+      ) {
+        setImportMessage(
+          ""
+        );
+
+        setError(
+          "Unsupported file type. Upload a .txt or .csv file."
+        );
+
+        return;
+      }
+
+      if (
+        file.size >
+        MAX_FILE_SIZE_BYTES
+      ) {
+        setImportMessage(
+          ""
+        );
+
+        setError(
+          "The file is too large. Upload a .txt or .csv file smaller than 1 MB."
+        );
+
+        return;
+      }
+
+      try {
+        const text =
+          await file.text();
+
+        const extracted =
+          extractIdentifiersFromFile(
+            file.name,
+            text
+          );
+
+        if (
+          extracted.length ===
+          0
+        ) {
+          setImportMessage(
+            ""
+          );
+
+          setError(
+            "No Content IDs or URLs were found in the uploaded file."
+          );
+
+          return;
+        }
+
+        const result =
+          processIdentifiers(
+            extracted
+          );
+
+        setImportMessage(
+          `${file.name}: ${importSummaryText(
+            result
+          )}`
+        );
+
+        if (
+          result.added >
+          0
+        ) {
+          setError(
+            ""
+          );
+        } else if (
+          result.invalid >
+          0
+        ) {
+          setError(
+            "The file did not contain any new valid Poster Content IDs or complete http/https URLs."
+          );
+        } else {
+          setError(
+            "The uploaded file did not contain any new unique items."
+          );
+        }
+      } catch {
+        setImportMessage(
+          ""
+        );
+
+        setError(
+          "The selected file could not be read. Try another .txt or .csv file."
+        );
+      }
     };
 
   const toggleItem = (
@@ -394,7 +954,13 @@ export default function BulkRemovalForm({
           )
       );
 
-      setError("");
+      setError(
+        ""
+      );
+
+      setImportMessage(
+        ""
+      );
 
       setConfirmSubmission(
         false
@@ -441,7 +1007,9 @@ export default function BulkRemovalForm({
     if (
       !confirmSubmission
     ) {
-      setError("");
+      setError(
+        ""
+      );
 
       setConfirmSubmission(
         true
@@ -454,12 +1022,14 @@ export default function BulkRemovalForm({
      * Frontend-only workflow.
      *
      * Production backend will later:
-     * - generate one CR parent case,
-     * - create item-level affected records,
-     * - deduplicate by canonical Poster Content ID,
+     * - validate every identifier again server-side,
+     * - resolve exact Poster records,
+     * - deduplicate by canonical Content ID,
+     * - create one CR parent case,
+     * - create affected-item child records,
      * - send the case to Admin Copyright,
      * - store item-level outcomes,
-     * - send claimant notifications.
+     * - notify the claimant.
      */
     router.push(
       `/submitted?type=bulk&count=${selectedCount}`
@@ -486,14 +1056,12 @@ export default function BulkRemovalForm({
           }
         >
           <h2>
-            1. Claimant information
+            1. Claimant
           </h2>
 
           <p>
-            Enter the rights holder or
-            authorized representative
-            once for this entire bulk
-            copyright request.
+            Rights holder or authorized
+            representative for this request.
           </p>
         </div>
 
@@ -586,10 +1154,8 @@ export default function BulkRemovalForm({
           </h2>
 
           <p>
-            Identify the original work,
-            collection, publication, or
-            other copyright material
-            covered by this request.
+            Identify the original work or
+            collection covered by this request.
           </p>
         </div>
 
@@ -617,13 +1183,6 @@ export default function BulkRemovalForm({
               type="url"
               placeholder="https://"
             />
-
-            <span className="fieldHelp">
-              Provide an original
-              publication, publisher, or
-              ownership reference when
-              available.
-            </span>
           </div>
         </div>
       </section>
@@ -639,18 +1198,16 @@ export default function BulkRemovalForm({
           }
         >
           <h2>
-            3. Affected Poster content
+            3. Affected content
           </h2>
 
           <p>
-            Add the Poster Content IDs or
-            exact URLs you already know.
-            You can include up to
+            Add up to
             {" "}
             {MAX_BULK_ITEMS}
             {" "}
-            affected items in one bulk
-            request.
+            known Poster Content IDs or
+            exact URLs.
           </p>
         </div>
 
@@ -661,11 +1218,11 @@ export default function BulkRemovalForm({
             {" "}
             {items.length ===
             1
-              ? "affected item is"
-              : "affected items are"}
-            {" "}
-            currently attached to this
-            request.
+              ? "item attached"
+              : "items attached"}
+            {" · "}
+            {selectedCount}
+            {" selected"}
           </div>
         ) : null}
 
@@ -680,7 +1237,7 @@ export default function BulkRemovalForm({
           }}
         >
           <label htmlFor="bulk-items">
-            Add Poster URLs / Content IDs
+            Paste Content IDs / exact URLs
           </label>
 
           <textarea
@@ -692,20 +1249,16 @@ export default function BulkRemovalForm({
               event
             ) =>
               setRawItems(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder={`CNT-10482
 CNT-10510
-https://poster.example/content/...
-https://example.com/original-content`}
+https://publisher.example/article/123`}
           />
 
           <span className="fieldHelp">
-            Enter one Content ID or exact
-            URL per line. Duplicate values
-            are not added twice.
+            One identifier per line.
           </span>
         </div>
 
@@ -713,17 +1266,68 @@ https://example.com/original-content`}
           className={
             styles.bulkInputActions
           }
+          style={{
+            gap: 10,
+            flexWrap: "wrap",
+          }}
         >
+          <input
+            ref={
+              fileInputRef
+            }
+            type="file"
+            accept=".txt,.csv,text/plain,text/csv"
+            onChange={
+              handleFileUpload
+            }
+            style={{
+              display:
+                "none",
+            }}
+          />
+
           <button
             type="button"
             className="secondaryButton"
             onClick={
-              addItems
+              openFilePicker
             }
           >
-            Add items
+            Upload .txt or .csv
+          </button>
+
+          <button
+            type="button"
+            className="primaryButton"
+            onClick={
+              addPastedItems
+            }
+          >
+            Add pasted items
           </button>
         </div>
+
+        {importMessage ? (
+          <div
+            style={{
+              marginTop: 12,
+              padding: "10px 12px",
+              border:
+                "1px solid #DDE7F6",
+              borderRadius: 8,
+              background:
+                "#F8FAFC",
+              color:
+                "#475569",
+              fontSize: 12,
+              lineHeight: "19px",
+            }}
+          >
+            {
+              importMessage
+            }
+          </div>
+        ) : null}
 
         {items.length >
         0 ? (
@@ -857,14 +1461,12 @@ https://example.com/original-content`}
               styles.emptyItems
             }
           >
-            No affected content has
-            been added yet.
+            No affected content added yet.
             <br />
-            Add known Poster Content
-            IDs or exact URLs above,
-            or arrive here from Find
-            Your Content with matched
-            records already selected.
+            Paste known Content IDs / URLs,
+            upload a .txt or .csv file, or
+            arrive from Find Your Content
+            with matched items already selected.
           </div>
         )}
       </section>
@@ -884,11 +1486,8 @@ https://example.com/original-content`}
           </h2>
 
           <p>
-            Explain why these affected
-            records belong in the same
-            copyright request and provide
-            information that helps review
-            them accurately.
+            Explain the copyright concern
+            that applies to the selected items.
           </p>
         </div>
 
@@ -902,7 +1501,6 @@ https://example.com/original-content`}
               id="bulk-reason"
               name="reason"
               required
-              placeholder="Explain the copyright concern that applies to these selected Poster content records."
             />
           </div>
 
@@ -936,8 +1534,7 @@ https://example.com/original-content`}
 
           <p>
             These declarations apply to
-            every selected item included
-            in this bulk copyright request.
+            every selected item.
           </p>
         </div>
 
@@ -1006,10 +1603,9 @@ https://example.com/original-content`}
             />
 
             <span>
-              I confirm that the
-              information supplied is
-              accurate to the best of
-              my knowledge.
+              I confirm that the information
+              supplied is accurate to the best
+              of my knowledge.
             </span>
           </label>
 
@@ -1040,9 +1636,9 @@ https://example.com/original-content`}
             />
 
             <span>
-              I am the rights holder or
-              am authorized to act on
-              behalf of the rights holder.
+              I am the rights holder or am
+              authorized to act on behalf of
+              the rights holder.
             </span>
           </label>
 
@@ -1059,9 +1655,7 @@ https://example.com/original-content`}
             />
 
             <span className="fieldHelp">
-              Used to confirm the person
-              making this request. No
-              Poster account is created.
+              No Poster account is created.
             </span>
           </div>
         </div>
@@ -1097,16 +1691,13 @@ https://example.com/original-content`}
               ? " content item"
               : " content items"}
             {" "}
-            for review as one copyright
-            case.
+            as one copyright case.
           </p>
 
           <p>
-            Submission does not
-            automatically remove content.
-            Each affected item can receive
-            its own verification, review,
-            and final outcome.
+            Submission does not automatically
+            remove content. Each affected item
+            is reviewed before action.
           </p>
         </div>
       ) : null}

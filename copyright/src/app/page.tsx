@@ -1,48 +1,29 @@
 import Link from "next/link";
 
-const workflowSteps = [
+const primaryActions = [
   {
-    number:
-      "1",
-
-    title:
-      "Identify",
-
+    href: "/find",
+    title: "Find Your Content",
     description:
-      "Use Find Your Content when you already have a Poster Content ID or exact content URL.",
+      "Check a Content ID or exact URL you already have.",
+    action: "Find content",
+    featured: true,
   },
-
   {
-    number:
-      "2",
-
-    title:
-      "Submit",
-
+    href: "/request",
+    title: "Submit Claim",
     description:
-      "Submit a normal copyright claim or group many known affected records into one bulk request.",
+      "Report one affected Poster content record.",
+    action: "Submit claim",
+    featured: false,
   },
-
   {
-    number:
-      "3",
-
-    title:
-      "Verify and review",
-
+    href: "/bulk-removal",
+    title: "Bulk Removal Request",
     description:
-      "Claimant information, supporting evidence, and affected content can be verified before action is taken.",
-  },
-
-  {
-    number:
-      "4",
-
-    title:
-      "Track the outcome",
-
-    description:
-      "Once backend services are connected, claimants can securely follow review and resolution status.",
+      "Report multiple known content records in one case.",
+    action: "Start bulk request",
+    featured: false,
   },
 ] as const;
 
@@ -60,13 +41,8 @@ export default function CopyrightCenterPage() {
           </h1>
 
           <p className="pageDescription">
-            Find content you already know
-            about, report a copyright
-            concern, submit many affected
-            records together, and follow
-            the outcome of a submitted
-            request without creating an
-            account.
+            Find, report, or track a copyright
+            concern without creating an account.
           </p>
         </div>
       </header>
@@ -76,430 +52,117 @@ export default function CopyrightCenterPage() {
           What do you need to do?
         </h2>
 
-        <p className="sectionDescription">
-          Choose the path that best matches
-          the information you already have
-          and the number of affected Poster
-          content records involved.
-        </p>
-
         <div
           style={{
-            display:
-              "grid",
-
+            display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit, minmax(230px, 1fr))",
-
-            gap:
-              12,
-
-            marginTop:
-              20,
+            gap: 12,
+            marginTop: 18,
           }}
         >
-          <Link
-            href="/find"
-            style={{
-              padding:
-                18,
-
-              border:
-                "1px solid #DBE7FB",
-
-              borderRadius:
-                10,
-
-              textDecoration:
-                "none",
-
-              background:
-                "#F8FAFF",
-            }}
-          >
-            <strong>
-              Find Your Content
-            </strong>
-
-            <p
+          {primaryActions.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
               style={{
-                margin:
-                  "6px 0 0",
-
-                color:
-                  "#64748B",
-
-                fontSize:
-                  14,
-
-                lineHeight:
-                  "21px",
+                display: "flex",
+                minHeight: 170,
+                flexDirection: "column",
+                padding: 20,
+                border: item.featured
+                  ? "1px solid #C9DAFA"
+                  : "1px solid #E2E8F0",
+                borderRadius: 10,
+                background: item.featured
+                  ? "#F8FAFF"
+                  : "#FFFFFF",
+                color: "#0F172A",
+                textDecoration: "none",
               }}
             >
-              Enter a Poster Content ID,
-              Poster URL, or exact
-              original-source URL you
-              already possess and check
-              for an exact matching record.
-            </p>
-          </Link>
-
-          <Link
-            href="/request"
-            style={{
-              padding:
-                18,
-
-              border:
-                "1px solid #E2E8F0",
-
-              borderRadius:
-                10,
-
-              textDecoration:
-                "none",
-
-              background:
-                "#FFFFFF",
-            }}
-          >
-            <strong>
-              Submit Claim
-            </strong>
-
-            <p
-              style={{
-                margin:
-                  "6px 0 0",
-
-                color:
-                  "#64748B",
-
-                fontSize:
-                  14,
-
-                lineHeight:
-                  "21px",
-              }}
-            >
-              Best for one affected
-              content record or a smaller,
-              straightforward copyright
-              request.
-            </p>
-          </Link>
-
-          <Link
-            href="/bulk-removal"
-            style={{
-              padding:
-                18,
-
-              border:
-                "1px solid #E2E8F0",
-
-              borderRadius:
-                10,
-
-              textDecoration:
-                "none",
-
-              background:
-                "#FFFFFF",
-            }}
-          >
-            <strong>
-              Bulk Removal Request
-            </strong>
-
-            <p
-              style={{
-                margin:
-                  "6px 0 0",
-
-                color:
-                  "#64748B",
-
-                fontSize:
-                  14,
-
-                lineHeight:
-                  "21px",
-              }}
-            >
-              Submit many known Poster
-              Content IDs or exact URLs
-              together as one copyright
-              case.
-            </p>
-          </Link>
-        </div>
-      </section>
-
-      <section className="contentCard">
-        <h2 className="sectionTitle">
-          Find only content you already know
-        </h2>
-
-        <p className="sectionDescription">
-          Find Your Content is designed
-          for exact matching. It does not
-          provide public browsing of
-          Poster&apos;s content inventory,
-          broad publisher searches,
-          content suggestions, or similar
-          record discovery.
-        </p>
-
-        <div
-          className="notice"
-          style={{
-            marginTop:
-              18,
-          }}
-        >
-          You provide a Poster Content ID,
-          Poster URL, or exact original
-          source URL that you already
-          possess. Poster checks only for
-          the corresponding exact record.
-        </div>
-      </section>
-
-      <section className="contentCard">
-        <h2 className="sectionTitle">
-          How copyright requests work
-        </h2>
-
-        <p className="sectionDescription">
-          Finding an exact Poster record
-          identifies the affected content.
-          It does not automatically verify
-          copyright ownership or remove
-          content.
-        </p>
-
-        <div
-          style={{
-            display:
-              "grid",
-
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(180px, 1fr))",
-
-            gap:
-              12,
-
-            marginTop:
-              18,
-          }}
-        >
-          {workflowSteps.map(
-            (
-              step
-            ) => (
-              <div
-                key={
-                  step.number
-                }
+              <strong
                 style={{
-                  padding:
-                    16,
-
-                  border:
-                    "1px solid #E2E8F0",
-
-                  borderRadius:
-                    8,
-
-                  background:
-                    "#FFFFFF",
+                  fontSize: 17,
+                  lineHeight: "24px",
                 }}
               >
-                <strong
-                  style={{
-                    color:
-                      "#5B86E5",
+                {item.title}
+              </strong>
 
-                    fontSize:
-                      13,
-                  }}
-                >
-                  {
-                    step.number
-                  }
-                </strong>
+              <p
+                style={{
+                  margin: "7px 0 20px",
+                  color: "#64748B",
+                  fontSize: 14,
+                  lineHeight: "21px",
+                }}
+              >
+                {item.description}
+              </p>
 
-                <div
-                  style={{
-                    marginTop:
-                      5,
-
-                    fontWeight:
-                      600,
-                  }}
-                >
-                  {
-                    step.title
-                  }
-                </div>
-
-                <p
-                  style={{
-                    margin:
-                      "5px 0 0",
-
-                    color:
-                      "#64748B",
-
-                    fontSize:
-                      13,
-
-                    lineHeight:
-                      "20px",
-                  }}
-                >
-                  {
-                    step.description
-                  }
-                </p>
-              </div>
-            )
-          )}
+              <span
+                style={{
+                  marginTop: "auto",
+                  color: "#416ECF",
+                  fontSize: 13,
+                  lineHeight: "20px",
+                  fontWeight: 600,
+                }}
+              >
+                {item.action} →
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="contentCard">
-        <h2 className="sectionTitle">
-          Bulk copyright requests
-        </h2>
-
-        <p className="sectionDescription">
-          A rights holder can submit many
-          known affected records as one
-          case instead of completing the
-          same claimant information for
-          every item separately.
-        </p>
-
         <div
           style={{
-            marginTop:
-              18,
-
-            display:
-              "grid",
-
-            gap:
-              8,
-
-            color:
-              "#475569",
-
-            fontSize:
-              13,
-
-            lineHeight:
-              "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 24,
+            flexWrap: "wrap",
           }}
         >
           <div>
-            ✓ Paste multiple known Content
-            IDs or exact URLs.
+            <h2 className="sectionTitle">
+              Already submitted a request?
+            </h2>
+
+            <p className="sectionDescription">
+              Check the current status and outcome
+              of your copyright case.
+            </p>
           </div>
 
-          <div>
-            ✓ Select affected items using
-            square checkboxes.
-          </div>
-
-          <div>
-            ✓ Duplicate entries are not
-            added twice.
-          </div>
-
-          <div>
-            ✓ Submit selected records
-            together as one copyright case.
-          </div>
-
-          <div>
-            ✓ Each affected item can later
-            receive its own review outcome.
-          </div>
-        </div>
-      </section>
-
-      <section className="contentCard">
-        <h2 className="sectionTitle">
-          No account required
-        </h2>
-
-        <p className="sectionDescription">
-          Copyright requests remain
-          separate from Poster consumer
-          accounts. Claimants do not need
-          to create a username or password
-          to report a copyright concern.
-        </p>
-
-        <p
-          style={{
-            margin:
-              "10px 0 0",
-
-            color:
-              "#64748B",
-
-            fontSize:
-              13,
-
-            lineHeight:
-              "21px",
-          }}
-        >
-          Once backend and email services
-          are connected, claim verification,
-          secure status access, permanent
-          claim references, and notifications
-          will use the contact information
-          supplied with the request.
-        </p>
-      </section>
-
-      <section className="contentCard">
-        <h2 className="sectionTitle">
-          Already submitted a request?
-        </h2>
-
-        <p className="sectionDescription">
-          Use Check Status to follow a
-          submitted copyright case once
-          secure verification and backend
-          claim lookup are connected.
-        </p>
-
-        <div
-          style={{
-            marginTop:
-              16,
-          }}
-        >
           <Link
             href="/status"
-            className="secondaryButton"
+            className="primaryButton"
             style={{
-              display:
-                "inline-block",
-
-              textDecoration:
-                "none",
+              display: "inline-block",
+              textDecoration: "none",
             }}
           >
             Check Status
           </Link>
         </div>
       </section>
+
+      <div
+        style={{
+          padding: "4px 2px",
+          color: "#64748B",
+          fontSize: 12,
+          lineHeight: "19px",
+        }}
+      >
+        No account required · Finding a record does
+        not verify copyright ownership · Requests
+        are reviewed before action is taken.
+      </div>
     </>
   );
 }
