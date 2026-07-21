@@ -1,0 +1,191 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.sectionHeader {
+  margin-bottom: 18px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+}
+
+.sectionHeader p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.declarations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.checkboxRow input {
+  width: 17px;
+  height: 17px;
+  margin: 2px 0 0;
+  flex: 0 0 auto;
+  accent-color: var(--primary);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.error {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.bulkInputActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.selectionToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.selectionToolbarLeft,
+.selectionToolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selectionCount {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.itemList {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.itemRow:last-child {
+  border-bottom: 0;
+}
+
+.itemRow input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary);
+}
+
+.itemValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.itemNumber {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.emptyItems {
+  margin-top: 12px;
+  padding: 22px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.confirmBox {
+  padding: 16px;
+  border: 1px solid #dbe7fb;
+  border-radius: 8px;
+  background: #f7f9ff;
+}
+
+.confirmBox strong {
+  display: block;
+}
+
+.confirmBox p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+@media (max-width: 680px) {
+  .section {
+    padding: 18px;
+  }
+
+  .selectionToolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .selectionToolbarRight {
+    width: 100%;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
