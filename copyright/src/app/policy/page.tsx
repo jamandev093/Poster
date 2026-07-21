@@ -40,8 +40,8 @@ export default function CopyrightPolicyPage() {
         <p className="sectionDescription">
           A claimant should identify the affected
           Poster record, the original copyrighted
-          work, their relationship to the rights,
-          and information that supports the request.
+          work, their relationship to the rights, and
+          information that supports the request.
         </p>
       </section>
 
@@ -53,8 +53,8 @@ export default function CopyrightPolicyPage() {
         <p className="sectionDescription">
           Related affected records can be submitted
           together as one copyright case. Each item
-          can still receive its own verification,
-          review, and outcome.
+          can receive its own review and final
+          outcome.
         </p>
       </section>
 
@@ -65,7 +65,7 @@ export default function CopyrightPolicyPage() {
 
         <p className="sectionDescription">
           Submission does not automatically remove
-          content. Poster may verify claimant
+          content. Poster may check claimant
           information, affected records, source
           information, and supporting evidence before
           taking action.
@@ -98,23 +98,68 @@ export default function CopyrightPolicyPage() {
           </div>
 
           <div>
-            • A record may be unavailable or not matched.
+            • No action may be taken when a claim is not supported.
+          </div>
+
+          <div>
+            • A record may already be unavailable or may not be matched.
           </div>
         </div>
       </section>
 
       <section className="contentCard">
         <h2 className="sectionTitle">
-          Status and notifications
+          Status and support
         </h2>
 
         <p className="sectionDescription">
-          Claimants can track request outcomes without
-          creating a Poster account. Production claim
-          access and notifications will use secure
-          verification through the submitted contact
-          information once backend and email services
-          are connected.
+          Claimants can check a request without
+          creating a Poster account. Enter the claim
+          reference and the email used for submission
+          to see whether affected content was removed,
+          remains under review, requires more
+          information, or received another outcome.
+        </p>
+
+        <p
+          className="sectionDescription"
+          style={{
+            marginTop: 10,
+          }}
+        >
+          Production status access will match the
+          claim reference with the submitted email
+          and apply server-side security controls,
+          request limits, and generic error responses.
+          There is no separate verification or OTP
+          screen in this workflow.
+        </p>
+
+        <p
+          className="sectionDescription"
+          style={{
+            marginTop: 10,
+          }}
+        >
+          Claimants who need assistance can contact
+          Copyright Support through Signal and should
+          include their claim reference when asking
+          about a submitted request.
+        </p>
+      </section>
+
+      <section className="contentCard">
+        <h2 className="sectionTitle">
+          Claim outcomes
+        </h2>
+
+        <p className="sectionDescription">
+          A single claim displays the overall case
+          status, whether the affected content was
+          removed, and whether re-import protection
+          was enabled. A bulk claim displays a
+          separate status and outcome for every
+          affected content record.
         </p>
       </section>
 

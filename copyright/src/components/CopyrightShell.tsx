@@ -5,11 +5,11 @@ import type {
 } from "react";
 
 import Link from "next/link";
-
 import {
   usePathname,
 } from "next/navigation";
 
+import SignalContact from "./SignalContact";
 import styles from "./CopyrightShell.module.css";
 
 interface CopyrightShellProps {
@@ -18,9 +18,7 @@ interface CopyrightShellProps {
 
 interface NavigationItem {
   href: string;
-
   label: string;
-
   description: string;
 }
 
@@ -28,61 +26,44 @@ const navigation:
   NavigationItem[] = [
   {
     href: "/",
-
     label:
       "Copyright Center",
-
     description:
       "Overview",
   },
-
   {
     href: "/find",
-
     label:
       "Find Your Content",
-
     description:
       "Exact matching",
   },
-
   {
     href: "/request",
-
     label:
       "Submit Claim",
-
     description:
       "Single content claim",
   },
-
   {
     href:
       "/bulk-removal",
-
     label:
       "Bulk Removal Request",
-
     description:
       "Multiple content claims",
   },
-
   {
     href: "/status",
-
     label:
       "Check Status",
-
     description:
       "Track your claim",
   },
-
   {
     href: "/policy",
-
     label:
       "Copyright Policy",
-
     description:
       "Policies & process",
   },
@@ -95,15 +76,15 @@ function isActivePath(
   if (
     href === "/"
   ) {
-    return pathname ===
-      "/";
+    return pathname === "/";
   }
 
-  return pathname ===
-      href ||
+  return (
+    pathname === href ||
     pathname.startsWith(
       `${href}/`
-    );
+    )
+  );
 }
 
 export default function CopyrightShell({
@@ -221,6 +202,8 @@ export default function CopyrightShell({
             without creating a
             Poster account.
           </span>
+
+          <SignalContact variant="sidebar" />
         </div>
       </aside>
 
