@@ -17,63 +17,108 @@ export default function AuthShell({
 }: AuthShellProps) {
   return (
     <main className={styles.page}>
-      <section className={styles.brandPanel}>
-        <Link href="/login" className={styles.brand}>
-          <span className={styles.brandMark}>P</span>
+      <aside className={styles.brandPanel}>
+        <div className={styles.brandTop}>
+          <Link
+            href="/login"
+            className={styles.brand}
+          >
+            <span className={styles.brandMark}>
+              P
+            </span>
 
-          <span>
-            <strong>Poster</strong>
-            <small>Client</small>
-          </span>
-        </Link>
+            <span className={styles.brandText}>
+              <strong>Poster</strong>
+              <small>Client Workspace</small>
+            </span>
+          </Link>
+        </div>
 
-        <div className={styles.brandContent}>
-          <span className={styles.eyebrow}>
-            Commercial workspace
-          </span>
+        <div className={styles.workspaceIntro}>
+          <div className={styles.eyebrow}>
+            FOR BUSINESS PARTNERS
+          </div>
 
           <h1>
-            Requests, campaigns, and performance in one place.
+            Manage commercial work with Poster.
           </h1>
 
-          <div className={styles.featureList}>
-            <div>
-              <span>01</span>
-              Submit sponsorship and affiliate requests
+          <p>
+            Submit requests, follow campaign status,
+            and review performance from one workspace.
+          </p>
+
+          <div className={styles.capabilities}>
+            <div className={styles.capability}>
+              <span className={styles.capabilityMark}>
+                ✓
+              </span>
+
+              <span>
+                Sponsorship and affiliate requests
+              </span>
             </div>
 
-            <div>
-              <span>02</span>
-              Track Admin review and requested changes
+            <div className={styles.capability}>
+              <span className={styles.capabilityMark}>
+                ✓
+              </span>
+
+              <span>
+                Campaign status and delivery
+              </span>
             </div>
 
-            <div>
-              <span>03</span>
-              View campaign delivery and results
+            <div className={styles.capability}>
+              <span className={styles.capabilityMark}>
+                ✓
+              </span>
+
+              <span>
+                Performance and conversion reporting
+              </span>
             </div>
           </div>
         </div>
 
-        <p className={styles.brandFooter}>
-          One organization · One primary client
-        </p>
-      </section>
+        <footer className={styles.brandFooter}>
+          <span>Poster</span>
+
+          <span className={styles.footerDivider}>
+            ·
+          </span>
+
+          <span>Commercial Operations</span>
+        </footer>
+      </aside>
 
       <section className={styles.formPanel}>
         <div className={styles.mobileBrand}>
           <Link href="/login">
             <span>P</span>
-            <strong>Poster Client</strong>
+
+            <div>
+              <strong>Poster</strong>
+              <small>Client Workspace</small>
+            </div>
           </Link>
         </div>
 
-        <div className={styles.formContainer}>
-          <header className={styles.formHeader}>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </header>
+        <div className={styles.formWrap}>
+          <section className={styles.authCard}>
+            <header className={styles.formHeader}>
+              <h2>{title}</h2>
 
-          {children}
+              <p>{description}</p>
+            </header>
+
+            {children}
+          </section>
+
+          <div className={styles.securityNote}>
+            Secure access for approved Poster business
+            accounts.
+          </div>
         </div>
       </section>
     </main>

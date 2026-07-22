@@ -1,11 +1,13 @@
 import AuthShell from "@/components/auth/AuthShell";
-import { LoginForm } from "@/features/auth/AuthForms";
+import {
+  LoginForm,
+} from "@/features/auth/AuthForms";
 
 export default function LoginPage() {
   return (
     <AuthShell
-      title="Sign in"
-      description="Open your organization’s Client workspace."
+      title="Sign in to Client"
+      description="Access your organization's requests, campaigns, and performance."
     >
       <LoginForm />
     </AuthShell>

@@ -57,10 +57,10 @@ export function LoginForm() {
   const router = useRouter();
 
   const [email, setEmail] =
-    useState("marketing@examplecloud.com");
+    useState("");
 
   const [password, setPassword] =
-    useState("ClientDemo123");
+    useState("");
 
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
