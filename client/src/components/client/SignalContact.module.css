@@ -1,0 +1,131 @@
+.contact,
+.contactDisabled {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+
+  padding: 7px 8px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+}
+
+.contact {
+  color: #334155;
+
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.contact:hover {
+  background: #f8fafc;
+  color: #315fbf;
+}
+
+.contactDisabled {
+  color: #64748b;
+  cursor: default;
+}
+
+.icon {
+  display: grid;
+
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 auto;
+
+  place-items: center;
+
+  border: 1px solid #dbe4f0;
+  border-radius: 8px;
+
+  background: #f8fafc;
+  color: #5b86e5;
+}
+
+.contact:hover .icon {
+  border-color: #c9dafa;
+  background: #f4f7ff;
+  color: #416ecf;
+}
+
+.iconSvg {
+  width: 16px;
+  height: 16px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.content {
+  min-width: 0;
+  flex: 1;
+}
+
+.content strong,
+.content small {
+  display: block;
+}
+
+.content strong {
+  overflow: hidden;
+
+  color: #334155;
+
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact:hover .content strong {
+  color: #315fbf;
+}
+
+.content small {
+  margin-top: 1px;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+  line-height: 14px;
+  font-weight: 500;
+}
+
+.arrow {
+  flex: 0 0 auto;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.contact:hover .arrow {
+  color: #5b86e5;
+}
+
+.unavailable {
+  flex: 0 0 auto;
+
+  color: #cbd5e1;
+
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .contact,
+  .contactDisabled {
+    min-height: 44px;
+  }
+}

@@ -1,45 +1,46 @@
 "use client";
 
+import styles from "./SignalContact.module.css";
+
 const SIGNAL_URL =
   process.env.NEXT_PUBLIC_SIGNAL_CONTACT_URL?.trim() ?? "";
 
 const SIGNAL_LABEL =
   process.env.NEXT_PUBLIC_SIGNAL_CONTACT_LABEL?.trim() ||
-  "Contact us on Signal";
+  "Contact on Signal";
+
+function SignalIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={styles.iconSvg}
+    >
+      <path d="M12 4.5c-4.7 0-8.5 3.1-8.5 7s3.8 7 8.5 7c1.1 0 2.2-.2 3.2-.5l4 1.4-1.2-3.3c1.6-1.2 2.5-2.8 2.5-4.6 0-3.9-3.8-7-8.5-7Z" />
+      <path d="M8.5 11.5h7" />
+    </svg>
+  );
+}
 
 export default function SignalContact() {
   if (!SIGNAL_URL) {
     return (
       <div
+        className={styles.contactDisabled}
         aria-disabled="true"
-        style={{
-          padding: "12px 13px",
-          border: "1px solid #D8E3F5",
-          borderRadius: 10,
-          background: "#F8FAFF",
-        }}
+        title="Signal support is not configured yet"
       >
-        <strong
-          style={{
-            display: "block",
-            color: "#0F172A",
-            fontSize: 13,
-            lineHeight: "19px",
-          }}
-        >
-          Contact us on Signal
-        </strong>
+        <span className={styles.icon}>
+          <SignalIcon />
+        </span>
 
-        <span
-          style={{
-            display: "block",
-            marginTop: 3,
-            color: "#94A3B8",
-            fontSize: 11,
-            lineHeight: "17px",
-          }}
-        >
-          Signal contact setup pending
+        <span className={styles.content}>
+          <strong>Contact on Signal</strong>
+          <small>Direct support</small>
+        </span>
+
+        <span className={styles.unavailable}>
+          —
         </span>
       </div>
     );
@@ -50,35 +51,23 @@ export default function SignalContact() {
       href={SIGNAL_URL}
       target="_blank"
       rel="noopener noreferrer"
-      style={{
-        display: "block",
-        padding: "12px 13px",
-        border: "1px solid #C9DAFA",
-        borderRadius: 10,
-        background: "#F8FAFF",
-      }}
+      className={styles.contact}
+      aria-label={`${SIGNAL_LABEL} — opens Signal in a new tab`}
     >
-      <strong
-        style={{
-          display: "block",
-          color: "#285CC4",
-          fontSize: 13,
-          lineHeight: "19px",
-        }}
-      >
-        {SIGNAL_LABEL}
-      </strong>
+      <span className={styles.icon}>
+        <SignalIcon />
+      </span>
+
+      <span className={styles.content}>
+        <strong>{SIGNAL_LABEL}</strong>
+        <small>Direct support</small>
+      </span>
 
       <span
-        style={{
-          display: "block",
-          marginTop: 3,
-          color: "#64748B",
-          fontSize: 11,
-          lineHeight: "17px",
-        }}
+        className={styles.arrow}
+        aria-hidden="true"
       >
-        Campaign and account support
+        ↗
       </span>
     </a>
   );

@@ -4,20 +4,20 @@ import styles from "./page.module.css";
 
 const metrics = [
   {
-    label: "Active campaigns",
-    value: "2",
-    detail: "Currently delivering",
-  },
-  {
-    label: "Requests need attention",
+    label: "Needs attention",
     value: "1",
     detail: "Changes requested",
     attention: true,
   },
   {
-    label: "Delivery completed",
+    label: "Active campaigns",
+    value: "2",
+    detail: "Currently delivering",
+  },
+  {
+    label: "Delivery",
     value: "72.8%",
-    detail: "Across active campaigns",
+    detail: "Active sponsorships",
   },
   {
     label: "Contract value",
@@ -28,16 +28,16 @@ const metrics = [
 
 const requests = [
   {
-    id: "ADV-1001",
-    name: "Cloud Skills Campaign",
-    type: "Direct Sponsorship",
-    status: "Pending review",
-  },
-  {
     id: "ADV-1002",
     name: "Learning Partner Offer",
     type: "Affiliate",
     status: "Changes requested",
+  },
+  {
+    id: "ADV-1001",
+    name: "Cloud Skills Campaign",
+    type: "Direct Sponsorship",
+    status: "Pending review",
   },
   {
     id: "ADV-1003",
@@ -52,182 +52,336 @@ const campaigns = [
     id: "CMP-3001",
     name: "Cloud Skills Campaign",
     status: "Active",
-    delivery: "72.8%",
+    delivery: 72.8,
     impressions: "7,28,000",
   },
   {
     id: "CMP-3010",
     name: "Future Skills Sponsorship",
     status: "Draft",
-    delivery: "0%",
+    delivery: 0,
     impressions: "0",
   },
 ];
 
+function getRequestStatusClass(
+  status: string
+) {
+  if (
+    status ===
+    "Changes requested"
+  ) {
+    return "statusBadge statusAttention";
+  }
+
+  if (
+    status ===
+    "Approved"
+  ) {
+    return "statusBadge statusActive";
+  }
+
+  return "statusBadge statusScheduled";
+}
+
 export default function DashboardPage() {
+  const attentionRequest =
+    requests.find(
+      (
+        request
+      ) =>
+        request.status ===
+        "Changes requested"
+    );
+
   return (
     <>
-      <header className="pageHeader">
+      <header className={styles.pageHeader}>
         <div>
-          <div className="pageEyebrow">Client workspace</div>
+          <div className={styles.pageContext}>
+            Example Cloud
+          </div>
 
-          <h1 className="pageTitle">Welcome, Example Cloud</h1>
+          <h1 className={styles.pageTitle}>
+            Dashboard
+          </h1>
 
-          <p className="pageDescription">
-            Review requests, approved campaigns, and delivery performance.
+          <p className={styles.pageDescription}>
+            Commercial activity and campaign delivery at a glance.
           </p>
         </div>
 
-        <Link href="/requests/new" className="primaryButton">
-          Submit new request
+        <Link
+          href="/requests/new"
+          className={styles.primaryAction}
+        >
+          New request
         </Link>
       </header>
 
-      <section className={styles.metrics}>
-        {metrics.map((metric) => (
-          <article
-            key={metric.label}
-            className={
-              metric.attention
-                ? styles.metricAttention
-                : styles.metric
-            }
-          >
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-            <small>{metric.detail}</small>
-          </article>
-        ))}
+      <section className={styles.summaryStrip}>
+        {metrics.map(
+          (
+            metric
+          ) => (
+            <div
+              key={
+                metric.label
+              }
+              className={styles.summaryItem}
+            >
+              <span>
+                {
+                  metric.label
+                }
+              </span>
+
+              <strong
+                className={
+                  metric.attention
+                    ? styles.attentionValue
+                    : undefined
+                }
+              >
+                {
+                  metric.value
+                }
+              </strong>
+
+              <small>
+                {
+                  metric.detail
+                }
+              </small>
+            </div>
+          )
+        )}
       </section>
 
       <section className={styles.mainGrid}>
-        <article className="contentCard">
-          <div className={styles.cardHeader}>
+        <article className={styles.panel}>
+          <div className={styles.panelHeader}>
             <div>
-              <h2 className="sectionTitle">Recent requests</h2>
-              <p className="sectionDescription">
+              <h2>
+                Recent requests
+              </h2>
+
+              <p>
                 Latest commercial submissions.
               </p>
             </div>
 
-            <Link href="/requests" className={styles.textLink}>
+            <Link
+              href="/requests"
+              className={styles.textLink}
+            >
               View all
             </Link>
           </div>
 
-          <div className={styles.list}>
-            {requests.map((request) => (
-              <Link
-                key={request.id}
-                href="/requests"
-                className={styles.listRow}
-              >
-                <div>
-                  <strong>{request.name}</strong>
-                  <span>
-                    {request.id} · {request.type}
-                  </span>
-                </div>
-
-                <span
-                  className={
-                    request.status === "Changes requested"
-                      ? "statusBadge statusAttention"
-                      : request.status === "Approved"
-                        ? "statusBadge statusActive"
-                        : "statusBadge statusScheduled"
+          <div className={styles.requestList}>
+            {requests.map(
+              (
+                request
+              ) => (
+                <Link
+                  key={
+                    request.id
                   }
+                  href={`/requests/${request.id}`}
+                  className={styles.requestRow}
                 >
-                  {request.status}
-                </span>
-              </Link>
-            ))}
+                  <div className={styles.requestIdentity}>
+                    <strong>
+                      {
+                        request.name
+                      }
+                    </strong>
+
+                    <span>
+                      {
+                        request.id
+                      }
+                      {" · "}
+                      {
+                        request.type
+                      }
+                    </span>
+                  </div>
+
+                  <span
+                    className={getRequestStatusClass(
+                      request.status
+                    )}
+                  >
+                    {
+                      request.status
+                    }
+                  </span>
+
+                  <span className={styles.rowArrow}>
+                    →
+                  </span>
+                </Link>
+              )
+            )}
           </div>
         </article>
 
-        <article className="contentCard">
-          <div className={styles.cardHeader}>
-            <div>
-              <h2 className="sectionTitle">Quick actions</h2>
-              <p className="sectionDescription">
-                Common client tasks.
+        <aside className={styles.attentionPanel}>
+          <div className={styles.attentionLabel}>
+            Needs attention
+          </div>
+
+          {attentionRequest ? (
+            <>
+              <h2>
+                {
+                  attentionRequest.name
+                }
+              </h2>
+
+              <p className={styles.attentionMeta}>
+                {
+                  attentionRequest.id
+                }
+                {" · "}
+                {
+                  attentionRequest.type
+                }
               </p>
-            </div>
-          </div>
 
-          <div className={styles.actions}>
-            <Link href="/requests/new" className={styles.actionCard}>
-              <strong>Submit new request</strong>
-              <span>Direct sponsorship or affiliate</span>
-            </Link>
+              <div className={styles.attentionMessage}>
+                Poster requested changes before this request can continue.
+              </div>
 
-            <Link href="/campaigns" className={styles.actionCard}>
-              <strong>View campaigns</strong>
-              <span>Delivery and campaign status</span>
-            </Link>
-
-            <Link href="/performance" className={styles.actionCard}>
-              <strong>Open performance</strong>
-              <span>Clicks, conversions, and results</span>
-            </Link>
-          </div>
-        </article>
+              <Link
+                href={`/requests/${attentionRequest.id}`}
+                className={styles.secondaryAction}
+              >
+                Review request
+              </Link>
+            </>
+          ) : (
+            <p className={styles.noAttention}>
+              Nothing currently needs your attention.
+            </p>
+          )}
+        </aside>
       </section>
 
-      <section className="contentCard">
-        <div className={styles.cardHeader}>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
           <div>
-            <h2 className="sectionTitle">Campaign delivery</h2>
-            <p className="sectionDescription">
-              Current approved campaign activity.
+            <h2>
+              Campaigns
+            </h2>
+
+            <p>
+              Current approved campaign delivery.
             </p>
           </div>
 
-          <Link href="/campaigns" className={styles.textLink}>
-            View campaigns
+          <Link
+            href="/campaigns"
+            className={styles.textLink}
+          >
+            View all campaigns
           </Link>
         </div>
 
         <div className={styles.campaignTable}>
           <div className={styles.tableHeader}>
-            <span>Campaign</span>
-            <span>Status</span>
-            <span>Delivery</span>
-            <span>Impressions</span>
+            <span>
+              Campaign
+            </span>
+
+            <span>
+              Status
+            </span>
+
+            <span>
+              Delivery
+            </span>
+
+            <span>
+              Impressions
+            </span>
           </div>
 
-          {campaigns.map((campaign) => (
-            <Link
-              key={campaign.id}
-              href="/campaigns"
-              className={styles.tableRow}
-            >
-              <div>
-                <strong>{campaign.name}</strong>
-                <span>{campaign.id}</span>
-              </div>
-
-              <span
-                className={
-                  campaign.status === "Active"
-                    ? "statusBadge statusActive"
-                    : "statusBadge statusScheduled"
+          {campaigns.map(
+            (
+              campaign
+            ) => (
+              <Link
+                key={
+                  campaign.id
                 }
+                href={`/campaigns/${campaign.id}`}
+                className={styles.tableRow}
               >
-                {campaign.status}
-              </span>
+                <div className={styles.campaignIdentity}>
+                  <strong>
+                    {
+                      campaign.name
+                    }
+                  </strong>
 
-              <strong>{campaign.delivery}</strong>
-              <span>{campaign.impressions}</span>
-            </Link>
-          ))}
+                  <span>
+                    {
+                      campaign.id
+                    }
+                  </span>
+                </div>
+
+                <span
+                  className={
+                    campaign.status ===
+                    "Active"
+                      ? "statusBadge statusActive"
+                      : "statusBadge statusScheduled"
+                  }
+                >
+                  {
+                    campaign.status
+                  }
+                </span>
+
+                <div className={styles.deliveryCell}>
+                  <div className={styles.deliveryHeader}>
+                    <strong>
+                      {
+                        campaign.delivery
+                      }
+                      %
+                    </strong>
+                  </div>
+
+                  <div className={styles.progressTrack}>
+                    <span
+                      style={{
+                        width: `${campaign.delivery}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.impressionsCell}>
+                  <strong>
+                    {
+                      campaign.impressions
+                    }
+                  </strong>
+
+                  <span>
+                    impressions
+                  </span>
+                </div>
+              </Link>
+            )
+          )}
         </div>
       </section>
-
-      <p className={styles.demoNote}>
-        Frontend demonstration data · Backend and organization-scoped APIs
-        will replace this data source.
-      </p>
     </>
   );
 }
