@@ -1,13 +1,9 @@
 "use client";
 
-import type {
-  ReactNode,
-} from "react";
+import type { ReactNode } from "react";
 
 import Link from "next/link";
-import {
-  usePathname,
-} from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import SignalContact from "./SignalContact";
 import styles from "./ClientShell.module.css";
@@ -63,34 +59,19 @@ const navigation: NavigationItem[] = [
   },
 ];
 
-function findActiveItem(
-  pathname: string
-): NavigationItem {
-  const matching =
-    navigation
-      .filter(
-        (
-          item
-        ) =>
-          pathname ===
-            item.href ||
-          pathname.startsWith(
-            `${item.href}/`
-          )
-      )
-      .sort(
-        (
-          first,
-          second
-        ) =>
-          second.href.length -
-          first.href.length
-      );
+function findActiveItem(pathname: string): NavigationItem {
+  const matches = navigation
+    .filter(
+      (item) =>
+        pathname === item.href ||
+        pathname.startsWith(`${item.href}/`)
+    )
+    .sort(
+      (first, second) =>
+        second.href.length - first.href.length
+    );
 
-  return (
-    matching[0] ??
-    navigation[0]
-  );
+  return matches[0] ?? navigation[0];
 }
 
 function NavIcon({
@@ -98,111 +79,50 @@ function NavIcon({
 }: {
   name: NavigationIcon;
 }) {
-  if (
-    name ===
-    "dashboard"
-  ) {
+  if (name === "dashboard") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <rect
-          x="4"
-          y="4"
-          width="6"
-          height="6"
-          rx="1"
-        />
-        <rect
-          x="14"
-          y="4"
-          width="6"
-          height="6"
-          rx="1"
-        />
-        <rect
-          x="4"
-          y="14"
-          width="6"
-          height="6"
-          rx="1"
-        />
-        <rect
-          x="14"
-          y="14"
-          width="6"
-          height="6"
-          rx="1"
-        />
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="4" width="6" height="6" rx="1" />
+        <rect x="14" y="4" width="6" height="6" rx="1" />
+        <rect x="4" y="14" width="6" height="6" rx="1" />
+        <rect x="14" y="14" width="6" height="6" rx="1" />
       </svg>
     );
   }
 
-  if (
-    name ===
-    "requests"
-  ) {
+  if (name === "requests") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path d="M7 5h10" />
-        <path d="M7 10h10" />
-        <path d="M7 15h7" />
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 5h12" />
+        <path d="M6 10h12" />
+        <path d="M6 15h8" />
         <path d="M5 3h14a2 2 0 0 1 2 2v14H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
       </svg>
     );
   }
 
-  if (
-    name ===
-    "new"
-  ) {
+  if (name === "new") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 5v14" />
         <path d="M5 12h14" />
       </svg>
     );
   }
 
-  if (
-    name ===
-    "campaigns"
-  ) {
+  if (name === "campaigns") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path d="M4 7h16" />
-        <path d="M4 12h16" />
-        <path d="M4 17h10" />
-        <rect
-          x="3"
-          y="4"
-          width="18"
-          height="16"
-          rx="2"
-        />
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="5" width="16" height="14" rx="2" />
+        <path d="M8 9h8" />
+        <path d="M8 13h8" />
       </svg>
     );
   }
 
-  if (
-    name ===
-    "performance"
-  ) {
+  if (name === "performance") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 19V5" />
         <path d="M4 19h16" />
         <path d="m7 15 4-4 3 2 5-6" />
@@ -211,15 +131,8 @@ function NavIcon({
   }
 
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <circle
-        cx="12"
-        cy="8"
-        r="4"
-      />
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" />
       <path d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6" />
     </svg>
   );
@@ -228,13 +141,8 @@ function NavIcon({
 export default function ClientShell({
   children,
 }: ClientShellProps) {
-  const pathname =
-    usePathname();
-
-  const activeItem =
-    findActiveItem(
-      pathname
-    );
+  const pathname = usePathname();
+  const activeItem = findActiveItem(pathname);
 
   return (
     <div className={styles.shell}>
@@ -249,85 +157,44 @@ export default function ClientShell({
             </span>
 
             <span className={styles.brandText}>
-              <strong>
-                Poster
-              </strong>
-
-              <small>
-                Client
-              </small>
+              <strong>Poster</strong>
+              <small>Client</small>
             </span>
           </Link>
         </div>
 
-        <div className={styles.navSection}>
-          <div className={styles.navLabel}>
-            Workspace
-          </div>
+        <nav
+          className={styles.navigation}
+          aria-label="Client navigation"
+        >
+          {navigation.map((item) => {
+            const active =
+              activeItem.href === item.href;
 
-          <nav
-            className={styles.navigation}
-            aria-label="Client navigation"
-          >
-            {navigation.map(
-              (
-                item
-              ) => {
-                const active =
-                  activeItem.href ===
-                  item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={
+                  active ? "page" : undefined
+                }
+                className={
+                  active
+                    ? styles.navigationItemActive
+                    : styles.navigationItem
+                }
+              >
+                <span className={styles.navigationIcon}>
+                  <NavIcon name={item.icon} />
+                </span>
 
-                return (
-                  <Link
-                    key={
-                      item.href
-                    }
-                    href={
-                      item.href
-                    }
-                    title={
-                      item.label
-                    }
-                    aria-current={
-                      active
-                        ? "page"
-                        : undefined
-                    }
-                    className={
-                      active
-                        ? styles.navigationItemActive
-                        : styles.navigationItem
-                    }
-                  >
-                    <span
-                      className={
-                        styles.navigationIcon
-                      }
-                    >
-                      <NavIcon
-                        name={
-                          item.icon
-                        }
-                      />
-                    </span>
-
-                    <span>
-                      {
-                        item.label
-                      }
-                    </span>
-                  </Link>
-                );
-              }
-            )}
-          </nav>
-        </div>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className={styles.sidebarBottom}>
-          <div className={styles.supportLabel}>
-            Support
-          </div>
-
           <div className={styles.support}>
             <SignalContact />
           </div>
@@ -338,45 +205,18 @@ export default function ClientShell({
             </div>
 
             <div className={styles.profileText}>
-              <strong>
-                Aarav Mehta
-              </strong>
-
-              <span>
-                Example Cloud
-              </span>
+              <strong>Aarav Mehta</strong>
+              <span>Example Cloud</span>
             </div>
           </div>
         </div>
       </aside>
 
-      <div className={styles.workspace}>
-        <header className={styles.topbar}>
-          <strong className={styles.topbarTitle}>
-            {activeItem.label}
-          </strong>
-
-          <div className={styles.organizationContext}>
-            <div className={styles.organizationAvatar}>
-              EC
-            </div>
-
-            <div className={styles.organizationText}>
-              <strong>
-                Example Cloud
-              </strong>
-
-              <span>
-                Client account
-              </span>
-            </div>
-          </div>
-        </header>
-
-        <main className={styles.content}>
+      <main className={styles.workspace}>
+        <div className={styles.content}>
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
