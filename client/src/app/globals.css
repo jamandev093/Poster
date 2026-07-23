@@ -1,32 +1,32 @@
 ﻿:root {
   --primary: #5b86e5;
-  --primary-dark: #416ecf;
+  --primary-dark: #3f6fce;
   --primary-hover: #4f79d6;
-  --primary-soft: #f1f5ff;
-  --primary-border: #cddbf7;
+  --primary-soft: #eef4ff;
+  --primary-border: #cbdafa;
 
-  --background: #f7f8fa;
-  --surface: #f9fafb;
-  --surface-strong: #f1f3f6;
+  --background: #f6f7f9;
+  --surface: #f8fafc;
+  --surface-strong: #eef1f5;
   --card: #ffffff;
 
-  --border: #e3e7ed;
-  --border-strong: #ccd3dd;
-  --border-dark: #b8c1ce;
+  --border: #dfe4eb;
+  --border-strong: #c8d0dc;
+  --border-dark: #aeb8c7;
 
   --text: #111827;
-  --text-secondary: #5f6b7a;
-  --text-muted: #8a95a5;
-  --icon: #586577;
+  --text-secondary: #526071;
+  --text-muted: #7c899a;
+  --icon: #5b6879;
 
-  --success: #16803c;
+  --success: #15803d;
   --success-soft: #eefaf2;
 
-  --warning: #b86812;
-  --warning-soft: #fff8ed;
+  --warning: #b45f0b;
+  --warning-soft: #fff8ec;
 
-  --danger: #c72c3b;
-  --danger-soft: #fff1f2;
+  --danger: #c6283a;
+  --danger-soft: #fff1f3;
 
   --radius-sm: 5px;
   --radius-md: 7px;
@@ -34,10 +34,10 @@
   --radius-xl: 12px;
 
   --shadow-focus:
-    0 0 0 3px rgba(91, 134, 229, 0.13);
+    0 0 0 3px rgba(91, 134, 229, 0.16);
 
   --shadow-menu:
-    0 12px 32px rgba(15, 23, 42, 0.1);
+    0 14px 34px rgba(15, 23, 42, 0.12);
 }
 
 * {
@@ -62,18 +62,16 @@ body {
   color: var(--text);
 
   font-family:
-    Inter,
-    ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
+    "Segoe UI Variable",
     "Segoe UI",
+    Arial,
+    Helvetica,
     sans-serif;
 
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.5;
 
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  font-weight: 400;
 }
 
 button,
@@ -138,7 +136,7 @@ textarea {
   line-height: 38px;
   font-weight: 700;
 
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 .pageDescription {
@@ -172,7 +170,7 @@ textarea {
   line-height: 26px;
   font-weight: 700;
 
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
 .sectionDescription {
@@ -199,13 +197,15 @@ textarea {
 
   gap: 8px;
 
-  padding: 9px 15px;
+  padding:
+    9px
+    15px;
 
   border-radius: var(--radius-md);
 
   font-size: 13px;
   line-height: 20px;
-  font-weight: 650;
+  font-weight: 600;
 
   transition:
     border-color 140ms ease,
@@ -259,17 +259,19 @@ textarea {
 .statusBadge {
   display: inline-flex;
 
-  min-height: 27px;
+  min-height: 28px;
 
   align-items: center;
 
-  padding: 4px 9px;
+  padding:
+    4px
+    9px;
 
   border-radius: 5px;
 
   font-size: 12px;
   line-height: 18px;
-  font-weight: 650;
+  font-weight: 600;
 
   white-space: nowrap;
 }
@@ -281,7 +283,7 @@ textarea {
 
 .statusAttention {
   background: var(--warning-soft);
-  color: #a75b0e;
+  color: #a65409;
 }
 
 .statusScheduled {
@@ -293,20 +295,20 @@ textarea {
    FOCUS
    ========================================================= */
 
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-button:focus-visible,
-a:focus-visible {
-  outline: none;
-}
-
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--primary) !important;
 
+  outline: none;
+
   box-shadow: var(--shadow-focus);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 /* =========================================================
