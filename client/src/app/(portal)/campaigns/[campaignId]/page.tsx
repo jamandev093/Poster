@@ -1,28 +1,33 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import {
   notFound,
 } from "next/navigation";
 
 import {
-  calculateCampaignCtr,
-  calculateConversionRate,
-  calculateDeliveryProgress,
-  calculateRevenuePerClick,
-  formatCampaignCurrency,
-  formatCampaignDate,
-  formatCampaignNumber,
+  formatClientCurrency,
+  formatClientDate,
+  formatClientNumber,
   getCampaignStatusLabel,
   getCampaignTypeLabel,
-  getClientCampaignById,
+  getPlacementLabel,
   getTrackingStatusLabel,
-} from "@/features/campaigns/campaign.mock";
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getCampaignById,
+  getRequestById,
+} from "@/features/workspace/workspace.selectors";
+
+import {
+  calculateConversionRate,
+  calculateCtr,
+  calculateDeliveryProgress,
+  calculateRevenuePerClick,
+} from "@/features/workspace/workspace.types";
 
 import type {
-  ClientCampaignStatus,
-} from "@/features/campaigns/campaign.types";
-
-import type {
+  CampaignStatus,
   CreativeMediaAsset,
 } from "@/features/workspace/workspace.types";
 
@@ -35,7 +40,7 @@ interface CampaignDetailsPageProps {
 }
 
 function getStatusClass(
-  status: ClientCampaignStatus
+  status: CampaignStatus
 ): string {
   switch (status) {
     case "active":
@@ -51,7 +56,32 @@ function getStatusClass(
       return `statusBadge ${styles.statusDraft}`;
 
     case "ended":
+    case "disabled":
       return `statusBadge ${styles.statusEnded}`;
+  }
+}
+
+function getCampaignStateMessage(
+  status: CampaignStatus
+): string {
+  switch (status) {
+    case "draft":
+      return "Poster Admin is completing campaign setup. This campaign is not delivering yet.";
+
+    case "scheduled":
+      return "This campaign is approved and scheduled. Delivery will begin according to the campaign schedule.";
+
+    case "active":
+      return "This campaign is currently active. Performance shown below belongs only to this campaign.";
+
+    case "paused":
+      return "This campaign is currently paused by Poster Admin. Historical performance remains available.";
+
+    case "ended":
+      return "This campaign has completed and is no longer delivering.";
+
+    case "disabled":
+      return "This campaign is currently unavailable for delivery.";
   }
 }
 
@@ -87,8 +117,8 @@ function getMediaDimensions(
   media: CreativeMediaAsset
 ): string {
   if (
-    !media.width ||
-    !media.height
+    media.width === undefined ||
+    media.height === undefined
   ) {
     return "—";
   }
@@ -103,6 +133,34 @@ function getMediaTypeLabel(
     "video"
     ? "Video"
     : "Image";
+}
+
+function formatOptionalCurrency(
+  value: number | undefined
+): string {
+  if (
+    value === undefined
+  ) {
+    return "—";
+  }
+
+  return formatClientCurrency(
+    value
+  );
+}
+
+function formatOptionalNumber(
+  value: number | undefined
+): string {
+  if (
+    value === undefined
+  ) {
+    return "—";
+  }
+
+  return formatClientNumber(
+    value
+  );
 }
 
 function MediaPreview({
@@ -125,7 +183,7 @@ function MediaPreview({
             : styles.standardMedia
         }
       >
-        {/* External demonstration URLs are used only by frontend mock data. */}
+        {/* Mock external media only. Production media uses approved storage URLs. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={media.url}
@@ -153,6 +211,9 @@ function MediaPreview({
       >
         <video
           src={media.url}
+          poster={
+            media.thumbnailUrl
+          }
           controls
           muted
           playsInline
@@ -181,14 +242,16 @@ function MediaPreview({
       </span>
 
       <strong>
-        {media.fileName}
+        {
+          media.fileName
+        }
       </strong>
 
       <small>
         {media.type ===
         "video"
-          ? "Video preview will be available after secure media storage is connected."
-          : "Permanent preview unavailable in this frontend record."}
+          ? "Video preview becomes available after secure media storage is connected."
+          : "Permanent preview is unavailable for this frontend record."}
       </small>
     </div>
   );
@@ -206,7 +269,10 @@ function MediaMetadata({
       }
     >
       <div>
-        <span>Type</span>
+        <span>
+          Type
+        </span>
+
         <strong>
           {getMediaTypeLabel(
             media
@@ -215,7 +281,10 @@ function MediaMetadata({
       </div>
 
       <div>
-        <span>Dimensions</span>
+        <span>
+          Dimensions
+        </span>
+
         <strong>
           {getMediaDimensions(
             media
@@ -224,11 +293,25 @@ function MediaMetadata({
       </div>
 
       <div>
-        <span>Size</span>
+        <span>
+          Size
+        </span>
+
         <strong>
           {formatBytes(
             media.sizeBytes
           )}
+        </strong>
+      </div>
+
+      <div>
+        <span>
+          Format
+        </span>
+
+        <strong>
+          {media.mimeType ??
+            "—"}
         </strong>
       </div>
 
@@ -244,7 +327,11 @@ function MediaMetadata({
               {media.durationSeconds !==
               undefined
                 ? `${media.durationSeconds.toFixed(
-                    1
+                    media.durationSeconds %
+                      1 ===
+                      0
+                      ? 0
+                      : 1
                   )} sec`
                 : "—"}
             </strong>
@@ -273,43 +360,84 @@ export default async function CampaignDetailsPage({
 }: CampaignDetailsPageProps) {
   const {
     campaignId,
-  } = await params;
+  } =
+    await params;
 
   const campaign =
-    getClientCampaignById(
+    getCampaignById(
       campaignId
     );
 
-  if (!campaign) {
+  if (
+    !campaign
+  ) {
     notFound();
   }
 
+  const relatedRequest =
+    getRequestById(
+      campaign.requestId
+    );
+
   const ctr =
-    calculateCampaignCtr(
-      campaign.performance.impressions,
-      campaign.performance.clicks
+    calculateCtr(
+      campaign.performance
+        .impressions,
+      campaign.performance
+        .clicks
     );
 
   const conversionRate =
     calculateConversionRate(
-      campaign.performance.clicks,
-      campaign.performance.conversions
+      campaign.performance
+        .clicks,
+      campaign.performance
+        .conversions
     );
 
   const delivery =
     calculateDeliveryProgress(
-      campaign.financials.deliveryTarget,
-      campaign.financials.delivered
+      campaign.financials
+        .deliveryTarget,
+      campaign.financials
+        .delivered
     );
+
+  const deliveryRemaining =
+    campaign.financials
+      .deliveryTarget !==
+      undefined &&
+    campaign.financials
+      .delivered !==
+      undefined
+      ? Math.max(
+          campaign.financials
+            .deliveryTarget -
+            campaign.financials
+              .delivered,
+          0
+        )
+      : undefined;
 
   const revenuePerClick =
     calculateRevenuePerClick(
-      campaign.performance.clicks,
-      campaign.financials.revenue
+      campaign.performance
+        .clicks,
+      campaign.financials
+        .revenue
     );
 
   const creative =
     campaign.creative;
+
+  const creativeLayout =
+    creative?.layout ??
+    (
+      creative?.slidingCards
+        ?.length
+        ? "sliding"
+        : "standard"
+    );
 
   return (
     <>
@@ -322,17 +450,29 @@ export default async function CampaignDetailsPage({
         ← Back to campaigns
       </Link>
 
-      <header className="pageHeader">
+      <header
+        className="pageHeader"
+      >
         <div>
-          <div className="pageEyebrow">
-            {campaign.id}
+          <div
+            className="pageEyebrow"
+          >
+            {
+              campaign.id
+            }
           </div>
 
-          <h1 className="pageTitle">
-            {campaign.name}
+          <h1
+            className="pageTitle"
+          >
+            {
+              campaign.name
+            }
           </h1>
 
-          <p className="pageDescription">
+          <p
+            className="pageDescription"
+          >
             {getCampaignTypeLabel(
               campaign.type
             )}
@@ -340,17 +480,25 @@ export default async function CampaignDetailsPage({
         </div>
 
         <span
-          className={
-            getStatusClass(
-              campaign.status
-            )
-          }
+          className={getStatusClass(
+            campaign.status
+          )}
         >
           {getCampaignStatusLabel(
             campaign.status
           )}
         </span>
       </header>
+
+      <section
+        className={
+          styles.notice
+        }
+      >
+        {getCampaignStateMessage(
+          campaign.status
+        )}
+      </section>
 
       <section
         className={
@@ -367,8 +515,9 @@ export default async function CampaignDetailsPage({
           </span>
 
           <strong>
-            {formatCampaignNumber(
-              campaign.performance.impressions
+            {formatClientNumber(
+              campaign.performance
+                .impressions
             )}
           </strong>
 
@@ -387,8 +536,9 @@ export default async function CampaignDetailsPage({
           </span>
 
           <strong>
-            {formatCampaignNumber(
-              campaign.performance.clicks
+            {formatClientNumber(
+              campaign.performance
+                .clicks
             )}
           </strong>
 
@@ -410,11 +560,13 @@ export default async function CampaignDetailsPage({
           </span>
 
           <strong>
-            {campaign.performance.conversions ===
+            {campaign.performance
+              .conversions ===
             null
               ? "Not tracked"
-              : formatCampaignNumber(
-                  campaign.performance.conversions
+              : formatClientNumber(
+                  campaign.performance
+                    .conversions
                 )}
           </strong>
 
@@ -443,13 +595,13 @@ export default async function CampaignDetailsPage({
           <strong>
             {campaign.type ===
             "affiliate"
-              ? formatCampaignCurrency(
-                  campaign.financials.commission ??
-                    0
+              ? formatOptionalCurrency(
+                  campaign.financials
+                    .commission
                 )
-              : formatCampaignCurrency(
-                  campaign.financials.contractValue ??
-                    0
+              : formatOptionalCurrency(
+                  campaign.financials
+                    .contractValue
                 )}
           </strong>
 
@@ -458,10 +610,13 @@ export default async function CampaignDetailsPage({
               "affiliate" &&
             revenuePerClick !==
               null
-              ? `${formatCampaignCurrency(
+              ? `${formatClientCurrency(
                   revenuePerClick
                 )} revenue per click`
-              : "Commercial value"}
+              : campaign.type ===
+                  "affiliate"
+                ? "Revenue per click unavailable"
+                : "Agreed commercial value"}
           </small>
         </article>
       </section>
@@ -491,7 +646,7 @@ export default async function CampaignDetailsPage({
               </h2>
 
               <p>
-                The creative currently assigned to this campaign.
+                The exact approved creative currently assigned to this campaign.
               </p>
             </div>
 
@@ -500,14 +655,14 @@ export default async function CampaignDetailsPage({
                 styles.layoutBadge
               }
             >
-              {creative.layout ===
+              {creativeLayout ===
               "sliding"
                 ? "Sliding · 3 cards"
                 : "Standard · 16:9"}
             </span>
           </div>
 
-          {creative.layout ===
+          {creativeLayout ===
             "standard" &&
           creative.primaryMedia ? (
             <div
@@ -590,7 +745,8 @@ export default async function CampaignDetailsPage({
 
                     <strong>
                       {
-                        creative.primaryMedia.fileName
+                        creative.primaryMedia
+                          .fileName
                       }
                     </strong>
                   </div>
@@ -599,9 +755,10 @@ export default async function CampaignDetailsPage({
             </div>
           ) : null}
 
-          {creative.layout ===
+          {creativeLayout ===
             "sliding" &&
-          creative.slidingCards?.length ? (
+          creative.slidingCards
+            ?.length ? (
             <>
               <div
                 className={
@@ -695,7 +852,8 @@ export default async function CampaignDetailsPage({
 
                           <small>
                             {
-                              card.media.fileName
+                              card.media
+                                .fileName
                             }
                           </small>
                         </div>
@@ -757,7 +915,7 @@ export default async function CampaignDetailsPage({
           </strong>
 
           <p>
-            This campaign record does not yet contain an approved creative snapshot.
+            This campaign does not yet contain an approved creative snapshot.
           </p>
         </section>
       )}
@@ -767,8 +925,12 @@ export default async function CampaignDetailsPage({
           styles.grid
         }
       >
-        <article className="contentCard">
-          <h2 className="sectionTitle">
+        <article
+          className="contentCard"
+        >
+          <h2
+            className="sectionTitle"
+          >
             Campaign details
           </h2>
 
@@ -786,13 +948,37 @@ export default async function CampaignDetailsPage({
                 Request
               </span>
 
-              <Link
-                href={`/requests/${campaign.requestId}`}
-              >
+              {relatedRequest ? (
+                <Link
+                  href={`/requests/${relatedRequest.id}`}
+                >
+                  {
+                    relatedRequest.id
+                  }
+                </Link>
+              ) : (
+                <strong>
+                  {
+                    campaign.requestId
+                  }
+                </strong>
+              )}
+            </div>
+
+            <div
+              className={
+                styles.detailRow
+              }
+            >
+              <span>
+                Organization
+              </span>
+
+              <strong>
                 {
-                  campaign.requestId
+                  campaign.organizationName
                 }
-              </Link>
+              </strong>
             </div>
 
             <div
@@ -805,11 +991,11 @@ export default async function CampaignDetailsPage({
               </span>
 
               <strong>
-                {formatCampaignDate(
+                {formatClientDate(
                   campaign.startDate
                 )}
                 {" – "}
-                {formatCampaignDate(
+                {formatClientDate(
                   campaign.endDate
                 )}
               </strong>
@@ -841,9 +1027,9 @@ export default async function CampaignDetailsPage({
                         styles.placement
                       }
                     >
-                      {
+                      {getPlacementLabel(
                         placement
-                      }
+                      )}
                     </span>
                   )
                 )}
@@ -883,64 +1069,230 @@ export default async function CampaignDetailsPage({
           </div>
         </article>
 
-        <article className="contentCard">
-          <h2 className="sectionTitle">
-            Delivery
+        <article
+          className="contentCard"
+        >
+          <h2
+            className="sectionTitle"
+          >
+            {campaign.type ===
+            "affiliate"
+              ? "Commercial performance"
+              : "Delivery"}
           </h2>
 
-          {delivery !==
-          null ? (
+          {campaign.type ===
+          "direct_sponsorship" ? (
             <>
               <div
                 className={
-                  styles.deliveryHeader
+                  styles.detailList
                 }
               >
-                <div>
+                <div
+                  className={
+                    styles.detailRow
+                  }
+                >
                   <span>
-                    Completed
+                    Contract value
                   </span>
 
                   <strong>
-                    {delivery.toFixed(
-                      1
+                    {formatOptionalCurrency(
+                      campaign.financials
+                        .contractValue
                     )}
-                    %
                   </strong>
                 </div>
 
-                <span>
-                  {formatCampaignNumber(
-                    campaign.financials.delivered ??
-                      0
-                  )}
-                  {" / "}
-                  {formatCampaignNumber(
-                    campaign.financials.deliveryTarget ??
-                      0
-                  )}
-                </span>
+                <div
+                  className={
+                    styles.detailRow
+                  }
+                >
+                  <span>
+                    Delivery target
+                  </span>
+
+                  <strong>
+                    {formatOptionalNumber(
+                      campaign.financials
+                        .deliveryTarget
+                    )}
+                  </strong>
+                </div>
+
+                <div
+                  className={
+                    styles.detailRow
+                  }
+                >
+                  <span>
+                    Delivered
+                  </span>
+
+                  <strong>
+                    {formatOptionalNumber(
+                      campaign.financials
+                        .delivered
+                    )}
+                  </strong>
+                </div>
+
+                <div
+                  className={
+                    styles.detailRow
+                  }
+                >
+                  <span>
+                    Remaining
+                  </span>
+
+                  <strong>
+                    {formatOptionalNumber(
+                      deliveryRemaining
+                    )}
+                  </strong>
+                </div>
               </div>
 
-              <div
-                className={
-                  styles.progressTrack
-                }
-              >
-                <span
-                  style={{
-                    width: `${delivery}%`,
-                  }}
-                />
-              </div>
+              {delivery !==
+              null ? (
+                <>
+                  <div
+                    className={
+                      styles.deliveryHeader
+                    }
+                  >
+                    <div>
+                      <span>
+                        Delivery completed
+                      </span>
+
+                      <strong>
+                        {delivery.toFixed(
+                          1
+                        )}
+                        %
+                      </strong>
+                    </div>
+
+                    <span>
+                      {formatClientNumber(
+                        campaign.financials
+                          .delivered ??
+                          0
+                      )}
+                      {" / "}
+                      {formatClientNumber(
+                        campaign.financials
+                          .deliveryTarget ??
+                          0
+                      )}
+                    </span>
+                  </div>
+
+                  <div
+                    className={
+                      styles.progressTrack
+                    }
+                  >
+                    <span
+                      style={{
+                        width:
+                          `${delivery}%`,
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div
+                  className={
+                    styles.notice
+                  }
+                >
+                  Contracted delivery information is not available yet.
+                </div>
+              )}
             </>
           ) : (
             <div
               className={
-                styles.notice
+                styles.detailList
               }
             >
-              Affiliate campaigns use conversion and commission reporting instead of contracted impression delivery.
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Commission
+                </span>
+
+                <strong>
+                  {formatOptionalCurrency(
+                    campaign.financials
+                      .commission
+                  )}
+                </strong>
+              </div>
+
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Revenue
+                </span>
+
+                <strong>
+                  {formatOptionalCurrency(
+                    campaign.financials
+                      .revenue
+                  )}
+                </strong>
+              </div>
+
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Revenue per click
+                </span>
+
+                <strong>
+                  {revenuePerClick ===
+                  null
+                    ? "—"
+                    : formatClientCurrency(
+                        revenuePerClick
+                      )}
+                </strong>
+              </div>
+
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Conversion rate
+                </span>
+
+                <strong>
+                  {conversionRate ===
+                  null
+                    ? "Not tracked"
+                    : `${conversionRate.toFixed(
+                        2
+                      )}%`}
+                </strong>
+              </div>
             </div>
           )}
 

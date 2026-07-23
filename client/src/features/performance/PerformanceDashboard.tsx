@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useMemo,
@@ -24,7 +24,6 @@ import {
 
 import type {
   PerformanceWindow,
-  PerformanceWindowMetrics,
 } from "@/features/workspace/workspace.performance";
 
 import {
@@ -38,7 +37,6 @@ import {
 
 import type {
   CampaignStatus,
-  ClientCampaign,
 } from "@/features/workspace/workspace.types";
 
 import styles from "./PerformanceDashboard.module.css";
@@ -47,7 +45,7 @@ type CampaignSelection =
   | "all"
   | string;
 
-const campaigns =
+const clientCampaigns =
   getOrganizationCampaigns();
 
 const windowOptions: {
@@ -58,10 +56,12 @@ const windowOptions: {
     value: "7d",
     label: "7 days",
   },
+
   {
     value: "30d",
     label: "30 days",
   },
+
   {
     value: "all",
     label: "All time",
@@ -88,61 +88,6 @@ function getStatusClass(
   }
 }
 
-function getMetricsForCampaign(
-  campaign: ClientCampaign,
-  window: PerformanceWindow
-): PerformanceWindowMetrics {
-  /*
-   * For all-time reporting, the canonical campaign record
-   * remains authoritative.
-   */
-  if (
-    window ===
-    "all"
-  ) {
-    return {
-      impressions:
-        campaign.performance.impressions,
-
-      clicks:
-        campaign.performance.clicks,
-
-      conversions:
-        campaign.performance.conversions,
-
-      commission:
-        campaign.financials.commission,
-
-      revenue:
-        campaign.financials.revenue,
-    };
-  }
-
-  const snapshot =
-    getCampaignPerformanceSnapshot(
-      campaign.id
-    );
-
-  const metrics =
-    snapshot?.windows[
-      window
-    ];
-
-  if (metrics) {
-    return metrics;
-  }
-
-  /*
-   * Missing analytics data is not treated as a real zero
-   * conversion count.
-   */
-  return {
-    impressions: 0,
-    clicks: 0,
-    conversions: null,
-  };
-}
-
 export default function PerformanceDashboard() {
   const [
     selectedWindow,
@@ -167,10 +112,10 @@ export default function PerformanceDashboard() {
           selectedCampaign ===
           "all"
         ) {
-          return campaigns;
+          return clientCampaigns;
         }
 
-        return campaigns.filter(
+        return clientCampaigns.filter(
           (
             campaign
           ) =>
@@ -190,11 +135,24 @@ export default function PerformanceDashboard() {
           (
             campaign
           ) => {
-            const metrics =
-              getMetricsForCampaign(
-                campaign,
-                selectedWindow
+            const snapshot =
+              getCampaignPerformanceSnapshot(
+                campaign.id
               );
+
+            const metrics =
+              snapshot?.windows[
+                selectedWindow
+              ] ?? {
+                impressions:
+                  0,
+
+                clicks:
+                  0,
+
+                conversions:
+                  null,
+              };
 
             const ctr =
               calculateCtr(
@@ -208,26 +166,11 @@ export default function PerformanceDashboard() {
                 metrics.conversions
               );
 
-            const commission =
-              metrics.commission ??
-              0;
-
-            const revenuePerClick =
-              metrics.revenue !==
-                undefined &&
-              metrics.clicks >
-                0
-                ? metrics.revenue /
-                  metrics.clicks
-                : null;
-
             return {
               campaign,
               metrics,
               ctr,
               conversionRate,
-              commission,
-              revenuePerClick,
             };
           }
         ),
@@ -266,16 +209,20 @@ export default function PerformanceDashboard() {
             row
           ) => {
             impressions +=
-              row.metrics.impressions;
+              row.metrics
+                .impressions;
 
             clicks +=
               row.metrics.clicks;
 
             commission +=
-              row.commission;
+              row.metrics
+                .commission ??
+              0;
 
             if (
-              row.metrics.conversions ===
+              row.metrics
+                .conversions ===
               null
             ) {
               untrackedCampaigns +=
@@ -291,12 +238,14 @@ export default function PerformanceDashboard() {
               row.metrics.clicks;
 
             conversions +=
-              row.metrics.conversions;
+              row.metrics
+                .conversions;
           }
         );
 
         return {
           impressions,
+
           clicks,
 
           ctr:
@@ -406,11 +355,13 @@ export default function PerformanceDashboard() {
               )
             }
           >
-            <option value="all">
+            <option
+              value="all"
+            >
               All campaigns
             </option>
 
-            {campaigns.map(
+            {clientCampaigns.map(
               (
                 campaign
               ) => (
@@ -467,7 +418,7 @@ export default function PerformanceDashboard() {
           </strong>
 
           <small>
-            Content displays
+            Recorded delivery
           </small>
         </article>
 
@@ -487,7 +438,7 @@ export default function PerformanceDashboard() {
           </strong>
 
           <small>
-            Recorded visits
+            Recorded engagement
           </small>
         </article>
 
@@ -533,7 +484,7 @@ export default function PerformanceDashboard() {
           <small>
             {totals.conversionRate ===
             null
-              ? "Tracking unavailable"
+              ? "No connected tracking"
               : `${totals.conversionRate.toFixed(
                   2
                 )}% conversion rate`}
@@ -568,35 +519,38 @@ export default function PerformanceDashboard() {
             styles.trackingNotice
           }
         >
-          Conversion results are unavailable for
-          {" "}
           {
             totals.untrackedCampaigns
           }
           {" "}
           {totals.untrackedCampaigns ===
           1
-            ? "campaign"
-            : "campaigns"}
+            ? "campaign does"
+            : "campaigns do"}
           {" "}
-          because tracking is not currently connected.
+          not currently have conversion tracking.
         </div>
       ) : null}
 
-      <section className="contentCard">
+      <section
+        className="contentCard"
+      >
         <div
           className={
             styles.cardHeader
           }
         >
           <div>
-            <h2 className="sectionTitle">
-              Campaign performance
+            <h2
+              className="sectionTitle"
+            >
+              Campaign comparison
             </h2>
 
-            <p className="sectionDescription">
-              Compare delivery, engagement, conversion results,
-              and tracking.
+            <p
+              className="sectionDescription"
+            >
+              Performance and tracking by campaign.
             </p>
           </div>
         </div>
@@ -673,7 +627,8 @@ export default function PerformanceDashboard() {
 
                 <strong>
                   {formatClientNumber(
-                    row.metrics.impressions
+                    row.metrics
+                      .impressions
                   )}
                 </strong>
 
@@ -684,7 +639,8 @@ export default function PerformanceDashboard() {
                 >
                   <strong>
                     {formatClientNumber(
-                      row.metrics.clicks
+                      row.metrics
+                        .clicks
                     )}
                   </strong>
 
@@ -702,11 +658,13 @@ export default function PerformanceDashboard() {
                   }
                 >
                   <strong>
-                    {row.metrics.conversions ===
+                    {row.metrics
+                      .conversions ===
                     null
                       ? "Not tracked"
                       : formatClientNumber(
-                          row.metrics.conversions
+                          row.metrics
+                            .conversions
                         )}
                   </strong>
 
@@ -716,16 +674,7 @@ export default function PerformanceDashboard() {
                       ? "—"
                       : `${row.conversionRate.toFixed(
                           2
-                        )}% conversion rate`}
-
-                    {row.campaign.type ===
-                      "affiliate" &&
-                    row.commission >
-                      0
-                      ? ` · ${formatClientCurrency(
-                          row.commission
-                        )} commission`
-                      : ""}
+                        )}%`}
                   </span>
                 </div>
 
@@ -735,7 +684,8 @@ export default function PerformanceDashboard() {
                   }
                 >
                   {getTrackingStatusLabel(
-                    row.campaign.trackingStatus
+                    row.campaign
+                      .trackingStatus
                   )}
                 </span>
 
@@ -756,19 +706,25 @@ export default function PerformanceDashboard() {
 
       {selectedCampaign ===
       "all" ? (
-        <section className="contentCard">
+        <section
+          className="contentCard"
+        >
           <div
             className={
               styles.cardHeader
             }
           >
             <div>
-              <h2 className="sectionTitle">
-                Where performance came from
+              <h2
+                className="sectionTitle"
+              >
+                Placement performance
               </h2>
 
-              <p className="sectionDescription">
-                Results across Poster Home, Search, and Trending.
+              <p
+                className="sectionDescription"
+              >
+                Home, Search, and Trending results.
               </p>
             </div>
           </div>
@@ -835,7 +791,8 @@ export default function PerformanceDashboard() {
                     >
                       <span
                         style={{
-                          width: `${width}%`,
+                          width:
+                            `${width}%`,
                         }}
                       />
                     </div>
@@ -872,8 +829,8 @@ export default function PerformanceDashboard() {
           styles.demoNote
         }
       >
-        Development reporting data · Production analytics will
-        use authenticated organization-scoped reporting APIs.
+        Frontend demonstration snapshots · Real reporting will use
+        organization-scoped campaign analytics APIs.
       </p>
     </>
   );
