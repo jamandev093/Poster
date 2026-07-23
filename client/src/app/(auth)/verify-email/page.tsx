@@ -1,5 +1,8 @@
 import AuthShell from "@/components/auth/AuthShell";
-import { VerifyEmailForm } from "@/features/auth/AuthForms";
+
+import {
+  VerifyEmailForm,
+} from "@/features/auth/AuthForms";
 
 interface VerifyEmailPageProps {
   searchParams: Promise<{
@@ -10,14 +13,19 @@ interface VerifyEmailPageProps {
 export default async function VerifyEmailPage({
   searchParams,
 }: VerifyEmailPageProps) {
-  const params = await searchParams;
+  const params =
+    await searchParams;
 
   return (
     <AuthShell
-      title="Verify business email"
-      description="Enter the 6-digit code sent to your email."
+      title="Verify your email"
+      description="Confirm the business email connected to your Client account."
     >
-      <VerifyEmailForm email={params.email} />
+      <VerifyEmailForm
+        email={
+          params.email
+        }
+      />
     </AuthShell>
   );
 }

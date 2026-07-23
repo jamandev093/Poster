@@ -8,23 +8,26 @@ import {
 import Link from "next/link";
 
 import {
-  clientRequests,
   formatClientDate,
   getRequestStatusLabel,
   getRequestTypeLabel,
-} from "./request.mock";
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getOrganizationRequests,
+} from "@/features/workspace/workspace.selectors";
 
 import type {
-  ClientRequestRecord,
-  ClientRequestStatus,
-} from "./request.types";
+  CommercialRequest,
+  CommercialRequestStatus,
+} from "@/features/workspace/workspace.types";
 
 import styles from "./RequestsManager.module.css";
 
 type RequestFilter =
   | "all"
   | "needs_action"
-  | ClientRequestStatus;
+  | CommercialRequestStatus;
 
 interface FilterOption {
   key: RequestFilter;
@@ -54,23 +57,34 @@ const filters: FilterOption[] = [
   },
 ];
 
+const requests =
+  getOrganizationRequests();
+
 function matchesFilter(
-  request: ClientRequestRecord,
+  request: CommercialRequest,
   filter: RequestFilter
 ): boolean {
   if (filter === "all") {
     return true;
   }
 
-  if (filter === "needs_action") {
-    return request.status === "changes_requested";
+  if (
+    filter ===
+    "needs_action"
+  ) {
+    return (
+      request.status ===
+      "changes_requested"
+    );
   }
 
-  return request.status === filter;
+  return (
+    request.status === filter
+  );
 }
 
 function getStatusClass(
-  status: ClientRequestStatus
+  status: CommercialRequestStatus
 ): string {
   switch (status) {
     case "pending_review":
@@ -96,171 +110,339 @@ export default function RequestsManager() {
   const [
     filter,
     setFilter,
-  ] = useState<RequestFilter>("all");
+  ] =
+    useState<RequestFilter>(
+      "all"
+    );
 
-  const visibleRequests = useMemo(
-    () => {
-      const normalizedSearch =
-        search.trim().toLowerCase();
+  const visibleRequests =
+    useMemo(
+      () => {
+        const normalizedSearch =
+          search
+            .trim()
+            .toLowerCase();
 
-      return clientRequests.filter(
-        (request) => {
-          if (
-            !matchesFilter(
-              request,
-              filter
-            )
-          ) {
-            return false;
-          }
+        return requests.filter(
+          (
+            request
+          ) => {
+            if (
+              !matchesFilter(
+                request,
+                filter
+              )
+            ) {
+              return false;
+            }
 
-          if (!normalizedSearch) {
-            return true;
-          }
+            if (
+              !normalizedSearch
+            ) {
+              return true;
+            }
 
-          const searchable =
-            [
+            const searchable = [
               request.id,
               request.campaignName,
-              getRequestTypeLabel(request.type),
-              getRequestStatusLabel(request.status),
+              request.organizationName,
+              getRequestTypeLabel(
+                request.type
+              ),
+              getRequestStatusLabel(
+                request.status
+              ),
+              request.linkedCampaignId ??
+                "",
             ]
               .join(" ")
               .toLowerCase();
 
-          return searchable.includes(normalizedSearch);
-        }
-      );
-    },
-    [
-      filter,
-      search,
-    ]
-  );
+            return searchable.includes(
+              normalizedSearch
+            );
+          }
+        );
+      },
+      [
+        filter,
+        search,
+      ]
+    );
 
   const needsAction =
-    clientRequests.filter(
-      (request) =>
-        request.status === "changes_requested"
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "changes_requested"
     ).length;
 
   const pending =
-    clientRequests.filter(
-      (request) =>
-        request.status === "pending_review"
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "pending_review"
     ).length;
 
   const approved =
-    clientRequests.filter(
-      (request) =>
-        request.status === "approved"
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "approved"
     ).length;
 
   return (
     <>
-      <section className={styles.summaryGrid}>
-        <article className={styles.summaryCard}>
-          <span>Total requests</span>
-          <strong>{clientRequests.length}</strong>
-          <small>All submitted requests</small>
+      <section
+        className={
+          styles.summaryGrid
+        }
+      >
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Total requests
+          </span>
+
+          <strong>
+            {requests.length}
+          </strong>
+
+          <small>
+            Submitted to Poster
+          </small>
         </article>
 
-        <article className={styles.attentionCard}>
-          <span>Needs action</span>
-          <strong>{needsAction}</strong>
-          <small>Admin requested changes</small>
+        <article
+          className={
+            styles.attentionCard
+          }
+        >
+          <span>
+            Needs action
+          </span>
+
+          <strong>
+            {needsAction}
+          </strong>
+
+          <small>
+            Changes requested
+          </small>
         </article>
 
-        <article className={styles.summaryCard}>
-          <span>Pending review</span>
-          <strong>{pending}</strong>
-          <small>Awaiting Admin review</small>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Pending review
+          </span>
+
+          <strong>
+            {pending}
+          </strong>
+
+          <small>
+            Poster is reviewing
+          </small>
         </article>
 
-        <article className={styles.summaryCard}>
-          <span>Approved</span>
-          <strong>{approved}</strong>
-          <small>Converted or ready for campaigns</small>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Approved
+          </span>
+
+          <strong>
+            {approved}
+          </strong>
+
+          <small>
+            Ready for campaign workflow
+          </small>
         </article>
       </section>
 
       <section className="contentCard">
-        <div className={styles.toolbar}>
+        <div
+          className={
+            styles.toolbar
+          }
+        >
           <input
-            className={styles.searchInput}
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
+            className={
+              styles.searchInput
             }
-            placeholder="Search request ID or campaign..."
+            value={search}
+            onChange={(
+              event
+            ) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search request, campaign, or ID"
             aria-label="Search requests"
           />
 
           <div
-            className={styles.filters}
+            className={
+              styles.filters
+            }
             aria-label="Request status filters"
           >
-            {filters.map((option) => {
-              const active =
-                filter === option.key;
+            {filters.map(
+              (
+                option
+              ) => {
+                const active =
+                  filter ===
+                  option.key;
 
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  className={
-                    active
-                      ? styles.filterButtonActive
-                      : styles.filterButton
-                  }
-                  onClick={() =>
-                    setFilter(option.key)
-                  }
-                >
-                  {option.label}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={
+                      option.key
+                    }
+                    type="button"
+                    className={
+                      active
+                        ? styles.filterButtonActive
+                        : styles.filterButton
+                    }
+                    onClick={() =>
+                      setFilter(
+                        option.key
+                      )
+                    }
+                  >
+                    {
+                      option.label
+                    }
+                  </button>
+                );
+              }
+            )}
           </div>
         </div>
 
-        <div className={styles.table}>
-          <div className={styles.tableHeader}>
-            <span>Request</span>
-            <span>Type</span>
-            <span>Submitted</span>
-            <span>Status</span>
+        <div
+          className={
+            styles.table
+          }
+        >
+          <div
+            className={
+              styles.tableHeader
+            }
+          >
+            <span>
+              Request
+            </span>
+
+            <span>
+              Type
+            </span>
+
+            <span>
+              Submitted
+            </span>
+
+            <span>
+              Status
+            </span>
           </div>
 
-          {visibleRequests.length > 0 ? (
-            visibleRequests.map((request) => (
-              <Link
-                key={request.id}
-                href={`/requests/${request.id}`}
-                className={styles.row}
-              >
-                <div className={styles.requestInfo}>
-                  <strong>{request.campaignName}</strong>
+          {visibleRequests.length >
+          0 ? (
+            visibleRequests.map(
+              (
+                request
+              ) => (
+                <Link
+                  key={
+                    request.id
+                  }
+                  href={`/requests/${request.id}`}
+                  className={
+                    styles.row
+                  }
+                >
+                  <div
+                    className={
+                      styles.requestInfo
+                    }
+                  >
+                    <strong>
+                      {
+                        request.campaignName
+                      }
+                    </strong>
 
-                  <span>{request.id}</span>
-                </div>
+                    <span>
+                      {
+                        request.id
+                      }
 
-                <span className={styles.typeLabel}>
-                  {getRequestTypeLabel(request.type)}
-                </span>
+                      {request.linkedCampaignId
+                        ? ` · ${request.linkedCampaignId}`
+                        : ""}
+                    </span>
+                  </div>
 
-                <span className={styles.dateCell}>
-                  {formatClientDate(request.submittedAt)}
-                </span>
+                  <span
+                    className={
+                      styles.typeLabel
+                    }
+                  >
+                    {getRequestTypeLabel(
+                      request.type
+                    )}
+                  </span>
 
-                <span className={getStatusClass(request.status)}>
-                  {getRequestStatusLabel(request.status)}
-                </span>
-              </Link>
-            ))
+                  <span
+                    className={
+                      styles.dateCell
+                    }
+                  >
+                    {formatClientDate(
+                      request.submittedAt
+                    )}
+                  </span>
+
+                  <span
+                    className={getStatusClass(
+                      request.status
+                    )}
+                  >
+                    {getRequestStatusLabel(
+                      request.status
+                    )}
+                  </span>
+                </Link>
+              )
+            )
           ) : (
-            <div className={styles.empty}>
-              No requests match the current search and filter.
+            <div
+              className={
+                styles.empty
+              }
+            >
+              No requests match your search or filter.
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import AuthShell from "@/components/auth/AuthShell";
+
 import {
   OrganizationOnboardingForm,
 } from "@/features/auth/AuthForms";
@@ -6,8 +7,8 @@ import {
 export default function OrganizationOnboardingPage() {
   return (
     <AuthShell
-      title="Complete organization"
-      description="Add the business details needed for requests and billing."
+      title="Set up your organization"
+      description="Add the business details used for advertising requests and billing."
     >
       <OrganizationOnboardingForm />
     </AuthShell>

@@ -6,7 +6,7 @@ export default function AccountPage() {
       <header className="pageHeader">
         <div>
           <div className="pageEyebrow">
-            Organization
+            Client workspace
           </div>
 
           <h1 className="pageTitle">
@@ -14,8 +14,8 @@ export default function AccountPage() {
           </h1>
 
           <p className="pageDescription">
-            Organization, primary contact, and
-            notification settings.
+            Manage the business identity and primary contact connected to
+            your Poster Client workspace.
           </p>
         </div>
       </header>

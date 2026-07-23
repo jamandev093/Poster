@@ -1,9 +1,13 @@
 import NewRequestForm from "@/features/requests/NewRequestForm";
 
 import {
-  getClientRequestById,
   getRequestTypeLabel,
-} from "@/features/requests/request.mock";
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  clientCanEditRequest,
+  getRequestById,
+} from "@/features/workspace/workspace.selectors";
 
 interface NewRequestPageProps {
   searchParams: Promise<{
@@ -23,14 +27,16 @@ export default async function NewRequestPage({
 
   const requestedRecord =
     requestedEditId
-      ? getClientRequestById(
+      ? getRequestById(
           requestedEditId
         )
       : undefined;
 
   const editableRequest =
-    requestedRecord?.status ===
-    "changes_requested"
+    requestedRecord &&
+    clientCanEditRequest(
+      requestedRecord
+    )
       ? requestedRecord
       : undefined;
 
@@ -41,21 +47,21 @@ export default async function NewRequestPage({
           <div className="pageEyebrow">
             {editableRequest
               ? editableRequest.id
-              : "Commercial request"}
+              : "Advertising request"}
           </div>
 
           <h1 className="pageTitle">
             {editableRequest
-              ? "Update Request"
-              : "New Request"}
+              ? "Update requested changes"
+              : "Submit advertising request"}
           </h1>
 
           <p className="pageDescription">
             {editableRequest
               ? `${getRequestTypeLabel(
                   editableRequest.type
-                )} corrections requested by Admin.`
-              : "Submit a direct sponsorship or affiliate proposal."}
+                )} · Correct the items Poster requested and resubmit for review.`
+              : "Send a Direct Sponsorship or Affiliate proposal to Poster for review."}
           </p>
         </div>
       </header>

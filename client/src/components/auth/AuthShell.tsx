@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import type {
+  ReactNode,
+} from "react";
 
 import Link from "next/link";
 
@@ -16,108 +18,217 @@ export default function AuthShell({
   description,
 }: AuthShellProps) {
   return (
-    <main className={styles.page}>
-      <aside className={styles.brandPanel}>
-        <div className={styles.brandTop}>
+    <main
+      className={
+        styles.page
+      }
+    >
+      <aside
+        className={
+          styles.brandPanel
+        }
+      >
+        <div
+          className={
+            styles.brandTop
+          }
+        >
           <Link
             href="/login"
-            className={styles.brand}
+            className={
+              styles.brand
+            }
           >
-            <span className={styles.brandMark}>
+            <span
+              className={
+                styles.brandMark
+              }
+            >
               P
             </span>
 
-            <span className={styles.brandText}>
-              <strong>Poster</strong>
-              <small>Client Workspace</small>
+            <span
+              className={
+                styles.brandText
+              }
+            >
+              <strong>
+                Poster
+              </strong>
+
+              <small>
+                Client
+              </small>
             </span>
           </Link>
         </div>
 
-        <div className={styles.workspaceIntro}>
-          <div className={styles.eyebrow}>
-            FOR BUSINESS PARTNERS
+        <div
+          className={
+            styles.workspaceIntro
+          }
+        >
+          <div
+            className={
+              styles.eyebrow
+            }
+          >
+            BUSINESS WORKSPACE
           </div>
 
           <h1>
-            Manage commercial work with Poster.
+            Advertise and partner with Poster.
           </h1>
 
           <p>
-            Submit requests, follow campaign status,
-            and review performance from one workspace.
+            Submit commercial requests, follow review,
+            and monitor approved campaign results.
           </p>
 
-          <div className={styles.capabilities}>
-            <div className={styles.capability}>
-              <span className={styles.capabilityMark}>
+          <div
+            className={
+              styles.capabilities
+            }
+          >
+            <div
+              className={
+                styles.capability
+              }
+            >
+              <span
+                className={
+                  styles.capabilityMark
+                }
+              >
                 ✓
               </span>
 
               <span>
-                Sponsorship and affiliate requests
+                Direct sponsorship
               </span>
             </div>
 
-            <div className={styles.capability}>
-              <span className={styles.capabilityMark}>
+            <div
+              className={
+                styles.capability
+              }
+            >
+              <span
+                className={
+                  styles.capabilityMark
+                }
+              >
                 ✓
               </span>
 
               <span>
-                Campaign status and delivery
+                Affiliate partnerships
               </span>
             </div>
 
-            <div className={styles.capability}>
-              <span className={styles.capabilityMark}>
+            <div
+              className={
+                styles.capability
+              }
+            >
+              <span
+                className={
+                  styles.capabilityMark
+                }
+              >
                 ✓
               </span>
 
               <span>
-                Performance and conversion reporting
+                Campaign performance
               </span>
             </div>
           </div>
         </div>
 
-        <footer className={styles.brandFooter}>
-          <span>Poster</span>
+        <footer
+          className={
+            styles.brandFooter
+          }
+        >
+          <span>
+            Poster
+          </span>
 
-          <span className={styles.footerDivider}>
+          <span
+            className={
+              styles.footerDivider
+            }
+          >
             ·
           </span>
 
-          <span>Commercial Operations</span>
+          <span>
+            Client workspace
+          </span>
         </footer>
       </aside>
 
-      <section className={styles.formPanel}>
-        <div className={styles.mobileBrand}>
+      <section
+        className={
+          styles.formPanel
+        }
+      >
+        <div
+          className={
+            styles.mobileBrand
+          }
+        >
           <Link href="/login">
-            <span>P</span>
+            <span>
+              P
+            </span>
 
             <div>
-              <strong>Poster</strong>
-              <small>Client Workspace</small>
+              <strong>
+                Poster
+              </strong>
+
+              <small>
+                Client
+              </small>
             </div>
           </Link>
         </div>
 
-        <div className={styles.formWrap}>
-          <section className={styles.authCard}>
-            <header className={styles.formHeader}>
-              <h2>{title}</h2>
+        <div
+          className={
+            styles.formWrap
+          }
+        >
+          <section
+            className={
+              styles.authCard
+            }
+          >
+            <header
+              className={
+                styles.formHeader
+              }
+            >
+              <h2>
+                {title}
+              </h2>
 
-              <p>{description}</p>
+              <p>
+                {description}
+              </p>
             </header>
 
             {children}
           </section>
 
-          <div className={styles.securityNote}>
-            Secure access for approved Poster business
-            accounts.
+          <div
+            className={
+              styles.securityNote
+            }
+          >
+            Poster Client · Business account access
           </div>
         </div>
       </section>

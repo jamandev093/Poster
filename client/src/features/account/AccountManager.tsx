@@ -1,14 +1,30 @@
 "use client";
 
 import {
-  FormEvent,
   useState,
 } from "react";
+
+import type {
+  FormEvent,
+} from "react";
+
+import SignalContact from "@/components/client/SignalContact";
+
+import {
+  getWorkspaceAccountRoleLabel,
+  getWorkspaceAccountStatusLabel,
+  workspaceAccountProfile,
+} from "@/features/workspace/workspace.account";
+
+import {
+  getCurrentOrganization,
+} from "@/features/workspace/workspace.selectors";
 
 import styles from "./AccountManager.module.css";
 
 interface AccountFormState {
   organizationName: string;
+
   website: string;
   industry: string;
   country: string;
@@ -18,28 +34,58 @@ interface AccountFormState {
   jobTitle: string;
   businessEmail: string;
   phone: string;
-
-  requestUpdates: boolean;
-  campaignUpdates: boolean;
-  billingUpdates: boolean;
 }
 
-const initialState: AccountFormState = {
-  organizationName: "Example Cloud",
-  website: "https://examplecloud.com",
-  industry: "Professional learning",
-  country: "India",
-  billingEmail: "billing@examplecloud.com",
+const organization =
+  getCurrentOrganization();
 
-  contactName: "Aarav Mehta",
-  jobTitle: "Marketing Manager",
-  businessEmail: "marketing@examplecloud.com",
-  phone: "",
+function createInitialState():
+  AccountFormState {
+  return {
+    organizationName:
+      organization.name,
 
-  requestUpdates: true,
-  campaignUpdates: true,
-  billingUpdates: true,
-};
+    website:
+      workspaceAccountProfile
+        .organization
+        .website,
+
+    industry:
+      workspaceAccountProfile
+        .organization
+        .industry,
+
+    country:
+      workspaceAccountProfile
+        .organization
+        .country,
+
+    billingEmail:
+      workspaceAccountProfile
+        .organization
+        .billingEmail,
+
+    contactName:
+      workspaceAccountProfile
+        .primaryClient
+        .fullName,
+
+    jobTitle:
+      workspaceAccountProfile
+        .primaryClient
+        .jobTitle,
+
+    businessEmail:
+      workspaceAccountProfile
+        .primaryClient
+        .businessEmail,
+
+    phone:
+      workspaceAccountProfile
+        .primaryClient
+        .phone,
+  };
+}
 
 export default function AccountManager() {
   const [
@@ -47,7 +93,7 @@ export default function AccountManager() {
     setForm,
   ] =
     useState<AccountFormState>(
-      initialState
+      createInitialState
     );
 
   const [
@@ -67,11 +113,15 @@ export default function AccountManager() {
         current
       ) => ({
         ...current,
-        [key]: value,
+
+        [key]:
+          value,
       })
     );
 
-    setSaved(false);
+    setSaved(
+      false
+    );
   };
 
   const saveChanges = (
@@ -81,75 +131,171 @@ export default function AccountManager() {
     event.preventDefault();
 
     /*
-     * Frontend-only save.
+     * Frontend-only demonstration save.
      *
      * Backend integration will later:
-     * - authenticate the client,
-     * - validate organization ownership,
-     * - persist organization details,
-     * - preserve account audit history,
-     * - update notification preferences.
+     * - authenticate the Client account,
+     * - enforce organization ownership,
+     * - validate editable business fields,
+     * - persist organization/contact changes,
+     * - maintain account audit history.
      */
-    setSaved(true);
+    setSaved(
+      true
+    );
   };
 
   const resetChanges =
     () => {
-      setForm(initialState);
-      setSaved(false);
+      setForm(
+        createInitialState()
+      );
+
+      setSaved(
+        false
+      );
     };
+
+  const accountStatus =
+    getWorkspaceAccountStatusLabel(
+      workspaceAccountProfile
+        .status
+    );
+
+  const accountRole =
+    getWorkspaceAccountRoleLabel(
+      workspaceAccountProfile
+        .primaryClient
+        .role
+    );
 
   return (
     <form
-      className={styles.layout}
-      onSubmit={saveChanges}
+      className={
+        styles.layout
+      }
+      onSubmit={
+        saveChanges
+      }
     >
-      <section className={styles.summaryGrid}>
-        <article className={styles.summaryCard}>
-          <span>Organization</span>
-          <strong>Active</strong>
-          <small>Example Cloud</small>
+      <section
+        className={
+          styles.summaryGrid
+        }
+        aria-label="Client account summary"
+      >
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Workspace
+          </span>
+
+          <strong>
+            {accountStatus}
+          </strong>
+
+          <small>
+            {
+              organization.name
+            }
+          </small>
         </article>
 
-        <article className={styles.summaryCard}>
-          <span>Account role</span>
-          <strong>Primary client</strong>
-          <small>Full organization access</small>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Access
+          </span>
+
+          <strong>
+            {accountRole}
+          </strong>
+
+          <small>
+            Organization-scoped workspace
+          </small>
         </article>
 
-        <article className={styles.summaryCard}>
-          <span>Business email</span>
-          <strong>Verified</strong>
-          <small>marketing@examplecloud.com</small>
-        </article>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Business email
+          </span>
 
+          <strong>
+            {workspaceAccountProfile
+              .primaryClient
+              .emailVerified
+              ? "Verified"
+              : "Verification pending"}
+          </strong>
+
+          <small>
+            {
+              form.businessEmail
+            }
+          </small>
+        </article>
       </section>
 
-      <section className={styles.mainGrid}>
-        <div className={styles.primaryColumn}>
+      <section
+        className={
+          styles.mainGrid
+        }
+      >
+        <div
+          className={
+            styles.primaryColumn
+          }
+        >
           <section className="contentCard">
-            <div className={styles.sectionHeader}>
+            <div
+              className={
+                styles.sectionHeader
+              }
+            >
               <div>
                 <h2 className="sectionTitle">
                   Organization
                 </h2>
 
                 <p className="sectionDescription">
-                  Business and billing information.
+                  Business identity used for your Poster commercial workspace.
                 </p>
               </div>
             </div>
 
-            <div className={styles.formGrid}>
-              <div className={styles.field}>
+            <div
+              className={
+                styles.formGrid
+              }
+            >
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="organization-name">
-                  Organization name *
+                  Organization name
                 </label>
 
                 <input
                   id="organization-name"
-                  value={form.organizationName}
-                  onChange={(event) =>
+                  value={
+                    form.organizationName
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "organizationName",
                       event.target.value
@@ -160,34 +306,51 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="organization-website">
-                  Website *
+                  Website
                 </label>
 
                 <input
                   id="organization-website"
                   type="url"
-                  value={form.website}
-                  onChange={(event) =>
+                  value={
+                    form.website
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "website",
                       event.target.value
                     )
                   }
                   required
+                  autoComplete="url"
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="organization-industry">
-                  Industry *
+                  Industry
                 </label>
 
                 <input
                   id="organization-industry"
-                  value={form.industry}
-                  onChange={(event) =>
+                  value={
+                    form.industry
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "industry",
                       event.target.value
@@ -197,15 +360,23 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="organization-country">
-                  Country *
+                  Country
                 </label>
 
                 <select
                   id="organization-country"
-                  value={form.country}
-                  onChange={(event) =>
+                  value={
+                    form.country
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "country",
                       event.target.value
@@ -235,16 +406,24 @@ export default function AccountManager() {
                 </select>
               </div>
 
-              <div className={styles.fieldWide}>
+              <div
+                className={
+                  styles.fieldWide
+                }
+              >
                 <label htmlFor="billing-email">
-                  Billing email *
+                  Billing contact email
                 </label>
 
                 <input
                   id="billing-email"
                   type="email"
-                  value={form.billingEmail}
-                  onChange={(event) =>
+                  value={
+                    form.billingEmail
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "billingEmail",
                       event.target.value
@@ -253,37 +432,65 @@ export default function AccountManager() {
                   required
                   autoComplete="email"
                 />
+
+                <span
+                  className={
+                    styles.fieldHint
+                  }
+                >
+                  Used for future contract and payment communication.
+                </span>
               </div>
             </div>
           </section>
 
           <section className="contentCard">
-            <div className={styles.sectionHeader}>
+            <div
+              className={
+                styles.sectionHeader
+              }
+            >
               <div>
                 <h2 className="sectionTitle">
-                  Primary client
+                  Primary contact
                 </h2>
 
                 <p className="sectionDescription">
-                  Main organization contact.
+                  Main person responsible for this Client workspace.
                 </p>
               </div>
 
-              <span className={styles.primaryBadge}>
-                Primary
+              <span
+                className={
+                  styles.primaryBadge
+                }
+              >
+                Primary client
               </span>
             </div>
 
-            <div className={styles.formGrid}>
-              <div className={styles.field}>
+            <div
+              className={
+                styles.formGrid
+              }
+            >
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="contact-name">
-                  Full name *
+                  Full name
                 </label>
 
                 <input
                   id="contact-name"
-                  value={form.contactName}
-                  onChange={(event) =>
+                  value={
+                    form.contactName
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "contactName",
                       event.target.value
@@ -294,15 +501,23 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="job-title">
-                  Job title *
+                  Job title
                 </label>
 
                 <input
                   id="job-title"
-                  value={form.jobTitle}
-                  onChange={(event) =>
+                  value={
+                    form.jobTitle
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "jobTitle",
                       event.target.value
@@ -313,16 +528,24 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="business-email">
-                  Business email *
+                  Business email
                 </label>
 
                 <input
                   id="business-email"
                   type="email"
-                  value={form.businessEmail}
-                  onChange={(event) =>
+                  value={
+                    form.businessEmail
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "businessEmail",
                       event.target.value
@@ -333,7 +556,11 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label htmlFor="phone">
                   Phone
                 </label>
@@ -341,8 +568,12 @@ export default function AccountManager() {
                 <input
                   id="phone"
                   type="tel"
-                  value={form.phone}
-                  onChange={(event) =>
+                  value={
+                    form.phone
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     updateField(
                       "phone",
                       event.target.value
@@ -356,139 +587,148 @@ export default function AccountManager() {
           </section>
         </div>
 
-        <aside className={styles.secondaryColumn}>
+        <aside
+          className={
+            styles.secondaryColumn
+          }
+        >
           <section className="contentCard">
             <h2 className="sectionTitle">
-              Notifications
+              Workspace access
             </h2>
 
-            <div className={styles.preferenceList}>
-              <label className={styles.preference}>
-                <div>
-                  <strong>
-                    Request updates
-                  </strong>
+            <p className="sectionDescription">
+              Your current Client account scope.
+            </p>
 
-                  <span>
-                    Review and correction notices
-                  </span>
-                </div>
+            <div
+              className={
+                styles.detailList
+              }
+            >
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Organization
+                </span>
 
-                <input
-                  type="checkbox"
-                  checked={form.requestUpdates}
-                  onChange={(event) =>
-                    updateField(
-                      "requestUpdates",
-                      event.target.checked
-                    )
+                <strong>
+                  {
+                    organization.name
                   }
-                />
-              </label>
+                </strong>
+              </div>
 
-              <label className={styles.preference}>
-                <div>
-                  <strong>
-                    Campaign updates
-                  </strong>
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Role
+                </span>
 
-                  <span>
-                    Status and delivery changes
-                  </span>
-                </div>
+                <strong>
+                  {accountRole}
+                </strong>
+              </div>
 
-                <input
-                  type="checkbox"
-                  checked={form.campaignUpdates}
-                  onChange={(event) =>
-                    updateField(
-                      "campaignUpdates",
-                      event.target.checked
-                    )
-                  }
-                />
-              </label>
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Workspace
+                </span>
 
-              <label className={styles.preference}>
-                <div>
-                  <strong>
-                    Billing updates
-                  </strong>
+                <strong>
+                  {accountStatus}
+                </strong>
+              </div>
 
-                  <span>
-                    Contract and payment notices
-                  </span>
-                </div>
+              <div
+                className={
+                  styles.detailRow
+                }
+              >
+                <span>
+                  Email
+                </span>
 
-                <input
-                  type="checkbox"
-                  checked={form.billingUpdates}
-                  onChange={(event) =>
-                    updateField(
-                      "billingUpdates",
-                      event.target.checked
-                    )
-                  }
-                />
-              </label>
+                <strong>
+                  {workspaceAccountProfile
+                    .primaryClient
+                    .emailVerified
+                    ? "Verified"
+                    : "Pending"}
+                </strong>
+              </div>
             </div>
           </section>
 
           <section className="contentCard">
             <h2 className="sectionTitle">
-              Security
+              Need help?
             </h2>
 
-            <div className={styles.securityList}>
-              <div>
-                <span>Email status</span>
-                <strong>Verified</strong>
-              </div>
-
-              <div>
-                <span>Password</span>
-                <strong>Configured</strong>
-              </div>
-
-              <div>
-                <span>Last sign-in</span>
-                <strong>22 Jul 2026</strong>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="secondaryButton"
-              disabled
+            <p
+              className={
+                styles.supportDescription
+              }
             >
-              Change password
-            </button>
+              Contact Poster directly for campaign or account support.
+            </p>
 
-            <p className={styles.pendingNote}>
-              Password management will connect with
-              Client authentication services later.
+            <SignalContact />
+          </section>
+
+          <section
+            className={
+              styles.futureCard
+            }
+          >
+            <span>
+              Later phase
+            </span>
+
+            <strong>
+              Team access
+            </strong>
+
+            <p>
+              Additional organization members and roles will be added after
+              the primary Client workflow is stable.
             </p>
           </section>
-
-          
         </aside>
       </section>
 
       {saved ? (
         <div
-          className={styles.success}
+          className={
+            styles.success
+          }
           role="status"
         >
-          Account changes saved in this frontend
-          demonstration.
+          Account changes saved for this frontend demonstration.
         </div>
       ) : null}
 
-      <div className={styles.actions}>
+      <div
+        className={
+          styles.actions
+        }
+      >
         <button
           type="button"
           className="secondaryButton"
-          onClick={resetChanges}
+          onClick={
+            resetChanges
+          }
         >
           Reset
         </button>
@@ -501,9 +741,13 @@ export default function AccountManager() {
         </button>
       </div>
 
-      <p className={styles.demoNote}>
-        Frontend demonstration · Backend account and
-        organization APIs will replace local state.
+      <p
+        className={
+          styles.demoNote
+        }
+      >
+        Development environment · Production account changes will be stored
+        through authenticated organization APIs.
       </p>
     </form>
   );

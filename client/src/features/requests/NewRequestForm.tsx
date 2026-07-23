@@ -1,91 +1,148 @@
-"use client";
+﻿"use client";
 
 import {
-  FormEvent,
+  type FormEvent,
   useMemo,
   useState,
 } from "react";
 
 import Link from "next/link";
 
+import CreativeMediaUploader, {
+  type CreativeMediaSelection,
+} from "@/components/media/CreativeMediaUploader";
+
+import {
+  validateCommercialCreative,
+} from "@/features/workspace/creative.rules";
+
+import {
+  currentOrganization,
+} from "@/features/workspace/workspace.mock";
+
+import {
+  getRequestTypeLabel,
+} from "@/features/workspace/workspace.formatters";
+
 import type {
-  ClientPlacement,
-  ClientRequestRecord,
-  ClientRequestType,
-} from "./request.types";
+  CommercialCreative,
+  CommercialRequest,
+  CommercialRequestType,
+  CreativeLayout,
+  CreativeMediaAsset,
+  Placement,
+  SlidingCardSlot,
+  SlidingCreativeCard,
+} from "@/features/workspace/workspace.types";
 
 import styles from "./NewRequestForm.module.css";
 
 interface NewRequestFormProps {
-  initialRequest?: ClientRequestRecord;
+  initialRequest?: CommercialRequest;
 }
 
 interface FormState {
-  type: ClientRequestType;
+  type: CommercialRequestType;
 
-  organization: string;
+  organizationName: string;
+
   contactName: string;
+
   businessEmail: string;
+
   website: string;
 
   campaignName: string;
+
   requestedStartDate: string;
+
   requestedEndDate: string;
 
   proposedContractValue: string;
+
   proposedBudget: string;
+
   commissionModel: string;
+
   conversionDefinition: string;
 
   headline: string;
+
   body: string;
+
   callToAction: string;
+
   destinationUrl: string;
 
   rightsConfirmed: boolean;
 }
 
 const placementOptions: {
-  value: ClientPlacement;
+  value: Placement;
+
   label: string;
 }[] = [
   {
-    value: "home",
-    label: "Home",
+    value:
+      "home",
+
+    label:
+      "Home",
   },
+
   {
-    value: "search",
-    label: "Search",
+    value:
+      "search",
+
+    label:
+      "Search",
   },
+
   {
-    value: "trending",
-    label: "Trending",
+    value:
+      "trending",
+
+    label:
+      "Trending",
   },
 ];
 
+const slidingSlots:
+  readonly SlidingCardSlot[] = [
+  1,
+  2,
+  3,
+];
+
+const MAX_VIDEO_BYTES =
+  20 *
+  1024 *
+  1024;
+
 function createInitialState(
-  request?: ClientRequestRecord
-): FormState {
+  request?: CommercialRequest
+):
+  FormState {
   return {
     type:
       request?.type ??
       "direct_sponsorship",
 
-    organization:
-      request?.organization ??
-      "Example Cloud",
+    organizationName:
+      request?.organizationName ??
+      currentOrganization.name,
 
     contactName:
       request?.contactName ??
-      "Aarav Mehta",
+      currentOrganization.primaryContactName,
 
     businessEmail:
       request?.businessEmail ??
-      "marketing@examplecloud.com",
+      currentOrganization.primaryContactEmail,
 
     website:
       request?.website ??
-      "https://examplecloud.com",
+      currentOrganization.website,
 
     campaignName:
       request?.campaignName ??
@@ -140,17 +197,184 @@ function createInitialState(
       "",
 
     rightsConfirmed:
-      Boolean(request),
+      request?.rightsConfirmed ??
+      false,
   };
 }
 
-function createSubmissionReference(): string {
-  const timestamp =
+function createInitialLayout(
+  request?: CommercialRequest
+):
+  CreativeLayout {
+  if (
+    request?.creative.layout
+  ) {
+    return request.creative.layout;
+  }
+
+  if (
+    request?.creative
+      .slidingCards
+      ?.length
+  ) {
+    return "sliding";
+  }
+
+  return "standard";
+}
+
+function createInitialStandardMedia(
+  request?: CommercialRequest
+):
+  CreativeMediaAsset |
+  undefined {
+  if (
+    request?.creative
+      .primaryMedia
+  ) {
+    return request.creative
+      .primaryMedia;
+  }
+
+  if (
+    request?.creative
+      .imageName
+  ) {
+    return {
+      role:
+        "primary",
+
+      type:
+        "image",
+
+      frameProfile:
+        "standard_media",
+
+      fileName:
+        request.creative
+          .imageName,
+    };
+  }
+
+  return undefined;
+}
+
+function createInitialLogoMedia(
+  request?: CommercialRequest
+):
+  CreativeMediaAsset |
+  undefined {
+  if (
+    request?.creative
+      .logoMedia
+  ) {
+    return request.creative
+      .logoMedia;
+  }
+
+  if (
+    request?.creative
+      .logoName
+  ) {
+    return {
+      role:
+        "logo",
+
+      type:
+        "image",
+
+      fileName:
+        request.creative
+          .logoName,
+    };
+  }
+
+  return undefined;
+}
+
+function createInitialSlideTitles(
+  request?: CommercialRequest
+):
+  Record<
+    SlidingCardSlot,
+    string
+  > {
+  const findTitle = (
+    slot:
+      SlidingCardSlot
+  ) =>
+    request?.creative
+      .slidingCards
+      ?.find(
+        (
+          card
+        ) =>
+          card.slot ===
+          slot
+      )
+      ?.title ??
+    "";
+
+  return {
+    1:
+      findTitle(
+        1
+      ),
+
+    2:
+      findTitle(
+        2
+      ),
+
+    3:
+      findTitle(
+        3
+      ),
+  };
+}
+
+function createInitialSlideMedia(
+  request?: CommercialRequest
+):
+  Partial<
+    Record<
+      SlidingCardSlot,
+      CreativeMediaAsset
+    >
+  > {
+  const result:
+    Partial<
+      Record<
+        SlidingCardSlot,
+        CreativeMediaAsset
+      >
+    > = {};
+
+  for (
+    const card of
+    request?.creative
+      .slidingCards ??
+    []
+  ) {
+    result[
+      card.slot
+    ] =
+      card.media;
+  }
+
+  return result;
+}
+
+function createPreviewReference():
+  string {
+  const suffix =
     Date.now()
       .toString()
-      .slice(-6);
+      .slice(
+        -6
+      );
 
-  return `ADV-DEMO-${timestamp}`;
+  return `ADV-PREVIEW-${suffix}`;
 }
 
 export default function NewRequestForm({
@@ -184,56 +408,140 @@ export default function NewRequestForm({
     setPlacements,
   ] =
     useState<
-      ClientPlacement[]
+      Placement[]
     >(
-      initialRequest?.requestedPlacements ??
+      initialRequest
+        ?.requestedPlacements ??
         []
     );
 
   const [
-    campaignImage,
-    setCampaignImage,
+    creativeLayout,
+    setCreativeLayout,
   ] =
-    useState("");
+    useState<CreativeLayout>(
+      () =>
+        createInitialLayout(
+          initialRequest
+        )
+    );
 
   const [
-    organizationLogo,
-    setOrganizationLogo,
+    standardMedia,
+    setStandardMedia,
   ] =
-    useState("");
+    useState<
+      CreativeMediaAsset |
+      undefined
+    >(
+      () =>
+        createInitialStandardMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    logoMedia,
+    setLogoMedia,
+  ] =
+    useState<
+      CreativeMediaAsset |
+      undefined
+    >(
+      () =>
+        createInitialLogoMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    slideTitles,
+    setSlideTitles,
+  ] =
+    useState<
+      Record<
+        SlidingCardSlot,
+        string
+      >
+    >(
+      () =>
+        createInitialSlideTitles(
+          initialRequest
+        )
+    );
+
+  const [
+    slideMedia,
+    setSlideMedia,
+  ] =
+    useState<
+      Partial<
+        Record<
+          SlidingCardSlot,
+          CreativeMediaAsset
+        >
+      >
+    >(
+      () =>
+        createInitialSlideMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    formResetVersion,
+    setFormResetVersion,
+  ] =
+    useState(
+      0
+    );
 
   const [
     error,
     setError,
   ] =
-    useState("");
+    useState(
+      ""
+    );
 
   const [
     submittedReference,
     setSubmittedReference,
   ] =
-    useState("");
+    useState(
+      ""
+    );
 
   const updateField = <
     Key extends keyof FormState,
   >(
-    key: Key,
-    value: FormState[Key]
+    key:
+      Key,
+
+    value:
+      FormState[
+        Key
+      ]
   ) => {
     setForm(
       (
         current
       ) => ({
         ...current,
-        [key]: value,
+
+        [key]:
+          value,
       })
     );
 
-    setError("");
+    setError(
+      ""
+    );
   };
 
   const selectType = (
-    type: ClientRequestType
+    type:
+      CommercialRequestType
   ) => {
     if (
       isEditMode
@@ -247,9 +555,22 @@ export default function NewRequestForm({
     );
   };
 
+  const selectCreativeLayout = (
+    layout:
+      CreativeLayout
+  ) => {
+    setCreativeLayout(
+      layout
+    );
+
+    setError(
+      ""
+    );
+  };
+
   const togglePlacement = (
     placement:
-      ClientPlacement
+      Placement
   ) => {
     setPlacements(
       (
@@ -271,8 +592,192 @@ export default function NewRequestForm({
             ]
     );
 
-    setError("");
+    setError(
+      ""
+    );
   };
+
+  const updateSlideTitle = (
+    slot:
+      SlidingCardSlot,
+
+    value:
+      string
+  ) => {
+    setSlideTitles(
+      (
+        current
+      ) => ({
+        ...current,
+
+        [slot]:
+          value,
+      })
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateStandardMedia = (
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setStandardMedia(
+      selection?.asset
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateLogoMedia = (
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setLogoMedia(
+      selection?.asset
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateSlideMedia = (
+    slot:
+      SlidingCardSlot,
+
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setSlideMedia(
+      (
+        current
+      ) => {
+        const next = {
+          ...current,
+        };
+
+        if (
+          selection
+        ) {
+          next[
+            slot
+          ] =
+            selection.asset;
+        } else {
+          delete next[
+            slot
+          ];
+        }
+
+        return next;
+      }
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const buildCreative =
+    ():
+      CommercialCreative => {
+      const base:
+        CommercialCreative = {
+        layout:
+          creativeLayout,
+
+        headline:
+          form.headline
+            .trim(),
+
+        body:
+          form.body
+            .trim(),
+
+        callToAction:
+          form.callToAction
+            .trim(),
+
+        destinationUrl:
+          form.destinationUrl
+            .trim(),
+
+        logoMedia,
+
+        logoName:
+          logoMedia
+            ?.fileName ??
+          initialRequest
+            ?.creative
+            .logoName,
+      };
+
+      if (
+        creativeLayout ===
+        "standard"
+      ) {
+        return {
+          ...base,
+
+          primaryMedia:
+            standardMedia,
+
+          imageName:
+            standardMedia
+              ?.type ===
+              "image"
+              ? standardMedia
+                  .fileName
+              : initialRequest
+                  ?.creative
+                  .imageName,
+        };
+      }
+
+      const slidingCards:
+        SlidingCreativeCard[] = [];
+
+      for (
+        const slot of
+        slidingSlots
+      ) {
+        const media =
+          slideMedia[
+            slot
+          ];
+
+        if (
+          !media
+        ) {
+          continue;
+        }
+
+        slidingCards.push({
+          slot,
+
+          title:
+            slideTitles[
+              slot
+            ].trim(),
+
+          media,
+        });
+      }
+
+      return {
+        ...base,
+
+        slidingCards,
+      };
+    };
 
   const resetForm =
     () => {
@@ -281,16 +786,47 @@ export default function NewRequestForm({
       );
 
       setPlacements(
-        initialRequest?.requestedPlacements ??
+        initialRequest
+          ?.requestedPlacements ??
           []
       );
 
-      setCampaignImage(
-        ""
+      setCreativeLayout(
+        createInitialLayout(
+          initialRequest
+        )
       );
 
-      setOrganizationLogo(
-        ""
+      setStandardMedia(
+        createInitialStandardMedia(
+          initialRequest
+        )
+      );
+
+      setLogoMedia(
+        createInitialLogoMedia(
+          initialRequest
+        )
+      );
+
+      setSlideTitles(
+        createInitialSlideTitles(
+          initialRequest
+        )
+      );
+
+      setSlideMedia(
+        createInitialSlideMedia(
+          initialRequest
+        )
+      );
+
+      setFormResetVersion(
+        (
+          current
+        ) =>
+          current +
+          1
       );
 
       setSubmittedReference(
@@ -335,7 +871,8 @@ export default function NewRequestForm({
         "direct_sponsorship" &&
       Number(
         form.proposedContractValue
-      ) <= 0
+      ) <=
+        0
     ) {
       setError(
         "Enter a valid proposed contract value."
@@ -347,10 +884,34 @@ export default function NewRequestForm({
     if (
       form.type ===
         "affiliate" &&
-      !form.commissionModel.trim()
+      !form.commissionModel
+        .trim()
     ) {
       setError(
         "Enter the proposed commission model."
+      );
+
+      return;
+    }
+
+    const creative =
+      buildCreative();
+
+    const creativeValidation =
+      validateCommercialCreative(
+        creative
+      );
+
+    if (
+      !creativeValidation
+        .valid
+    ) {
+      setError(
+        creativeValidation
+          .errors[
+          0
+        ] ??
+          "Review the advertising creative before submitting."
       );
 
       return;
@@ -360,29 +921,41 @@ export default function NewRequestForm({
       !form.rightsConfirmed
     ) {
       setError(
-        "Confirm that you have permission to submit the creative and destination content."
+        "Confirm that you have permission to submit the creative, links, and commercial information."
       );
 
       return;
     }
 
-    setError("");
+    setError(
+      ""
+    );
 
     /*
-     * Frontend-only submission.
+     * Frontend-only workflow.
      *
      * Backend integration will later:
-     * - authenticate the primary client,
-     * - scope the request to the organization,
-     * - upload creative assets,
-     * - create or update an ADV record,
-     * - notify Admin,
-     * - preserve request history,
-     * - return the permanent reference.
+     *
+     * - authenticate the client;
+     * - enforce organization ownership;
+     * - upload media to secure object storage;
+     * - re-verify MIME, codec, FPS, duration,
+     *   dimensions and aspect ratio;
+     * - generate permanent media asset IDs/URLs;
+     * - create/update the ADV request;
+     * - preserve immutable review history;
+     * - notify Admin;
+     * - return the permanent request reference.
+     *
+     * Browser File objects and object URLs are never
+     * persisted as canonical campaign data.
      */
+    void creative;
+
     setSubmittedReference(
-      initialRequest?.id ??
-        createSubmissionReference()
+      initialRequest
+        ?.id ??
+        createPreviewReference()
     );
   };
 
@@ -410,24 +983,28 @@ export default function NewRequestForm({
             }
           >
             {isEditMode
-              ? "Updates sent"
-              : "Request submitted"}
+              ? "Corrections ready"
+              : "Request prepared"}
           </div>
 
           <h2>
             {isEditMode
-              ? "Your corrections were sent to Admin."
-              : "Your commercial request was received."}
+              ? "Your changes are ready to return to Poster for review."
+              : "Your advertising request is ready for Poster review."}
           </h2>
 
           <p>
-            Reference:
-            {" "}
+            Reference:{" "}
             <strong>
               {
                 submittedReference
               }
             </strong>
+          </p>
+
+          <p>
+            This development build does not persist submissions until
+            backend services are connected.
           </p>
 
           <div
@@ -436,10 +1013,17 @@ export default function NewRequestForm({
             }
           >
             <Link
-              href="/requests"
+              href={
+                isEditMode &&
+                initialRequest
+                  ? `/requests/${initialRequest.id}`
+                  : "/requests"
+              }
               className="primaryButton"
             >
-              View requests
+              {isEditMode
+                ? "Back to request"
+                : "View requests"}
             </Link>
 
             <button
@@ -450,7 +1034,7 @@ export default function NewRequestForm({
               }
             >
               {isEditMode
-                ? "Review again"
+                ? "Edit again"
                 : "Submit another"}
             </button>
           </div>
@@ -477,7 +1061,7 @@ export default function NewRequestForm({
         >
           <div>
             <strong>
-              Admin requested changes
+              Poster requested changes
             </strong>
 
             <span>
@@ -487,11 +1071,38 @@ export default function NewRequestForm({
             </span>
           </div>
 
-          <p>
-            {
-              initialRequest.reviewNote
-            }
-          </p>
+          {initialRequest
+            .review
+            ?.requestedChanges
+            .length ? (
+            <ul>
+              {initialRequest.review.requestedChanges.map(
+                (
+                  change
+                ) => (
+                  <li
+                    key={
+                      change
+                    }
+                  >
+                    {
+                      change
+                    }
+                  </li>
+                )
+              )}
+            </ul>
+          ) : null}
+
+          {initialRequest
+            .review
+            ?.reviewNote ? (
+            <p>
+              {
+                initialRequest.review.reviewNote
+              }
+            </p>
+          ) : null}
         </section>
       ) : null}
 
@@ -515,7 +1126,8 @@ export default function NewRequestForm({
             </h2>
 
             <p>
-              Choose the commercial model.
+              Choose the commercial relationship. Creative format and
+              placement are selected independently.
             </p>
           </div>
         </div>
@@ -547,8 +1159,8 @@ export default function NewRequestForm({
             </strong>
 
             <span>
-              Contract-based campaign with defined
-              placement and delivery.
+              Contract-based advertising with agreed commercial terms,
+              placements, schedule, and delivery.
             </span>
           </button>
 
@@ -574,8 +1186,8 @@ export default function NewRequestForm({
             </strong>
 
             <span>
-              Performance partnership using tracked
-              conversions and commission.
+              Performance partnership based on tracked conversions
+              and commission.
             </span>
           </button>
         </div>
@@ -597,11 +1209,11 @@ export default function NewRequestForm({
 
           <div>
             <h2>
-              Organization
+              Business contact
             </h2>
 
             <p>
-              Primary client contact.
+              The organization submitting this request.
             </p>
           </div>
         </div>
@@ -623,18 +1235,9 @@ export default function NewRequestForm({
             <input
               id="request-organization"
               value={
-                form.organization
+                form.organizationName
               }
-              onChange={(
-                event
-              ) =>
-                updateField(
-                  "organization",
-                  event.target.value
-                )
-              }
-              required
-              autoComplete="organization"
+              readOnly
             />
           </div>
 
@@ -738,11 +1341,11 @@ export default function NewRequestForm({
 
           <div>
             <h2>
-              Campaign
+              Campaign request
             </h2>
 
             <p>
-              Name, placement, and requested dates.
+              Choose where the campaign may be delivered.
             </p>
           </div>
         </div>
@@ -770,7 +1373,7 @@ export default function NewRequestForm({
               )
             }
             required
-            placeholder="Example: Professional Skills Campaign"
+            placeholder="Professional Skills Campaign"
           />
         </div>
 
@@ -918,7 +1521,7 @@ export default function NewRequestForm({
             </h2>
 
             <p>
-              Proposed value and conversion details.
+              Proposed business terms for Poster to review.
             </p>
           </div>
         </div>
@@ -945,7 +1548,7 @@ export default function NewRequestForm({
                 }
               >
                 <span>
-                  ₹
+
                 </span>
 
                 <input
@@ -986,7 +1589,7 @@ export default function NewRequestForm({
                   }
                 >
                   <span>
-                    ₹
+
                   </span>
 
                   <input
@@ -1033,7 +1636,7 @@ export default function NewRequestForm({
                     )
                   }
                   required
-                  placeholder="₹400 per verified enrollment"
+                  placeholder="12% per completed purchase"
                 />
               </div>
             </>
@@ -1061,7 +1664,7 @@ export default function NewRequestForm({
                   event.target.value
                 )
               }
-              placeholder="Example: Completed paid course enrollment"
+              placeholder="Completed paid course enrollment"
             />
           </div>
         </div>
@@ -1087,7 +1690,8 @@ export default function NewRequestForm({
             </h2>
 
             <p>
-              Submitted message and destination.
+              Choose a creative format independently from the commercial
+              type and requested placements.
             </p>
           </div>
         </div>
@@ -1213,77 +1817,280 @@ export default function NewRequestForm({
 
         <div
           className={
-            styles.uploadGrid
+            styles.fieldGroup
           }
         >
-          <label
-            className={
-              styles.uploadBox
-            }
-          >
-            <strong>
-              Campaign image
-            </strong>
-
-            <span>
-              PNG, JPG or WebP
-            </span>
-
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={(
-                event
-              ) =>
-                setCampaignImage(
-                  event.target.files?.[
-                    0
-                  ]?.name ??
-                    ""
-                )
-              }
-            />
-
-            <em>
-              {campaignImage ||
-                "Choose image"}
-            </em>
+          <label>
+            Creative format *
           </label>
 
-          <label
+          <div
             className={
-              styles.uploadBox
+              styles.typeGrid
             }
           >
-            <strong>
-              Organization logo
-            </strong>
-
-            <span>
-              Optional
-            </span>
-
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/svg+xml"
-              onChange={(
-                event
-              ) =>
-                setOrganizationLogo(
-                  event.target.files?.[
-                    0
-                  ]?.name ??
-                    ""
+            <button
+              type="button"
+              className={
+                creativeLayout ===
+                "standard"
+                  ? styles.typeCardActive
+                  : styles.typeCard
+              }
+              onClick={() =>
+                selectCreativeLayout(
+                  "standard"
                 )
               }
-            />
+            >
+              <strong>
+                Standard ad
+              </strong>
 
-            <em>
-              {organizationLogo ||
-                "Choose logo"}
-            </em>
-          </label>
+              <span>
+                One 16:9 landscape image or short video in Poster&apos;s
+                finalized standard advertising frame.
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                creativeLayout ===
+                "sliding"
+                  ? styles.typeCardActive
+                  : styles.typeCard
+              }
+              onClick={() =>
+                selectCreativeLayout(
+                  "sliding"
+                )
+              }
+            >
+              <strong>
+                Sliding ad
+              </strong>
+
+              <span>
+                Three square cards: Card 1 video, then two image cards.
+              </span>
+            </button>
+          </div>
         </div>
+
+        {creativeLayout ===
+        "standard" ? (
+          <div
+            className={
+              styles.uploadGrid
+            }
+          >
+            <CreativeMediaUploader
+              key={`standard-${formResetVersion}`}
+              label="Main advertising media"
+              description="16:9 image or video. Video: maximum 10 seconds, 20 MB, 30–45 FPS, maximum 1280 × 720."
+              role="primary"
+              frameProfile="standard_media"
+              accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"
+              allowVideo
+              required
+              maxVideoBytes={
+                MAX_VIDEO_BYTES
+              }
+              maxVideoDurationSeconds={
+                10
+              }
+              initialAsset={
+                standardMedia
+              }
+              initialFileName={
+                initialRequest
+                  ?.creative
+                  .imageName
+              }
+              altTextRequired
+              onChange={
+                updateStandardMedia
+              }
+            />
+
+            <CreativeMediaUploader
+              key={`logo-${formResetVersion}`}
+              label="Organization logo"
+              description="Optional logo. PNG, JPG or WebP."
+              role="logo"
+              accept="image/png,image/jpeg,image/webp"
+              initialAsset={
+                logoMedia
+              }
+              initialFileName={
+                initialRequest
+                  ?.creative
+                  .logoName
+              }
+              onChange={
+                updateLogoMedia
+              }
+            />
+          </div>
+        ) : (
+          <>
+            <div
+              className={
+                styles.adminNotice
+              }
+            >
+              <div>
+                <strong>
+                  Sliding creative format
+                </strong>
+
+                <span>
+                  Fixed structure
+                </span>
+              </div>
+
+              <p>
+                Poster&apos;s finalized sliding ad uses exactly three
+                square cards: Card 1 is a short video, Card 2 is an image,
+                and Card 3 is an image.
+              </p>
+            </div>
+
+            {slidingSlots.map(
+              (
+                slot
+              ) => {
+                const isVideo =
+                  slot ===
+                  1;
+
+                return (
+                  <div
+                    key={
+                      slot
+                    }
+                    className={
+                      styles.fieldGroup
+                    }
+                  >
+                    <div
+                      className={
+                        styles.field
+                      }
+                    >
+                      <label
+                        htmlFor={`request-slide-${slot}-title`}
+                      >
+                        Card {slot} title *
+                      </label>
+
+                      <input
+                        id={`request-slide-${slot}-title`}
+                        value={
+                          slideTitles[
+                            slot
+                          ]
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          updateSlideTitle(
+                            slot,
+                            event.target.value
+                          )
+                        }
+                        required
+                        maxLength={
+                          70
+                        }
+                        placeholder={
+                          slot ===
+                          1
+                            ? "Research in Motion"
+                            : slot ===
+                                2
+                              ? "Shared Research Workspace"
+                              : "Team Collaboration"
+                        }
+                      />
+                    </div>
+
+                    <CreativeMediaUploader
+                      key={`slide-${formResetVersion}-${slot}`}
+                      label={
+                        isVideo
+                          ? "Card 1 video"
+                          : `Card ${slot} image`
+                      }
+                      description={
+                        isVideo
+                          ? "Required square 1:1 video. Maximum 10 seconds, 20 MB, 30–45 FPS, maximum 720 × 720."
+                          : "Required square 1:1 image for Poster’s finalized sliding-card frame."
+                      }
+                      role="slide"
+                      frameProfile="sliding_card_media"
+                      accept={
+                        isVideo
+                          ? "video/mp4,video/webm"
+                          : "image/png,image/jpeg,image/webp"
+                      }
+                      allowVideo={
+                        isVideo
+                      }
+                      required
+                      maxVideoBytes={
+                        MAX_VIDEO_BYTES
+                      }
+                      maxVideoDurationSeconds={
+                        10
+                      }
+                      initialAsset={
+                        slideMedia[
+                          slot
+                        ]
+                      }
+                      altTextRequired
+                      onChange={(
+                        selection
+                      ) =>
+                        updateSlideMedia(
+                          slot,
+                          selection
+                        )
+                      }
+                    />
+                  </div>
+                );
+              }
+            )}
+
+            <div
+              className={
+                styles.uploadGrid
+              }
+            >
+              <CreativeMediaUploader
+                key={`sliding-logo-${formResetVersion}`}
+                label="Organization logo"
+                description="Optional logo. PNG, JPG or WebP."
+                role="logo"
+                accept="image/png,image/jpeg,image/webp"
+                initialAsset={
+                  logoMedia
+                }
+                initialFileName={
+                  initialRequest
+                    ?.creative
+                    .logoName
+                }
+                onChange={
+                  updateLogoMedia
+                }
+              />
+            </div>
+          </>
+        )}
       </section>
 
       <section
@@ -1308,10 +2115,8 @@ export default function NewRequestForm({
           />
 
           <span>
-            I confirm that I have permission to
-            submit the creative, branding, links,
-            and commercial information in this
-            request.
+            I confirm that I am authorized to submit this creative,
+            branding, destination, and commercial information to Poster.
           </span>
         </label>
       </section>
@@ -1323,9 +2128,7 @@ export default function NewRequestForm({
           }
           role="alert"
         >
-          {
-            error
-          }
+          {error}
         </div>
       ) : null}
 
@@ -1349,8 +2152,10 @@ export default function NewRequestForm({
           className="primaryButton"
         >
           {isEditMode
-            ? "Send updates"
-            : "Submit request"}
+            ? "Resubmit changes"
+            : `Submit ${getRequestTypeLabel(
+                form.type
+              )} request`}
         </button>
       </div>
 
@@ -1359,9 +2164,8 @@ export default function NewRequestForm({
           styles.controlNote
         }
       >
-        Admin reviews and controls approval,
-        scheduling, activation, pausing, and
-        campaign completion.
+        Poster reviews requests and controls campaign approval,
+        scheduling, activation, pausing, and completion.
       </p>
     </form>
   );

@@ -8,23 +8,29 @@ import {
 import Link from "next/link";
 
 import {
-  calculateCampaignCtr,
-  calculateDeliveryProgress,
-  clientCampaigns,
-  formatCampaignNumber,
+  formatClientNumber,
   getCampaignStatusLabel,
   getCampaignTypeLabel,
-} from "./campaign.mock";
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getOrganizationCampaigns,
+} from "@/features/workspace/workspace.selectors";
+
+import {
+  calculateCtr,
+  calculateDeliveryProgress,
+} from "@/features/workspace/workspace.types";
 
 import type {
-  ClientCampaignStatus,
-} from "./campaign.types";
+  CampaignStatus,
+} from "@/features/workspace/workspace.types";
 
 import styles from "./CampaignsManager.module.css";
 
 type CampaignFilter =
   | "all"
-  | ClientCampaignStatus;
+  | CampaignStatus;
 
 interface FilterOption {
   key: CampaignFilter;
@@ -56,10 +62,17 @@ const filters: FilterOption[] = [
     key: "ended",
     label: "Ended",
   },
+  {
+    key: "disabled",
+    label: "Disabled",
+  },
 ];
 
+const campaigns =
+  getOrganizationCampaigns();
+
 function getStatusClass(
-  status: ClientCampaignStatus
+  status: CampaignStatus
 ): string {
   switch (status) {
     case "active":
@@ -76,6 +89,9 @@ function getStatusClass(
 
     case "ended":
       return `statusBadge ${styles.statusEnded}`;
+
+    case "disabled":
+      return "statusBadge statusAttention";
   }
 }
 
@@ -88,228 +104,444 @@ export default function CampaignsManager() {
   const [
     filter,
     setFilter,
-  ] = useState<CampaignFilter>("all");
+  ] =
+    useState<CampaignFilter>(
+      "all"
+    );
 
-  const visibleCampaigns = useMemo(
-    () => {
-      const normalizedSearch =
-        search.trim().toLowerCase();
-
-      return clientCampaigns.filter(
-        (campaign) => {
-          if (
-            filter !== "all" &&
-            campaign.status !== filter
-          ) {
-            return false;
-          }
-
-          if (!normalizedSearch) {
-            return true;
-          }
-
-          const searchable = [
-            campaign.id,
-            campaign.requestId,
-            campaign.name,
-            getCampaignTypeLabel(campaign.type),
-            getCampaignStatusLabel(campaign.status),
-          ]
-            .join(" ")
+  const visibleCampaigns =
+    useMemo(
+      () => {
+        const normalizedSearch =
+          search
+            .trim()
             .toLowerCase();
 
-          return searchable.includes(normalizedSearch);
-        }
-      );
-    },
-    [
-      filter,
-      search,
-    ]
-  );
+        return campaigns.filter(
+          (
+            campaign
+          ) => {
+            if (
+              filter !==
+                "all" &&
+              campaign.status !==
+                filter
+            ) {
+              return false;
+            }
+
+            if (
+              !normalizedSearch
+            ) {
+              return true;
+            }
+
+            const searchable = [
+              campaign.id,
+              campaign.requestId,
+              campaign.name,
+              campaign.organizationName,
+              getCampaignTypeLabel(
+                campaign.type
+              ),
+              getCampaignStatusLabel(
+                campaign.status
+              ),
+            ]
+              .join(" ")
+              .toLowerCase();
+
+            return searchable.includes(
+              normalizedSearch
+            );
+          }
+        );
+      },
+      [
+        filter,
+        search,
+      ]
+    );
 
   const activeCount =
-    clientCampaigns.filter(
-      (campaign) =>
-        campaign.status === "active"
+    campaigns.filter(
+      (
+        campaign
+      ) =>
+        campaign.status ===
+        "active"
     ).length;
 
-  const scheduledCount =
-    clientCampaigns.filter(
-      (campaign) =>
-        campaign.status === "scheduled"
+  const upcomingCount =
+    campaigns.filter(
+      (
+        campaign
+      ) =>
+        campaign.status ===
+          "draft" ||
+        campaign.status ===
+          "scheduled"
     ).length;
 
   const totalImpressions =
-    clientCampaigns.reduce(
-      (total, campaign) =>
-        total + campaign.performance.impressions,
+    campaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance
+          .impressions,
       0
     );
 
   const totalClicks =
-    clientCampaigns.reduce(
-      (total, campaign) =>
-        total + campaign.performance.clicks,
+    campaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance
+          .clicks,
       0
     );
 
   return (
     <>
-      <section className={styles.summaryGrid}>
-        <article className={styles.summaryCard}>
-          <span>Active campaigns</span>
-          <strong>{activeCount}</strong>
-          <small>Currently delivering</small>
-        </article>
+      <section
+        className={
+          styles.summaryGrid
+        }
+      >
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Active campaigns
+          </span>
 
-        <article className={styles.summaryCard}>
-          <span>Scheduled</span>
-          <strong>{scheduledCount}</strong>
-          <small>Waiting to start</small>
-        </article>
-
-        <article className={styles.summaryCard}>
-          <span>Total impressions</span>
           <strong>
-            {formatCampaignNumber(totalImpressions)}
+            {activeCount}
           </strong>
-          <small>Across all campaigns</small>
+
+          <small>
+            Currently delivering
+          </small>
         </article>
 
-        <article className={styles.summaryCard}>
-          <span>Total clicks</span>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Upcoming
+          </span>
+
           <strong>
-            {formatCampaignNumber(totalClicks)}
+            {upcomingCount}
           </strong>
-          <small>Recorded engagement</small>
+
+          <small>
+            Draft or scheduled
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Impressions
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalImpressions
+            )}
+          </strong>
+
+          <small>
+            Across your campaigns
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Clicks
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalClicks
+            )}
+          </strong>
+
+          <small>
+            Recorded engagement
+          </small>
         </article>
       </section>
 
       <section className="contentCard">
-        <div className={styles.toolbar}>
+        <div
+          className={
+            styles.toolbar
+          }
+        >
           <input
-            className={styles.searchInput}
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
+            className={
+              styles.searchInput
             }
-            placeholder="Search campaign ID, name or request..."
+            value={search}
+            onChange={(
+              event
+            ) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search campaign, request, or ID"
             aria-label="Search campaigns"
           />
 
-          <div className={styles.filters}>
-            {filters.map((option) => {
-              const active =
-                filter === option.key;
+          <div
+            className={
+              styles.filters
+            }
+            aria-label="Campaign status filters"
+          >
+            {filters.map(
+              (
+                option
+              ) => {
+                const active =
+                  filter ===
+                  option.key;
 
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  className={
-                    active
-                      ? styles.filterButtonActive
-                      : styles.filterButton
-                  }
-                  onClick={() =>
-                    setFilter(option.key)
-                  }
-                >
-                  {option.label}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={
+                      option.key
+                    }
+                    type="button"
+                    className={
+                      active
+                        ? styles.filterButtonActive
+                        : styles.filterButton
+                    }
+                    onClick={() =>
+                      setFilter(
+                        option.key
+                      )
+                    }
+                  >
+                    {
+                      option.label
+                    }
+                  </button>
+                );
+              }
+            )}
           </div>
         </div>
 
-        <div className={styles.table}>
-          <div className={styles.tableHeader}>
-            <span>Campaign</span>
-            <span>Type</span>
-            <span>Delivery</span>
-            <span>Performance</span>
-            <span>Status</span>
+        <div
+          className={
+            styles.table
+          }
+        >
+          <div
+            className={
+              styles.tableHeader
+            }
+          >
+            <span>
+              Campaign
+            </span>
+
+            <span>
+              Type
+            </span>
+
+            <span>
+              Delivery
+            </span>
+
+            <span>
+              Performance
+            </span>
+
+            <span>
+              Status
+            </span>
           </div>
 
-          {visibleCampaigns.length > 0 ? (
-            visibleCampaigns.map((campaign) => {
-              const delivery =
-                calculateDeliveryProgress(
-                  campaign.financials.deliveryTarget,
-                  campaign.financials.delivered
-                );
+          {visibleCampaigns.length >
+          0 ? (
+            visibleCampaigns.map(
+              (
+                campaign
+              ) => {
+                const delivery =
+                  calculateDeliveryProgress(
+                    campaign
+                      .financials
+                      .deliveryTarget,
+                    campaign
+                      .financials
+                      .delivered
+                  );
 
-              const ctr =
-                calculateCampaignCtr(
-                  campaign.performance.impressions,
-                  campaign.performance.clicks
-                );
+                const ctr =
+                  calculateCtr(
+                    campaign
+                      .performance
+                      .impressions,
+                    campaign
+                      .performance
+                      .clicks
+                  );
 
-              return (
-                <Link
-                  key={campaign.id}
-                  href={`/campaigns/${campaign.id}`}
-                  className={styles.row}
-                >
-                  <div className={styles.campaignInfo}>
-                    <strong>{campaign.name}</strong>
+                return (
+                  <Link
+                    key={
+                      campaign.id
+                    }
+                    href={`/campaigns/${campaign.id}`}
+                    className={
+                      styles.row
+                    }
+                  >
+                    <div
+                      className={
+                        styles.campaignInfo
+                      }
+                    >
+                      <strong>
+                        {
+                          campaign.name
+                        }
+                      </strong>
 
-                    <span>
-                      {campaign.id} · {campaign.requestId}
-                    </span>
-                  </div>
+                      <span>
+                        {
+                          campaign.id
+                        }
+                        {" · "}
+                        {
+                          campaign.requestId
+                        }
+                      </span>
+                    </div>
 
-                  <span className={styles.typeLabel}>
-                    {getCampaignTypeLabel(campaign.type)}
-                  </span>
-
-                  <div className={styles.delivery}>
-                    <strong>
-                      {delivery === null
-                        ? "Not applicable"
-                        : `${delivery.toFixed(1)}%`}
-                    </strong>
-
-                    {delivery !== null ? (
-                      <div className={styles.progressTrack}>
-                        <span
-                          style={{
-                            width: `${delivery}%`,
-                          }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className={styles.performance}>
-                    <strong>{ctr.toFixed(2)}% CTR</strong>
-
-                    <span>
-                      {formatCampaignNumber(
-                        campaign.performance.impressions
+                    <span
+                      className={
+                        styles.typeLabel
+                      }
+                    >
+                      {getCampaignTypeLabel(
+                        campaign.type
                       )}
-                      {" impressions"}
                     </span>
-                  </div>
 
-                  <span className={getStatusClass(campaign.status)}>
-                    {getCampaignStatusLabel(campaign.status)}
-                  </span>
-                </Link>
-              );
-            })
+                    <div
+                      className={
+                        styles.delivery
+                      }
+                    >
+                      <strong>
+                        {delivery ===
+                        null
+                          ? campaign.type ===
+                            "affiliate"
+                            ? "Performance based"
+                            : "Not configured"
+                          : `${delivery.toFixed(
+                              1
+                            )}%`}
+                      </strong>
+
+                      {delivery !==
+                      null ? (
+                        <div
+                          className={
+                            styles.progressTrack
+                          }
+                        >
+                          <span
+                            style={{
+                              width: `${delivery}%`,
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={
+                        styles.performance
+                      }
+                    >
+                      <strong>
+                        {ctr.toFixed(
+                          2
+                        )}
+                        % CTR
+                      </strong>
+
+                      <span>
+                        {formatClientNumber(
+                          campaign
+                            .performance
+                            .impressions
+                        )}
+                        {
+                          " impressions"
+                        }
+                      </span>
+                    </div>
+
+                    <span
+                      className={getStatusClass(
+                        campaign.status
+                      )}
+                    >
+                      {getCampaignStatusLabel(
+                        campaign.status
+                      )}
+                    </span>
+                  </Link>
+                );
+              }
+            )
           ) : (
-            <div className={styles.empty}>
-              No campaigns match the current search and filter.
+            <div
+              className={
+                styles.empty
+              }
+            >
+              No campaigns match your search or filter.
             </div>
           )}
         </div>
       </section>
 
-      <p className={styles.note}>
-        Campaign setup, scheduling, activation, pausing, and completion are
-        controlled by Poster Admin.
+      <p
+        className={
+          styles.note
+        }
+      >
+        Campaign setup, scheduling, activation, pausing,
+        and completion are controlled by Poster Admin.
       </p>
     </>
   );

@@ -15,7 +15,7 @@
   height: 100vh;
   flex-direction: column;
 
-  padding: 14px 10px 14px;
+  padding: 14px 10px;
 
   border-right: 1px solid #e8eaed;
   background: #f9f9f9;
@@ -35,6 +35,7 @@
 
 .brandMark {
   display: grid;
+
   width: 32px;
   height: 32px;
 
@@ -79,7 +80,9 @@
 .navigationItem,
 .navigationItemActive {
   display: flex;
+
   min-height: 40px;
+
   align-items: center;
 
   gap: 10px;
@@ -131,12 +134,14 @@
   stroke-linejoin: round;
 }
 
-.navigationItemActive .navigationIcon {
+.navigationItemActive
+.navigationIcon {
   color: #315fbf;
 }
 
 .sidebarBottom {
   margin-top: auto;
+  padding-top: 18px;
 }
 
 .support {
@@ -147,19 +152,35 @@
   box-shadow: none !important;
 }
 
-.support a {
+.support a,
+.support > div {
   border-radius: 8px !important;
 }
 
 .profile {
-  display: flex;
+  display: grid;
+
+  grid-template-columns:
+    30px
+    minmax(0, 1fr)
+    14px;
+
   align-items: center;
 
   gap: 9px;
 
-  padding: 12px 8px 5px;
+  min-height: 53px;
+
+  padding: 11px 8px 5px;
 
   border-top: 1px solid #e5e7eb;
+
+  color: inherit;
+}
+
+.profile:hover
+.profileText strong {
+  color: #315fbf;
 }
 
 .profileAvatar {
@@ -167,8 +188,6 @@
 
   width: 30px;
   height: 30px;
-
-  flex: 0 0 auto;
 
   place-items: center;
 
@@ -217,9 +236,20 @@
   white-space: nowrap;
 }
 
+.profileArrow {
+  color: #aab2bf;
+
+  font-size: 16px;
+  line-height: 16px;
+
+  text-align: right;
+}
+
 .workspace {
   min-height: 100vh;
-  padding-left: var(--client-sidebar-width);
+
+  padding-left:
+    var(--client-sidebar-width);
 
   background: #ffffff;
 }
@@ -230,7 +260,10 @@
 
   margin: 0 auto;
 
-  padding: 48px 42px 64px;
+  padding:
+    48px
+    42px
+    64px;
 }
 
 @media (max-width: 900px) {
@@ -240,18 +273,26 @@
     width: 100%;
     height: auto;
 
-    padding: 10px 12px;
+    padding:
+      10px
+      12px
+      12px;
 
     border-right: 0;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom:
+      1px solid #e5e7eb;
   }
 
   .brand {
-    padding: 3px 4px 12px;
+    padding:
+      3px
+      4px
+      12px;
   }
 
   .navigation {
     display: flex;
+
     gap: 4px;
 
     overflow-x: auto;
@@ -270,6 +311,20 @@
   }
 
   .sidebarBottom {
+    margin-top: 10px;
+    padding-top: 0;
+  }
+
+  .support {
+    width: min(
+      100%,
+      320px
+    );
+
+    margin-bottom: 0;
+  }
+
+  .profile {
     display: none;
   }
 
@@ -278,7 +333,10 @@
   }
 
   .content {
-    padding: 34px 22px 48px;
+    padding:
+      34px
+      22px
+      48px;
   }
 }
 
@@ -288,6 +346,9 @@
   }
 
   .content {
-    padding: 28px 16px 40px;
+    padding:
+      28px
+      16px
+      40px;
   }
 }
