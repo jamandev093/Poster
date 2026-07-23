@@ -352,3 +352,347 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   PHASE 5 UI REFINEMENT
+   Visual only — authentication behavior unchanged
+   ========================================================= */
+
+.form {
+  gap: 15px;
+}
+
+.twoColumns {
+  gap: 12px;
+}
+
+.field {
+  gap: 5px;
+}
+
+.field label {
+  color: var(--text);
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 680;
+}
+
+.field input,
+.field select,
+.passwordField {
+  min-height: 41px;
+
+  border-color: var(--border-strong);
+  border-radius: var(--radius-md);
+
+  color: var(--text);
+
+  font-size: 11px;
+}
+
+.field input,
+.field select {
+  padding:
+    8px
+    10px;
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+}
+
+.field input:focus,
+.field select:focus,
+.passwordField:focus-within {
+  border-color: var(--primary);
+
+  box-shadow: var(--shadow-focus);
+}
+
+/* =========================================================
+   PASSWORD
+   ========================================================= */
+
+.passwordField button {
+  min-width: 54px;
+
+  padding:
+    0
+    10px;
+
+  border-left-color: var(--border);
+
+  background: #fbfcfe;
+  color: var(--text-secondary);
+
+  font-size: 9px;
+  line-height: 15px;
+  font-weight: 650;
+}
+
+.passwordField button:hover {
+  background: var(--surface);
+
+  color: var(--primary-dark);
+}
+
+/* =========================================================
+   OPTIONS / LINKS
+   ========================================================= */
+
+.formOptions {
+  gap: 12px;
+}
+
+.formOptions > a,
+.switchText a,
+.linkRow a {
+  color: var(--primary-dark);
+}
+
+.formOptions > a {
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.checkbox,
+.declaration {
+  gap: 8px;
+}
+
+.checkbox input,
+.declaration input {
+  width: 15px;
+  height: 15px;
+
+  accent-color: var(--primary);
+}
+
+.checkbox span {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.declaration {
+  padding:
+    11px
+    12px;
+
+  border-color: var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  background: #fafcff;
+}
+
+.declaration span {
+  color: #334155;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+/* =========================================================
+   PRIMARY ACTION
+   ========================================================= */
+
+.primaryAction {
+  min-height: 41px;
+
+  padding:
+    8px
+    14px;
+
+  border-color: var(--primary);
+  border-radius: var(--radius-md);
+
+  background: var(--primary);
+
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 700;
+
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.primaryAction:hover {
+  border-color: var(--primary-dark);
+
+  background: var(--primary-dark);
+}
+
+.primaryAction:focus-visible {
+  outline: none;
+
+  box-shadow: var(--shadow-focus);
+}
+
+.textButton {
+  min-height: 34px;
+
+  color: var(--primary-dark);
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   FEEDBACK
+   ========================================================= */
+
+.error {
+  padding:
+    9px
+    11px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.switchText {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.result {
+  padding: 20px;
+
+  border-radius: var(--radius-md);
+}
+
+.resultMark {
+  width: 35px;
+  height: 35px;
+
+  font-size: 15px;
+}
+
+.result h3 {
+  margin-top: 11px;
+
+  font-size: 16px;
+  line-height: 23px;
+}
+
+.result p {
+  margin:
+    5px
+    auto
+    16px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+/* =========================================================
+   INFORMATION BOXES
+   ========================================================= */
+
+.emailSummary,
+.scopeNote,
+.helperMessage,
+.accountSummary {
+  border-color: var(--primary-border);
+  border-radius: var(--radius-sm);
+
+  background: #fafcff;
+}
+
+.emailSummary,
+.scopeNote {
+  padding:
+    10px
+    12px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.emailSummary strong {
+  color: var(--text);
+}
+
+.codeInput {
+  font-size: 19px !important;
+
+  letter-spacing: 0.24em;
+}
+
+.scopeNote strong {
+  color: var(--text);
+
+  font-size: 10px;
+}
+
+.scopeNote span {
+  margin-top: 2px;
+
+  color: var(--text-secondary);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.linkRow a {
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.helperMessage {
+  padding:
+    9px
+    11px;
+
+  color: var(--text-secondary);
+
+  font-size: 9px;
+  line-height: 16px;
+}
+
+.accountSummary {
+  gap: 10px;
+
+  padding:
+    11px
+    12px;
+}
+
+.accountSummary span {
+  color: var(--text-secondary);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.accountSummary strong {
+  margin-top: 2px;
+
+  color: var(--text);
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+  .form {
+    gap: 14px;
+  }
+
+  .formOptions {
+    gap: 9px;
+  }
+}

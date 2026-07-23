@@ -1,14 +1,18 @@
-:root {
+﻿:root {
   --primary: #5b86e5;
   --primary-dark: #416ecf;
+  --primary-hover: #4f79d6;
   --primary-soft: #eef4ff;
+  --primary-border: #cdddf9;
 
   --background: #f8fafc;
-  --surface: #f1f5f9;
+  --surface: #f3f6fa;
+  --surface-hover: #eef2f7;
   --card: #ffffff;
 
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
+  --border-subtle: #edf1f5;
 
   --text: #0f172a;
   --text-secondary: #64748b;
@@ -17,22 +21,23 @@
 
   --success: #16a34a;
   --success-soft: #f0fdf4;
+
   --warning: #d97706;
   --warning-soft: #fff7ed;
+
   --danger: #dc2626;
   --danger-soft: #fef2f2;
 
-  --sidebar-width: 258px;
-  --topbar-height: 72px;
-
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
   --shadow-card:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px rgba(15, 23, 42, 0.03);
+    0 1px 2px rgba(15, 23, 42, 0.025);
+
+  --shadow-focus:
+    0 0 0 3px rgba(91, 134, 229, 0.12);
 }
 
 * {
@@ -52,8 +57,10 @@ html {
 
 body {
   min-height: 100vh;
+
   background: var(--background);
   color: var(--text);
+
   font-family:
     Inter,
     ui-sans-serif,
@@ -61,8 +68,10 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
   font-size: 14px;
   line-height: 1.5;
+
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -88,100 +97,151 @@ a {
   text-decoration: none;
 }
 
+/* =========================================================
+   SHARED PAGE HEADER
+   ========================================================= */
+
 .pageHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 24px;
-  margin-bottom: 22px;
+
+  margin-bottom: 26px;
 }
 
 .pageEyebrow {
   margin-bottom: 5px;
+
   color: var(--primary-dark);
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 750;
+
+  letter-spacing: 0.065em;
   text-transform: uppercase;
 }
 
 .pageTitle {
   color: var(--text);
-  font-size: 30px;
-  line-height: 38px;
+
+  font-size: 28px;
+  line-height: 36px;
   font-weight: 700;
-  letter-spacing: -0.025em;
+
+  letter-spacing: -0.03em;
 }
 
 .pageDescription {
-  max-width: 700px;
-  margin-top: 6px;
+  max-width: 690px;
+
+  margin-top: 5px;
+
   color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 23px;
+
+  font-size: 13px;
+  line-height: 21px;
 }
+
+/* =========================================================
+   SHARED CONTENT SURFACE
+   ========================================================= */
 
 .contentCard {
   padding: 20px;
+
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+
   background: var(--card);
+
   box-shadow: var(--shadow-card);
 }
 
 .sectionTitle {
   color: var(--text);
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 700;
+
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 680;
+
+  letter-spacing: -0.012em;
 }
 
 .sectionDescription {
-  margin-top: 4px;
+  margin-top: 3px;
+
   color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 20px;
+
+  font-size: 11px;
+  line-height: 18px;
 }
+
+/* =========================================================
+   SHARED BUTTONS
+   ========================================================= */
 
 .primaryButton,
 .secondaryButton {
   display: inline-flex;
-  min-height: 42px;
+
+  min-height: 40px;
+
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 15px;
+
+  gap: 7px;
+
+  padding:
+    8px
+    14px;
+
   border-radius: var(--radius-md);
-  font-size: 13px;
-  line-height: 20px;
-  font-weight: 700;
+
+  font-size: 12px;
+  line-height: 19px;
+  font-weight: 680;
+
   transition:
-    border-color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 100ms ease;
 }
 
 .primaryButton {
   border: 1px solid var(--primary);
+
   background: var(--primary);
   color: #ffffff;
 }
 
+.primaryButton:hover {
+  border-color: var(--primary-dark);
+
+  background: var(--primary-dark);
+}
+
 .secondaryButton {
   border: 1px solid var(--border-strong);
+
   background: #ffffff;
   color: var(--text);
 }
 
-.primaryButton:hover {
-  border-color: var(--primary-dark);
-  background: var(--primary-dark);
+.secondaryButton:hover {
+  border-color: #b8c4d3;
+
+  background: var(--surface);
 }
 
-.secondaryButton:hover {
-  border-color: #aebfd3;
-  background: var(--surface);
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: none;
+
+  box-shadow: var(--shadow-focus);
 }
 
 .primaryButton:active,
@@ -189,15 +249,27 @@ a {
   transform: translateY(1px);
 }
 
+/* =========================================================
+   STATUS
+   ========================================================= */
+
 .statusBadge {
   display: inline-flex;
-  min-height: 26px;
+
+  min-height: 25px;
+
   align-items: center;
-  padding: 4px 9px;
-  border-radius: 999px;
-  font-size: 11px;
+
+  padding:
+    3px
+    8px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
   line-height: 17px;
   font-weight: 700;
+
   white-space: nowrap;
 }
 
@@ -216,15 +288,46 @@ a {
   color: var(--primary-dark);
 }
 
+/* =========================================================
+   ACCESSIBILITY / INPUT CONSISTENCY
+   ========================================================= */
+
+input,
+select,
+textarea {
+  accent-color: var(--primary);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline-color: var(--primary);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 720px) {
   .pageHeader {
     flex-direction: column;
-    margin-bottom: 18px;
+
+    gap: 16px;
+
+    margin-bottom: 20px;
   }
 
   .pageTitle {
-    font-size: 26px;
-    line-height: 34px;
+    font-size: 25px;
+    line-height: 32px;
+  }
+
+  .pageDescription {
+    font-size: 12px;
+    line-height: 19px;
   }
 
   .contentCard {

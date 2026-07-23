@@ -374,3 +374,197 @@
     width: 100%;
   }
 }
+/* =========================================================
+   PHASE 4 UI REFINEMENT
+   Visual only — media validation unchanged
+   ========================================================= */
+
+.uploader {
+  gap: 10px;
+
+  padding: 13px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: #fbfcfe;
+}
+
+.header {
+  gap: 12px;
+}
+
+.header strong {
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 680;
+}
+
+.header span {
+  margin-top: 2px;
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.selectedStatus {
+  font-size: 9px !important;
+}
+
+.emptyUpload {
+  min-height: 132px;
+
+  padding: 18px;
+
+  border: 1px dashed #b8c5d5;
+  border-radius: 6px;
+
+  background: #ffffff;
+}
+
+.emptyUpload:hover {
+  border-color: var(--primary);
+
+  background: #fafcff;
+}
+
+.uploadIcon {
+  width: 28px;
+  height: 28px;
+
+  margin-bottom: 3px;
+
+  border: 1px solid var(--primary-border);
+  border-radius: 6px;
+
+  background: var(--primary-soft);
+
+  font-size: 14px;
+}
+
+.emptyUpload strong {
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 680;
+}
+
+.emptyUpload small {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.preview {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.preview img,
+.preview video {
+  max-height: 330px;
+}
+
+.existingAsset {
+  padding: 13px;
+
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+
+  background: #ffffff;
+}
+
+.existingAsset span {
+  font-size: 8px;
+  line-height: 14px;
+
+  letter-spacing: 0.045em;
+}
+
+.existingAsset strong {
+  margin-top: 3px;
+
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.existingAsset small {
+  margin-top: 4px;
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.metadata {
+  border-radius: 6px;
+
+  background: var(--border-subtle);
+}
+
+.metadata > div {
+  padding: 9px 10px;
+}
+
+.metadata span {
+  font-size: 8px;
+  line-height: 14px;
+}
+
+.metadata strong {
+  font-size: 9px;
+  line-height: 15px;
+  font-weight: 650;
+}
+
+.altField {
+  gap: 5px;
+}
+
+.altField label {
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 680;
+}
+
+.altField input {
+  min-height: 39px;
+
+  padding: 7px 9px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.altField input:focus {
+  box-shadow: var(--shadow-focus);
+}
+
+.actions {
+  gap: 7px;
+}
+
+.secondaryAction,
+.removeAction {
+  min-height: 32px;
+
+  padding: 5px 9px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.reading {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.error {
+  padding: 8px 10px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+  line-height: 15px;
+}

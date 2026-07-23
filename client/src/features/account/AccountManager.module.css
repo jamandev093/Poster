@@ -289,3 +289,206 @@
     text-align: left;
   }
 }
+/* =========================================================
+   PHASE 4 UI REFINEMENT
+   Visual only — account logic unchanged
+   ========================================================= */
+
+.layout {
+  gap: 22px;
+}
+
+.summaryGrid {
+  margin-bottom: 2px;
+}
+
+.summaryCard {
+  padding:
+    16px
+    20px
+    16px
+    0;
+}
+
+.summaryCard + .summaryCard {
+  padding-left: 20px;
+}
+
+.summaryCard span {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.summaryCard strong {
+  margin-top: 5px;
+
+  font-size: 18px;
+  line-height: 25px;
+  font-weight: 700;
+}
+
+.summaryCard small {
+  margin-top: 2px;
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.mainGrid {
+  grid-template-columns:
+    minmax(0, 1.55fr)
+    minmax(280px, 0.7fr);
+
+  gap: 18px;
+}
+
+.primaryColumn,
+.secondaryColumn {
+  gap: 15px;
+}
+
+.sectionHeader {
+  gap: 16px;
+
+  margin-bottom: 17px;
+}
+
+.primaryBadge {
+  min-height: 23px;
+
+  padding: 3px 7px;
+
+  border: 1px solid var(--primary-border);
+  border-radius: 5px;
+
+  background: var(--primary-soft);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.formGrid {
+  gap: 13px;
+}
+
+.field,
+.fieldWide {
+  gap: 5px;
+}
+
+.field label,
+.fieldWide label {
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 680;
+}
+
+.field input,
+.field select,
+.fieldWide input {
+  min-height: 40px;
+
+  padding: 8px 10px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 11px;
+}
+
+.field input:focus,
+.field select:focus,
+.fieldWide input:focus {
+  box-shadow: var(--shadow-focus);
+}
+
+.fieldHint {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.detailList {
+  margin-top: 13px;
+}
+
+.detailRow {
+  min-height: 44px;
+
+  gap: 16px;
+
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.detailRow span {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.detailRow strong {
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.supportDescription {
+  margin:
+    4px
+    0
+    12px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.futureCard {
+  padding: 15px;
+
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+
+  background: #fbfcfe;
+}
+
+.futureCard > span {
+  font-size: 8px;
+  line-height: 14px;
+}
+
+.futureCard > strong {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.futureCard p {
+  margin-top: 4px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.success {
+  padding: 10px 12px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.actions {
+  gap: 8px;
+
+  padding-top: 2px;
+}
+
+.demoNote {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+@media (max-width: 720px) {
+  .summaryCard,
+  .summaryCard + .summaryCard {
+    padding:
+      13px
+      0;
+  }
+}

@@ -1,9 +1,14 @@
-.shell {
-  --client-sidebar-width: 220px;
+﻿.shell {
+  --client-sidebar-width: 228px;
 
   min-height: 100vh;
+
   background: #ffffff;
 }
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
 .sidebar {
   position: fixed;
@@ -11,43 +16,62 @@
   z-index: 20;
 
   display: flex;
+
   width: var(--client-sidebar-width);
   height: 100vh;
+
   flex-direction: column;
 
-  padding: 14px 10px;
+  padding:
+    16px
+    12px
+    14px;
 
-  border-right: 1px solid #e8eaed;
-  background: #f9f9f9;
+  border-right: 1px solid #e4e9f0;
+
+  background: #f8fafc;
 
   overflow-y: auto;
 }
 
+/* =========================================================
+   BRAND
+   ========================================================= */
+
 .brand {
-  padding: 5px 8px 20px;
+  padding:
+    3px
+    8px
+    22px;
 }
 
 .brandLink {
   display: inline-flex;
+
   align-items: center;
+
   gap: 10px;
 }
 
 .brandMark {
   display: grid;
 
-  width: 32px;
-  height: 32px;
+  width: 33px;
+  height: 33px;
 
   place-items: center;
 
-  border-radius: 8px;
+  border-radius: 7px;
 
-  background: #5b86e5;
+  background: var(--primary);
   color: #ffffff;
 
   font-size: 14px;
   font-weight: 800;
+
+  box-shadow:
+    0 1px 2px
+    rgba(15, 23, 42, 0.08);
 }
 
 .brandText strong,
@@ -56,58 +80,97 @@
 }
 
 .brandText strong {
-  color: #111827;
+  color: #172033;
 
   font-size: 15px;
   line-height: 20px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .brandText small {
   margin-top: 1px;
 
-  color: #737b8c;
+  color: #7c8798;
 
-  font-size: 10px;
+  font-size: 9px;
   line-height: 14px;
+  font-weight: 550;
+
+  letter-spacing: 0.015em;
 }
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
 
 .navigation {
   display: grid;
-  gap: 2px;
+
+  gap: 3px;
 }
 
 .navigationItem,
 .navigationItemActive {
+  position: relative;
+
   display: flex;
 
-  min-height: 40px;
+  min-height: 39px;
 
   align-items: center;
 
   gap: 10px;
 
-  padding: 8px 10px;
+  padding:
+    8px
+    10px;
 
-  border-radius: 8px;
-
-  color: #475569;
+  border-radius: 6px;
 
   font-size: 12px;
   line-height: 18px;
-  font-weight: 520;
+
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.navigationItem {
+  color: #526072;
 }
 
 .navigationItem:hover {
-  background: #f0f0f0;
-  color: #111827;
+  background: #f0f3f7;
+
+  color: #172033;
 }
 
 .navigationItemActive {
-  background: #ececec;
-  color: #111827;
+  background: #edf3ff;
 
-  font-weight: 620;
+  color: #254eaa;
+
+  font-weight: 650;
+}
+
+.navigationItemActive::before {
+  position: absolute;
+
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+
+  width: 3px;
+
+  border-radius:
+    0
+    2px
+    2px
+    0;
+
+  background: var(--primary);
+
+  content: "";
 }
 
 .navigationIcon {
@@ -120,7 +183,7 @@
 
   place-items: center;
 
-  color: #64748b;
+  color: #718096;
 }
 
 .navigationIcon svg {
@@ -136,16 +199,21 @@
 
 .navigationItemActive
 .navigationIcon {
-  color: #315fbf;
+  color: var(--primary-dark);
 }
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
 
 .sidebarBottom {
   margin-top: auto;
-  padding-top: 18px;
+
+  padding-top: 20px;
 }
 
 .support {
-  margin-bottom: 9px;
+  margin-bottom: 10px;
 }
 
 .support > * {
@@ -154,8 +222,12 @@
 
 .support a,
 .support > div {
-  border-radius: 8px !important;
+  border-radius: 6px !important;
 }
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
 
 .profile {
   display: grid;
@@ -165,22 +237,25 @@
     minmax(0, 1fr)
     14px;
 
+  min-height: 55px;
+
   align-items: center;
 
   gap: 9px;
 
-  min-height: 53px;
+  padding:
+    12px
+    8px
+    4px;
 
-  padding: 11px 8px 5px;
-
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e2e8f0;
 
   color: inherit;
 }
 
 .profile:hover
 .profileText strong {
-  color: #315fbf;
+  color: var(--primary-dark);
 }
 
 .profileAvatar {
@@ -191,13 +266,14 @@
 
   place-items: center;
 
-  border-radius: 999px;
+  border: 1px solid #d8e2f4;
+  border-radius: 50%;
 
-  background: #e9eef9;
-  color: #416ecf;
+  background: #edf3ff;
+  color: var(--primary-dark);
 
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .profileText {
@@ -212,11 +288,11 @@
 .profileText strong {
   overflow: hidden;
 
-  color: #1f2937;
+  color: #273244;
 
   font-size: 11px;
   line-height: 16px;
-  font-weight: 600;
+  font-weight: 650;
 
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -227,7 +303,7 @@
 
   margin-top: 1px;
 
-  color: #8a94a5;
+  color: #8a95a6;
 
   font-size: 9px;
   line-height: 13px;
@@ -237,13 +313,17 @@
 }
 
 .profileArrow {
-  color: #aab2bf;
+  color: #a4adba;
 
-  font-size: 16px;
-  line-height: 16px;
+  font-size: 15px;
+  line-height: 15px;
 
   text-align: right;
 }
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
 
 .workspace {
   min-height: 100vh;
@@ -256,15 +336,19 @@
 
 .content {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1180px;
 
   margin: 0 auto;
 
   padding:
-    48px
     42px
+    44px
     64px;
 }
+
+/* =========================================================
+   TABLET
+   ========================================================= */
 
 @media (max-width: 900px) {
   .sidebar {
@@ -275,25 +359,27 @@
 
     padding:
       10px
-      12px
+      14px
       12px;
 
     border-right: 0;
     border-bottom:
-      1px solid #e5e7eb;
+      1px solid #e2e8f0;
+
+    background: #ffffff;
   }
 
   .brand {
     padding:
       3px
-      4px
+      3px
       12px;
   }
 
   .navigation {
     display: flex;
 
-    gap: 4px;
+    gap: 3px;
 
     overflow-x: auto;
 
@@ -307,11 +393,20 @@
   .navigationItem,
   .navigationItemActive {
     min-width: max-content;
-    min-height: 38px;
+    min-height: 37px;
+
+    padding:
+      7px
+      10px;
+  }
+
+  .navigationItemActive::before {
+    display: none;
   }
 
   .sidebarBottom {
     margin-top: 10px;
+
     padding-top: 0;
   }
 
@@ -334,20 +429,29 @@
 
   .content {
     padding:
-      34px
-      22px
+      32px
+      24px
       48px;
   }
 }
+
+/* =========================================================
+   PHONE
+   ========================================================= */
 
 @media (max-width: 560px) {
   .navigationIcon {
     display: none;
   }
 
+  .navigationItem,
+  .navigationItemActive {
+    font-size: 11px;
+  }
+
   .content {
     padding:
-      28px
+      26px
       16px
       40px;
   }

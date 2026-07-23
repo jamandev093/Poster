@@ -451,3 +451,307 @@
     text-align: left;
   }
 }
+/* =========================================================
+   PHASE 4 UI REFINEMENT
+   Visual only — no form logic changes
+   ========================================================= */
+
+.form {
+  gap: 18px;
+}
+
+.adminNotice {
+  padding: 13px 15px;
+
+  border: 1px solid #f1d7ab;
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-sm);
+
+  background: #fffdf8;
+}
+
+.adminNotice strong {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 680;
+}
+
+.adminNotice span {
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.adminNotice p {
+  margin-top: 4px;
+
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.section {
+  padding: 20px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: #ffffff;
+
+  box-shadow: none;
+}
+
+.sectionHeader {
+  gap: 10px;
+
+  margin-bottom: 17px;
+}
+
+.sectionHeader > span {
+  width: 25px;
+  height: 25px;
+
+  border: 1px solid var(--primary-border);
+  border-radius: 6px;
+
+  background: var(--primary-soft);
+
+  font-size: 10px;
+}
+
+.sectionHeader h2 {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 680;
+}
+
+.sectionHeader p {
+  margin-top: 2px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.typeGrid {
+  gap: 10px;
+}
+
+.typeCard,
+.typeCardActive {
+  min-height: 98px;
+
+  padding: 14px;
+
+  border-radius: var(--radius-md);
+}
+
+.typeCard {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+}
+
+.typeCard:hover {
+  border-color: #b9c8dc;
+
+  background: #fbfcfe;
+}
+
+.typeCardActive {
+  border: 1px solid var(--primary-border);
+
+  background: var(--primary-soft);
+}
+
+.typeCard strong,
+.typeCardActive strong {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 680;
+}
+
+.typeCard span,
+.typeCardActive span {
+  margin-top: 4px;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+.formGrid {
+  gap: 14px;
+}
+
+.field,
+.fieldWide,
+.fieldGroup {
+  gap: 6px;
+}
+
+.fieldGroup {
+  padding-top: 16px;
+
+  border-top: 1px solid var(--border-subtle);
+}
+
+.field label,
+.fieldWide label,
+.fieldGroup > label {
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 680;
+}
+
+.field input,
+.fieldWide input {
+  min-height: 41px;
+
+  padding: 8px 10px;
+}
+
+.fieldWide textarea {
+  min-height: 104px;
+
+  padding: 9px 10px;
+}
+
+.field input,
+.fieldWide input,
+.fieldWide textarea,
+.moneyInput {
+  border-radius: var(--radius-md);
+
+  font-size: 11px;
+}
+
+.field input:focus,
+.fieldWide input:focus,
+.fieldWide textarea:focus,
+.moneyInput:focus-within {
+  box-shadow: var(--shadow-focus);
+}
+
+.placements {
+  gap: 6px;
+}
+
+.placement,
+.placementActive {
+  min-height: 36px;
+
+  gap: 7px;
+
+  padding: 6px 10px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+}
+
+.placement {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+}
+
+.placement:hover {
+  background: var(--surface);
+}
+
+.placementActive {
+  border: 1px solid var(--primary-border);
+
+  background: var(--primary-soft);
+}
+
+.squareCheck {
+  width: 15px;
+  height: 15px;
+
+  border-radius: 3px;
+
+  font-size: 9px;
+}
+
+.moneyInput > span {
+  min-height: 39px;
+  min-width: 38px;
+
+  font-size: 11px;
+}
+
+.moneyInput input {
+  min-height: 39px;
+
+  padding: 8px 10px;
+
+  font-size: 11px;
+}
+
+.uploadGrid {
+  gap: 12px;
+
+  margin-top: 14px;
+}
+
+.declaration {
+  padding: 14px 16px;
+
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+
+  background: #fafcff;
+}
+
+.declaration span {
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.error {
+  padding: 10px 12px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.actions {
+  gap: 8px;
+}
+
+.controlNote {
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.success {
+  gap: 14px;
+
+  padding: 22px;
+
+  border-radius: var(--radius-lg);
+}
+
+.successMark {
+  width: 36px;
+  height: 36px;
+
+  font-size: 15px;
+}
+
+.success h2 {
+  font-size: 18px;
+  line-height: 25px;
+}
+
+.success p {
+  font-size: 11px;
+  line-height: 18px;
+}
+
+@media (max-width: 760px) {
+  .section {
+    padding: 17px;
+  }
+}
