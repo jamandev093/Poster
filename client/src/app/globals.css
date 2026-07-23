@@ -2,42 +2,42 @@
   --primary: #5b86e5;
   --primary-dark: #416ecf;
   --primary-hover: #4f79d6;
-  --primary-soft: #eef4ff;
-  --primary-border: #cdddf9;
+  --primary-soft: #f1f5ff;
+  --primary-border: #cddbf7;
 
-  --background: #f8fafc;
-  --surface: #f3f6fa;
-  --surface-hover: #eef2f7;
+  --background: #f7f8fa;
+  --surface: #f9fafb;
+  --surface-strong: #f1f3f6;
   --card: #ffffff;
 
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --border-subtle: #edf1f5;
+  --border: #e3e7ed;
+  --border-strong: #ccd3dd;
+  --border-dark: #b8c1ce;
 
-  --text: #0f172a;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --icon: #475569;
+  --text: #111827;
+  --text-secondary: #5f6b7a;
+  --text-muted: #8a95a5;
+  --icon: #586577;
 
-  --success: #16a34a;
-  --success-soft: #f0fdf4;
+  --success: #16803c;
+  --success-soft: #eefaf2;
 
-  --warning: #d97706;
-  --warning-soft: #fff7ed;
+  --warning: #b86812;
+  --warning-soft: #fff8ed;
 
-  --danger: #dc2626;
-  --danger-soft: #fef2f2;
+  --danger: #c72c3b;
+  --danger-soft: #fff1f2;
 
   --radius-sm: 5px;
   --radius-md: 7px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-
-  --shadow-card:
-    0 1px 2px rgba(15, 23, 42, 0.025);
+  --radius-lg: 9px;
+  --radius-xl: 12px;
 
   --shadow-focus:
-    0 0 0 3px rgba(91, 134, 229, 0.12);
+    0 0 0 3px rgba(91, 134, 229, 0.13);
+
+  --shadow-menu:
+    0 12px 32px rgba(15, 23, 42, 0.1);
 }
 
 * {
@@ -70,7 +70,7 @@ body {
     sans-serif;
 
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
 
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -83,13 +83,13 @@ textarea {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;
-}
-
-button {
-  cursor: pointer;
 }
 
 a {
@@ -97,18 +97,25 @@ a {
   text-decoration: none;
 }
 
+input,
+select,
+textarea {
+  color: var(--text);
+}
+
 /* =========================================================
-   SHARED PAGE HEADER
+   PAGE HEADER
    ========================================================= */
 
 .pageHeader {
   display: flex;
+
   align-items: flex-start;
   justify-content: space-between;
 
-  gap: 24px;
+  gap: 28px;
 
-  margin-bottom: 26px;
+  margin-bottom: 30px;
 }
 
 .pageEyebrow {
@@ -116,93 +123,89 @@ a {
 
   color: var(--primary-dark);
 
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 750;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
 
-  letter-spacing: 0.065em;
+  letter-spacing: 0.035em;
   text-transform: uppercase;
 }
 
 .pageTitle {
   color: var(--text);
 
-  font-size: 28px;
-  line-height: 36px;
+  font-size: 30px;
+  line-height: 38px;
   font-weight: 700;
 
   letter-spacing: -0.03em;
 }
 
 .pageDescription {
-  max-width: 690px;
+  max-width: 720px;
 
-  margin-top: 5px;
+  margin-top: 6px;
 
   color: var(--text-secondary);
 
-  font-size: 13px;
-  line-height: 21px;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 /* =========================================================
-   SHARED CONTENT SURFACE
+   SHARED SURFACE
    ========================================================= */
 
 .contentCard {
-  padding: 20px;
+  padding: 22px;
 
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 
   background: var(--card);
-
-  box-shadow: var(--shadow-card);
 }
 
 .sectionTitle {
   color: var(--text);
 
-  font-size: 16px;
-  line-height: 23px;
-  font-weight: 680;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
 
-  letter-spacing: -0.012em;
+  letter-spacing: -0.015em;
 }
 
 .sectionDescription {
-  margin-top: 3px;
+  margin-top: 4px;
 
   color: var(--text-secondary);
 
-  font-size: 11px;
-  line-height: 18px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 /* =========================================================
-   SHARED BUTTONS
+   BUTTONS
    ========================================================= */
 
 .primaryButton,
 .secondaryButton {
   display: inline-flex;
 
-  min-height: 40px;
+  min-height: 42px;
 
   align-items: center;
   justify-content: center;
 
-  gap: 7px;
+  gap: 8px;
 
-  padding:
-    8px
-    14px;
+  padding: 9px 15px;
 
   border-radius: var(--radius-md);
 
-  font-size: 12px;
-  line-height: 19px;
-  font-weight: 680;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 650;
 
   transition:
     border-color 140ms ease,
@@ -232,7 +235,7 @@ a {
 }
 
 .secondaryButton:hover {
-  border-color: #b8c4d3;
+  border-color: var(--border-dark);
 
   background: var(--surface);
 }
@@ -256,31 +259,29 @@ a {
 .statusBadge {
   display: inline-flex;
 
-  min-height: 25px;
+  min-height: 27px;
 
   align-items: center;
 
-  padding:
-    3px
-    8px;
+  padding: 4px 9px;
 
-  border-radius: 6px;
+  border-radius: 5px;
 
-  font-size: 10px;
-  line-height: 17px;
-  font-weight: 700;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 650;
 
   white-space: nowrap;
 }
 
 .statusActive {
   background: var(--success-soft);
-  color: #15803d;
+  color: var(--success);
 }
 
 .statusAttention {
   background: var(--warning-soft);
-  color: #b45309;
+  color: #a75b0e;
 }
 
 .statusScheduled {
@@ -289,22 +290,23 @@ a {
 }
 
 /* =========================================================
-   ACCESSIBILITY / INPUT CONSISTENCY
+   FOCUS
    ========================================================= */
-
-input,
-select,
-textarea {
-  accent-color: var(--primary);
-}
 
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 button:focus-visible,
 a:focus-visible {
-  outline-color: var(--primary);
-  outline-offset: 2px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary) !important;
+
+  box-shadow: var(--shadow-focus);
 }
 
 /* =========================================================
@@ -317,20 +319,20 @@ a:focus-visible {
 
     gap: 16px;
 
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
   .pageTitle {
-    font-size: 25px;
-    line-height: 32px;
+    font-size: 26px;
+    line-height: 34px;
   }
 
   .pageDescription {
-    font-size: 12px;
-    line-height: 19px;
+    font-size: 13px;
+    line-height: 21px;
   }
 
   .contentCard {
-    padding: 16px;
+    padding: 18px;
   }
 }
