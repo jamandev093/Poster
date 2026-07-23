@@ -2,7 +2,6 @@
   --client-sidebar-width: 240px;
 
   display: grid;
-
   grid-template-columns:
     var(--client-sidebar-width)
     minmax(0, 1fr);
@@ -22,6 +21,8 @@
   position: sticky;
   top: 0;
   z-index: 30;
+
+  grid-column: 1 / 2;
 
   display: flex;
 
@@ -335,13 +336,12 @@
   min-width: 0;
   min-height: 100vh;
 
-  overflow-x: hidden;
-
   background: var(--background);
 }
 
 .content {
   width: 100%;
+  min-width: 0;
   max-width: 1240px;
 
   margin: 0 auto;
@@ -353,13 +353,12 @@
 }
 
 /* =========================================================
-   COMPACT DESKTOP / LAPTOP
-   Preserve the sidebar + workspace layout.
+   COMPACT DESKTOP
    ========================================================= */
 
 @media (max-width: 1100px) {
   .shell {
-    --client-sidebar-width: 220px;
+    --client-sidebar-width: 210px;
   }
 
   .sidebar {
@@ -367,6 +366,13 @@
       16px
       12px
       14px;
+  }
+
+  .brand {
+    padding:
+      2px
+      7px
+      21px;
   }
 
   .content {
@@ -389,11 +395,127 @@
 }
 
 /* =========================================================
-   MOBILE / NARROW TABLET
-   Only switch to a top navigation below 760 CSS pixels.
+   NARROW DESKTOP / TABLET
+
+   This remains a two-column workspace. It does not change
+   into the full-width mobile sidebar.
    ========================================================= */
 
-@media (max-width: 760px) {
+@media (max-width: 820px) {
+  .shell {
+    --client-sidebar-width: 180px;
+  }
+
+  .sidebar {
+    padding:
+      14px
+      9px
+      12px;
+  }
+
+  .brand {
+    padding:
+      2px
+      6px
+      18px;
+  }
+
+  .brandLink {
+    gap: 9px;
+  }
+
+  .brandMark {
+    width: 33px;
+    height: 33px;
+
+    font-size: 14px;
+  }
+
+  .brandText strong {
+    font-size: 15px;
+  }
+
+  .brandText small {
+    font-size: 11px;
+  }
+
+  .navigationItem,
+  .navigationItemActive {
+    min-height: 41px;
+
+    gap: 9px;
+
+    padding:
+      8px
+      8px;
+
+    font-size: 13px;
+  }
+
+  .navigationItemActive::before {
+    left: -9px;
+  }
+
+  .navigationIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .navigationIcon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .content {
+    padding:
+      28px
+      18px
+      46px;
+  }
+
+  .support {
+    display: none;
+  }
+
+  .profile {
+    grid-template-columns:
+      32px
+      minmax(0, 1fr);
+
+    gap: 8px;
+
+    padding:
+      12px
+      5px
+      2px;
+  }
+
+  .profileAvatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profileText strong {
+    font-size: 12px;
+  }
+
+  .profileText span {
+    font-size: 11px;
+  }
+
+  .profileArrow {
+    display: none;
+  }
+}
+
+/* =========================================================
+   PHONE ONLY
+
+   Windows desktop scaling will not normally reach this
+   breakpoint. The workspace stays visible above 480px.
+   ========================================================= */
+
+@media (max-width: 480px) {
   .shell {
     display: block;
   }
@@ -401,12 +523,14 @@
   .sidebar {
     position: static;
 
+    display: block;
+
     width: 100%;
     height: auto;
 
     padding:
       12px
-      16px;
+      14px;
 
     border-right: 0;
     border-bottom: 1px solid var(--border);
@@ -418,9 +542,9 @@
 
   .brand {
     padding:
-      2px
-      2px
-      14px;
+      1px
+      1px
+      12px;
   }
 
   .navigation {
@@ -440,57 +564,7 @@
   .navigationItem,
   .navigationItemActive {
     min-width: max-content;
-  }
-
-  .navigationItemActive::before {
-    display: none;
-  }
-
-  .sidebarBottom {
-    margin-top: 12px;
-    padding-top: 0;
-  }
-
-  .support {
-    width: min(
-      100%,
-      360px
-    );
-
-    margin-bottom: 0;
-  }
-
-  .profile {
-    display: none;
-  }
-
-  .workspace {
-    width: 100%;
-    min-width: 0;
-
-    overflow-x: hidden;
-  }
-
-  .content {
-    padding:
-      30px
-      22px
-      46px;
-  }
-}
-
-/* =========================================================
-   PHONE
-   ========================================================= */
-
-@media (max-width: 560px) {
-  .navigationIcon {
-    display: none;
-  }
-
-  .navigationItem,
-  .navigationItemActive {
-    min-height: 39px;
+    min-height: 38px;
 
     padding:
       8px
@@ -499,10 +573,27 @@
     font-size: 13px;
   }
 
+  .navigationItemActive::before {
+    display: none;
+  }
+
+  .navigationIcon {
+    display: none;
+  }
+
+  .sidebarBottom {
+    display: none;
+  }
+
+  .workspace {
+    width: 100%;
+    min-width: 0;
+  }
+
   .content {
     padding:
       24px
-      16px
+      14px
       38px;
   }
 }
