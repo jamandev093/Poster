@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   type FormEvent,
@@ -1763,7 +1763,7 @@ export default function NewRequestForm({
             }
           >
             <label htmlFor="request-body">
-              Message *
+              Description *
             </label>
 
             <textarea

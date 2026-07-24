@@ -66,11 +66,7 @@ const navigation: NavigationItem[] = [
     label: "Performance",
     icon: "performance",
   },
-  {
-    href: "/account",
-    label: "Account",
-    icon: "account",
-  },
+
 ];
 
 function findActiveItem(
@@ -452,7 +448,7 @@ export default function ClientShell({
               }
               aria-hidden="true"
             >
-              ›
+              â€º
             </span>
           </Link>
         </div>
