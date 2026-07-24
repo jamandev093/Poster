@@ -9,15 +9,16 @@
 }
 
 .eyebrow {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 
-  color: var(--text-secondary);
+  color: var(--primary-dark);
 
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
 
-  letter-spacing: 0.025em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .header h1 {
@@ -25,28 +26,28 @@
 
   color: var(--text);
 
-  font-size: 28px;
-  line-height: 36px;
+  font-size: 32px;
+  line-height: 40px;
   font-weight: 700;
 
   letter-spacing: -0.03em;
 }
 
 .header p {
-  max-width: 690px;
+  max-width: 760px;
 
-  margin-top: 6px;
+  margin-top: 7px;
 
   color: var(--text-secondary);
 
-  font-size: 13px;
-  line-height: 21px;
+  font-size: 15px;
+  line-height: 23px;
 }
 
 .newRequestButton {
   display: inline-flex;
 
-  min-height: 40px;
+  min-height: 42px;
 
   flex: 0 0 auto;
 
@@ -54,8 +55,8 @@
   justify-content: center;
 
   padding:
-    8px
-    14px;
+    9px
+    15px;
 
   border: 1px solid var(--primary);
   border-radius: var(--radius-md);
@@ -63,9 +64,9 @@
   background: var(--primary);
   color: #ffffff;
 
-  font-size: 12px;
-  line-height: 19px;
-  font-weight: 680;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
 
   transition:
     background-color 140ms ease,
@@ -88,25 +89,23 @@
   grid-template-columns:
     repeat(4, minmax(0, 1fr));
 
-  margin-bottom: 34px;
+  margin-bottom: 36px;
 
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .summaryItem {
   min-width: 0;
 
   padding:
-    18px
     20px
-    18px
-    0;
+    22px;
 }
 
 .summaryItem + .summaryItem {
-  padding-left: 20px;
-
   border-left: 1px solid var(--border);
 }
 
@@ -119,30 +118,30 @@
 .summaryItem span {
   color: var(--text-secondary);
 
-  font-size: 10px;
-  line-height: 15px;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
 }
 
 .summaryItem strong {
-  margin-top: 6px;
+  margin-top: 7px;
 
   color: var(--text);
 
-  font-size: 22px;
-  line-height: 29px;
+  font-size: 26px;
+  line-height: 32px;
   font-weight: 700;
 
   letter-spacing: -0.025em;
 }
 
 .summaryItem small {
-  margin-top: 3px;
+  margin-top: 4px;
 
   color: var(--text-muted);
 
-  font-size: 9px;
-  line-height: 15px;
+  font-size: 11px;
+  line-height: 17px;
 }
 
 /* =========================================================
@@ -150,20 +149,20 @@
    ========================================================= */
 
 .attentionSection {
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
 .section {
-  margin-top: 38px;
+  margin-top: 40px;
 }
 
 .performanceSection {
-  margin-top: 38px;
+  margin-top: 42px;
 
   padding:
-    20px
+    24px
     0
-    3px;
+    4px;
 
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -175,9 +174,9 @@
   align-items: flex-end;
   justify-content: space-between;
 
-  gap: 20px;
+  gap: 24px;
 
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 .sectionHeader h2 {
@@ -185,20 +184,20 @@
 
   color: var(--text);
 
-  font-size: 16px;
-  line-height: 23px;
-  font-weight: 680;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
 
-  letter-spacing: -0.012em;
+  letter-spacing: -0.015em;
 }
 
 .sectionHeader p {
-  margin-top: 3px;
+  margin-top: 4px;
 
-  color: var(--text-muted);
+  color: var(--text-secondary);
 
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .sectionHeader > a {
@@ -206,9 +205,9 @@
 
   color: var(--primary-dark);
 
-  font-size: 11px;
-  line-height: 17px;
-  font-weight: 650;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .sectionHeader > a:hover {
@@ -218,13 +217,13 @@
 .sectionEyebrow {
   display: block;
 
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 
   color: #b45309;
 
-  font-size: 9px;
-  line-height: 14px;
-  font-weight: 750;
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 700;
 
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -237,7 +236,7 @@
 .attentionList {
   display: grid;
 
-  gap: 7px;
+  gap: 10px;
 }
 
 .attention {
@@ -249,12 +248,12 @@
   gap: 24px;
 
   padding:
-    14px
-    17px;
+    17px
+    19px;
 
-  border: 1px solid #f4dfbd;
+  border: 1px solid #f0d9b2;
   border-left: 3px solid var(--warning);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 
   background: #fffdf8;
 }
@@ -269,11 +268,11 @@
 }
 
 .attentionContent strong {
-  color: #273244;
+  color: var(--text);
 
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 650;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
 }
 
 .attentionContent span {
@@ -281,17 +280,17 @@
 
   color: var(--text-secondary);
 
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .attentionContent p {
-  margin-top: 4px;
+  margin-top: 5px;
 
   color: var(--text-secondary);
 
-  font-size: 11px;
-  line-height: 18px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .reviewLink {
@@ -299,9 +298,9 @@
 
   color: var(--primary-dark);
 
-  font-size: 11px;
-  line-height: 17px;
-  font-weight: 700;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .reviewLink:hover {
@@ -316,40 +315,49 @@
   overflow-x: auto;
 
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+
+  background: #ffffff;
 }
 
 .tableHeader,
 .campaignRow {
   display: grid;
 
-  min-width: 790px;
+  min-width: 840px;
 
   grid-template-columns:
-    minmax(260px, 1.45fr)
-    minmax(150px, 0.7fr)
-    minmax(240px, 1fr)
-    minmax(90px, 0.45fr);
+    minmax(280px, 1.5fr)
+    minmax(160px, 0.75fr)
+    minmax(250px, 1fr)
+    minmax(100px, 0.45fr);
 
-  gap: 20px;
+  gap: 22px;
 
   align-items: center;
+
+  padding:
+    0
+    14px;
 }
 
 .tableHeader {
-  min-height: 38px;
+  min-height: 42px;
+
+  background: #fafbfd;
 
   color: var(--text-muted);
 
-  font-size: 9px;
-  line-height: 14px;
-  font-weight: 650;
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 700;
 
   letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
 .campaignRow {
-  min-height: 72px;
+  min-height: 78px;
 
   border-top: 1px solid var(--border);
 }
@@ -370,23 +378,23 @@
 .primaryCell strong {
   overflow: hidden;
 
-  color: #273244;
+  color: var(--text);
 
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 650;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
 
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .primaryCell span {
-  margin-top: 2px;
+  margin-top: 3px;
 
   color: var(--text-muted);
 
-  font-size: 10px;
-  line-height: 15px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .placementCell {
@@ -394,21 +402,21 @@
 
   flex-wrap: wrap;
 
-  gap: 5px;
+  gap: 6px;
 }
 
 .placementCell span {
   color: var(--icon);
 
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 600;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
 }
 
 .placementCell span + span::before {
   content: "·";
 
-  margin-right: 5px;
+  margin-right: 6px;
 
   color: var(--border-strong);
 }
@@ -423,11 +431,11 @@
 }
 
 .resultCell > strong {
-  color: #334155;
+  color: var(--text);
 
-  font-size: 11px;
-  line-height: 17px;
-  font-weight: 650;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .resultCell > span {
@@ -435,8 +443,8 @@
 
   color: var(--text-muted);
 
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 /* =========================================================
@@ -453,30 +461,31 @@
 }
 
 .deliveryHeader strong {
-  color: #334155;
+  color: var(--text);
 
-  font-size: 11px;
-  line-height: 17px;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .deliveryHeader span {
   color: var(--text-muted);
 
-  font-size: 9px;
-  line-height: 15px;
+  font-size: 11px;
+  line-height: 17px;
 }
 
 .progress {
   width: 100%;
-  height: 4px;
+  height: 5px;
 
-  margin-top: 7px;
+  margin-top: 8px;
 
   overflow: hidden;
 
   border-radius: 999px;
 
-  background: #e8edf3;
+  background: #e7ecf2;
 }
 
 .progress i {
@@ -490,15 +499,15 @@
 }
 
 /* =========================================================
-   TEXT STATUS
+   STATUS
    ========================================================= */
 
 .statusAttention,
 .statusPositive,
 .statusNeutral {
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
 
   white-space: nowrap;
 }
@@ -527,18 +536,14 @@
 }
 
 .performanceSummary > div {
-  min-height: 88px;
+  min-height: 104px;
 
   padding:
-    14px
-    20px
-    16px
-    0;
+    17px
+    22px;
 }
 
 .performanceSummary > div + div {
-  padding-left: 20px;
-
   border-left: 1px solid var(--border);
 }
 
@@ -551,28 +556,28 @@
 .performanceSummary span {
   color: var(--text-secondary);
 
-  font-size: 10px;
-  line-height: 15px;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
 }
 
 .performanceSummary strong {
-  margin-top: 6px;
+  margin-top: 7px;
 
   color: var(--text);
 
-  font-size: 19px;
-  line-height: 26px;
+  font-size: 23px;
+  line-height: 30px;
   font-weight: 700;
 }
 
 .performanceSummary small {
-  margin-top: 3px;
+  margin-top: 4px;
 
   color: var(--text-muted);
 
-  font-size: 9px;
-  line-height: 15px;
+  font-size: 11px;
+  line-height: 17px;
 }
 
 /* =========================================================
@@ -591,11 +596,15 @@
     auto
     18px;
 
-  gap: 16px;
+  gap: 18px;
 
-  min-height: 64px;
+  min-height: 70px;
 
   align-items: center;
+
+  padding:
+    0
+    14px;
 
   border-bottom: 1px solid var(--border);
 }
@@ -613,15 +622,15 @@
 
 .emptyState {
   padding:
-    22px
-    0;
+    26px
+    14px;
 
   border-top: 1px solid var(--border);
 
   color: var(--text-secondary);
 
-  font-size: 12px;
-  line-height: 19px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 /* =========================================================
@@ -658,8 +667,8 @@
   }
 
   .header h1 {
-    font-size: 25px;
-    line-height: 32px;
+    font-size: 27px;
+    line-height: 34px;
   }
 
   .newRequestButton {
@@ -676,7 +685,7 @@
   .performanceSummary > div,
   .performanceSummary > div + div {
     padding:
-      14px
+      16px
       0;
 
     border-left: 0;
@@ -706,7 +715,7 @@
       auto;
 
     padding:
-      11px
+      12px
       0;
   }
 

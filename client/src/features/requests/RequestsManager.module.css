@@ -4,29 +4,29 @@
   grid-template-columns:
     repeat(4, minmax(0, 1fr));
 
-  gap: 10px;
+  gap: 12px;
 
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .summaryCard,
 .attentionCard {
-  min-height: 108px;
+  min-height: 116px;
 
   padding:
-    15px
-    16px;
+    18px
+    18px;
 
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 
   background: var(--card);
 
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .attentionCard {
-  border-color: #f1d7ab;
+  border-color: #efd3a3;
 
   background: #fffdf8;
 }
@@ -37,9 +37,9 @@
 
   color: var(--text-secondary);
 
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
 }
 
 .summaryCard strong,
@@ -50,8 +50,8 @@
 
   color: var(--text);
 
-  font-size: 22px;
-  line-height: 29px;
+  font-size: 26px;
+  line-height: 32px;
   font-weight: 700;
 
   letter-spacing: -0.02em;
@@ -65,12 +65,12 @@
 .attentionCard small {
   display: block;
 
-  margin-top: 3px;
+  margin-top: 4px;
 
   color: var(--text-muted);
 
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 11px;
+  line-height: 17px;
 }
 
 /* =========================================================
@@ -83,22 +83,22 @@
   align-items: center;
   justify-content: space-between;
 
-  gap: 16px;
+  gap: 18px;
 
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .searchInput {
   width: min(
-    400px,
+    430px,
     100%
   );
 
-  min-height: 40px;
+  min-height: 42px;
 
   padding:
-    8px
-    12px;
+    9px
+    13px;
 
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
@@ -108,7 +108,8 @@
   background: #ffffff;
   color: var(--text);
 
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .searchInput::placeholder {
@@ -124,7 +125,7 @@
 .filters {
   display: flex;
 
-  gap: 5px;
+  gap: 6px;
 
   overflow-x: auto;
 
@@ -137,19 +138,19 @@
 
 .filterButton,
 .filterButtonActive {
-  min-height: 34px;
+  min-height: 36px;
 
   padding:
-    6px
-    10px;
+    7px
+    11px;
 
   border-radius: 6px;
 
   white-space: nowrap;
 
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 680;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
 
   transition:
     background-color 120ms ease,
@@ -194,40 +195,40 @@
 .row {
   display: grid;
 
-  min-width: 760px;
+  min-width: 820px;
 
   grid-template-columns:
-    minmax(280px, 1.5fr)
-    minmax(150px, 0.8fr)
-    minmax(135px, 0.7fr)
-    minmax(145px, 0.7fr);
+    minmax(300px, 1.55fr)
+    minmax(170px, 0.8fr)
+    minmax(145px, 0.7fr)
+    minmax(165px, 0.75fr);
 
-  gap: 16px;
+  gap: 18px;
 
   align-items: center;
 
   padding:
     0
-    12px;
+    14px;
 }
 
 .tableHeader {
-  min-height: 38px;
+  min-height: 42px;
 
-  background: #fbfcfe;
+  background: #fafbfd;
 
   color: var(--text-muted);
 
-  font-size: 9px;
-  line-height: 14px;
-  font-weight: 650;
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 700;
 
   letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
 .row {
-  min-height: 68px;
+  min-height: 74px;
 
   border-top: 1px solid var(--border);
 }
@@ -248,31 +249,31 @@
 .requestInfo strong {
   overflow: hidden;
 
-  color: #273244;
+  color: var(--text);
 
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 650;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
 
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .requestInfo span {
-  margin-top: 2px;
+  margin-top: 3px;
 
   color: var(--text-muted);
 
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .typeLabel,
 .dateCell {
   color: var(--text-secondary);
 
-  font-size: 11px;
-  line-height: 18px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .statusRejected {
@@ -282,18 +283,18 @@
 }
 
 .empty {
-  min-width: 760px;
+  min-width: 820px;
 
   padding:
-    38px
-    20px;
+    42px
+    22px;
 
   color: var(--text-secondary);
 
   text-align: center;
 
-  font-size: 12px;
-  line-height: 19px;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 /* =========================================================
@@ -324,6 +325,6 @@
 
   .summaryCard,
   .attentionCard {
-    min-height: 96px;
+    min-height: 104px;
   }
 }
