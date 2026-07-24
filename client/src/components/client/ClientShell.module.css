@@ -1,63 +1,77 @@
 ﻿/* =========================================================
-   PORTAL LAYOUT INVARIANT
+   FINAL PORTAL GEOMETRY FIX
 
-   ClientShell DOM is permanently:
-   .shell
-     > .sidebar
-     > .workspace
-
-   Never allow responsive or stale rules to stack the
-   workspace underneath the sidebar.
+   Sidebar remains permanently visible.
+   Workspace always starts after the sidebar.
+   This overrides earlier grid/sticky geometry only.
    ========================================================= */
 
 .shell {
-  display: grid !important;
-
-  grid-template-columns:
-    var(
-      --client-sidebar-width,
-      232px
-    )
-    minmax(0, 1fr) !important;
-
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.sidebar {
-  grid-column: 1 / 2 !important;
-  grid-row: 1 !important;
-
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-.workspace {
-  grid-column: 2 / 3 !important;
-  grid-row: 1 !important;
+  --client-sidebar-width: 232px;
 
   display: block !important;
 
-  width: auto !important;
+  width: 100% !important;
   min-width: 0 !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.sidebar {
+  position: fixed !important;
+
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+
+  z-index: 100 !important;
+
+  width: var(--client-sidebar-width) !important;
+  min-width: var(--client-sidebar-width) !important;
+  max-width: var(--client-sidebar-width) !important;
+
+  height: 100vh !important;
+  height: 100dvh !important;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.workspace {
+  display: block !important;
+
+  width:
+    calc(
+      100% -
+      var(--client-sidebar-width)
+    ) !important;
+
+  min-width: 0 !important;
+  min-height: 100vh !important;
+
+  margin-left:
+    var(--client-sidebar-width) !important;
+
+  overflow-x: hidden;
+}
+
+/* Compact laptop */
+@media (max-width: 1100px) {
+  .shell {
+    --client-sidebar-width: 204px;
+  }
 }
 
 /*
- * Scaled Windows displays can report a CSS viewport
- * around 700–760px even on a laptop.
+ * Windows display scaling can report approximately
+ * 700–760 CSS pixels even on a laptop.
  *
- * Keep the workspace visible and collapse only the
- * sidebar width.
+ * Use an icon rail instead of hiding or stacking
+ * the workspace.
  */
 @media (max-width: 760px) {
   .shell {
     --client-sidebar-width: 76px;
-
-    display: grid !important;
-
-    grid-template-columns:
-      76px
-      minmax(0, 1fr) !important;
   }
 
   .sidebar {
@@ -67,23 +81,34 @@
   }
 
   .workspace {
-    width: auto !important;
-    min-width: 0 !important;
+    width:
+      calc(
+        100% -
+        76px
+      ) !important;
+
+    margin-left: 76px !important;
   }
 }
 
 @media (max-width: 420px) {
   .shell {
     --client-sidebar-width: 64px;
-
-    grid-template-columns:
-      64px
-      minmax(0, 1fr) !important;
   }
 
   .sidebar {
     width: 64px !important;
     min-width: 64px !important;
     max-width: 64px !important;
+  }
+
+  .workspace {
+    width:
+      calc(
+        100% -
+        64px
+      ) !important;
+
+    margin-left: 64px !important;
   }
 }
