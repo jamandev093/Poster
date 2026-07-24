@@ -1,163 +1,203 @@
 .page {
   min-height: 100vh;
+  background: #eef2fb;
 }
 
 .hero {
-  padding:
-    110px
-    72px
-    96px;
-
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(320px, 0.85fr);
+  gap: 64px;
+  align-items: center;
+  padding: 94px 72px;
   border-bottom: 1px solid var(--border);
+
+  background:
+    linear-gradient(
+      135deg,
+      #eef2fb 0%,
+      #f7f9fd 58%,
+      #e8eefa 100%
+    );
 }
 
-.eyebrow {
-  color: var(--primary-dark);
+.heroCopy {
+  max-width: 740px;
+}
 
+.eyebrow,
+.overviewEyebrow {
+  color: var(--primary-dark);
   font-size: 11px;
   line-height: 17px;
   font-weight: 750;
-
   letter-spacing: 0.08em;
-
   text-transform: uppercase;
 }
 
 .hero h1 {
-  max-width: 800px;
-
   margin-top: 18px;
-
   color: var(--text);
-
-  font-size:
-    clamp(
-      44px,
-      6vw,
-      70px
-    );
-
-  line-height: 1.02;
+  font-size: clamp(44px, 5.3vw, 64px);
+  line-height: 1.04;
   font-weight: 720;
-
-  letter-spacing: -0.055em;
+  letter-spacing: -0.05em;
 }
 
 .description {
-  max-width: 650px;
-
-  margin-top: 26px;
-
+  max-width: 670px;
+  margin-top: 25px;
   color: var(--text-secondary);
-
   font-size: 17px;
   line-height: 29px;
 }
 
 .downloads {
   display: flex;
-
   flex-wrap: wrap;
-
   gap: 12px;
-
-  margin-top: 34px;
+  margin-top: 32px;
 }
 
 .downloads > div {
-  min-width: 180px;
-
-  padding:
-    13px
-    16px;
-
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-
-  background: #ffffff;
+  min-width: 190px;
+  padding: 14px 16px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 10px 28px
+    rgba(71, 93, 140, 0.07);
 }
 
+.downloads span,
 .downloads strong,
-.downloads span {
+.downloads small {
   display: block;
 }
 
-.downloads strong {
-  color: var(--text);
-
-  font-size: 13px;
-  line-height: 20px;
+.downloads span {
+  color: var(--text-muted);
+  font-size: 9px;
+  line-height: 15px;
 }
 
-.downloads span {
+.downloads strong {
   margin-top: 2px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 22px;
+}
 
-  color: var(--text-muted);
-
+.downloads small {
+  margin-top: 3px;
+  color: var(--primary-dark);
   font-size: 10px;
   line-height: 16px;
 }
 
-.features {
-  display: grid;
+.appOverview {
+  padding: 28px;
+  border-radius: 18px;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.94),
+      rgba(232, 238, 250, 0.96)
+    );
 
+  box-shadow:
+    0 20px 48px
+    rgba(71, 93, 140, 0.12);
+}
+
+.appOverview > div {
+  padding: 16px 0;
   border-bottom: 1px solid var(--border);
 }
 
-.features > div {
-  min-height: 210px;
-
-  padding:
-    44px
-    40px;
-
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+.appOverview > div:last-child {
+  border-bottom: 0;
 }
 
-.features span {
+.appOverview strong,
+.appOverview span {
+  display: block;
+}
+
+.appOverview strong {
   color: var(--text);
-
-  font-size: 21px;
-  line-height: 29px;
-  font-weight: 680;
-
-  letter-spacing: -0.025em;
+  font-size: 15px;
+  line-height: 22px;
 }
 
-.features p {
-  max-width: 360px;
-
-  margin-top: 10px;
-
+.appOverview span {
+  margin-top: 4px;
   color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 20px;
+}
 
-  font-size: 14px;
-  line-height: 24px;
+.whySection {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1.1fr);
+  gap: 72px;
+  padding: 92px 72px 104px;
+  background: #ffffff;
+}
+
+.whySection h2 {
+  margin-top: 15px;
+  color: var(--text);
+  font-size: clamp(32px, 3.7vw, 48px);
+  line-height: 1.09;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.copy {
+  display: grid;
+  gap: 18px;
+  padding-top: 30px;
+}
+
+.copy p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 27px;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .whySection {
+    padding-right: 42px;
+    padding-left: 42px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
   .hero {
-    padding:
-      76px
-      24px
-      68px;
+    padding: 70px 24px 64px;
   }
 
-  .features {
+  .whySection {
     grid-template-columns: 1fr;
+    gap: 26px;
+    padding: 68px 24px 80px;
   }
 
-  .features > div {
-    min-height: auto;
+  .copy {
+    padding-top: 0;
+  }
 
-    padding:
-      34px
-      24px;
-
-    border-right: 0;
+  .downloads > div {
+    width: 100%;
   }
 }

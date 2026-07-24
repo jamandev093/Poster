@@ -5,15 +5,9 @@ import styles from "./page.module.css";
 export default function HomePage() {
   return (
     <>
-      <section
-        className={styles.hero}
-      >
-        <div
-          className={styles.heroInner}
-        >
-          <p
-            className={styles.eyebrow}
-          >
+      <section className={styles.hero}>
+        <div className={styles.heroInner}>
+          <p className={styles.eyebrow}>
             Discover knowledge that matters
           </p>
 
@@ -23,18 +17,14 @@ export default function HomePage() {
             From sources you can trust.
           </h1>
 
-          <p
-            className={styles.heroDescription}
-          >
-            Poster helps people discover useful,
-            relevant information from trusted
-            publishers and takes them directly
-            to the original source.
+          <p className={styles.heroDescription}>
+            Poster helps you find useful and relevant information
+            without searching across dozens of websites yourself.
+            Discover on Poster, then continue directly to the
+            original source.
           </p>
 
-          <div
-            className={styles.heroActions}
-          >
+          <div className={styles.heroActions}>
             <Link
               href="/get-app"
               className={styles.primaryAction}
@@ -52,106 +42,176 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section
-        className={styles.principles}
-      >
-        <article>
-          <span>
-            01
-          </span>
-
-          <h2>
-            Discover
-          </h2>
-
-          <p>
-            Find useful information across
-            trusted sources without having to
-            search everywhere yourself.
-          </p>
-        </article>
-
-        <article>
-          <span>
-            02
-          </span>
-
-          <h2>
-            Personalize
-          </h2>
-
-          <p>
-            Shape discovery around your
-            interests, goals, and the subjects
-            that matter to you.
-          </p>
-        </article>
-
-        <article>
-          <span>
-            03
-          </span>
-
-          <h2>
-            Go to the source
-          </h2>
-
-          <p>
-            Poster helps you discover content,
-            then sends you to the original
-            publisher to continue reading.
-          </p>
-        </article>
-      </section>
-
-      <section
-        className={styles.editorialSection}
-      >
+      <section className={styles.problemSection}>
         <div>
-          <p
-            className={styles.sectionEyebrow}
-          >
-            A better discovery layer
+          <p className={styles.sectionEyebrow}>
+            The problem
           </p>
 
           <h2>
-            Useful information should be
-            easier to find.
+            Too much information.
+            <br />
+            Too little useful discovery.
           </h2>
         </div>
 
-        <div
-          className={styles.editorialCopy}
-        >
+        <div className={styles.problemCopy}>
           <p>
-            The internet contains an enormous
-            amount of valuable knowledge, but
-            finding the right information at
-            the right time is increasingly
-            difficult.
+            Valuable knowledge is spread across publishers,
+            websites, organizations, and platforms. Finding the
+            right information at the right time often means
+            searching repeatedly and filtering through noise.
           </p>
 
           <p>
-            Poster is designed to organize
-            discovery around relevance,
-            trusted sources, and personal
-            interests — without replacing the
-            publishers who created the
-            original work.
+            Poster creates a discovery layer that helps surface
+            information around your interests, relevance, trusted
+            sources, and what is happening now.
           </p>
         </div>
       </section>
 
-      <section
-        className={styles.sourceSection}
-      >
-        <div
-          className={styles.sourceStatement}
-        >
-          <p
-            className={styles.sectionEyebrow}
+      <section className={styles.principles}>
+        <article>
+          <span>01</span>
+
+          <h2>Discover</h2>
+
+          <p>
+            Find useful information from multiple trusted sources
+            through one discovery experience.
+          </p>
+        </article>
+
+        <article>
+          <span>02</span>
+
+          <h2>Personalize</h2>
+
+          <p>
+            Shape discovery around your interests, goals, and the
+            subjects that matter to you.
+          </p>
+        </article>
+
+        <article>
+          <span>03</span>
+
+          <h2>Go to the source</h2>
+
+          <p>
+            Open the original publisher when you want to continue
+            reading, watching, learning, or engaging.
+          </p>
+        </article>
+      </section>
+
+      <section className={styles.intentSection}>
+        <div className={styles.intentHeading}>
+          <p className={styles.sectionEyebrow}>
+            What brings you to Poster?
+          </p>
+
+          <h2>
+            Find the information
+            that matters to you.
+          </h2>
+
+          <p>
+            Poster serves people discovering knowledge, publishers
+            whose content is discovered, advertisers reaching
+            relevant audiences, and rights holders who need a clear
+            way to raise concerns.
+          </p>
+        </div>
+
+        <div className={styles.intentList}>
+          <Link
+            href="/get-app"
+            className={styles.intentItem}
           >
-            Original sources remain central
+            <div>
+              <span>For people</span>
+
+              <strong>
+                I want to discover useful knowledge.
+              </strong>
+
+              <p>
+                Learn what Poster can help you discover and how to
+                get the mobile app.
+              </p>
+            </div>
+
+            <b>→</b>
+          </Link>
+
+          <Link
+            href="/publishers"
+            className={styles.intentItem}
+          >
+            <div>
+              <span>For publishers</span>
+
+              <strong>
+                I want to understand how Poster uses my source.
+              </strong>
+
+              <p>
+                Learn about attribution, original-source redirects,
+                approved discovery methods, corrections, and rights.
+              </p>
+            </div>
+
+            <b>→</b>
+          </Link>
+
+          <Link
+            href="/advertisers"
+            className={styles.intentItem}
+          >
+            <div>
+              <span>For advertisers</span>
+
+              <strong>
+                I want to advertise on Poster.
+              </strong>
+
+              <p>
+                Understand sponsorship, affiliate campaigns,
+                placements, measurement, and how to submit a request.
+              </p>
+            </div>
+
+            <b>→</b>
+          </Link>
+
+          <Link
+            href="/copyright"
+            className={styles.intentItem}
+          >
+            <div>
+              <span>For rights holders</span>
+
+              <strong>
+                I have a copyright or rights concern.
+              </strong>
+
+              <p>
+                See what can be reported, what evidence is needed,
+                how claims are reviewed, and what happens next.
+              </p>
+            </div>
+
+            <b>→</b>
+          </Link>
+        </div>
+      </section>
+
+      <section className={styles.sourceSection}>
+        <div className={styles.sourceStatement}>
+          <p className={styles.sectionEyebrow}>
+            Our core principle
           </p>
 
           <h2>
@@ -161,111 +221,28 @@ export default function HomePage() {
           </h2>
 
           <p>
-            Poster is a discovery platform,
-            not a publishing platform.
-            Content remains connected to its
-            original publisher.
+            Poster is a discovery platform, not a publishing
+            platform. Original publishers remain central to the
+            experience.
           </p>
 
           <Link
-            href="/publishers"
+            href="/how-it-works"
             className={styles.textLink}
           >
-            Learn how Poster works with publishers →
+            See how Poster works →
           </Link>
         </div>
       </section>
 
-      <section
-        className={styles.audienceSection}
-      >
-        <div
-          className={styles.audienceIntro}
-        >
-          <p
-            className={styles.sectionEyebrow}
-          >
-            Built for a connected ecosystem
-          </p>
-
-          <h2>
-            Discovery works better when
-            everyone has a clear role.
-          </h2>
-        </div>
-
-        <div
-          className={styles.audienceRows}
-        >
-          <Link
-            href="/get-app"
-            className={styles.audienceRow}
-          >
-            <span>
-              For people
-            </span>
-
-            <strong>
-              Discover information that is
-              more relevant to you.
-            </strong>
-
-            <b>
-              →
-            </b>
-          </Link>
-
-          <Link
-            href="/publishers"
-            className={styles.audienceRow}
-          >
-            <span>
-              For publishers
-            </span>
-
-            <strong>
-              Keep original content at the
-              center of discovery.
-            </strong>
-
-            <b>
-              →
-            </b>
-          </Link>
-
-          <Link
-            href="/advertisers"
-            className={styles.audienceRow}
-          >
-            <span>
-              For advertisers
-            </span>
-
-            <strong>
-              Reach audiences through
-              relevant sponsorship and
-              affiliate opportunities.
-            </strong>
-
-            <b>
-              →
-            </b>
-          </Link>
-        </div>
-      </section>
-
-      <section
-        className={styles.finalSection}
-      >
-        <p
-          className={styles.sectionEyebrow}
-        >
-          Poster
+      <section className={styles.finalSection}>
+        <p className={styles.sectionEyebrow}>
+          Start with Poster
         </p>
 
         <h2>
-          Knowledge discovery,
-          built around the source.
+          Find knowledge that is
+          more relevant to you.
         </h2>
 
         <Link

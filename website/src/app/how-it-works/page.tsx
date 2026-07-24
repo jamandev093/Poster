@@ -4,41 +4,46 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "How Poster Works",
-
   description:
-    "See how Poster turns trusted sources, relevance, and personalization into a simpler knowledge discovery experience.",
+    "See how Poster discovers permitted source content, understands relevance, personalizes discovery, and sends users to original publishers.",
 };
 
 const steps = [
   {
     number: "01",
-    title: "Sources",
+    title: "Publishers create the original content",
     description:
-      "Poster connects with permitted sources through official APIs, authorized feeds, embeds, agreements, and other approved discovery methods.",
+      "Publishers, organizations, experts, and other sources create and publish information on their own websites and platforms.",
   },
   {
     number: "02",
-    title: "Understand",
+    title: "Poster discovers permitted sources",
     description:
-      "AI helps classify topics, understand context, and organize information so discovery can become more useful.",
+      "Poster can receive or discover information through approved methods such as official APIs, authorized feeds, embeds, direct agreements, or link-only discovery.",
   },
   {
     number: "03",
-    title: "Personalize",
+    title: "AI helps understand the information",
     description:
-      "Poster uses interests and relevance signals to help surface information that better matches each person.",
+      "Poster can classify topics, understand context, organize source information, and identify signals that help determine relevance.",
   },
   {
     number: "04",
-    title: "Discover",
+    title: "Discovery becomes more relevant",
     description:
-      "Useful information appears across Poster through personalized discovery, search, and trending experiences.",
+      "Interests, relevance signals, search, and discovery systems help surface information that may be more useful to each person.",
   },
   {
     number: "05",
-    title: "Continue",
+    title: "People discover through Poster",
     description:
-      "When someone opens content, Poster takes them to the original publisher to continue reading or engaging.",
+      "Useful information can appear through personalized Home discovery, Search, and Trending experiences.",
+  },
+  {
+    number: "06",
+    title: "People continue at the original source",
+    description:
+      "When someone chooses to open a discovery, Poster directs them to the original publisher to continue reading, watching, learning, or engaging.",
   },
 ] as const;
 
@@ -51,109 +56,75 @@ export default function HowPosterWorksPage() {
         </p>
 
         <h1>
-          From trusted sources
+          From original sources
           to relevant discovery.
         </h1>
 
         <p className={styles.lead}>
-          Poster helps organize useful
-          information around relevance and
-          personal interests while keeping
-          original publishers at the center.
+          Poster creates a discovery layer between useful
+          information and the people who may benefit from it —
+          without replacing the original publisher.
         </p>
       </section>
 
-      <section className={styles.flowIntro}>
+      <section className={styles.intro}>
         <div>
           <p className={styles.eyebrow}>
-            The discovery flow
+            The complete journey
           </p>
 
           <h2>
-            Simple for people.
-            Structured behind the scenes.
+            What happens from publication
+            to discovery?
           </h2>
         </div>
 
         <p>
-          Poster connects source discovery,
-          classification, relevance, and
-          personalization into one experience
-          designed to help people find useful
-          information more efficiently.
+          Poster connects approved source access, AI-assisted
+          understanding, relevance, personalization, and
+          original-source redirection into one discovery flow.
         </p>
       </section>
 
       <section className={styles.steps}>
-        {steps.map(
-          (
-            step
-          ) => (
-            <article
-              key={step.number}
-              className={styles.step}
-            >
-              <span
-                className={styles.stepNumber}
-              >
-                {step.number}
-              </span>
+        {steps.map((step) => (
+          <article
+            key={step.number}
+            className={styles.step}
+          >
+            <span>{step.number}</span>
 
-              <h2>
-                {step.title}
-              </h2>
+            <div>
+              <h2>{step.title}</h2>
 
-              <p>
-                {step.description}
-              </p>
-            </article>
-          )
-        )}
+              <p>{step.description}</p>
+            </div>
+          </article>
+        ))}
       </section>
 
-      <section className={styles.sourceSection}>
+      <section className={styles.principleSection}>
         <p className={styles.eyebrow}>
-          Discovery, not republication
+          The principle behind the system
         </p>
 
         <h2>
-          Original publishers remain
-          part of the experience.
+          Poster helps people find the content.
+          <br />
+          Publishers remain the source.
         </h2>
 
         <p>
-          Poster is designed to help people
-          discover content while respecting
-          the role of the original source.
-          Where appropriate, users continue
-          directly to the publisher.
+          Poster is not designed to copy the entire publishing
+          experience. Its role is to improve discovery and make
+          it easier for people to reach useful original sources.
         </p>
 
         <Link
           href="/publishers"
           className={styles.textLink}
         >
-          Learn about publishers →
-        </Link>
-      </section>
-
-      <section className={styles.finalSection}>
-        <div>
-          <p className={styles.eyebrow}>
-            Start discovering
-          </p>
-
-          <h2>
-            Find information that better
-            matches what matters to you.
-          </h2>
-        </div>
-
-        <Link
-          href="/get-app"
-          className={styles.primaryAction}
-        >
-          Get the App
+          How Poster works with publishers →
         </Link>
       </section>
     </div>

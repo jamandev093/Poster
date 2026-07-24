@@ -2,155 +2,207 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Copyright & Rights",
-
   description:
-    "Learn how Poster approaches copyright, rights-holder concerns, source attribution, and claim handling.",
+    "Report copyright concerns, understand Poster’s verification process, and learn what actions may follow a rights claim.",
 };
 
 export default function CopyrightPage() {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
-            Copyright & Rights
+            Copyright &amp; Rights
           </p>
 
           <h1>
-            Respecting original publishers
-            and rights holders.
+            Concerned about copyrighted
+            content appearing on Poster?
           </h1>
 
           <p className={styles.lead}>
-            Poster is built around responsible
-            discovery, clear attribution, and
-            a structured process for copyright
-            and rights-related concerns.
+            If you own or represent copyrighted work, Poster provides
+            a structured process to report a concern, provide evidence,
+            and follow the case through review.
           </p>
         </div>
 
-        <a
-          href="https://copyright.getpostar.com"
-          className={styles.claimAction}
-        >
-          Submit or Manage a Copyright Claim
-        </a>
+        <aside className={styles.portalPanel}>
+          <p className={styles.portalEyebrow}>
+            Copyright &amp; Rights Portal
+          </p>
+
+          <h2>
+            Submit or manage
+            a rights claim.
+          </h2>
+
+          <p>
+            Start a new claim, provide supporting information,
+            or manage an existing copyright case through the
+            dedicated portal.
+          </p>
+
+          <a
+            href="https://copyright.getpostar.com"
+            className={styles.portalAction}
+          >
+            Open Copyright Portal →
+          </a>
+        </aside>
       </section>
 
       <section className={styles.editorialSection}>
         <div>
           <p className={styles.eyebrow}>
-            Our approach
+            What can be reported?
           </p>
 
           <h2>
-            Discovery should respect
-            ownership and source rights.
+            Use the rights process when
+            something needs formal review.
           </h2>
         </div>
 
         <div className={styles.copy}>
           <p>
-            Poster does not aim to replace
-            original publishers or rehost
-            protected works without authorization.
+            You can report a Poster content reference, incorrect
+            attribution, a suspected unauthorized use, a copyright
+            ownership concern, or another rights-related issue.
           </p>
 
           <p>
-            Content discovery should use
-            permitted methods and maintain
-            clear connections to the original
-            source.
+            You can also raise concerns where previously removed
+            content appears again or where source information may
+            cause confusion about ownership.
           </p>
         </div>
       </section>
 
-      <section className={styles.process}>
-        <article>
-          <span>
-            01
-          </span>
+      <section className={styles.detailSection}>
+        <article className={styles.detailRow}>
+          <div>
+            <span className={styles.number}>
+              01
+            </span>
 
-          <h2>
-            Submit
-          </h2>
+            <h2>
+              What information should I provide?
+            </h2>
+          </div>
 
-          <p>
-            Identify the protected work,
-            relevant Poster reference, claimant
-            information, and supporting evidence.
-          </p>
+          <div className={styles.detailCopy}>
+            <p>
+              Provide the Poster Content ID or URL where possible,
+              the original work URL or source, the claimant or
+              rights-holder name, contact information, and evidence
+              supporting the claim.
+            </p>
+
+            <p>
+              Clear evidence helps Poster distinguish verified rights
+              concerns from incomplete, uncertain, or unsupported
+              submissions.
+            </p>
+          </div>
         </article>
 
-        <article>
-          <span>
-            02
-          </span>
+        <article className={styles.detailRow}>
+          <div>
+            <span className={styles.number}>
+              02
+            </span>
 
-          <h2>
-            Verify
-          </h2>
+            <h2>
+              How does Poster verify a claim?
+            </h2>
+          </div>
 
-          <p>
-            Poster reviews claimant identity,
-            source information, URLs, ownership
-            signals, and submitted evidence.
-          </p>
+          <div className={styles.detailCopy}>
+            <p>
+              Poster can cross-check the relevant Poster reference,
+              original URL or domain, claimant identity, publisher
+              information, business email or domain alignment,
+              source metadata, and supporting references.
+            </p>
+
+            <p>
+              Uncertain cases can remain pending for additional
+              information or manual review rather than being treated
+              as automatically verified.
+            </p>
+          </div>
         </article>
 
-        <article>
-          <span>
-            03
-          </span>
+        <article className={styles.detailRow}>
+          <div>
+            <span className={styles.number}>
+              03
+            </span>
 
-          <h2>
-            Review
-          </h2>
+            <h2>
+              What happens after submission?
+            </h2>
+          </div>
 
-          <p>
-            The case is assessed before an
-            operational decision is made.
-          </p>
+          <div className={styles.detailCopy}>
+            <p>
+              Poster reviews the claim, checks the evidence, and may
+              request additional information before making an
+              operational decision.
+            </p>
+
+            <p>
+              The goal is to respond appropriately while preserving
+              a clear and auditable record of important actions.
+            </p>
+          </div>
         </article>
 
-        <article>
-          <span>
-            04
-          </span>
+        <article className={styles.detailRow}>
+          <div>
+            <span className={styles.number}>
+              04
+            </span>
 
-          <h2>
-            Act
-          </h2>
+            <h2>
+              What actions can follow?
+            </h2>
+          </div>
 
-          <p>
-            Appropriate action may include
-            removal, prevention of re-import,
-            resolution, or dismissal where
-            justified.
-          </p>
+          <div className={styles.detailCopy}>
+            <p>
+              Depending on the review, Poster may remove the relevant
+              content reference, remove and prevent re-import,
+              request more evidence, dismiss an unsupported claim,
+              or resolve the case.
+            </p>
+          </div>
         </article>
       </section>
 
-      <section className={styles.policySection}>
-        <p className={styles.eyebrow}>
-          Responsible discovery
-        </p>
+      <section className={styles.methodsSection}>
+        <div>
+          <p className={styles.eyebrow}>
+            Responsible discovery
+          </p>
 
-        <h2>
-          Poster uses approved
-          content-access methods.
-        </h2>
+          <h2>
+            Poster uses approved
+            content-access methods.
+          </h2>
+        </div>
 
-        <div className={styles.policyRows}>
+        <div className={styles.methodList}>
           <div>
             <span>
               Official APIs
             </span>
 
-            <strong>
-              Used where publishers provide
-              authorized access.
-            </strong>
+            <p>
+              Used where publishers or platforms provide authorized
+              access.
+            </p>
           </div>
 
           <div>
@@ -158,10 +210,10 @@ export default function CopyrightPage() {
               Authorized feeds
             </span>
 
-            <strong>
-              RSS or similar feeds are used
-              only where permission is clear.
-            </strong>
+            <p>
+              RSS or similar feeds are used where authorization or
+              permission is clear.
+            </p>
           </div>
 
           <div>
@@ -169,10 +221,10 @@ export default function CopyrightPage() {
               Embeds and agreements
             </span>
 
-            <strong>
-              Supported where permitted by
-              the source or direct agreement.
-            </strong>
+            <p>
+              Supported where the source permits embedding or where
+              a direct agreement exists.
+            </p>
           </div>
 
           <div>
@@ -180,32 +232,39 @@ export default function CopyrightPage() {
               Link-only discovery
             </span>
 
-            <strong>
-              Used where content itself should
-              remain entirely with the source.
-            </strong>
+            <p>
+              Used where the original content should remain entirely
+              with the publisher.
+            </p>
           </div>
         </div>
       </section>
 
       <section className={styles.finalSection}>
-        <div>
-          <p className={styles.eyebrow}>
-            Need to report a concern?
-          </p>
+        <aside className={styles.portalPanelLarge}>
+          <div>
+            <p className={styles.portalEyebrow}>
+              Copyright &amp; Rights Portal
+            </p>
 
-          <h2>
-            Use the Copyright & Rights portal
-            to submit or manage a claim.
-          </h2>
-        </div>
+            <h2>
+              Ready to submit
+              or manage a claim?
+            </h2>
 
-        <a
-          href="https://copyright.getpostar.com"
-          className={styles.primaryAction}
-        >
-          Open Copyright Portal
-        </a>
+            <p>
+              Use the dedicated portal to submit supporting evidence,
+              follow case status, or manage an existing rights claim.
+            </p>
+          </div>
+
+          <a
+            href="https://copyright.getpostar.com"
+            className={styles.portalAction}
+          >
+            Open Copyright Portal →
+          </a>
+        </aside>
       </section>
     </div>
   );
