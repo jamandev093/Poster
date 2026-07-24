@@ -8,8 +8,6 @@ import type {
   FormEvent,
 } from "react";
 
-import SignalContact from "@/components/client/SignalContact";
-
 import {
   getWorkspaceAccountRoleLabel,
   getWorkspaceAccountStatusLabel,
@@ -35,6 +33,205 @@ interface AccountFormState {
   businessEmail: string;
   phone: string;
 }
+
+const COUNTRIES = [
+  "Afghanistan",
+  "Albania",
+  "Algeria",
+  "Andorra",
+  "Angola",
+  "Antigua and Barbuda",
+  "Argentina",
+  "Armenia",
+  "Australia",
+  "Austria",
+  "Azerbaijan",
+  "Bahamas",
+  "Bahrain",
+  "Bangladesh",
+  "Barbados",
+  "Belarus",
+  "Belgium",
+  "Belize",
+  "Benin",
+  "Bhutan",
+  "Bolivia",
+  "Bosnia and Herzegovina",
+  "Botswana",
+  "Brazil",
+  "Brunei",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Cabo Verde",
+  "Cambodia",
+  "Cameroon",
+  "Canada",
+  "Central African Republic",
+  "Chad",
+  "Chile",
+  "China",
+  "Colombia",
+  "Comoros",
+  "Congo",
+  "Costa Rica",
+  "Croatia",
+  "Cuba",
+  "Cyprus",
+  "Czechia",
+  "Democratic Republic of the Congo",
+  "Denmark",
+  "Djibouti",
+  "Dominica",
+  "Dominican Republic",
+  "Ecuador",
+  "Egypt",
+  "El Salvador",
+  "Equatorial Guinea",
+  "Eritrea",
+  "Estonia",
+  "Eswatini",
+  "Ethiopia",
+  "Fiji",
+  "Finland",
+  "France",
+  "Gabon",
+  "Gambia",
+  "Georgia",
+  "Germany",
+  "Ghana",
+  "Greece",
+  "Grenada",
+  "Guatemala",
+  "Guinea",
+  "Guinea-Bissau",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Hungary",
+  "Iceland",
+  "India",
+  "Indonesia",
+  "Iran",
+  "Iraq",
+  "Ireland",
+  "Israel",
+  "Italy",
+  "Ivory Coast",
+  "Jamaica",
+  "Japan",
+  "Jordan",
+  "Kazakhstan",
+  "Kenya",
+  "Kiribati",
+  "Kuwait",
+  "Kyrgyzstan",
+  "Laos",
+  "Latvia",
+  "Lebanon",
+  "Lesotho",
+  "Liberia",
+  "Libya",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Madagascar",
+  "Malawi",
+  "Malaysia",
+  "Maldives",
+  "Mali",
+  "Malta",
+  "Marshall Islands",
+  "Mauritania",
+  "Mauritius",
+  "Mexico",
+  "Micronesia",
+  "Moldova",
+  "Monaco",
+  "Mongolia",
+  "Montenegro",
+  "Morocco",
+  "Mozambique",
+  "Myanmar",
+  "Namibia",
+  "Nauru",
+  "Nepal",
+  "Netherlands",
+  "New Zealand",
+  "Nicaragua",
+  "Niger",
+  "Nigeria",
+  "North Korea",
+  "North Macedonia",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Palau",
+  "Palestine",
+  "Panama",
+  "Papua New Guinea",
+  "Paraguay",
+  "Peru",
+  "Philippines",
+  "Poland",
+  "Portugal",
+  "Qatar",
+  "Romania",
+  "Russia",
+  "Rwanda",
+  "Saint Kitts and Nevis",
+  "Saint Lucia",
+  "Saint Vincent and the Grenadines",
+  "Samoa",
+  "San Marino",
+  "Sao Tome and Principe",
+  "Saudi Arabia",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leone",
+  "Singapore",
+  "Slovakia",
+  "Slovenia",
+  "Solomon Islands",
+  "Somalia",
+  "South Africa",
+  "South Korea",
+  "South Sudan",
+  "Spain",
+  "Sri Lanka",
+  "Sudan",
+  "Suriname",
+  "Sweden",
+  "Switzerland",
+  "Syria",
+  "Taiwan",
+  "Tajikistan",
+  "Tanzania",
+  "Thailand",
+  "Timor-Leste",
+  "Togo",
+  "Tonga",
+  "Trinidad and Tobago",
+  "Tunisia",
+  "Turkey",
+  "Turkmenistan",
+  "Tuvalu",
+  "Uganda",
+  "Ukraine",
+  "United Arab Emirates",
+  "United Kingdom",
+  "United States",
+  "Uruguay",
+  "Uzbekistan",
+  "Vanuatu",
+  "Vatican City",
+  "Venezuela",
+  "Vietnam",
+  "Yemen",
+  "Zambia",
+  "Zimbabwe",
+] as const;
 
 const organization =
   getCurrentOrganization();
@@ -119,9 +316,7 @@ export default function AccountManager() {
       })
     );
 
-    setSaved(
-      false
-    );
+    setSaved(false);
   };
 
   const saveChanges = (
@@ -140,9 +335,7 @@ export default function AccountManager() {
      * - persist organization/contact changes,
      * - maintain account audit history.
      */
-    setSaved(
-      true
-    );
+    setSaved(true);
   };
 
   const resetChanges =
@@ -151,9 +344,7 @@ export default function AccountManager() {
         createInitialState()
       );
 
-      setSaved(
-        false
-      );
+      setSaved(false);
     };
 
   const accountStatus =
@@ -171,23 +362,15 @@ export default function AccountManager() {
 
   return (
     <form
-      className={
-        styles.layout
-      }
-      onSubmit={
-        saveChanges
-      }
+      className={styles.layout}
+      onSubmit={saveChanges}
     >
       <section
-        className={
-          styles.summaryGrid
-        }
+        className={styles.summaryGrid}
         aria-label="Client account summary"
       >
         <article
-          className={
-            styles.summaryCard
-          }
+          className={styles.summaryCard}
         >
           <span>
             Workspace
@@ -198,16 +381,12 @@ export default function AccountManager() {
           </strong>
 
           <small>
-            {
-              organization.name
-            }
+            {organization.name}
           </small>
         </article>
 
         <article
-          className={
-            styles.summaryCard
-          }
+          className={styles.summaryCard}
         >
           <span>
             Access
@@ -223,9 +402,7 @@ export default function AccountManager() {
         </article>
 
         <article
-          className={
-            styles.summaryCard
-          }
+          className={styles.summaryCard}
         >
           <span>
             Business email
@@ -240,28 +417,20 @@ export default function AccountManager() {
           </strong>
 
           <small>
-            {
-              form.businessEmail
-            }
+            {form.businessEmail}
           </small>
         </article>
       </section>
 
       <section
-        className={
-          styles.mainGrid
-        }
+        className={styles.mainGrid}
       >
         <div
-          className={
-            styles.primaryColumn
-          }
+          className={styles.primaryColumn}
         >
           <section className="contentCard">
             <div
-              className={
-                styles.sectionHeader
-              }
+              className={styles.sectionHeader}
             >
               <div>
                 <h2 className="sectionTitle">
@@ -275,24 +444,16 @@ export default function AccountManager() {
             </div>
 
             <div
-              className={
-                styles.formGrid
-              }
+              className={styles.formGrid}
             >
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="organization-name">
                   Organization name
                 </label>
 
                 <input
                   id="organization-name"
-                  value={
-                    form.organizationName
-                  }
+                  value={form.organizationName}
                   onChange={(
                     event
                   ) =>
@@ -306,11 +467,7 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="organization-website">
                   Website
                 </label>
@@ -318,9 +475,7 @@ export default function AccountManager() {
                 <input
                   id="organization-website"
                   type="url"
-                  value={
-                    form.website
-                  }
+                  value={form.website}
                   onChange={(
                     event
                   ) =>
@@ -334,20 +489,14 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="organization-industry">
                   Industry
                 </label>
 
                 <input
                   id="organization-industry"
-                  value={
-                    form.industry
-                  }
+                  value={form.industry}
                   onChange={(
                     event
                   ) =>
@@ -360,20 +509,16 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="organization-country">
                   Country
                 </label>
 
-                <select
+                <input
                   id="organization-country"
-                  value={
-                    form.country
-                  }
+                  type="search"
+                  list="client-country-options"
+                  value={form.country}
                   onChange={(
                     event
                   ) =>
@@ -382,34 +527,27 @@ export default function AccountManager() {
                       event.target.value
                     )
                   }
+                  placeholder="Search country by name"
+                  autoComplete="country-name"
                   required
-                >
-                  <option value="India">
-                    India
-                  </option>
+                />
 
-                  <option value="United States">
-                    United States
-                  </option>
-
-                  <option value="United Kingdom">
-                    United Kingdom
-                  </option>
-
-                  <option value="Singapore">
-                    Singapore
-                  </option>
-
-                  <option value="Other">
-                    Other
-                  </option>
-                </select>
+                <datalist id="client-country-options">
+                  {COUNTRIES.map(
+                    (
+                      country
+                    ) => (
+                      <option
+                        key={country}
+                        value={country}
+                      />
+                    )
+                  )}
+                </datalist>
               </div>
 
               <div
-                className={
-                  styles.fieldWide
-                }
+                className={styles.fieldWide}
               >
                 <label htmlFor="billing-email">
                   Billing contact email
@@ -418,9 +556,7 @@ export default function AccountManager() {
                 <input
                   id="billing-email"
                   type="email"
-                  value={
-                    form.billingEmail
-                  }
+                  value={form.billingEmail}
                   onChange={(
                     event
                   ) =>
@@ -434,9 +570,7 @@ export default function AccountManager() {
                 />
 
                 <span
-                  className={
-                    styles.fieldHint
-                  }
+                  className={styles.fieldHint}
                 >
                   Used for future contract and payment communication.
                 </span>
@@ -446,9 +580,7 @@ export default function AccountManager() {
 
           <section className="contentCard">
             <div
-              className={
-                styles.sectionHeader
-              }
+              className={styles.sectionHeader}
             >
               <div>
                 <h2 className="sectionTitle">
@@ -461,33 +593,23 @@ export default function AccountManager() {
               </div>
 
               <span
-                className={
-                  styles.primaryBadge
-                }
+                className={styles.primaryBadge}
               >
                 Primary client
               </span>
             </div>
 
             <div
-              className={
-                styles.formGrid
-              }
+              className={styles.formGrid}
             >
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="contact-name">
                   Full name
                 </label>
 
                 <input
                   id="contact-name"
-                  value={
-                    form.contactName
-                  }
+                  value={form.contactName}
                   onChange={(
                     event
                   ) =>
@@ -501,20 +623,14 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="job-title">
                   Job title
                 </label>
 
                 <input
                   id="job-title"
-                  value={
-                    form.jobTitle
-                  }
+                  value={form.jobTitle}
                   onChange={(
                     event
                   ) =>
@@ -528,11 +644,7 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="business-email">
                   Business email
                 </label>
@@ -540,9 +652,7 @@ export default function AccountManager() {
                 <input
                   id="business-email"
                   type="email"
-                  value={
-                    form.businessEmail
-                  }
+                  value={form.businessEmail}
                   onChange={(
                     event
                   ) =>
@@ -556,11 +666,7 @@ export default function AccountManager() {
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label htmlFor="phone">
                   Phone
                 </label>
@@ -568,9 +674,7 @@ export default function AccountManager() {
                 <input
                   id="phone"
                   type="tel"
-                  value={
-                    form.phone
-                  }
+                  value={form.phone}
                   onChange={(
                     event
                   ) =>
@@ -586,132 +690,11 @@ export default function AccountManager() {
             </div>
           </section>
         </div>
-
-        <aside
-          className={
-            styles.secondaryColumn
-          }
-        >
-          <section className="contentCard">
-            <h2 className="sectionTitle">
-              Workspace access
-            </h2>
-
-            <p className="sectionDescription">
-              Your current Client account scope.
-            </p>
-
-            <div
-              className={
-                styles.detailList
-              }
-            >
-              <div
-                className={
-                  styles.detailRow
-                }
-              >
-                <span>
-                  Organization
-                </span>
-
-                <strong>
-                  {
-                    organization.name
-                  }
-                </strong>
-              </div>
-
-              <div
-                className={
-                  styles.detailRow
-                }
-              >
-                <span>
-                  Role
-                </span>
-
-                <strong>
-                  {accountRole}
-                </strong>
-              </div>
-
-              <div
-                className={
-                  styles.detailRow
-                }
-              >
-                <span>
-                  Workspace
-                </span>
-
-                <strong>
-                  {accountStatus}
-                </strong>
-              </div>
-
-              <div
-                className={
-                  styles.detailRow
-                }
-              >
-                <span>
-                  Email
-                </span>
-
-                <strong>
-                  {workspaceAccountProfile
-                    .primaryClient
-                    .emailVerified
-                    ? "Verified"
-                    : "Pending"}
-                </strong>
-              </div>
-            </div>
-          </section>
-
-          <section className="contentCard">
-            <h2 className="sectionTitle">
-              Need help?
-            </h2>
-
-            <p
-              className={
-                styles.supportDescription
-              }
-            >
-              Contact Poster directly for campaign or account support.
-            </p>
-
-            <SignalContact />
-          </section>
-
-          <section
-            className={
-              styles.futureCard
-            }
-          >
-            <span>
-              Later phase
-            </span>
-
-            <strong>
-              Team access
-            </strong>
-
-            <p>
-              Additional organization members and roles will be added after
-              the primary Client workflow is stable.
-            </p>
-          </section>
-        </aside>
       </section>
 
       {saved ? (
         <div
-          className={
-            styles.success
-          }
+          className={styles.success}
           role="status"
         >
           Account changes saved for this frontend demonstration.
@@ -719,16 +702,12 @@ export default function AccountManager() {
       ) : null}
 
       <div
-        className={
-          styles.actions
-        }
+        className={styles.actions}
       >
         <button
           type="button"
           className="secondaryButton"
-          onClick={
-            resetChanges
-          }
+          onClick={resetChanges}
         >
           Reset
         </button>
@@ -742,9 +721,7 @@ export default function AccountManager() {
       </div>
 
       <p
-        className={
-          styles.demoNote
-        }
+        className={styles.demoNote}
       >
         Development environment · Production account changes will be stored
         through authenticated organization APIs.

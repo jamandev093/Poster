@@ -1,23 +1,45 @@
 .layout {
   display: grid;
-  gap: 18px;
+
+  width: 100%;
+  max-width: 1060px;
+
+  gap: 22px;
+
+  margin: 0 auto;
 }
+
+/* =========================================================
+   ACCOUNT SUMMARY
+
+   Slightly narrower than the editable data cards.
+   ========================================================= */
 
 .summaryGrid {
   display: grid;
+
+  width: min(100%, 880px);
+
   grid-template-columns:
     repeat(3, minmax(0, 1fr));
+
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 
 .summaryCard {
   min-width: 0;
-  padding: 18px 22px 18px 0;
+
+  padding:
+    16px
+    20px;
+}
+
+.summaryCard:first-child {
+  padding-left: 0;
 }
 
 .summaryCard + .summaryCard {
-  padding-left: 22px;
   border-left: 1px solid var(--border);
 }
 
@@ -29,78 +51,129 @@
 
 .summaryCard span {
   color: var(--text-secondary);
-  font-size: 10px;
-  line-height: 16px;
+
+  font-size: 11px;
+  line-height: 17px;
   font-weight: 650;
 }
 
 .summaryCard strong {
   margin-top: 6px;
+
   color: var(--text);
-  font-size: 20px;
-  line-height: 27px;
-  font-weight: 680;
+
+  font-size: 21px;
+  line-height: 28px;
+  font-weight: 700;
+
   letter-spacing: -0.02em;
 }
 
 .summaryCard small {
-  margin-top: 3px;
   overflow: hidden;
+
+  margin-top: 3px;
+
   color: var(--text-muted);
-  font-size: 10px;
-  line-height: 16px;
+
+  font-size: 11px;
+  line-height: 17px;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* =========================================================
+   MAIN ACCOUNT DATA
+
+   Right-side duplicate/status/support column removed.
+   Editable cards receive more horizontal space.
+   ========================================================= */
+
 .mainGrid {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1.5fr)
-    minmax(280px, 0.65fr);
-  gap: 18px;
-  align-items: start;
+  display: block;
+
+  width: 100%;
 }
 
-.primaryColumn,
-.secondaryColumn {
+.primaryColumn {
   display: grid;
-  gap: 16px;
+
+  width: 100%;
+
+  gap: 18px;
 }
+
+.primaryColumn :global(.contentCard) {
+  width: 100%;
+
+  padding:
+    24px
+    25px;
+
+  border-radius: 12px;
+}
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
 
 .sectionHeader {
   display: flex;
+
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 18px;
-  margin-bottom: 20px;
+
+  margin-bottom: 21px;
 }
 
 .primaryBadge {
   display: inline-flex;
-  min-height: 25px;
+
+  min-height: 26px;
+
   flex: 0 0 auto;
+
   align-items: center;
-  padding: 4px 9px;
-  border: 1px solid #d7e3fa;
-  border-radius: 999px;
-  background: #f8faff;
+
+  padding:
+    4px
+    9px;
+
+  border: 1px solid var(--primary-border);
+  border-radius: 6px;
+
+  background: var(--primary-soft);
   color: var(--primary-dark);
+
   font-size: 10px;
   line-height: 16px;
   font-weight: 700;
 }
 
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
 .formGrid {
   display: grid;
+
   grid-template-columns:
     repeat(2, minmax(0, 1fr));
-  gap: 16px;
+
+  gap:
+    18px
+    22px;
 }
 
 .field,
 .fieldWide {
   display: grid;
+
+  min-width: 0;
+
   gap: 7px;
 }
 
@@ -111,144 +184,130 @@
 .field label,
 .fieldWide label {
   color: var(--text);
-  font-size: 11px;
-  line-height: 17px;
+
+  font-size: 12px;
+  line-height: 18px;
   font-weight: 650;
 }
 
 .field input,
-.field select,
 .fieldWide input {
   width: 100%;
-  min-height: 43px;
-  padding: 9px 11px;
+  min-width: 0;
+  min-height: 45px;
+
+  padding:
+    10px
+    12px;
+
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
+
   outline: none;
+
   background: #ffffff;
   color: var(--text);
-  font-size: 12px;
-  line-height: 18px;
+
+  font-size: 13px;
+  line-height: 20px;
+
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.field input::placeholder,
+.fieldWide input::placeholder {
+  color: var(--text-muted);
 }
 
 .field input:focus,
-.field select:focus,
 .fieldWide input:focus {
   border-color: var(--primary);
+
   box-shadow:
     0 0 0 3px
     rgba(91, 134, 229, 0.1);
 }
 
+/*
+ * Search input used for the country datalist.
+ * Keeps native search behavior while matching other inputs.
+ */
+.field input[type="search"] {
+  appearance: none;
+}
+
+.field input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 .fieldHint {
   color: var(--text-muted);
-  font-size: 10px;
-  line-height: 16px;
-}
 
-.detailList {
-  display: grid;
-  margin-top: 16px;
-}
-
-.detailRow {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  border-bottom: 1px solid var(--border);
-}
-
-.detailRow:last-child {
-  border-bottom: 0;
-}
-
-.detailRow span {
-  color: var(--text-secondary);
-  font-size: 10px;
-  line-height: 16px;
-}
-
-.detailRow strong {
-  overflow: hidden;
-  color: var(--text);
   font-size: 11px;
   line-height: 17px;
-  font-weight: 650;
-  text-align: right;
-  text-overflow: ellipsis;
 }
 
-.supportDescription {
-  margin: 5px 0 14px;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 18px;
-}
-
-.futureCard {
-  padding: 17px;
-  border: 1px dashed #cbd5e1;
-  border-radius: var(--radius-lg);
-  background: var(--background);
-}
-
-.futureCard > span,
-.futureCard > strong {
-  display: block;
-}
-
-.futureCard > span {
-  color: var(--text-muted);
-  font-size: 9px;
-  line-height: 15px;
-  font-weight: 750;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.futureCard > strong {
-  margin-top: 3px;
-  color: var(--text);
-  font-size: 14px;
-  line-height: 21px;
-}
-
-.futureCard p {
-  margin-top: 6px;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 18px;
-}
+/* =========================================================
+   SUCCESS
+   ========================================================= */
 
 .success {
-  padding: 11px 13px;
+  padding:
+    12px
+    14px;
+
   border: 1px solid #bbf7d0;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
+
   background: var(--success-soft);
   color: #15803d;
-  font-size: 11px;
-  line-height: 18px;
+
+  font-size: 12px;
+  line-height: 19px;
   font-weight: 650;
 }
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
 
 .actions {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 10px;
+
+  padding-top: 2px;
+}
+
+.actions button {
+  min-height: 42px;
 }
 
 .demoNote {
   color: var(--text-muted);
+
   font-size: 10px;
   line-height: 16px;
+
   text-align: right;
 }
 
-@media (max-width: 1050px) {
-  .mainGrid {
-    grid-template-columns: 1fr;
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .layout {
+    max-width: 100%;
+  }
+
+  .summaryGrid {
+    width: 100%;
   }
 }
 
@@ -258,8 +317,12 @@
   }
 
   .summaryCard,
+  .summaryCard:first-child,
   .summaryCard + .summaryCard {
-    padding: 14px 0;
+    padding:
+      14px
+      0;
+
     border-left: 0;
     border-bottom: 1px solid var(--border);
   }
@@ -276,8 +339,15 @@
     grid-column: auto;
   }
 
+  .primaryColumn :global(.contentCard) {
+    padding:
+      20px
+      18px;
+  }
+
   .actions {
     align-items: stretch;
+
     flex-direction: column-reverse;
   }
 
@@ -287,208 +357,5 @@
 
   .demoNote {
     text-align: left;
-  }
-}
-/* =========================================================
-   PHASE 4 UI REFINEMENT
-   Visual only — account logic unchanged
-   ========================================================= */
-
-.layout {
-  gap: 22px;
-}
-
-.summaryGrid {
-  margin-bottom: 2px;
-}
-
-.summaryCard {
-  padding:
-    16px
-    20px
-    16px
-    0;
-}
-
-.summaryCard + .summaryCard {
-  padding-left: 20px;
-}
-
-.summaryCard span {
-  font-size: 9px;
-  line-height: 15px;
-}
-
-.summaryCard strong {
-  margin-top: 5px;
-
-  font-size: 18px;
-  line-height: 25px;
-  font-weight: 700;
-}
-
-.summaryCard small {
-  margin-top: 2px;
-
-  font-size: 9px;
-  line-height: 15px;
-}
-
-.mainGrid {
-  grid-template-columns:
-    minmax(0, 1.55fr)
-    minmax(280px, 0.7fr);
-
-  gap: 18px;
-}
-
-.primaryColumn,
-.secondaryColumn {
-  gap: 15px;
-}
-
-.sectionHeader {
-  gap: 16px;
-
-  margin-bottom: 17px;
-}
-
-.primaryBadge {
-  min-height: 23px;
-
-  padding: 3px 7px;
-
-  border: 1px solid var(--primary-border);
-  border-radius: 5px;
-
-  background: var(--primary-soft);
-
-  font-size: 9px;
-  line-height: 15px;
-}
-
-.formGrid {
-  gap: 13px;
-}
-
-.field,
-.fieldWide {
-  gap: 5px;
-}
-
-.field label,
-.fieldWide label {
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 680;
-}
-
-.field input,
-.field select,
-.fieldWide input {
-  min-height: 40px;
-
-  padding: 8px 10px;
-
-  border-radius: var(--radius-md);
-
-  font-size: 11px;
-}
-
-.field input:focus,
-.field select:focus,
-.fieldWide input:focus {
-  box-shadow: var(--shadow-focus);
-}
-
-.fieldHint {
-  font-size: 9px;
-  line-height: 15px;
-}
-
-.detailList {
-  margin-top: 13px;
-}
-
-.detailRow {
-  min-height: 44px;
-
-  gap: 16px;
-
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.detailRow span {
-  font-size: 9px;
-  line-height: 15px;
-}
-
-.detailRow strong {
-  font-size: 10px;
-  line-height: 16px;
-}
-
-.supportDescription {
-  margin:
-    4px
-    0
-    12px;
-
-  font-size: 10px;
-  line-height: 17px;
-}
-
-.futureCard {
-  padding: 15px;
-
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-md);
-
-  background: #fbfcfe;
-}
-
-.futureCard > span {
-  font-size: 8px;
-  line-height: 14px;
-}
-
-.futureCard > strong {
-  font-size: 13px;
-  line-height: 20px;
-}
-
-.futureCard p {
-  margin-top: 4px;
-
-  font-size: 10px;
-  line-height: 17px;
-}
-
-.success {
-  padding: 10px 12px;
-
-  border-radius: 6px;
-
-  font-size: 10px;
-  line-height: 17px;
-}
-
-.actions {
-  gap: 8px;
-
-  padding-top: 2px;
-}
-
-.demoNote {
-  font-size: 9px;
-  line-height: 15px;
-}
-
-@media (max-width: 720px) {
-  .summaryCard,
-  .summaryCard + .summaryCard {
-    padding:
-      13px
-      0;
   }
 }
