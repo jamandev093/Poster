@@ -1,0 +1,358 @@
+.shell {
+  min-height: 100vh;
+
+  background: #ffffff;
+}
+
+.sidebar {
+  position: fixed;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  z-index: 100;
+
+  width: 232px;
+  height: 100vh;
+
+  border-right: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+.sidebarInner {
+  display: flex;
+
+  height: 100%;
+
+  flex-direction: column;
+
+  padding:
+    28px
+    20px
+    22px;
+}
+
+.siteIdentity {
+  display: block;
+
+  text-decoration: none;
+}
+
+.siteIdentity strong {
+  display: block;
+
+  color: #0f172a;
+
+  font-size: 18px;
+  line-height: 25px;
+  font-weight: 750;
+
+  letter-spacing: -0.025em;
+}
+
+.siteIdentity span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #64748b;
+
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.primaryNavigation {
+  display: grid;
+
+  gap: 3px;
+
+  margin-top: 34px;
+}
+
+.navigationLink,
+.navigationLinkActive {
+  position: relative;
+
+  display: flex;
+
+  min-height: 40px;
+
+  align-items: center;
+
+  padding:
+    9px
+    10px
+    9px
+    13px;
+
+  border-radius: 6px;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 560;
+
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.navigationLink {
+  color: #475569;
+}
+
+.navigationLink:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.navigationLinkActive {
+  background: #f3f7ff;
+  color: #315fbd;
+
+  font-weight: 650;
+}
+
+.navigationLinkActive::before {
+  position: absolute;
+
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+
+  width: 2px;
+
+  border-radius: 999px;
+
+  background: #5b86e5;
+
+  content: "";
+}
+
+.sidebarBottom {
+  margin-top: auto;
+}
+
+.sidebarDivider {
+  height: 1px;
+
+  margin-bottom: 15px;
+
+  background: #e2e8f0;
+}
+
+.legalNavigation {
+  display: grid;
+
+  gap: 2px;
+}
+
+.legalNavigation .navigationLink,
+.legalNavigation .navigationLinkActive {
+  min-height: 34px;
+
+  padding:
+    7px
+    10px;
+
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.copyright {
+  margin-top: 18px;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.main {
+  min-height: 100vh;
+
+  margin-left: 232px;
+
+  background: #ffffff;
+}
+
+.mobileHeader,
+.mobileOverlay {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    margin-left: 0;
+
+    padding-top: 60px;
+  }
+
+  .mobileHeader {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+    left: 0;
+
+    z-index: 120;
+
+    display: flex;
+
+    height: 60px;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding:
+      0
+      18px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.96
+      );
+
+    backdrop-filter: blur(12px);
+  }
+
+  .menuButton {
+    display: grid;
+
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    place-content: center;
+
+    gap: 4px;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    cursor: pointer;
+  }
+
+  .menuButton span {
+    display: block;
+
+    width: 18px;
+    height: 1.5px;
+
+    border-radius: 999px;
+
+    background: #0f172a;
+  }
+
+  .mobileIdentity {
+    color: #0f172a;
+
+    text-decoration: none;
+
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 700;
+
+    letter-spacing: -0.02em;
+  }
+
+  .mobileOverlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 200;
+
+    display: block;
+
+    background:
+      rgba(
+        15,
+        23,
+        42,
+        0.28
+      );
+  }
+
+  .mobileDrawer {
+    display: flex;
+
+    width: min(
+      86vw,
+      310px
+    );
+    height: 100%;
+
+    flex-direction: column;
+
+    padding:
+      24px
+      18px
+      20px;
+
+    background: #ffffff;
+
+    box-shadow:
+      16px
+      0
+      40px
+      rgba(
+        15,
+        23,
+        42,
+        0.12
+      );
+  }
+
+  .mobileDrawerHeader {
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+  }
+
+  .closeButton {
+    display: grid;
+
+    width: 34px;
+    height: 34px;
+
+    place-items: center;
+
+    padding: 0;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #475569;
+
+    cursor: pointer;
+
+    font-size: 23px;
+    line-height: 1;
+  }
+
+  .mobileDrawerBottom {
+    margin-top: auto;
+  }
+}
