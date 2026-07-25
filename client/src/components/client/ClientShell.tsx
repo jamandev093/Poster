@@ -448,8 +448,8 @@ export default function ClientShell({
               }
               aria-hidden="true"
             >
-              â€º
-            </span>
+          &#8594;
+        </span>
           </Link>
         </div>
       </aside>
