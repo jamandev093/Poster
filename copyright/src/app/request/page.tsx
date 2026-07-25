@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import CopyrightClaimForm from "@/features/copyright/CopyrightClaimForm";
 
 interface CopyrightRequestPageProps {
@@ -13,8 +15,7 @@ export default async function CopyrightRequestPage({
     await searchParams;
 
   const requestedContent =
-    params.content?.trim() ??
-    "";
+    params.content?.trim() ?? "";
 
   const initialAffectedContent =
     /^CNT-\d+$/i.test(
@@ -25,36 +26,56 @@ export default async function CopyrightRequestPage({
 
   return (
     <>
-      <header className="pageHeader">
+      <header className="pageHeader pageHeaderLarge">
         <div>
           <div className="pageEyebrow">
-            Copyright
+            Single copyright claim
           </div>
 
           <h1 className="pageTitle">
-            Submit Claim
+            Submit a copyright claim
           </h1>
 
           <p className="pageDescription">
             Report one affected Poster content record.
-            For multiple records, use Bulk Removal Request.
+            Identify the original work, explain your
+            relationship to the rights, and provide
+            information supporting the request.
           </p>
         </div>
+
+        <Link
+          href="/bulk-removal"
+          className="secondaryButton buttonLink"
+        >
+          Report multiple records
+        </Link>
       </header>
 
+      <div className="processNotice">
+        <strong>Before you submit</strong>
+
+        <span>
+          Submission starts a review. It does not
+          automatically remove content or establish
+          copyright ownership.
+        </span>
+      </div>
+
       {initialAffectedContent ? (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 16,
-          }}
-        >
+        <div className="selectedContentNotice">
+          <span className="selectedContentLabel">
+            Selected content
+          </span>
+
           <strong>
             {initialAffectedContent}
           </strong>
-          {" "}
-          was selected through Find Your Content
-          and is already attached below.
+
+          <span>
+            This record was selected through Find Your
+            Content and is already attached to the form.
+          </span>
         </div>
       ) : null}
 

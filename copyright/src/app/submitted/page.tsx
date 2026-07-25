@@ -10,118 +10,177 @@ interface SubmittedPageProps {
 export default async function SubmittedPage({
   searchParams,
 }: SubmittedPageProps) {
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
-  const isBulk =
-    params.type === "bulk";
+  const isBulk = params.type === "bulk";
 
-  const parsedCount =
-    Number(
-      params.count
-    );
+  const parsedCount = Number(params.count);
 
   const count =
-    Number.isFinite(
-      parsedCount
-    ) &&
-    parsedCount > 0
-      ? parsedCount
+    Number.isFinite(parsedCount) && parsedCount > 0
+      ? Math.min(Math.floor(parsedCount), 100)
       : 1;
+
+  const itemLabel =
+    count === 1
+      ? "affected content item"
+      : "affected content items";
 
   return (
     <>
       <header className="pageHeader">
         <div>
           <div className="pageEyebrow">
-            Submitted
+            Submission complete
           </div>
 
           <h1 className="pageTitle">
-            Request submitted
+            Your request has been submitted
           </h1>
 
           <p className="pageDescription">
-            Your copyright request has completed
-            the frontend submission flow.
+            Poster has received your copyright request.
+            Keep the reference below so you can return
+            later and check the case status.
           </p>
         </div>
       </header>
 
+      <section className="contentCard submittedSummary">
+        <div className="submittedStatus">
+          <span
+            className="submittedStatusIcon"
+            aria-hidden="true"
+          >
+            ✓
+          </span>
+
+          <div>
+            <div className="submittedStatusLabel">
+              Request received
+            </div>
+
+            <h2 className="submittedStatusTitle">
+              {isBulk
+                ? "Bulk copyright request"
+                : "Single copyright claim"}
+            </h2>
+          </div>
+        </div>
+
+        <dl className="submittedDetails">
+          <div>
+            <dt>Claim reference</dt>
+
+            <dd>CR-DEMO-0001</dd>
+          </div>
+
+          <div>
+            <dt>Request type</dt>
+
+            <dd>
+              {isBulk
+                ? "Bulk removal request"
+                : "Single content claim"}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Affected content</dt>
+
+            <dd>
+              {count} {itemLabel}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Current status</dt>
+
+            <dd>
+              <span className="submittedStatusBadge">
+                Submitted
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
       <section className="contentCard">
         <h2 className="sectionTitle">
-          Submission received
+          What happens next?
         </h2>
 
         <p className="sectionDescription">
-          {isBulk
-            ? `${count} affected content ${
-                count === 1
-                  ? "item was"
-                  : "items were"
-              } included in this bulk request.`
-            : "1 affected content item was included in this request."}
+          Submission does not automatically remove
+          content. Poster reviews the claimant
+          information, affected Poster records,
+          original-source details, and supporting
+          evidence before taking an operational action.
         </p>
 
-        <div
-          style={{
-            marginTop: 20,
-            padding: 16,
-            border: "1px solid #E2E8F0",
-            borderRadius: 8,
-            background: "#F8FAFC",
-          }}
-        >
-          <div
-            style={{
-              color: "#64748B",
-              fontSize: 12,
-            }}
-          >
-            Demonstration reference
-          </div>
+        <ol className="submittedSteps">
+          <li>
+            <span>1</span>
 
-          <strong
-            style={{
-              display: "block",
-              marginTop: 4,
-              fontSize: 20,
-            }}
-          >
-            CR-DEMO-0001
-          </strong>
+            <div>
+              <strong>Request received</strong>
+
+              <p>
+                Your request and affected content
+                references are recorded for review.
+              </p>
+            </div>
+          </li>
+
+          <li>
+            <span>2</span>
+
+            <div>
+              <strong>Identity and evidence review</strong>
+
+              <p>
+                Poster may cross-check claimant details,
+                original URLs, source information,
+                ownership signals, and supporting
+                references.
+              </p>
+            </div>
+          </li>
+
+          <li>
+            <span>3</span>
+
+            <div>
+              <strong>Outcome recorded</strong>
+
+              <p>
+                Each affected item may be removed,
+                blocked from re-import, remain under
+                review, require more information, or
+                receive no action.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section className="contentCard submittedActionsCard">
+        <div>
+          <h2 className="sectionTitle">
+            Save your claim reference
+          </h2>
+
+          <p className="sectionDescription">
+            You will need the claim reference and the
+            email used during submission to check the
+            request later.
+          </p>
         </div>
 
-        <p
-          style={{
-            margin: "18px 0 0",
-            color: "#64748B",
-            fontSize: 13,
-            lineHeight: "21px",
-          }}
-        >
-          This reference is demonstration-only
-          while the Copyright Web App is
-          frontend-only. The backend will later
-          create permanent references, store
-          submissions, connect them to Admin
-          Copyright, and send email updates.
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 10,
-            marginTop: 22,
-          }}
-        >
+        <div className="submittedActions">
           <Link
             href="/status"
             className="primaryButton"
-            style={{
-              textDecoration: "none",
-            }}
           >
             Check status
           </Link>
@@ -129,14 +188,19 @@ export default async function SubmittedPage({
           <Link
             href="/"
             className="secondaryButton"
-            style={{
-              textDecoration: "none",
-            }}
           >
-            Copyright Center
+            Return to Copyright Center
           </Link>
         </div>
       </section>
+
+      <div className="submittedDevelopmentNotice">
+        <strong>Frontend demonstration:</strong>{" "}
+        CR-DEMO-0001 is temporary. The production
+        backend will generate permanent references,
+        store submissions, connect cases to Poster
+        Admin, and send appropriate email updates.
+      </div>
     </>
   );
 }

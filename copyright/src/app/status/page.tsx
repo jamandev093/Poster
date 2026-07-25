@@ -45,190 +45,93 @@ interface DemoClaim {
   items?: ClaimItem[];
 }
 
-const DEMO_CLAIMS:
-  DemoClaim[] = [
+const DEMO_CLAIMS: DemoClaim[] = [
   {
-    reference:
-      "CR-DEMO-0001",
-
-    email:
-      "claimant@example.com",
-
-    kind:
-      "single",
-
-    status:
-      "Resolved",
-
-    affectedCount:
-      1,
-
+    reference: "CR-DEMO-0001",
+    email: "claimant@example.com",
+    kind: "single",
+    status: "Resolved",
+    affectedCount: 1,
     timeline: [
       {
-        label:
-          "Submitted",
-
-        detail:
-          "Copyright request received",
-
-        state:
-          "complete",
+        label: "Submitted",
+        detail: "Copyright request received",
+        state: "complete",
       },
       {
-        label:
-          "Under review",
-
-        detail:
-          "Claim and affected content reviewed",
-
-        state:
-          "complete",
+        label: "Under review",
+        detail: "Claim and affected content reviewed",
+        state: "complete",
       },
       {
-        label:
-          "Action taken",
-
-        detail:
-          "Content removal completed",
-
-        state:
-          "complete",
+        label: "Action taken",
+        detail: "Content removal completed",
+        state: "complete",
       },
       {
-        label:
-          "Resolved",
-
-        detail:
-          "Final outcome recorded",
-
-        state:
-          "complete",
+        label: "Resolved",
+        detail: "Final outcome recorded",
+        state: "complete",
       },
     ],
-
-    outcome:
-      "Removed",
-
-    reimportProtection:
-      "Enabled",
+    outcome: "Removed",
+    reimportProtection: "Enabled",
   },
-
   {
-    reference:
-      "CR-DEMO-0002",
-
-    email:
-      "rights@example.com",
-
-    kind:
-      "bulk",
-
-    status:
-      "Partially resolved",
-
-    affectedCount:
-      5,
-
+    reference: "CR-DEMO-0002",
+    email: "rights@example.com",
+    kind: "bulk",
+    status: "Partially resolved",
+    affectedCount: 5,
     timeline: [
       {
-        label:
-          "Submitted",
-
-        detail:
-          "Bulk copyright request received",
-
-        state:
-          "complete",
+        label: "Submitted",
+        detail: "Bulk copyright request received",
+        state: "complete",
       },
       {
-        label:
-          "Under review",
-
-        detail:
-          "Affected items are being reviewed",
-
-        state:
-          "current",
+        label: "Under review",
+        detail: "Affected items are being reviewed",
+        state: "current",
       },
       {
-        label:
-          "Resolved",
-
-        detail:
-          "Final outcomes pending for remaining items",
-
-        state:
-          "pending",
+        label: "Resolved",
+        detail: "Final outcomes pending for remaining items",
+        state: "pending",
       },
     ],
-
     summary: {
-      removed:
-        2,
-
-      blocked:
-        1,
-
-      underReview:
-        1,
-
-      informationRequired:
-        1,
-
-      noAction:
-        0,
+      removed: 2,
+      blocked: 1,
+      underReview: 1,
+      informationRequired: 1,
+      noAction: 0,
     },
-
     items: [
       {
-        contentId:
-          "CNT-1001",
-
-        status:
-          "Resolved",
-
-        outcome:
-          "Removed",
+        contentId: "CNT-1001",
+        status: "Resolved",
+        outcome: "Removed",
       },
       {
-        contentId:
-          "CNT-1002",
-
-        status:
-          "Resolved",
-
-        outcome:
-          "Removed",
+        contentId: "CNT-1002",
+        status: "Resolved",
+        outcome: "Removed",
       },
       {
-        contentId:
-          "CNT-1003",
-
-        status:
-          "Resolved",
-
-        outcome:
-          "Removed + re-import blocked",
+        contentId: "CNT-1003",
+        status: "Resolved",
+        outcome: "Removed + re-import blocked",
       },
       {
-        contentId:
-          "CNT-1004",
-
-        status:
-          "Under review",
-
-        outcome:
-          "Review in progress",
+        contentId: "CNT-1004",
+        status: "Under review",
+        outcome: "Review in progress",
       },
       {
-        contentId:
-          "CNT-1005",
-
-        status:
-          "Information required",
-
-        outcome:
-          "Waiting for claimant information",
+        contentId: "CNT-1005",
+        status: "Information required",
+        outcome: "Waiting for claimant information",
       },
     ],
   },
@@ -249,71 +152,54 @@ function timelineMark(
   }
 }
 
-function timelineColors(
+function timelineClassName(
   state: TimelineState
-) {
+): string {
   switch (state) {
     case "complete":
-      return {
-        background:
-          "#F0FDF4",
-
-        color:
-          "#15803D",
-      };
+      return "statusTimelineMarkComplete";
 
     case "current":
-      return {
-        background:
-          "#EEF4FF",
-
-        color:
-          "#416ECF",
-      };
+      return "statusTimelineMarkCurrent";
 
     case "pending":
-      return {
-        background:
-          "#F1F5F9",
-
-        color:
-          "#64748B",
-      };
+      return "statusTimelineMarkPending";
   }
+}
+
+function statusBadgeClassName(
+  status: string
+): string {
+  return status === "Resolved"
+    ? "statusBadge statusBadgeResolved"
+    : "statusBadge statusBadgeProgress";
 }
 
 export default function CopyrightStatusPage() {
   const [
     reference,
     setReference,
-  ] =
-    useState("");
+  ] = useState("");
 
   const [
     email,
     setEmail,
-  ] =
-    useState("");
+  ] = useState("");
 
   const [
     error,
     setError,
-  ] =
-    useState("");
+  ] = useState("");
 
   const [
     claim,
     setClaim,
-  ] =
-    useState<
-      DemoClaim | null
-    >(
-      null
-    );
+  ] = useState<DemoClaim | null>(
+    null
+  );
 
   const checkStatus = (
-    event:
-      FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
@@ -331,9 +217,7 @@ export default function CopyrightStatusPage() {
       !normalizedReference ||
       !normalizedEmail
     ) {
-      setClaim(
-        null
-      );
+      setClaim(null);
 
       setError(
         "Enter your claim reference and the email used for submission."
@@ -343,35 +227,29 @@ export default function CopyrightStatusPage() {
     }
 
     /*
-     * Production backend will check the
-     * reference/email pair, apply rate limits,
-     * and return only the matching case.
+     * The production backend will verify the
+     * reference and email pair, apply request
+     * limits, and return only the matching case.
      *
-     * There is no separate OTP or verification
-     * page in this workflow.
+     * This workflow does not require a separate
+     * account, OTP, or verification page.
      */
     const matchedClaim =
       DEMO_CLAIMS.find(
-        (
-          candidate
-        ) =>
+        (candidate) =>
           candidate.reference ===
             normalizedReference &&
           candidate.email.toLowerCase() ===
             normalizedEmail
       );
 
-    if (
-      !matchedClaim
-    ) {
-      setClaim(
-        null
-      );
+    if (!matchedClaim) {
+      setClaim(null);
 
       /*
-       * Keep the response generic so it does not
-       * reveal whether the reference or email was
-       * the incorrect value.
+       * Keep this response generic so the page
+       * does not reveal whether the claim
+       * reference or email was incorrect.
        */
       setError(
         "No matching copyright request was found with those details."
@@ -380,847 +258,516 @@ export default function CopyrightStatusPage() {
       return;
     }
 
-    setError(
-      ""
-    );
-
-    setClaim(
-      matchedClaim
-    );
+    setError("");
+    setClaim(matchedClaim);
   };
 
-  const resetLookup =
-    () => {
-      setClaim(
-        null
-      );
-
-      setReference(
-        ""
-      );
-
-      setEmail(
-        ""
-      );
-
-      setError(
-        ""
-      );
-    };
+  const resetLookup = () => {
+    setClaim(null);
+    setReference("");
+    setEmail("");
+    setError("");
+  };
 
   const bulkSummary =
-    claim?.kind ===
-      "bulk"
+    claim?.kind === "bulk"
       ? claim.summary
       : undefined;
 
   const bulkItems =
-    claim?.kind ===
-      "bulk"
+    claim?.kind === "bulk"
       ? claim.items ?? []
       : [];
 
   return (
     <>
-      <header className="pageHeader">
+      <header className="pageHeader pageHeaderLarge">
         <div>
           <div className="pageEyebrow">
-            Copyright
+            Copyright request status
           </div>
 
-          <h1 className="pageTitle">
-            Check Status
+          <h1 className="pageTitle pageTitleLarge">
+            {claim
+              ? "Your copyright case"
+              : "Check your request status"}
           </h1>
 
-          <p className="pageDescription">
-            Enter your claim reference and
-            submitted email to see whether
-            affected content was removed,
-            remains under review, or requires
-            more information.
+          <p className="pageDescription pageDescriptionLarge">
+            {claim
+              ? "Review the current case status, progress, and recorded outcome for each affected Poster content item."
+              : "Enter the claim reference and email used during submission. No Poster account or separate verification screen is required."}
           </p>
         </div>
       </header>
 
       {!claim ? (
         <>
-          <section className="contentCard">
-            <form
-              onSubmit={
-                checkStatus
-              }
-            >
-              <div className="formGrid">
-                <div className="formField">
-                  <label htmlFor="claim-reference">
-                    Claim reference *
-                  </label>
-
-                  <input
-                    id="claim-reference"
-                    value={
-                      reference
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setReference(
-                        event.target.value
-                      )
-                    }
-                    placeholder="CR-..."
-                    autoComplete="off"
-                    required
-                  />
-                </div>
-
-                <div className="formField">
-                  <label htmlFor="claim-email">
-                    Email used for submission *
-                  </label>
-
-                  <input
-                    id="claim-email"
-                    type="email"
-                    value={
-                      email
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setEmail(
-                        event.target.value
-                      )
-                    }
-                    placeholder="rights@example.com"
-                    autoComplete="email"
-                    required
-                  />
-                </div>
+          <section className="statusLookupSection">
+            <div className="statusLookupIntroduction">
+              <div className="sectionEyebrow">
+                Secure case lookup
               </div>
 
-              {error ? (
-                <div
-                  role="alert"
-                  style={{
-                    marginTop:
-                      14,
+              <h2 className="sectionTitle sectionTitleLarge">
+                Find a submitted copyright request
+              </h2>
 
-                    padding:
-                      "12px 14px",
+              <p className="sectionDescription">
+                Your claim reference appears on the
+                submission confirmation. Use the same
+                email address supplied with the request.
+              </p>
 
-                    border:
-                      "1px solid #FECACA",
+              <div className="statusPrivacyNotice">
+                <strong>
+                  Privacy protection
+                </strong>
 
-                    borderRadius:
-                      8,
+                <span>
+                  Incorrect details receive a generic
+                  response so the system does not reveal
+                  whether a reference or email exists.
+                </span>
+              </div>
+            </div>
 
-                    background:
-                      "#FEF2F2",
-
-                    color:
-                      "#991B1B",
-
-                    fontSize:
-                      13,
-
-                    lineHeight:
-                      "20px",
-                  }}
-                >
-                  {
-                    error
-                  }
-                </div>
-              ) : null}
-
-              <div
-                style={{
-                  display:
-                    "flex",
-
-                  justifyContent:
-                    "flex-end",
-
-                  marginTop:
-                    18,
-                }}
+            <div className="statusLookupPanel">
+              <form
+                onSubmit={checkStatus}
+                className="statusLookupForm"
               >
+                <div className="formGridSingle">
+                  <div className="formField">
+                    <label htmlFor="claim-reference">
+                      Claim reference *
+                    </label>
+
+                    <input
+                      id="claim-reference"
+                      value={reference}
+                      onChange={(event) =>
+                        setReference(
+                          event.target.value
+                        )
+                      }
+                      placeholder="CR-..."
+                      autoComplete="off"
+                      required
+                    />
+
+                    <span className="fieldHelp">
+                      Example format: CR-2026-0001
+                    </span>
+                  </div>
+
+                  <div className="formField">
+                    <label htmlFor="claim-email">
+                      Email used for submission *
+                    </label>
+
+                    <input
+                      id="claim-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) =>
+                        setEmail(
+                          event.target.value
+                        )
+                      }
+                      placeholder="rights@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {error ? (
+                  <div
+                    className="statusError"
+                    role="alert"
+                  >
+                    {error}
+                  </div>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="primaryButton"
+                  className="primaryButton statusSubmitButton"
                 >
                   Check status
                 </button>
+              </form>
+
+              <div className="statusDemoRecords">
+                <div className="statusDemoLabel">
+                  Frontend demonstration records
+                </div>
+
+                <div className="statusDemoRecord">
+                  <strong>
+                    CR-DEMO-0001
+                  </strong>
+
+                  <span>
+                    claimant@example.com
+                  </span>
+                </div>
+
+                <div className="statusDemoRecord">
+                  <strong>
+                    CR-DEMO-0002
+                  </strong>
+
+                  <span>
+                    rights@example.com
+                  </span>
+                </div>
               </div>
-            </form>
-
-            <div
-              style={{
-                marginTop:
-                  18,
-
-                paddingTop:
-                  14,
-
-                borderTop:
-                  "1px solid #E2E8F0",
-
-                color:
-                  "#64748B",
-
-                fontSize:
-                  12,
-
-                lineHeight:
-                  "19px",
-              }}
-            >
-              Test records:
-              {" "}
-              <strong>
-                CR-DEMO-0001
-              </strong>
-              {" / "}
-              claimant@example.com
-              {" · "}
-              <strong>
-                CR-DEMO-0002
-              </strong>
-              {" / "}
-              rights@example.com
             </div>
           </section>
 
-          <div
-            style={{
-              height:
-                16,
-            }}
-          />
+          <section className="pageSection">
+            <div className="sectionHeading">
+              <div>
+                <div className="sectionEyebrow">
+                  What you can see
+                </div>
+
+                <h2 className="sectionTitle sectionTitleLarge">
+                  Clear status and item-level outcomes
+                </h2>
+              </div>
+
+              <p className="sectionIntro">
+                A request can remain under review,
+                require more information, be resolved
+                with removal, include re-import
+                protection, or receive different
+                outcomes for separate bulk-request
+                items.
+              </p>
+            </div>
+
+            <div className="processList">
+              <div className="processRow">
+                <span className="processNumber">
+                  01
+                </span>
+
+                <div>
+                  <h3 className="processTitle">
+                    Overall case status
+                  </h3>
+
+                  <p className="processDescription">
+                    See whether the request is submitted,
+                    under review, partially resolved, or
+                    fully resolved.
+                  </p>
+                </div>
+              </div>
+
+              <div className="processRow">
+                <span className="processNumber">
+                  02
+                </span>
+
+                <div>
+                  <h3 className="processTitle">
+                    Review progress
+                  </h3>
+
+                  <p className="processDescription">
+                    Follow the recorded stages from
+                    submission through review and final
+                    action.
+                  </p>
+                </div>
+              </div>
+
+              <div className="processRow">
+                <span className="processNumber">
+                  03
+                </span>
+
+                <div>
+                  <h3 className="processTitle">
+                    Individual content outcomes
+                  </h3>
+
+                  <p className="processDescription">
+                    Bulk cases display separate results
+                    for every affected Poster content
+                    record.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <SignalContact />
         </>
       ) : (
         <>
-          <section className="contentCard">
-            <div
-              style={{
-                display:
-                  "flex",
+          <section className="statusCaseSummary">
+            <div className="statusCasePrimary">
+              <div className="statusCaseLabel">
+                Claim reference
+              </div>
 
-                alignItems:
-                  "flex-start",
+              <h2 className="statusCaseReference">
+                {claim.reference}
+              </h2>
 
-                justifyContent:
-                  "space-between",
+              <div
+                className={statusBadgeClassName(
+                  claim.status
+                )}
+              >
+                {claim.status}
+              </div>
+            </div>
 
-                gap:
-                  20,
-
-                flexWrap:
-                  "wrap",
-              }}
-            >
+            <dl className="statusCaseDetails">
               <div>
-                <div
-                  style={{
-                    color:
-                      "#64748B",
+                <dt>
+                  Request type
+                </dt>
 
-                    fontSize:
-                      12,
+                <dd>
+                  {claim.kind === "bulk"
+                    ? "Bulk copyright request"
+                    : "Single copyright claim"}
+                </dd>
+              </div>
 
-                    lineHeight:
-                      "18px",
-                  }}
-                >
-                  Claim reference
+              <div>
+                <dt>
+                  Affected content
+                </dt>
+
+                <dd>
+                  {claim.affectedCount}{" "}
+                  {claim.affectedCount === 1
+                    ? "item"
+                    : "items"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Submitted email
+                </dt>
+
+                <dd>
+                  {claim.email}
+                </dd>
+              </div>
+            </dl>
+
+            <button
+              type="button"
+              className="secondaryButton statusResetButton"
+              onClick={resetLookup}
+            >
+              Check another claim
+            </button>
+          </section>
+
+          <section className="pageSection">
+            <div className="sectionHeading">
+              <div>
+                <div className="sectionEyebrow">
+                  Case progress
                 </div>
 
-                <h2
-                  style={{
-                    margin:
-                      "3px 0 0",
-
-                    fontSize:
-                      22,
-
-                    lineHeight:
-                      "30px",
-                  }}
-                >
-                  {
-                    claim.reference
-                  }
+                <h2 className="sectionTitle sectionTitleLarge">
+                  Review timeline
                 </h2>
               </div>
 
-              <div
-                style={{
-                  padding:
-                    "7px 11px",
-
-                  borderRadius:
-                    999,
-
-                  background:
-                    claim.status ===
-                    "Resolved"
-                      ? "#F0FDF4"
-                      : "#EEF4FF",
-
-                  color:
-                    claim.status ===
-                    "Resolved"
-                      ? "#15803D"
-                      : "#416ECF",
-
-                  fontSize:
-                    12,
-
-                  lineHeight:
-                    "18px",
-
-                  fontWeight:
-                    700,
-                }}
-              >
-                {
-                  claim.status
-                }
-              </div>
+              <p className="sectionIntro">
+                The timeline reflects the current
+                processing state of this copyright
+                request.
+              </p>
             </div>
 
-            <div
-              style={{
-                display:
-                  "flex",
-
-                gap:
-                  24,
-
-                marginTop:
-                  18,
-
-                flexWrap:
-                  "wrap",
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    color:
-                      "#64748B",
-
-                    fontSize:
-                      12,
-                  }}
-                >
-                  Request type
-                </div>
-
-                <strong
-                  style={{
-                    display:
-                      "block",
-
-                    marginTop:
-                      3,
-
-                    fontSize:
-                      14,
-                  }}
-                >
-                  {claim.kind ===
-                  "bulk"
-                    ? "Bulk copyright request"
-                    : "Single copyright claim"}
-                </strong>
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    color:
-                      "#64748B",
-
-                    fontSize:
-                      12,
-                  }}
-                >
-                  Affected content
-                </div>
-
-                <strong
-                  style={{
-                    display:
-                      "block",
-
-                    marginTop:
-                      3,
-
-                    fontSize:
-                      14,
-                  }}
-                >
-                  {
-                    claim.affectedCount
-                  }
-                  {" "}
-                  {claim.affectedCount ===
-                  1
-                    ? "item"
-                    : "items"}
-                </strong>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop:
-                  18,
-              }}
-            >
-              <button
-                type="button"
-                className="secondaryButton"
-                onClick={
-                  resetLookup
-                }
-              >
-                Check another claim
-              </button>
-            </div>
-          </section>
-
-          <section className="contentCard">
-            <h2 className="sectionTitle">
-              Case progress
-            </h2>
-
-            <div
-              style={{
-                marginTop:
-                  14,
-              }}
-            >
+            <div className="statusTimeline">
               {claim.timeline.map(
-                (
-                  entry,
-                  index
-                ) => {
-                  const colors =
-                    timelineColors(
-                      entry.state
-                    );
-
-                  return (
-                    <div
-                      key={
-                        entry.label
-                      }
-                      style={{
-                        display:
-                          "grid",
-
-                        gridTemplateColumns:
-                          "34px minmax(120px, 170px) 1fr",
-
-                        gap:
-                          12,
-
-                        alignItems:
-                          "center",
-
-                        padding:
-                          "12px 0",
-
-                        borderBottom:
-                          index ===
-                          claim.timeline.length -
-                            1
-                            ? "0"
-                            : "1px solid #E2E8F0",
-                      }}
+                (entry) => (
+                  <div
+                    key={entry.label}
+                    className="statusTimelineRow"
+                  >
+                    <span
+                      className={`statusTimelineMark ${timelineClassName(
+                        entry.state
+                      )}`}
                     >
-                      <span
-                        style={{
-                          display:
-                            "grid",
+                      {timelineMark(
+                        entry.state
+                      )}
+                    </span>
 
-                          width:
-                            26,
-
-                          height:
-                            26,
-
-                          placeItems:
-                            "center",
-
-                          borderRadius:
-                            999,
-
-                          background:
-                            colors.background,
-
-                          color:
-                            colors.color,
-
-                          fontSize:
-                            12,
-
-                          fontWeight:
-                            700,
-                        }}
-                      >
-                        {timelineMark(
-                          entry.state
-                        )}
-                      </span>
-
-                      <strong
-                        style={{
-                          fontSize:
-                            13,
-
-                          lineHeight:
-                            "19px",
-                        }}
-                      >
-                        {
-                          entry.label
-                        }
+                    <div>
+                      <strong>
+                        {entry.label}
                       </strong>
 
-                      <span
-                        style={{
-                          color:
-                            "#64748B",
-
-                          fontSize:
-                            13,
-
-                          lineHeight:
-                            "20px",
-                        }}
-                      >
-                        {
-                          entry.detail
-                        }
-                      </span>
+                      <p>
+                        {entry.detail}
+                      </p>
                     </div>
-                  );
-                }
+                  </div>
+                )
               )}
             </div>
           </section>
 
-          {claim.kind ===
-          "single" ? (
-            <section className="contentCard">
-              <h2 className="sectionTitle">
-                Content outcome
-              </h2>
-
-              <div
-                style={{
-                  display:
-                    "grid",
-
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(200px, 1fr))",
-
-                  gap:
-                    12,
-
-                  marginTop:
-                    16,
-                }}
-              >
-                <div
-                  style={{
-                    padding:
-                      16,
-
-                    border:
-                      "1px solid #E2E8F0",
-
-                    borderRadius:
-                      8,
-                  }}
-                >
-                  <div
-                    style={{
-                      color:
-                        "#64748B",
-
-                      fontSize:
-                        12,
-                    }}
-                  >
-                    Removed or not
+          {claim.kind === "single" ? (
+            <section className="pageSection">
+              <div className="sectionHeading">
+                <div>
+                  <div className="sectionEyebrow">
+                    Content decision
                   </div>
 
-                  <strong
-                    style={{
-                      display:
-                        "block",
-
-                      marginTop:
-                        5,
-
-                      color:
-                        claim.outcome ===
-                        "Removed"
-                          ? "#15803D"
-                          : "#0F172A",
-
-                      fontSize:
-                        18,
-                    }}
-                  >
-                    {
-                      claim.outcome
-                    }
-                  </strong>
+                  <h2 className="sectionTitle sectionTitleLarge">
+                    Recorded outcome
+                  </h2>
                 </div>
 
-                <div
-                  style={{
-                    padding:
-                      16,
+                <p className="sectionIntro">
+                  This result shows the action recorded
+                  for the affected Poster content item.
+                </p>
+              </div>
 
-                    border:
-                      "1px solid #E2E8F0",
+              <div className="statusOutcomeGrid">
+                <div className="statusOutcomeItem">
+                  <span>
+                    Content outcome
+                  </span>
 
-                    borderRadius:
-                      8,
-                  }}
-                >
-                  <div
-                    style={{
-                      color:
-                        "#64748B",
-
-                      fontSize:
-                        12,
-                    }}
-                  >
-                    Re-import protection
-                  </div>
-
-                  <strong
-                    style={{
-                      display:
-                        "block",
-
-                      marginTop:
-                        5,
-
-                      fontSize:
-                        18,
-                    }}
-                  >
-                    {
-                      claim.reimportProtection
-                    }
+                  <strong className="statusOutcomeSuccess">
+                    {claim.outcome}
                   </strong>
+
+                  <p>
+                    The affected Poster content reference
+                    is no longer available through
+                    discovery.
+                  </p>
+                </div>
+
+                <div className="statusOutcomeItem">
+                  <span>
+                    Re-import protection
+                  </span>
+
+                  <strong>
+                    {claim.reimportProtection}
+                  </strong>
+
+                  <p>
+                    Poster will prevent the removed
+                    content record from being
+                    automatically imported again.
+                  </p>
                 </div>
               </div>
             </section>
           ) : null}
 
-          {claim.kind ===
-            "bulk" &&
+          {claim.kind === "bulk" &&
           bulkSummary ? (
-            <section className="contentCard">
-              <h2 className="sectionTitle">
-                Bulk outcome
-              </h2>
+            <section className="pageSection">
+              <div className="sectionHeading">
+                <div>
+                  <div className="sectionEyebrow">
+                    Bulk request
+                  </div>
 
-              <div
-                style={{
-                  display:
-                    "grid",
+                  <h2 className="sectionTitle sectionTitleLarge">
+                    Outcome summary
+                  </h2>
+                </div>
 
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(145px, 1fr))",
+                <p className="sectionIntro">
+                  A bulk case can contain several
+                  different results while remaining
+                  partially resolved.
+                </p>
+              </div>
 
-                  gap:
-                    10,
-
-                  marginTop:
-                    16,
-                }}
-              >
+              <div className="statusMetrics">
                 {[
                   {
-                    label:
-                      "Removed",
-
-                    value:
-                      bulkSummary.removed,
+                    label: "Removed",
+                    value: bulkSummary.removed,
                   },
                   {
-                    label:
-                      "Removed + blocked",
-
-                    value:
-                      bulkSummary.blocked,
+                    label: "Removed + blocked",
+                    value: bulkSummary.blocked,
                   },
                   {
-                    label:
-                      "Under review",
-
-                    value:
-                      bulkSummary.underReview,
+                    label: "Under review",
+                    value: bulkSummary.underReview,
                   },
                   {
-                    label:
-                      "Information required",
-
+                    label: "Information required",
                     value:
-                      bulkSummary
-                        .informationRequired,
+                      bulkSummary.informationRequired,
                   },
                   {
-                    label:
-                      "No action",
-
-                    value:
-                      bulkSummary.noAction,
+                    label: "No action",
+                    value: bulkSummary.noAction,
                   },
-                ].map(
-                  (
-                    entry
-                  ) => (
-                    <div
-                      key={
-                        entry.label
-                      }
-                      style={{
-                        padding:
-                          14,
+                ].map((entry) => (
+                  <div
+                    key={entry.label}
+                    className="statusMetric"
+                  >
+                    <strong>
+                      {entry.value}
+                    </strong>
 
-                        border:
-                          "1px solid #E2E8F0",
-
-                        borderRadius:
-                          8,
-                      }}
-                    >
-                      <strong
-                        style={{
-                          display:
-                            "block",
-
-                          fontSize:
-                            20,
-
-                          lineHeight:
-                            "26px",
-                        }}
-                      >
-                        {
-                          entry.value
-                        }
-                      </strong>
-
-                      <span
-                        style={{
-                          display:
-                            "block",
-
-                          marginTop:
-                            3,
-
-                          color:
-                            "#64748B",
-
-                          fontSize:
-                            12,
-
-                          lineHeight:
-                            "18px",
-                        }}
-                      >
-                        {
-                          entry.label
-                        }
-                      </span>
-                    </div>
-                  )
-                )}
+                    <span>
+                      {entry.label}
+                    </span>
+                  </div>
+                ))}
               </div>
             </section>
           ) : null}
 
-          {claim.kind ===
-            "bulk" &&
-          bulkItems.length >
-            0 ? (
-            <section className="contentCard">
-              <h2 className="sectionTitle">
-                Affected items
-              </h2>
+          {claim.kind === "bulk" &&
+          bulkItems.length > 0 ? (
+            <section className="pageSection">
+              <div className="sectionHeading">
+                <div>
+                  <div className="sectionEyebrow">
+                    Affected content
+                  </div>
 
-              <div
-                style={{
-                  marginTop:
-                    14,
+                  <h2 className="sectionTitle sectionTitleLarge">
+                    Item-level decisions
+                  </h2>
+                </div>
 
-                  border:
-                    "1px solid #E2E8F0",
+                <p className="sectionIntro">
+                  Every content record keeps its own
+                  review status and outcome.
+                </p>
+              </div>
 
-                  borderRadius:
-                    8,
-
-                  overflowX:
-                    "auto",
-                }}
-              >
-                <div
-                  style={{
-                    minWidth:
-                      620,
-                  }}
-                >
-                  <div
-                    style={{
-                      display:
-                        "grid",
-
-                      gridTemplateColumns:
-                        "minmax(120px, 0.8fr) minmax(150px, 1fr) minmax(220px, 1.5fr)",
-
-                      gap:
-                        12,
-
-                      padding:
-                        "10px 14px",
-
-                      background:
-                        "#F8FAFC",
-
-                      color:
-                        "#64748B",
-
-                      fontSize:
-                        11,
-
-                      lineHeight:
-                        "17px",
-
-                      fontWeight:
-                        700,
-
-                      textTransform:
-                        "uppercase",
-                    }}
-                  >
+              <div className="statusTableWrapper">
+                <div className="statusTable">
+                  <div className="statusTableHeader">
                     <span>
-                      Content
+                      Content ID
                     </span>
 
                     <span>
@@ -1233,83 +780,29 @@ export default function CopyrightStatusPage() {
                   </div>
 
                   {bulkItems.map(
-                    (
-                      item,
-                      index
-                    ) => (
+                    (item) => (
                       <div
-                        key={
-                          item.contentId
-                        }
-                        style={{
-                          display:
-                            "grid",
-
-                          gridTemplateColumns:
-                            "minmax(120px, 0.8fr) minmax(150px, 1fr) minmax(220px, 1.5fr)",
-
-                          gap:
-                            12,
-
-                          padding:
-                            "12px 14px",
-
-                          borderBottom:
-                            index ===
-                            bulkItems.length -
-                              1
-                              ? "0"
-                              : "1px solid #E2E8F0",
-                        }}
+                        key={item.contentId}
+                        className="statusTableRow"
                       >
-                        <strong
-                          style={{
-                            fontSize:
-                              13,
-                          }}
-                        >
-                          {
-                            item.contentId
-                          }
+                        <strong>
+                          {item.contentId}
                         </strong>
 
-                        <span
-                          style={{
-                            color:
-                              "#475569",
-
-                            fontSize:
-                              13,
-                          }}
-                        >
-                          {
-                            item.status
-                          }
+                        <span>
+                          {item.status}
                         </span>
 
                         <span
-                          style={{
-                            color:
-                              item.outcome.startsWith(
-                                "Removed"
-                              )
-                                ? "#15803D"
-                                : "#64748B",
-
-                            fontSize:
-                              13,
-
-                            fontWeight:
-                              item.outcome.startsWith(
-                                "Removed"
-                              )
-                                ? 650
-                                : 400,
-                          }}
-                        >
-                          {
-                            item.outcome
+                          className={
+                            item.outcome.startsWith(
+                              "Removed"
+                            )
+                              ? "statusTableOutcomeSuccess"
+                              : undefined
                           }
+                        >
+                          {item.outcome}
                         </span>
                       </div>
                     )
@@ -1321,24 +814,14 @@ export default function CopyrightStatusPage() {
 
           <SignalContact />
 
-          <div
-            style={{
-              padding:
-                "8px 2px 2px",
-
-              color:
-                "#64748B",
-
-              fontSize:
-                12,
-
-              lineHeight:
-                "19px",
-            }}
-          >
-            Development environment · Claim
-            information is temporary until backend
-            and database integration.
+          <div className="statusDevelopmentNotice">
+            <strong>
+              Development environment:
+            </strong>{" "}
+            demonstration claim information is
+            temporary. Backend and database
+            integration will later provide secure,
+            permanent case records.
           </div>
         </>
       )}

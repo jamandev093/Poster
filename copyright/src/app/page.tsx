@@ -1,168 +1,239 @@
 import Link from "next/link";
 
-const primaryActions = [
+interface CopyrightAction {
+  href: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  action: string;
+  featured?: boolean;
+}
+
+const primaryActions: CopyrightAction[] = [
   {
     href: "/find",
-    title: "Find Your Content",
+    eyebrow: "Start here",
+    title: "Find affected Poster content",
     description:
-      "Check a Content ID or exact URL you already have.",
+      "Search using a Poster Content ID or exact Poster content URL before submitting a concern.",
     action: "Find content",
     featured: true,
   },
   {
     href: "/request",
-    title: "Submit Claim",
+    eyebrow: "One record",
+    title: "Submit a copyright claim",
     description:
-      "Report one affected Poster content record.",
-    action: "Submit claim",
-    featured: false,
+      "Report one affected Poster content record and provide information supporting your claim.",
+    action: "Submit a claim",
   },
   {
     href: "/bulk-removal",
-    title: "Bulk Removal Request",
+    eyebrow: "Multiple records",
+    title: "Submit a bulk removal request",
     description:
-      "Report multiple known content records in one case.",
+      "Include several related Poster Content IDs in one request while preserving an individual outcome for each record.",
     action: "Start bulk request",
-    featured: false,
   },
-] as const;
+];
+
+const processSteps = [
+  {
+    number: "01",
+    title: "Identify the affected content",
+    description:
+      "Provide the Poster Content ID or exact Poster URL whenever available.",
+  },
+  {
+    number: "02",
+    title: "Explain your relationship to the work",
+    description:
+      "Tell Poster whether you are the rights holder, an authorized representative, or another relevant party.",
+  },
+  {
+    number: "03",
+    title: "Provide supporting information",
+    description:
+      "Include the original work, source details, claimant information, and evidence supporting the concern.",
+  },
+  {
+    number: "04",
+    title: "Poster reviews the request",
+    description:
+      "Submission does not automatically remove content. Poster reviews the claim before recording an outcome.",
+  },
+];
 
 export default function CopyrightCenterPage() {
   return (
     <>
-      <header className="pageHeader">
+      <header className="pageHeader pageHeaderLarge">
         <div>
           <div className="pageEyebrow">
-            Poster Copyright
+            Poster Copyright & Rights
           </div>
 
-          <h1 className="pageTitle">
-            Copyright Center
+          <h1 className="pageTitle pageTitleLarge">
+            Report and track a copyright concern.
           </h1>
 
-          <p className="pageDescription">
-            Find, report, or track a copyright
-            concern without creating an account.
+          <p className="pageDescription pageDescriptionLarge">
+            Find content referenced through Poster,
+            submit a single or bulk request, and check
+            the progress and outcome of an existing
+            copyright case.
           </p>
         </div>
       </header>
 
-      <section className="contentCard">
-        <h2 className="sectionTitle">
-          What do you need to do?
-        </h2>
+      <section
+        className="pageSection"
+        aria-labelledby="copyright-actions-title"
+      >
+        <div className="sectionHeading">
+          <div>
+            <div className="sectionEyebrow">
+              Choose the right path
+            </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(230px, 1fr))",
-            gap: 12,
-            marginTop: 18,
-          }}
-        >
+            <h2
+              id="copyright-actions-title"
+              className="sectionTitle sectionTitleLarge"
+            >
+              What do you need to do?
+            </h2>
+          </div>
+
+          <p className="sectionIntro">
+            Start by identifying whether your concern
+            involves one content record, several records,
+            or an already-submitted claim.
+          </p>
+        </div>
+
+        <div className="actionGrid">
           {primaryActions.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                display: "flex",
-                minHeight: 170,
-                flexDirection: "column",
-                padding: 20,
-                border: item.featured
-                  ? "1px solid #C9DAFA"
-                  : "1px solid #E2E8F0",
-                borderRadius: 10,
-                background: item.featured
-                  ? "#F8FAFF"
-                  : "#FFFFFF",
-                color: "#0F172A",
-                textDecoration: "none",
-              }}
+              className={
+                item.featured
+                  ? "actionCard actionCardFeatured"
+                  : "actionCard"
+              }
             >
-              <strong
-                style={{
-                  fontSize: 17,
-                  lineHeight: "24px",
-                }}
-              >
+              <span className="actionEyebrow">
+                {item.eyebrow}
+              </span>
+
+              <strong className="actionTitle">
                 {item.title}
               </strong>
 
-              <p
-                style={{
-                  margin: "7px 0 20px",
-                  color: "#64748B",
-                  fontSize: 14,
-                  lineHeight: "21px",
-                }}
-              >
+              <span className="actionDescription">
                 {item.description}
-              </p>
+              </span>
 
-              <span
-                style={{
-                  marginTop: "auto",
-                  color: "#416ECF",
-                  fontSize: 13,
-                  lineHeight: "20px",
-                  fontWeight: 600,
-                }}
-              >
-                {item.action} →
+              <span className="actionLink">
+                {item.action}
+                <span aria-hidden="true">→</span>
               </span>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="contentCard">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 24,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h2 className="sectionTitle">
-              Already submitted a request?
-            </h2>
-
-            <p className="sectionDescription">
-              Check the current status and outcome
-              of your copyright case.
-            </p>
+      <section
+        className="statusCallout"
+        aria-labelledby="existing-claim-title"
+      >
+        <div>
+          <div className="sectionEyebrow">
+            Existing request
           </div>
 
-          <Link
-            href="/status"
-            className="primaryButton"
-            style={{
-              display: "inline-block",
-              textDecoration: "none",
-            }}
+          <h2
+            id="existing-claim-title"
+            className="sectionTitle"
           >
-            Check Status
-          </Link>
+            Already submitted a claim?
+          </h2>
+
+          <p className="sectionDescription">
+            Enter the claim reference and submitted
+            email to view the current case status,
+            timeline, and recorded outcomes.
+          </p>
+        </div>
+
+        <Link
+          href="/status"
+          className="primaryButton buttonLink"
+        >
+          Check claim status
+        </Link>
+      </section>
+
+      <section
+        className="pageSection"
+        aria-labelledby="review-process-title"
+      >
+        <div className="sectionHeading">
+          <div>
+            <div className="sectionEyebrow">
+              Review process
+            </div>
+
+            <h2
+              id="review-process-title"
+              className="sectionTitle sectionTitleLarge"
+            >
+              What happens after you begin?
+            </h2>
+          </div>
+
+          <p className="sectionIntro">
+            Poster uses a structured process so the
+            affected content, claimant, evidence, and
+            final action remain clear.
+          </p>
+        </div>
+
+        <div className="processList">
+          {processSteps.map((step) => (
+            <article
+              key={step.number}
+              className="processRow"
+            >
+              <span className="processNumber">
+                {step.number}
+              </span>
+
+              <div>
+                <h3 className="processTitle">
+                  {step.title}
+                </h3>
+
+                <p className="processDescription">
+                  {step.description}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
-      <div
-        style={{
-          padding: "4px 2px",
-          color: "#64748B",
-          fontSize: 12,
-          lineHeight: "19px",
-        }}
-      >
-        No account required · Finding a record does
-        not verify copyright ownership · Requests
-        are reviewed before action is taken.
-      </div>
+      <aside className="informationNotice">
+        <strong>No account is required.</strong>
+
+        <span>
+          Finding a content record does not verify
+          ownership. Submitting a request does not
+          automatically remove content. Poster reviews
+          supporting information before recording an
+          operational outcome.
+        </span>
+      </aside>
     </>
   );
 }
