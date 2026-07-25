@@ -181,7 +181,7 @@
   Switch to the mobile shell before the fixed sidebar
   makes scaled laptop and tablet viewports too narrow.
 */
-@media (max-width: 920px) {
+@media (max-width: 1120px) {
   .sidebar {
     display: none;
   }
