@@ -4,8 +4,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "How Poster Works",
+
   description:
     "See how Poster discovers permitted source content, understands relevance, personalizes discovery, and sends users to original publishers.",
+
+  alternates: {
+    canonical: "/how-it-works",
+  },
+
+  openGraph: {
+    title: "How Poster Works",
+
+    description:
+      "See the journey from original publication to relevant discovery and original-source redirection.",
+
+    url: "/how-it-works",
+  },
 };
 
 const steps = [

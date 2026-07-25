@@ -2,8 +2,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Get the App",
+
   description:
     "Discover what Poster can help you do and learn about the upcoming mobile app for Android and iPhone.",
+
+  alternates: {
+    canonical: "/get-app",
+  },
+
+  openGraph: {
+    title: "Get the Poster App",
+
+    description:
+      "Discover useful knowledge, personalize your interests, save what matters, and continue to original sources.",
+
+    url: "/get-app",
+  },
 };
 
 export default function GetAppPage() {

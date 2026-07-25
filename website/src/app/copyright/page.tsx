@@ -2,8 +2,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Copyright & Rights",
+
   description:
     "Report copyright concerns, understand Poster’s verification process, and learn what actions may follow a rights claim.",
+
+  alternates: {
+    canonical: "/copyright",
+  },
+
+  openGraph: {
+    title: "Copyright & Rights",
+
+    description:
+      "Submit a copyright concern, provide supporting evidence, and understand Poster’s claim-review process.",
+
+    url: "/copyright",
+  },
 };
 
 export default function CopyrightPage() {

@@ -4,8 +4,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "About",
+
   description:
     "Learn why Poster exists, what the knowledge discovery platform does, and why original publishers remain central to the experience.",
+
+  alternates: {
+    canonical: "/about",
+  },
+
+  openGraph: {
+    title: "About Poster",
+
+    description:
+      "Learn why Poster exists and how it helps people discover useful knowledge while keeping original publishers central.",
+
+    url: "/about",
+  },
 };
 
 export default function AboutPage() {

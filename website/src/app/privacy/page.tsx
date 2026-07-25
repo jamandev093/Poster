@@ -2,8 +2,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Privacy Policy",
+
   description:
-    "Read Poster’s privacy policy for the public website and related services.",
+    "Read Poster’s privacy information covering data collection, usage, service providers, retention, security, and privacy rights.",
+
+  alternates: {
+    canonical: "/privacy",
+  },
+
+  openGraph: {
+    title: "Privacy Policy",
+
+    description:
+      "Read Poster’s public privacy information.",
+
+    url: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {

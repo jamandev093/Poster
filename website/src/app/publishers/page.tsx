@@ -4,8 +4,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Publishers",
+
   description:
     "Learn how Poster works with publishers while keeping attribution, original destinations, and source rights at the center of discovery.",
+
+  alternates: {
+    canonical: "/publishers",
+  },
+
+  openGraph: {
+    title: "Publishers and Original Sources",
+
+    description:
+      "Learn how Poster supports discovery while keeping publishers, attribution, rights, and original destinations central.",
+
+    url: "/publishers",
+  },
 };
 
 export default function PublishersPage() {

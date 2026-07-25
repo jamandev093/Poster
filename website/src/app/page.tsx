@@ -2,6 +2,26 @@ import Link from "next/link";
 
 import styles from "./page.module.css";
 
+export const metadata = {
+  title: "Poster — Knowledge Discovery",
+
+  description:
+    "Discover useful, relevant knowledge from trusted sources and continue directly to the original publisher.",
+
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    title: "Poster — Knowledge Discovery",
+
+    description:
+      "Discover useful, relevant knowledge from trusted sources and continue directly to the original publisher.",
+
+    url: "/",
+  },
+};
+
 export default function HomePage() {
   return (
     <>

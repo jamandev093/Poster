@@ -4,8 +4,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Contact",
+
   description:
-    "Contact Poster for general questions, publisher enquiries, advertising, and copyright or rights concerns.",
+    "Contact Poster about general questions, publisher relationships, advertising, copyright, or rights concerns.",
+
+  alternates: {
+    canonical: "/contact",
+  },
+
+  openGraph: {
+    title: "Contact Poster",
+
+    description:
+      "Find the correct contact path for general, publisher, advertising, and copyright enquiries.",
+
+    url: "/contact",
+  },
 };
 
 export default function ContactPage() {

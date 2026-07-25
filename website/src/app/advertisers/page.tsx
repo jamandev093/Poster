@@ -2,8 +2,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Advertisers",
+
   description:
     "Learn how sponsorship and affiliate advertising works on Poster and access the Advertiser Portal.",
+
+  alternates: {
+    canonical: "/advertisers",
+  },
+
+  openGraph: {
+    title: "Advertise on Poster",
+
+    description:
+      "Learn about Poster sponsorship, affiliate campaigns, placements, measurement, and the Advertiser Portal.",
+
+    url: "/advertisers",
+  },
 };
 
 export default function AdvertisersPage() {

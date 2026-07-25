@@ -2,8 +2,22 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "Terms",
+
   description:
-    "Read the terms governing use of Poster’s public website and related services.",
+    "Read the basic terms governing Poster’s website, knowledge discovery services, accounts, advertising, and rights processes.",
+
+  alternates: {
+    canonical: "/terms",
+  },
+
+  openGraph: {
+    title: "Poster Terms",
+
+    description:
+      "Read the basic conditions for using Poster’s website and related services.",
+
+    url: "/terms",
+  },
 };
 
 export default function TermsPage() {
