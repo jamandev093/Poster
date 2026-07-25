@@ -184,4 +184,17 @@
   .principleSection {
     padding: 68px 24px 80px;
   }
+
+  /* FINAL PROCESS TYPOGRAPHY POLISH */
+
+.intro h2 {
+  max-width: 580px;
+
+  font-size: clamp(30px, 3.3vw, 44px);
+}
+
+.step {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
 }

@@ -384,4 +384,31 @@
 
     padding: 28px;
   }
+
+
+  /* FINAL CLAIM-PROCESS TYPOGRAPHY POLISH */
+
+.detailRow h2 {
+  max-width: 430px;
+
+  font-size: clamp(26px, 2.8vw, 38px);
+  line-height: 1.13;
+  letter-spacing: -0.035em;
+}
+
+.portalAction {
+  white-space: nowrap;
+}
+
+.portalPanelLarge .portalAction {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1050px) {
+  .detailRow {
+    gap: 48px;
+  }
+}
+
+
 }

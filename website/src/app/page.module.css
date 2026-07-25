@@ -337,4 +337,11 @@
   .finalSection {
     padding: 68px 24px 78px;
   }
+
+  /* FINAL HOME INTENT TYPOGRAPHY POLISH */
+
+.intentHeading h2 {
+  font-size: clamp(30px, 3.3vw, 44px);
+  line-height: 1.09;
+}
 }

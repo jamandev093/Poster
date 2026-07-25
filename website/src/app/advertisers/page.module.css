@@ -394,4 +394,29 @@
 
     padding: 28px;
   }
+
+/* FINAL TYPOGRAPHY + ACTION POLISH */
+
+.commercialRow h2 {
+  max-width: 500px;
+
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.12;
+}
+
+.portalAction {
+  white-space: nowrap;
+}
+
+.portalPanelLarge .portalAction {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1050px) {
+  .commercialRow {
+    gap: 48px;
+  }
+}
+
+
 }

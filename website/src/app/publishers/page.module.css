@@ -284,4 +284,30 @@
       24px
       80px;
   }
+
+  /* FINAL PUBLISHER CTA POLISH */
+
+.rightsActions {
+  justify-content: flex-end;
+
+  min-width: 300px;
+}
+
+.rightsActions a {
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .rightsSection {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rightsActions {
+    justify-content: flex-start;
+
+    min-width: 0;
+  }
+}
+
 }
