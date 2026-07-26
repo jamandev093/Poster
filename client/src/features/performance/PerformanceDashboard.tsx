@@ -8,7 +8,6 @@ import {
 import Link from "next/link";
 
 import {
-  formatClientCurrency,
   formatClientNumber,
   getCampaignStatusLabel,
   getCampaignTypeLabel,
@@ -27,8 +26,17 @@ import type {
 } from "@/features/workspace/workspace.performance";
 
 import {
+  getCurrentOrganization,
   getOrganizationCampaigns,
 } from "@/features/workspace/workspace.selectors";
+
+import {
+  AnalyticsDashboardPanel,
+} from "@/features/workspace/components";
+
+import type {
+  OrganizationId,
+} from "@/features/workspace/advertising/advertising.types";
 
 import {
   calculateConversionRate,
@@ -47,6 +55,35 @@ type CampaignSelection =
 
 const clientCampaigns =
   getOrganizationCampaigns();
+
+const currentOrganization =
+  getCurrentOrganization();
+
+function normalizeOrganizationId(
+  value:
+    string
+): OrganizationId {
+  const normalized =
+    value.trim();
+
+  if (
+    !normalized.startsWith(
+      "ORG-"
+    )
+  ) {
+    throw new Error(
+      `Invalid organization ID: ${value}`
+    );
+  }
+
+  return normalized as
+    OrganizationId;
+}
+
+const organizationId =
+  normalizeOrganizationId(
+    currentOrganization.id
+  );
 
 const windowOptions: {
   value: PerformanceWindow;
@@ -180,105 +217,6 @@ export default function PerformanceDashboard() {
       ]
     );
 
-  const totals =
-    useMemo(
-      () => {
-        let impressions =
-          0;
-
-        let clicks =
-          0;
-
-        let trackedClicks =
-          0;
-
-        let conversions =
-          0;
-
-        let trackedCampaigns =
-          0;
-
-        let untrackedCampaigns =
-          0;
-
-        let commission =
-          0;
-
-        campaignRows.forEach(
-          (
-            row
-          ) => {
-            impressions +=
-              row.metrics
-                .impressions;
-
-            clicks +=
-              row.metrics.clicks;
-
-            commission +=
-              row.metrics
-                .commission ??
-              0;
-
-            if (
-              row.metrics
-                .conversions ===
-              null
-            ) {
-              untrackedCampaigns +=
-                1;
-
-              return;
-            }
-
-            trackedCampaigns +=
-              1;
-
-            trackedClicks +=
-              row.metrics.clicks;
-
-            conversions +=
-              row.metrics
-                .conversions;
-          }
-        );
-
-        return {
-          impressions,
-
-          clicks,
-
-          ctr:
-            calculateCtr(
-              impressions,
-              clicks
-            ),
-
-          conversions:
-            trackedCampaigns >
-            0
-              ? conversions
-              : null,
-
-          conversionRate:
-            trackedCampaigns >
-            0
-              ? calculateConversionRate(
-                  trackedClicks,
-                  conversions
-                )
-              : null,
-
-          commission,
-
-          untrackedCampaigns,
-        };
-      },
-      [
-        campaignRows,
-      ]
-    );
-
   const maximumPlacementImpressions =
     Math.max(
       ...placementPerformanceSnapshots.map(
@@ -397,141 +335,27 @@ export default function PerformanceDashboard() {
         )}
       </div>
 
-      <section
-        className={
-          styles.metrics
+      <AnalyticsDashboardPanel
+        campaignIds={
+          selectedCampaign ===
+          "all"
+            ? undefined
+            : [
+                selectedCampaign,
+              ]
         }
-      >
-        <article
-          className={
-            styles.metric
-          }
-        >
-          <span>
-            Impressions
-          </span>
-
-          <strong>
-            {formatClientNumber(
-              totals.impressions
-            )}
-          </strong>
-
-          <small>
-            Recorded delivery
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metric
-          }
-        >
-          <span>
-            Clicks
-          </span>
-
-          <strong>
-            {formatClientNumber(
-              totals.clicks
-            )}
-          </strong>
-
-          <small>
-            Recorded engagement
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metric
-          }
-        >
-          <span>
-            CTR
-          </span>
-
-          <strong>
-            {totals.ctr.toFixed(
-              2
-            )}
-            %
-          </strong>
-
-          <small>
-            Click-through rate
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metric
-          }
-        >
-          <span>
-            Conversions
-          </span>
-
-          <strong>
-            {totals.conversions ===
-            null
-              ? "Not tracked"
-              : formatClientNumber(
-                  totals.conversions
-                )}
-          </strong>
-
-          <small>
-            {totals.conversionRate ===
-            null
-              ? "No connected tracking"
-              : `${totals.conversionRate.toFixed(
-                  2
-                )}% conversion rate`}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metric
-          }
-        >
-          <span>
-            Affiliate commission
-          </span>
-
-          <strong>
-            {formatClientCurrency(
-              totals.commission
-            )}
-          </strong>
-
-          <small>
-            Recorded commission
-          </small>
-        </article>
-      </section>
-
-      {totals.untrackedCampaigns >
-      0 ? (
-        <div
-          className={
-            styles.trackingNotice
-          }
-        >
-          {
-            totals.untrackedCampaigns
-          }
-          {" "}
-          {totals.untrackedCampaigns ===
-          1
-            ? "campaign does"
-            : "campaigns do"}
-          {" "}
-          not currently have conversion tracking.
-        </div>
-      ) : null}
-
+        currency="INR"
+        description={
+          selectedWindow ===
+          "30d"
+            ? "Validated delivery, engagement, conversions, spend, and traffic quality for the selected campaign scope."
+            : "Validated analytics use the latest canonical reporting snapshot. The campaign comparison and placement sections below continue to follow the selected legacy date range."
+        }
+        organizationId={
+          organizationId
+        }
+        title="Validated performance"
+      />
       <section
         className="contentCard"
       >
@@ -835,3 +659,7 @@ export default function PerformanceDashboard() {
     </>
   );
 }
+
+
+
+

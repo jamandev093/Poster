@@ -572,3 +572,15 @@
       -16px;
   }
 }
+
+/* =========================================================
+   CANONICAL ANALYTICS PANEL
+   ========================================================= */
+
+.controls + .periodLabel {
+  margin-top: 0;
+}
+
+.periodLabel + section {
+  margin-bottom: 18px;
+}

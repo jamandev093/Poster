@@ -1,0 +1,2014 @@
+﻿===== .\src\app\(portal)\layout.tsx =====
+   1: import type { ReactNode } from "react";
+   2: 
+   3: import ClientShell from "@/components/client/ClientShell";
+   4: 
+   5: interface PortalLayoutProps {
+   6:   children: ReactNode;
+   7: }
+   8: 
+   9: export default function PortalLayout({
+  10:   children,
+  11: }: PortalLayoutProps) {
+  12:   return <ClientShell>{children}</ClientShell>;
+  13: }
+
+===== .\src\components\client\ClientShell.tsx =====
+   1: "use client";
+   2: 
+   3: import type {
+   4:   ReactNode,
+   5: } from "react";
+   6: 
+   7: import Link from "next/link";
+   8: 
+   9: import {
+  10:   usePathname,
+  11: } from "next/navigation";
+  12: 
+  13: import {
+  14:   workspaceAccountProfile,
+  15: } from "@/features/workspace/workspace.account";
+  16: 
+  17: import {
+  18:   getCurrentOrganization,
+  19: } from "@/features/workspace/workspace.selectors";
+  20: 
+  21: import SignalContact from "./SignalContact";
+  22: 
+  23: import styles from "./ClientShell.module.css";
+  24: 
+  25: interface ClientShellProps {
+  26:   children: ReactNode;
+  27: }
+  28: 
+  29: type NavigationIcon =
+  30:   | "dashboard"
+  31:   | "requests"
+  32:   | "new"
+  33:   | "campaigns"
+  34:   | "performance"
+  35:   | "account";
+  36: 
+  37: interface NavigationItem {
+  38:   href: string;
+  39:   label: string;
+  40:   icon: NavigationIcon;
+  41: }
+  42: 
+  43: const navigation: NavigationItem[] = [
+  44:   {
+  45:     href: "/dashboard",
+  46:     label: "Dashboard",
+  47:     icon: "dashboard",
+  48:   },
+  49:   {
+  50:     href: "/requests",
+  51:     label: "Requests",
+  52:     icon: "requests",
+  53:   },
+  54:   {
+  55:     href: "/requests/new",
+  56:     label: "New request",
+  57:     icon: "new",
+  58:   },
+  59:   {
+  60:     href: "/campaigns",
+  61:     label: "Campaigns",
+  62:     icon: "campaigns",
+  63:   },
+  64:   {
+  65:     href: "/performance",
+  66:     label: "Performance",
+  67:     icon: "performance",
+  68:   },
+  69: 
+  70: ];
+  71: 
+  72: function findActiveItem(
+  73:   pathname: string
+  74: ): NavigationItem {
+  75:   const matches =
+  76:     navigation
+  77:       .filter(
+  78:         (
+  79:           item
+  80:         ) =>
+  81:           pathname ===
+  82:             item.href ||
+  83:           pathname.startsWith(
+  84:             `${item.href}/`
+  85:           )
+  86:       )
+  87:       .sort(
+  88:         (
+  89:           first,
+  90:           second
+  91:         ) =>
+  92:           second.href.length -
+  93:           first.href.length
+  94:       );
+  95: 
+  96:   return (
+  97:     matches[0] ??
+  98:     navigation[0]
+  99:   );
+ 100: }
+ 101: 
+ 102: function getInitials(
+ 103:   value: string
+ 104: ): string {
+ 105:   const parts =
+ 106:     value
+ 107:       .trim()
+ 108:       .split(/\s+/)
+ 109:       .filter(Boolean);
+ 110: 
+ 111:   if (
+ 112:     parts.length ===
+ 113:     0
+ 114:   ) {
+ 115:     return "PC";
+ 116:   }
+ 117: 
+ 118:   if (
+ 119:     parts.length ===
+ 120:     1
+ 121:   ) {
+ 122:     return parts[0]
+ 123:       .slice(
+ 124:         0,
+ 125:         2
+ 126:       )
+ 127:       .toUpperCase();
+ 128:   }
+ 129: 
+ 130:   return `${parts[0][0]}${parts[1][0]}`
+ 131:     .toUpperCase();
+ 132: }
+ 133: 
+ 134: function NavIcon({
+ 135:   name,
+ 136: }: {
+ 137:   name: NavigationIcon;
+ 138: }) {
+ 139:   if (
+ 140:     name ===
+ 141:     "dashboard"
+ 142:   ) {
+ 143:     return (
+ 144:       <svg
+ 145:         viewBox="0 0 24 24"
+ 146:         aria-hidden="true"
+ 147:       >
+ 148:         <rect
+ 149:           x="4"
+ 150:           y="4"
+ 151:           width="6"
+ 152:           height="6"
+ 153:           rx="1"
+ 154:         />
+ 155: 
+ 156:         <rect
+ 157:           x="14"
+ 158:           y="4"
+ 159:           width="6"
+ 160:           height="6"
+ 161:           rx="1"
+ 162:         />
+ 163: 
+ 164:         <rect
+ 165:           x="4"
+ 166:           y="14"
+ 167:           width="6"
+ 168:           height="6"
+ 169:           rx="1"
+ 170:         />
+ 171: 
+ 172:         <rect
+ 173:           x="14"
+ 174:           y="14"
+ 175:           width="6"
+ 176:           height="6"
+ 177:           rx="1"
+ 178:         />
+ 179:       </svg>
+ 180:     );
+ 181:   }
+ 182: 
+ 183:   if (
+ 184:     name ===
+ 185:     "requests"
+ 186:   ) {
+ 187:     return (
+ 188:       <svg
+ 189:         viewBox="0 0 24 24"
+ 190:         aria-hidden="true"
+ 191:       >
+ 192:         <path d="M6 5h12" />
+ 193:         <path d="M6 10h12" />
+ 194:         <path d="M6 15h8" />
+ 195: 
+ 196:         <path d="M5 3h14a2 2 0 0 1 2 2v14H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+ 197:       </svg>
+ 198:     );
+ 199:   }
+ 200: 
+ 201:   if (
+ 202:     name ===
+ 203:     "new"
+ 204:   ) {
+ 205:     return (
+ 206:       <svg
+ 207:         viewBox="0 0 24 24"
+ 208:         aria-hidden="true"
+ 209:       >
+ 210:         <path d="M12 5v14" />
+ 211:         <path d="M5 12h14" />
+ 212:       </svg>
+ 213:     );
+ 214:   }
+ 215: 
+ 216:   if (
+ 217:     name ===
+ 218:     "campaigns"
+ 219:   ) {
+ 220:     return (
+ 221:       <svg
+ 222:         viewBox="0 0 24 24"
+ 223:         aria-hidden="true"
+ 224:       >
+ 225:         <rect
+ 226:           x="4"
+ 227:           y="5"
+ 228:           width="16"
+ 229:           height="14"
+ 230:           rx="2"
+ 231:         />
+ 232: 
+ 233:         <path d="M8 9h8" />
+ 234:         <path d="M8 13h8" />
+ 235:       </svg>
+ 236:     );
+ 237:   }
+ 238: 
+ 239:   if (
+ 240:     name ===
+ 241:     "performance"
+ 242:   ) {
+ 243:     return (
+ 244:       <svg
+ 245:         viewBox="0 0 24 24"
+ 246:         aria-hidden="true"
+ 247:       >
+ 248:         <path d="M4 19V5" />
+ 249:         <path d="M4 19h16" />
+ 250:         <path d="m7 15 4-4 3 2 5-6" />
+ 251:       </svg>
+ 252:     );
+ 253:   }
+ 254: 
+ 255:   return (
+ 256:     <svg
+ 257:       viewBox="0 0 24 24"
+ 258:       aria-hidden="true"
+ 259:     >
+ 260:       <circle
+ 261:         cx="12"
+ 262:         cy="8"
+ 263:         r="4"
+ 264:       />
+ 265: 
+ 266:       <path d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6" />
+ 267:     </svg>
+ 268:   );
+ 269: }
+ 270: 
+ 271: export default function ClientShell({
+ 272:   children,
+ 273: }: ClientShellProps) {
+ 274:   const pathname =
+ 275:     usePathname();
+ 276: 
+ 277:   const activeItem =
+ 278:     findActiveItem(
+ 279:       pathname
+ 280:     );
+ 281: 
+ 282:   const organization =
+ 283:     getCurrentOrganization();
+ 284: 
+ 285:   const primaryClient =
+ 286:     workspaceAccountProfile
+ 287:       .primaryClient;
+ 288: 
+ 289:   const profileInitials =
+ 290:     getInitials(
+ 291:       primaryClient.fullName
+ 292:     );
+ 293: 
+ 294:   return (
+ 295:     <div
+ 296:       className={
+ 297:         styles.shell
+ 298:       }
+ 299:     >
+ 300:       <aside
+ 301:         className={
+ 302:           styles.sidebar
+ 303:         }
+ 304:       >
+ 305:         <div
+ 306:           className={
+ 307:             styles.brand
+ 308:           }
+ 309:         >
+ 310:           <Link
+ 311:             href="/dashboard"
+ 312:             className={
+ 313:               styles.brandLink
+ 314:             }
+ 315:             aria-label="Poster Client dashboard"
+ 316:           >
+ 317:             <span
+ 318:               className={
+ 319:                 styles.brandMark
+ 320:               }
+ 321:             >
+ 322:               P
+ 323:             </span>
+ 324: 
+ 325:             <span
+ 326:               className={
+ 327:                 styles.brandText
+ 328:               }
+ 329:             >
+ 330:               <strong>
+ 331:                 Poster
+ 332:               </strong>
+ 333: 
+ 334:               <small>
+ 335:                 Client
+ 336:               </small>
+ 337:             </span>
+ 338:           </Link>
+ 339:         </div>
+ 340: 
+ 341:         <nav
+ 342:           className={
+ 343:             styles.navigation
+ 344:           }
+ 345:           aria-label="Client navigation"
+ 346:         >
+ 347:           {navigation.map(
+ 348:             (
+ 349:               item
+ 350:             ) => {
+ 351:               const active =
+ 352:                 activeItem.href ===
+ 353:                 item.href;
+ 354: 
+ 355:               return (
+ 356:                 <Link
+ 357:                   key={
+ 358:                     item.href
+ 359:                   }
+ 360:                   href={
+ 361:                     item.href
+ 362:                   }
+ 363:                   aria-current={
+ 364:                     active
+ 365:                       ? "page"
+ 366:                       : undefined
+ 367:                   }
+ 368:                   className={
+ 369:                     active
+ 370:                       ? styles.navigationItemActive
+ 371:                       : styles.navigationItem
+ 372:                   }
+ 373:                 >
+ 374:                   <span
+ 375:                     className={
+ 376:                       styles.navigationIcon
+ 377:                     }
+ 378:                   >
+ 379:                     <NavIcon
+ 380:                       name={
+ 381:                         item.icon
+ 382:                       }
+ 383:                     />
+ 384:                   </span>
+ 385: 
+ 386:                   <span>
+ 387:                     {
+ 388:                       item.label
+ 389:                     }
+ 390:                   </span>
+ 391:                 </Link>
+ 392:               );
+ 393:             }
+ 394:           )}
+ 395:         </nav>
+ 396: 
+ 397:         <div
+ 398:           className={
+ 399:             styles.sidebarBottom
+ 400:           }
+ 401:         >
+ 402:           <div
+ 403:             className={
+ 404:               styles.support
+ 405:             }
+ 406:           >
+ 407:             <SignalContact />
+ 408:           </div>
+ 409: 
+ 410:           <Link
+ 411:             href="/account"
+ 412:             className={
+ 413:               styles.profile
+ 414:             }
+ 415:             aria-label={`Open account for ${primaryClient.fullName}`}
+ 416:           >
+ 417:             <div
+ 418:               className={
+ 419:                 styles.profileAvatar
+ 420:               }
+ 421:             >
+ 422:               {
+ 423:                 profileInitials
+ 424:               }
+ 425:             </div>
+ 426: 
+ 427:             <div
+ 428:               className={
+ 429:                 styles.profileText
+ 430:               }
+ 431:             >
+ 432:               <strong>
+ 433:                 {
+ 434:                   primaryClient.fullName
+ 435:                 }
+ 436:               </strong>
+ 437: 
+ 438:               <span>
+ 439:                 {
+ 440:                   organization.name
+ 441:                 }
+ 442:               </span>
+ 443:             </div>
+ 444: 
+ 445:             <span
+ 446:               className={
+ 447:                 styles.profileArrow
+ 448:               }
+ 449:               aria-hidden="true"
+ 450:             >
+ 451:           &#8594;
+ 452:         </span>
+ 453:           </Link>
+ 454:         </div>
+ 455:       </aside>
+ 456: 
+ 457:       <main
+ 458:         className={
+ 459:           styles.workspace
+ 460:         }
+ 461:       >
+ 462:         <div
+ 463:           className={
+ 464:             styles.content
+ 465:           }
+ 466:         >
+ 467:           {children}
+ 468:         </div>
+ 469:       </main>
+ 470:     </div>
+ 471:   );
+ 472: }
+
+===== .\src\app\(portal)\dashboard\page.tsx =====
+   1: import Link from "next/link";
+   2: 
+   3: import {
+   4:   formatClientNumber,
+   5:   getCampaignStatusLabel,
+   6:   getCampaignTypeLabel,
+   7:   getPlacementLabel,
+   8:   getRequestStatusLabel,
+   9:   getRequestTypeLabel,
+  10: } from "@/features/workspace/workspace.formatters";
+  11: 
+  12: import {
+  13:   getActiveCampaigns,
+  14:   getCurrentOrganization,
+  15:   getOrganizationCampaigns,
+  16:   getOrganizationRequests,
+  17:   getPendingRequests,
+  18:   getRequestsNeedingAction,
+  19: } from "@/features/workspace/workspace.selectors";
+  20: 
+  21: import {
+  22:   calculateCtr,
+  23:   calculateDeliveryProgress,
+  24: } from "@/features/workspace/workspace.types";
+  25: 
+  26: import type {
+  27:   CampaignStatus,
+  28:   CommercialRequestStatus,
+  29: } from "@/features/workspace/workspace.types";
+  30: 
+  31: import styles from "./page.module.css";
+  32: 
+  33: function getRequestStatusClass(
+  34:   status: CommercialRequestStatus
+  35: ): string {
+  36:   switch (status) {
+  37:     case "changes_requested":
+  38:       return styles.statusAttention;
+  39: 
+  40:     case "approved":
+  41:       return styles.statusPositive;
+  42: 
+  43:     case "pending_review":
+  44:     case "rejected":
+  45:       return styles.statusNeutral;
+  46:   }
+  47: }
+  48: 
+  49: function getCampaignStatusClass(
+  50:   status: CampaignStatus
+  51: ): string {
+  52:   switch (status) {
+  53:     case "active":
+  54:       return styles.statusPositive;
+  55: 
+  56:     case "paused":
+  57:     case "disabled":
+  58:       return styles.statusAttention;
+  59: 
+  60:     case "draft":
+  61:     case "scheduled":
+  62:     case "ended":
+  63:       return styles.statusNeutral;
+  64:   }
+  65: }
+  66: 
+  67: export default function DashboardPage() {
+  68:   const organization =
+  69:     getCurrentOrganization();
+  70: 
+  71:   const requests =
+  72:     getOrganizationRequests();
+  73: 
+  74:   const campaigns =
+  75:     getOrganizationCampaigns();
+  76: 
+  77:   const needsAction =
+  78:     getRequestsNeedingAction();
+  79: 
+  80:   const pendingRequests =
+  81:     getPendingRequests();
+  82: 
+  83:   const activeCampaigns =
+  84:     getActiveCampaigns();
+  85: 
+  86:   const recentRequests =
+  87:     [...requests]
+  88:       .sort(
+  89:         (
+  90:           first,
+  91:           second
+  92:         ) =>
+  93:           new Date(
+  94:             second.updatedAt
+  95:           ).getTime() -
+  96:           new Date(
+  97:             first.updatedAt
+  98:           ).getTime()
+  99:       )
+ 100:       .slice(
+ 101:         0,
+ 102:         4
+ 103:       );
+ 104: 
+ 105:   const totalImpressions =
+ 106:     campaigns.reduce(
+ 107:       (
+ 108:         total,
+ 109:         campaign
+ 110:       ) =>
+ 111:         total +
+ 112:         campaign.performance.impressions,
+ 113:       0
+ 114:     );
+ 115: 
+ 116:   const totalClicks =
+ 117:     campaigns.reduce(
+ 118:       (
+ 119:         total,
+ 120:         campaign
+ 121:       ) =>
+ 122:         total +
+ 123:         campaign.performance.clicks,
+ 124:       0
+ 125:     );
+ 126: 
+ 127:   const trackedConversions =
+ 128:     campaigns.reduce(
+ 129:       (
+ 130:         total,
+ 131:         campaign
+ 132:       ) =>
+ 133:         total +
+ 134:         (
+ 135:           campaign.performance.conversions ??
+ 136:           0
+ 137:         ),
+ 138:       0
+ 139:     );
+ 140: 
+ 141:   const campaignsWithoutTracking =
+ 142:     campaigns.filter(
+ 143:       (
+ 144:         campaign
+ 145:       ) =>
+ 146:         campaign.performance.conversions ===
+ 147:         null
+ 148:     ).length;
+ 149: 
+ 150:   const overallCtr =
+ 151:     calculateCtr(
+ 152:       totalImpressions,
+ 153:       totalClicks
+ 154:     );
+ 155: 
+ 156:   return (
+ 157:     <>
+ 158:       <header
+ 159:         className={
+ 160:           styles.header
+ 161:         }
+ 162:       >
+ 163:         <div>
+ 164:           <div
+ 165:             className={
+ 166:               styles.eyebrow
+ 167:             }
+ 168:           >
+ 169:             {organization.name}
+ 170:           </div>
+ 171: 
+ 172:           <h1>
+ 173:             Advertising workspace
+ 174:           </h1>
+ 175: 
+ 176:           <p>
+ 177:             Submit advertising requests, follow Poster&apos;s review,
+ 178:             and monitor approved campaign delivery and results.
+ 179:           </p>
+ 180:         </div>
+ 181: 
+ 182:         <Link
+ 183:           href="/requests/new"
+ 184:           className={
+ 185:             styles.newRequestButton
+ 186:           }
+ 187:         >
+ 188:           Submit advertising request
+ 189:         </Link>
+ 190:       </header>
+ 191: 
+ 192:       <section
+ 193:         className={
+ 194:           styles.summary
+ 195:         }
+ 196:         aria-label="Advertising workspace summary"
+ 197:       >
+ 198:         <div
+ 199:           className={
+ 200:             styles.summaryItem
+ 201:           }
+ 202:         >
+ 203:           <span>
+ 204:             Needs your action
+ 205:           </span>
+ 206: 
+ 207:           <strong>
+ 208:             {needsAction.length}
+ 209:           </strong>
+ 210: 
+ 211:           <small>
+ 212:             Changes requested
+ 213:           </small>
+ 214:         </div>
+ 215: 
+ 216:         <div
+ 217:           className={
+ 218:             styles.summaryItem
+ 219:           }
+ 220:         >
+ 221:           <span>
+ 222:             Pending review
+ 223:           </span>
+ 224: 
+ 225:           <strong>
+ 226:             {pendingRequests.length}
+ 227:           </strong>
+ 228: 
+ 229:           <small>
+ 230:             With Poster
+ 231:           </small>
+ 232:         </div>
+ 233: 
+ 234:         <div
+ 235:           className={
+ 236:             styles.summaryItem
+ 237:           }
+ 238:         >
+ 239:           <span>
+ 240:             Active campaigns
+ 241:           </span>
+ 242: 
+ 243:           <strong>
+ 244:             {activeCampaigns.length}
+ 245:           </strong>
+ 246: 
+ 247:           <small>
+ 248:             Currently delivering
+ 249:           </small>
+ 250:         </div>
+ 251: 
+ 252:         <div
+ 253:           className={
+ 254:             styles.summaryItem
+ 255:           }
+ 256:         >
+ 257:           <span>
+ 258:             Recorded impressions
+ 259:           </span>
+ 260: 
+ 261:           <strong>
+ 262:             {formatClientNumber(
+ 263:               totalImpressions
+ 264:             )}
+ 265:           </strong>
+ 266: 
+ 267:           <small>
+ 268:             Across your campaigns
+ 269:           </small>
+ 270:         </div>
+ 271:       </section>
+ 272: 
+ 273:       {needsAction.length >
+ 274:       0 ? (
+ 275:         <section
+ 276:           className={
+ 277:             styles.attentionSection
+ 278:           }
+ 279:           aria-labelledby="attention-title"
+ 280:         >
+ 281:           <div
+ 282:             className={
+ 283:               styles.sectionHeader
+ 284:             }
+ 285:           >
+ 286:             <div>
+ 287:               <span
+ 288:                 className={
+ 289:                   styles.sectionEyebrow
+ 290:                 }
+ 291:               >
+ 292:                 Action required
+ 293:               </span>
+ 294: 
+ 295:               <h2 id="attention-title">
+ 296:                 Poster needs information from you
+ 297:               </h2>
+ 298:             </div>
+ 299:           </div>
+ 300: 
+ 301:           <div
+ 302:             className={
+ 303:               styles.attentionList
+ 304:             }
+ 305:           >
+ 306:             {needsAction.map(
+ 307:               (
+ 308:                 request
+ 309:               ) => (
+ 310:                 <article
+ 311:                   key={
+ 312:                     request.id
+ 313:                   }
+ 314:                   className={
+ 315:                     styles.attention
+ 316:                   }
+ 317:                 >
+ 318:                   <div
+ 319:                     className={
+ 320:                       styles.attentionContent
+ 321:                     }
+ 322:                   >
+ 323:                     <strong>
+ 324:                       {
+ 325:                         request.campaignName
+ 326:                       }
+ 327:                     </strong>
+ 328: 
+ 329:                     <span>
+ 330:                       {
+ 331:                         request.id
+ 332:                       }
+ 333:                       {" Â· "}
+ 334:                       {getRequestTypeLabel(
+ 335:                         request.type
+ 336:                       )}
+ 337:                     </span>
+ 338: 
+ 339:                     <p>
+ 340:                       {request.review
+ 341:                         ?.requestedChanges
+ 342:                         .length
+ 343:                         ? `${request.review.requestedChanges.length} ${
+ 344:                             request.review.requestedChanges.length ===
+ 345:                             1
+ 346:                               ? "change"
+ 347:                               : "changes"
+ 348:                           } requested before this request can continue.`
+ 349:                         : "Poster requested changes before this request can continue."}
+ 350:                     </p>
+ 351:                   </div>
+ 352: 
+ 353:                   <Link
+ 354:                     href={`/requests/${request.id}`}
+ 355:                     className={
+ 356:                       styles.reviewLink
+ 357:                     }
+ 358:                   >
+ 359:                     Review changes
+ 360:                   </Link>
+ 361:                 </article>
+ 362:               )
+ 363:             )}
+ 364:           </div>
+ 365:         </section>
+ 366:       ) : null}
+ 367: 
+ 368:       <section
+ 369:         className={
+ 370:           styles.section
+ 371:         }
+ 372:       >
+ 373:         <div
+ 374:           className={
+ 375:             styles.sectionHeader
+ 376:           }
+ 377:         >
+ 378:           <div>
+ 379:             <h2>
+ 380:               Active campaigns
+ 381:             </h2>
+ 382: 
+ 383:             <p>
+ 384:               Campaigns currently delivering through Poster.
+ 385:             </p>
+ 386:           </div>
+ 387: 
+ 388:           <Link href="/campaigns">
+ 389:             View all campaigns
+ 390:           </Link>
+ 391:         </div>
+ 392: 
+ 393:         {activeCampaigns.length >
+ 394:         0 ? (
+ 395:           <div
+ 396:             className={
+ 397:               styles.campaignTable
+ 398:             }
+ 399:           >
+ 400:             <div
+ 401:               className={
+ 402:                 styles.tableHeader
+ 403:               }
+ 404:             >
+ 405:               <span>
+ 406:                 Campaign
+ 407:               </span>
+ 408: 
+ 409:               <span>
+ 410:                 Placement
+ 411:               </span>
+ 412: 
+ 413:               <span>
+ 414:                 Delivery / result
+ 415:               </span>
+ 416: 
+ 417:               <span>
+ 418:                 Status
+ 419:               </span>
+ 420:             </div>
+ 421: 
+ 422:             {activeCampaigns.map(
+ 423:               (
+ 424:                 campaign
+ 425:               ) => {
+ 426:                 const delivery =
+ 427:                   calculateDeliveryProgress(
+ 428:                     campaign
+ 429:                       .financials
+ 430:                       .deliveryTarget,
+ 431:                     campaign
+ 432:                       .financials
+ 433:                       .delivered
+ 434:                   );
+ 435: 
+ 436:                 const ctr =
+ 437:                   calculateCtr(
+ 438:                     campaign
+ 439:                       .performance
+ 440:                       .impressions,
+ 441:                     campaign
+ 442:                       .performance
+ 443:                       .clicks
+ 444:                   );
+ 445: 
+ 446:                 return (
+ 447:                   <Link
+ 448:                     key={
+ 449:                       campaign.id
+ 450:                     }
+ 451:                     href={`/campaigns/${campaign.id}`}
+ 452:                     className={
+ 453:                       styles.campaignRow
+ 454:                     }
+ 455:                   >
+ 456:                     <div
+ 457:                       className={
+ 458:                         styles.primaryCell
+ 459:                       }
+ 460:                     >
+ 461:                       <strong>
+ 462:                         {
+ 463:                           campaign.name
+ 464:                         }
+ 465:                       </strong>
+ 466: 
+ 467:                       <span>
+ 468:                         {
+ 469:                           campaign.id
+ 470:                         }
+ 471:                         {" Â· "}
+ 472:                         {getCampaignTypeLabel(
+ 473:                           campaign.type
+ 474:                         )}
+ 475:                       </span>
+ 476:                     </div>
+ 477: 
+ 478:                     <div
+ 479:                       className={
+ 480:                         styles.placementCell
+ 481:                       }
+ 482:                     >
+ 483:                       {campaign.placements.map(
+ 484:                         (
+ 485:                           placement
+ 486:                         ) => (
+ 487:                           <span
+ 488:                             key={
+ 489:                               placement
+ 490:                             }
+ 491:                           >
+ 492:                             {getPlacementLabel(
+ 493:                               placement
+ 494:                             )}
+ 495:                           </span>
+ 496:                         )
+ 497:                       )}
+ 498:                     </div>
+ 499: 
+ 500:                     <div
+ 501:                       className={
+ 502:                         styles.resultCell
+ 503:                       }
+ 504:                     >
+ 505:                       {delivery !==
+ 506:                       null ? (
+ 507:                         <>
+ 508:                           <div
+ 509:                             className={
+ 510:                               styles.deliveryHeader
+ 511:                             }
+ 512:                           >
+ 513:                             <strong>
+ 514:                               {delivery.toFixed(
+ 515:                                 1
+ 516:                               )}
+ 517:                               %
+ 518:                             </strong>
+ 519: 
+ 520:                             <span>
+ 521:                               {formatClientNumber(
+ 522:                                 campaign
+ 523:                                   .financials
+ 524:                                   .delivered ??
+ 525:                                   0
+ 526:                               )}
+ 527:                               {" / "}
+ 528:                               {formatClientNumber(
+ 529:                                 campaign
+ 530:                                   .financials
+ 531:                                   .deliveryTarget ??
+ 532:                                   0
+ 533:                               )}
+ 534:                             </span>
+ 535:                           </div>
+ 536: 
+ 537:                           <div
+ 538:                             className={
+ 539:                               styles.progress
+ 540:                             }
+ 541:                           >
+ 542:                             <i
+ 543:                               style={{
+ 544:                                 width: `${delivery}%`,
+ 545:                               }}
+ 546:                             />
+ 547:                           </div>
+ 548:                         </>
+ 549:                       ) : (
+ 550:                         <>
+ 551:                           <strong>
+ 552:                             {formatClientNumber(
+ 553:                               campaign
+ 554:                                 .performance
+ 555:                                 .impressions
+ 556:                             )}
+ 557:                             {" impressions"}
+ 558:                           </strong>
+ 559: 
+ 560:                           <span>
+ 561:                             {campaign
+ 562:                               .performance
+ 563:                               .conversions ===
+ 564:                             null
+ 565:                               ? `${ctr.toFixed(
+ 566:                                   2
+ 567:                                 )}% CTR Â· conversions not tracked`
+ 568:                               : `${formatClientNumber(
+ 569:                                   campaign
+ 570:                                     .performance
+ 571:                                     .conversions
+ 572:                                 )} conversions Â· ${ctr.toFixed(
+ 573:                                   2
+ 574:                                 )}% CTR`}
+ 575:                           </span>
+ 576:                         </>
+ 577:                       )}
+ 578:                     </div>
+ 579: 
+ 580:                     <span
+ 581:                       className={getCampaignStatusClass(
+ 582:                         campaign.status
+ 583:                       )}
+ 584:                     >
+ 585:                       {getCampaignStatusLabel(
+ 586:                         campaign.status
+ 587:                       )}
+ 588:                     </span>
+ 589:                   </Link>
+ 590:                 );
+ 591:               }
+ 592:             )}
+ 593:           </div>
+ 594:         ) : (
+ 595:           <div
+ 596:             className={
+ 597:               styles.emptyState
+ 598:             }
+ 599:           >
+ 600:             No campaigns are currently active.
+ 601:           </div>
+ 602:         )}
+ 603:       </section>
+ 604: 
+ 605:       <section
+ 606:         className={
+ 607:           styles.performanceSection
+ 608:         }
+ 609:       >
+ 610:         <div
+ 611:           className={
+ 612:             styles.sectionHeader
+ 613:           }
+ 614:         >
+ 615:           <div>
+ 616:             <h2>
+ 617:               Performance
+ 618:             </h2>
+ 619: 
+ 620:             <p>
+ 621:               Recorded results across your campaigns.
+ 622:             </p>
+ 623:           </div>
+ 624: 
+ 625:           <Link href="/performance">
+ 626:             View performance
+ 627:           </Link>
+ 628:         </div>
+ 629: 
+ 630:         <div
+ 631:           className={
+ 632:             styles.performanceSummary
+ 633:           }
+ 634:         >
+ 635:           <div>
+ 636:             <span>
+ 637:               Impressions
+ 638:             </span>
+ 639: 
+ 640:             <strong>
+ 641:               {formatClientNumber(
+ 642:                 totalImpressions
+ 643:               )}
+ 644:             </strong>
+ 645:           </div>
+ 646: 
+ 647:           <div>
+ 648:             <span>
+ 649:               Clicks
+ 650:             </span>
+ 651: 
+ 652:             <strong>
+ 653:               {formatClientNumber(
+ 654:                 totalClicks
+ 655:               )}
+ 656:             </strong>
+ 657:           </div>
+ 658: 
+ 659:           <div>
+ 660:             <span>
+ 661:               CTR
+ 662:             </span>
+ 663: 
+ 664:             <strong>
+ 665:               {overallCtr.toFixed(
+ 666:                 2
+ 667:               )}
+ 668:               %
+ 669:             </strong>
+ 670:           </div>
+ 671: 
+ 672:           <div>
+ 673:             <span>
+ 674:               Conversions
+ 675:             </span>
+ 676: 
+ 677:             <strong>
+ 678:               {formatClientNumber(
+ 679:                 trackedConversions
+ 680:               )}
+ 681:             </strong>
+ 682: 
+ 683:             {campaignsWithoutTracking >
+ 684:             0 ? (
+ 685:               <small>
+ 686:                 {campaignsWithoutTracking}
+ 687:                 {" "}
+ 688:                 {campaignsWithoutTracking ===
+ 689:                 1
+ 690:                   ? "campaign is"
+ 691:                   : "campaigns are"}
+ 692:                 {" "}
+ 693:                 not tracking conversions
+ 694:               </small>
+ 695:             ) : null}
+ 696:           </div>
+ 697:         </div>
+ 698:       </section>
+ 699: 
+ 700:       <section
+ 701:         className={
+ 702:           styles.section
+ 703:         }
+ 704:       >
+ 705:         <div
+ 706:           className={
+ 707:             styles.sectionHeader
+ 708:           }
+ 709:         >
+ 710:           <div>
+ 711:             <h2>
+ 712:               Recent requests
+ 713:             </h2>
+ 714: 
+ 715:             <p>
+ 716:               Latest advertising requests submitted to Poster.
+ 717:             </p>
+ 718:           </div>
+ 719: 
+ 720:           <Link href="/requests">
+ 721:             View all requests
+ 722:           </Link>
+ 723:         </div>
+ 724: 
+ 725:         <div
+ 726:           className={
+ 727:             styles.rows
+ 728:           }
+ 729:         >
+ 730:           {recentRequests.map(
+ 731:             (
+ 732:               request
+ 733:             ) => (
+ 734:               <Link
+ 735:                 key={
+ 736:                   request.id
+ 737:                 }
+ 738:                 href={`/requests/${request.id}`}
+ 739:                 className={
+ 740:                   styles.row
+ 741:                 }
+ 742:               >
+ 743:                 <div
+ 744:                   className={
+ 745:                     styles.primaryCell
+ 746:                   }
+ 747:                 >
+ 748:                   <strong>
+ 749:                     {
+ 750:                       request.campaignName
+ 751:                     }
+ 752:                   </strong>
+ 753: 
+ 754:                   <span>
+ 755:                     {
+ 756:                       request.id
+ 757:                     }
+ 758:                     {" Â· "}
+ 759:                     {getRequestTypeLabel(
+ 760:                       request.type
+ 761:                     )}
+ 762:                   </span>
+ 763:                 </div>
+ 764: 
+ 765:                 <span
+ 766:                   className={getRequestStatusClass(
+ 767:                     request.status
+ 768:                   )}
+ 769:                 >
+ 770:                   {getRequestStatusLabel(
+ 771:                     request.status
+ 772:                   )}
+ 773:                 </span>
+ 774: 
+ 775:                 <span
+ 776:                   className={
+ 777:                     styles.chevron
+ 778:                   }
+ 779:                   aria-hidden="true"
+ 780:                 >
+ 781:                   â€º
+ 782:                 </span>
+ 783:               </Link>
+ 784:             )
+ 785:           )}
+ 786:         </div>
+ 787:       </section>
+ 788:     </>
+ 789:   );
+ 790: }
+
+===== .\src\features\account\AccountManager.tsx =====
+   1: "use client";
+   2: 
+   3: import {
+   4:   useState,
+   5: } from "react";
+   6: 
+   7: import type {
+   8:   FormEvent,
+   9: } from "react";
+  10: 
+  11: import {
+  12:   getWorkspaceAccountRoleLabel,
+  13:   getWorkspaceAccountStatusLabel,
+  14:   workspaceAccountProfile,
+  15: } from "@/features/workspace/workspace.account";
+  16: 
+  17: import {
+  18:   getCurrentOrganization,
+  19: } from "@/features/workspace/workspace.selectors";
+  20: 
+  21: import styles from "./AccountManager.module.css";
+  22: 
+  23: interface AccountFormState {
+  24:   organizationName: string;
+  25: 
+  26:   website: string;
+  27:   industry: string;
+  28:   country: string;
+  29:   billingEmail: string;
+  30: 
+  31:   contactName: string;
+  32:   jobTitle: string;
+  33:   businessEmail: string;
+  34:   phone: string;
+  35: }
+  36: 
+  37: const COUNTRIES = [
+  38:   "Afghanistan",
+  39:   "Albania",
+  40:   "Algeria",
+  41:   "Andorra",
+  42:   "Angola",
+  43:   "Antigua and Barbuda",
+  44:   "Argentina",
+  45:   "Armenia",
+  46:   "Australia",
+  47:   "Austria",
+  48:   "Azerbaijan",
+  49:   "Bahamas",
+  50:   "Bahrain",
+  51:   "Bangladesh",
+  52:   "Barbados",
+  53:   "Belarus",
+  54:   "Belgium",
+  55:   "Belize",
+  56:   "Benin",
+  57:   "Bhutan",
+  58:   "Bolivia",
+  59:   "Bosnia and Herzegovina",
+  60:   "Botswana",
+  61:   "Brazil",
+  62:   "Brunei",
+  63:   "Bulgaria",
+  64:   "Burkina Faso",
+  65:   "Burundi",
+  66:   "Cabo Verde",
+  67:   "Cambodia",
+  68:   "Cameroon",
+  69:   "Canada",
+  70:   "Central African Republic",
+  71:   "Chad",
+  72:   "Chile",
+  73:   "China",
+  74:   "Colombia",
+  75:   "Comoros",
+  76:   "Congo",
+  77:   "Costa Rica",
+  78:   "Croatia",
+  79:   "Cuba",
+  80:   "Cyprus",
+  81:   "Czechia",
+  82:   "Democratic Republic of the Congo",
+  83:   "Denmark",
+  84:   "Djibouti",
+  85:   "Dominica",
+  86:   "Dominican Republic",
+  87:   "Ecuador",
+  88:   "Egypt",
+  89:   "El Salvador",
+  90:   "Equatorial Guinea",
+  91:   "Eritrea",
+  92:   "Estonia",
+  93:   "Eswatini",
+  94:   "Ethiopia",
+  95:   "Fiji",
+  96:   "Finland",
+  97:   "France",
+  98:   "Gabon",
+  99:   "Gambia",
+ 100:   "Georgia",
+ 101:   "Germany",
+ 102:   "Ghana",
+ 103:   "Greece",
+ 104:   "Grenada",
+ 105:   "Guatemala",
+ 106:   "Guinea",
+ 107:   "Guinea-Bissau",
+ 108:   "Guyana",
+ 109:   "Haiti",
+ 110:   "Honduras",
+ 111:   "Hungary",
+ 112:   "Iceland",
+ 113:   "India",
+ 114:   "Indonesia",
+ 115:   "Iran",
+ 116:   "Iraq",
+ 117:   "Ireland",
+ 118:   "Israel",
+ 119:   "Italy",
+ 120:   "Ivory Coast",
+ 121:   "Jamaica",
+ 122:   "Japan",
+ 123:   "Jordan",
+ 124:   "Kazakhstan",
+ 125:   "Kenya",
+ 126:   "Kiribati",
+ 127:   "Kuwait",
+ 128:   "Kyrgyzstan",
+ 129:   "Laos",
+ 130:   "Latvia",
+ 131:   "Lebanon",
+ 132:   "Lesotho",
+ 133:   "Liberia",
+ 134:   "Libya",
+ 135:   "Liechtenstein",
+ 136:   "Lithuania",
+ 137:   "Luxembourg",
+ 138:   "Madagascar",
+ 139:   "Malawi",
+ 140:   "Malaysia",
+ 141:   "Maldives",
+ 142:   "Mali",
+ 143:   "Malta",
+ 144:   "Marshall Islands",
+ 145:   "Mauritania",
+ 146:   "Mauritius",
+ 147:   "Mexico",
+ 148:   "Micronesia",
+ 149:   "Moldova",
+ 150:   "Monaco",
+ 151:   "Mongolia",
+ 152:   "Montenegro",
+ 153:   "Morocco",
+ 154:   "Mozambique",
+ 155:   "Myanmar",
+ 156:   "Namibia",
+ 157:   "Nauru",
+ 158:   "Nepal",
+ 159:   "Netherlands",
+ 160:   "New Zealand",
+ 161:   "Nicaragua",
+ 162:   "Niger",
+ 163:   "Nigeria",
+ 164:   "North Korea",
+ 165:   "North Macedonia",
+ 166:   "Norway",
+ 167:   "Oman",
+ 168:   "Pakistan",
+ 169:   "Palau",
+ 170:   "Palestine",
+ 171:   "Panama",
+ 172:   "Papua New Guinea",
+ 173:   "Paraguay",
+ 174:   "Peru",
+ 175:   "Philippines",
+ 176:   "Poland",
+ 177:   "Portugal",
+ 178:   "Qatar",
+ 179:   "Romania",
+ 180:   "Russia",
+ 181:   "Rwanda",
+ 182:   "Saint Kitts and Nevis",
+ 183:   "Saint Lucia",
+ 184:   "Saint Vincent and the Grenadines",
+ 185:   "Samoa",
+ 186:   "San Marino",
+ 187:   "Sao Tome and Principe",
+ 188:   "Saudi Arabia",
+ 189:   "Senegal",
+ 190:   "Serbia",
+ 191:   "Seychelles",
+ 192:   "Sierra Leone",
+ 193:   "Singapore",
+ 194:   "Slovakia",
+ 195:   "Slovenia",
+ 196:   "Solomon Islands",
+ 197:   "Somalia",
+ 198:   "South Africa",
+ 199:   "South Korea",
+ 200:   "South Sudan",
+ 201:   "Spain",
+ 202:   "Sri Lanka",
+ 203:   "Sudan",
+ 204:   "Suriname",
+ 205:   "Sweden",
+ 206:   "Switzerland",
+ 207:   "Syria",
+ 208:   "Taiwan",
+ 209:   "Tajikistan",
+ 210:   "Tanzania",
+ 211:   "Thailand",
+ 212:   "Timor-Leste",
+ 213:   "Togo",
+ 214:   "Tonga",
+ 215:   "Trinidad and Tobago",
+ 216:   "Tunisia",
+ 217:   "Turkey",
+ 218:   "Turkmenistan",
+ 219:   "Tuvalu",
+ 220:   "Uganda",
+ 221:   "Ukraine",
+ 222:   "United Arab Emirates",
+ 223:   "United Kingdom",
+ 224:   "United States",
+ 225:   "Uruguay",
+ 226:   "Uzbekistan",
+ 227:   "Vanuatu",
+ 228:   "Vatican City",
+ 229:   "Venezuela",
+ 230:   "Vietnam",
+ 231:   "Yemen",
+ 232:   "Zambia",
+ 233:   "Zimbabwe",
+ 234: ] as const;
+ 235: 
+ 236: const organization =
+ 237:   getCurrentOrganization();
+ 238: 
+ 239: function createInitialState():
+ 240:   AccountFormState {
+ 241:   return {
+ 242:     organizationName:
+ 243:       organization.name,
+ 244: 
+ 245:     website:
+ 246:       workspaceAccountProfile
+ 247:         .organization
+ 248:         .website,
+ 249: 
+ 250:     industry:
+ 251:       workspaceAccountProfile
+ 252:         .organization
+ 253:         .industry,
+ 254: 
+ 255:     country:
+ 256:       workspaceAccountProfile
+ 257:         .organization
+ 258:         .country,
+ 259: 
+ 260:     billingEmail:
+ 261:       workspaceAccountProfile
+ 262:         .organization
+ 263:         .billingEmail,
+ 264: 
+ 265:     contactName:
+ 266:       workspaceAccountProfile
+ 267:         .primaryClient
+ 268:         .fullName,
+ 269: 
+ 270:     jobTitle:
+ 271:       workspaceAccountProfile
+ 272:         .primaryClient
+ 273:         .jobTitle,
+ 274: 
+ 275:     businessEmail:
+ 276:       workspaceAccountProfile
+ 277:         .primaryClient
+ 278:         .businessEmail,
+ 279: 
+ 280:     phone:
+ 281:       workspaceAccountProfile
+ 282:         .primaryClient
+ 283:         .phone,
+ 284:   };
+ 285: }
+ 286: 
+ 287: export default function AccountManager() {
+ 288:   const [
+ 289:     form,
+ 290:     setForm,
+ 291:   ] =
+ 292:     useState<AccountFormState>(
+ 293:       createInitialState
+ 294:     );
+ 295: 
+ 296:   const [
+ 297:     saved,
+ 298:     setSaved,
+ 299:   ] =
+ 300:     useState(false);
+ 301: 
+ 302:   const updateField = <
+ 303:     Key extends keyof AccountFormState,
+ 304:   >(
+ 305:     key: Key,
+ 306:     value: AccountFormState[Key]
+ 307:   ) => {
+ 308:     setForm(
+ 309:       (
+ 310:         current
+ 311:       ) => ({
+ 312:         ...current,
+ 313: 
+ 314:         [key]:
+ 315:           value,
+ 316:       })
+ 317:     );
+ 318: 
+ 319:     setSaved(false);
+ 320:   };
+ 321: 
+ 322:   const saveChanges = (
+ 323:     event:
+ 324:       FormEvent<HTMLFormElement>
+ 325:   ) => {
+ 326:     event.preventDefault();
+ 327: 
+ 328:     /*
+ 329:      * Frontend-only demonstration save.
+ 330:      *
+ 331:      * Backend integration will later:
+ 332:      * - authenticate the Client account,
+ 333:      * - enforce organization ownership,
+ 334:      * - validate editable business fields,
+ 335:      * - persist organization/contact changes,
+ 336:      * - maintain account audit history.
+ 337:      */
+ 338:     setSaved(true);
+ 339:   };
+ 340: 
+ 341:   const resetChanges =
+ 342:     () => {
+ 343:       setForm(
+ 344:         createInitialState()
+ 345:       );
+ 346: 
+ 347:       setSaved(false);
+ 348:     };
+ 349: 
+ 350:   const accountStatus =
+ 351:     getWorkspaceAccountStatusLabel(
+ 352:       workspaceAccountProfile
+ 353:         .status
+ 354:     );
+ 355: 
+ 356:   const accountRole =
+ 357:     getWorkspaceAccountRoleLabel(
+ 358:       workspaceAccountProfile
+ 359:         .primaryClient
+ 360:         .role
+ 361:     );
+ 362: 
+ 363:   return (
+ 364:     <form
+ 365:       className={styles.layout}
+ 366:       onSubmit={saveChanges}
+ 367:     >
+ 368:       <section
+ 369:         className={styles.summaryGrid}
+ 370:         aria-label="Client account summary"
+ 371:       >
+ 372:         <article
+ 373:           className={styles.summaryCard}
+ 374:         >
+ 375:           <span>
+ 376:             Workspace
+ 377:           </span>
+ 378: 
+ 379:           <strong>
+ 380:             {accountStatus}
+ 381:           </strong>
+ 382: 
+ 383:           <small>
+ 384:             {organization.name}
+ 385:           </small>
+ 386:         </article>
+ 387: 
+ 388:         <article
+ 389:           className={styles.summaryCard}
+ 390:         >
+ 391:           <span>
+ 392:             Access
+ 393:           </span>
+ 394: 
+ 395:           <strong>
+ 396:             {accountRole}
+ 397:           </strong>
+ 398: 
+ 399:           <small>
+ 400:             Organization-scoped workspace
+ 401:           </small>
+ 402:         </article>
+ 403: 
+ 404:         <article
+ 405:           className={styles.summaryCard}
+ 406:         >
+ 407:           <span>
+ 408:             Business email
+ 409:           </span>
+ 410: 
+ 411:           <strong>
+ 412:             {workspaceAccountProfile
+ 413:               .primaryClient
+ 414:               .emailVerified
+ 415:               ? "Verified"
+ 416:               : "Verification pending"}
+ 417:           </strong>
+ 418: 
+ 419:           <small>
+ 420:             {form.businessEmail}
+ 421:           </small>
+ 422:         </article>
+ 423:       </section>
+ 424: 
+ 425:       <section
+ 426:         className={styles.mainGrid}
+ 427:       >
+ 428:         <div
+ 429:           className={styles.primaryColumn}
+ 430:         >
+ 431:           <section className="contentCard">
+ 432:             <div
+ 433:               className={styles.sectionHeader}
+ 434:             >
+ 435:               <div>
+ 436:                 <h2 className="sectionTitle">
+ 437:                   Organization
+ 438:                 </h2>
+ 439: 
+ 440:                 <p className="sectionDescription">
+ 441:                   Business identity used for your Poster commercial workspace.
+ 442:                 </p>
+ 443:               </div>
+ 444:             </div>
+ 445: 
+ 446:             <div
+ 447:               className={styles.formGrid}
+ 448:             >
+ 449:               <div className={styles.field}>
+ 450:                 <label htmlFor="organization-name">
+ 451:                   Organization name
+ 452:                 </label>
+ 453: 
+ 454:                 <input
+ 455:                   id="organization-name"
+ 456:                   value={form.organizationName}
+ 457:                   onChange={(
+ 458:                     event
+ 459:                   ) =>
+ 460:                     updateField(
+ 461:                       "organizationName",
+ 462:                       event.target.value
+ 463:                     )
+ 464:                   }
+ 465:                   required
+ 466:                   autoComplete="organization"
+ 467:                 />
+ 468:               </div>
+ 469: 
+ 470:               <div className={styles.field}>
+ 471:                 <label htmlFor="organization-website">
+ 472:                   Website
+ 473:                 </label>
+ 474: 
+ 475:                 <input
+ 476:                   id="organization-website"
+ 477:                   type="url"
+ 478:                   value={form.website}
+ 479:                   onChange={(
+ 480:                     event
+ 481:                   ) =>
+ 482:                     updateField(
+ 483:                       "website",
+ 484:                       event.target.value
+ 485:                     )
+ 486:                   }
+ 487:                   required
+ 488:                   autoComplete="url"
+ 489:                 />
+ 490:               </div>
+ 491: 
+ 492:               <div className={styles.field}>
+ 493:                 <label htmlFor="organization-industry">
+ 494:                   Industry
+ 495:                 </label>
+ 496: 
+ 497:                 <input
+ 498:                   id="organization-industry"
+ 499:                   value={form.industry}
+ 500:                   onChange={(
+ 501:                     event
+ 502:                   ) =>
+ 503:                     updateField(
+ 504:                       "industry",
+ 505:                       event.target.value
+ 506:                     )
+ 507:                   }
+ 508:                   required
+ 509:                 />
+ 510:               </div>
+ 511: 
+ 512:               <div className={styles.field}>
+ 513:                 <label htmlFor="organization-country">
+ 514:                   Country
+ 515:                 </label>
+ 516: 
+ 517:                 <input
+ 518:                   id="organization-country"
+ 519:                   type="search"
+ 520:                   list="client-country-options"
+ 521:                   value={form.country}
+ 522:                   onChange={(
+ 523:                     event
+ 524:                   ) =>
+ 525:                     updateField(
+ 526:                       "country",
+ 527:                       event.target.value
+ 528:                     )
+ 529:                   }
+ 530:                   placeholder="Search country by name"
+ 531:                   autoComplete="country-name"
+ 532:                   required
+ 533:                 />
+ 534: 
+ 535:                 <datalist id="client-country-options">
+ 536:                   {COUNTRIES.map(
+ 537:                     (
+ 538:                       country
+ 539:                     ) => (
+ 540:                       <option
+ 541:                         key={country}
+ 542:                         value={country}
+ 543:                       />
+ 544:                     )
+ 545:                   )}
+ 546:                 </datalist>
+ 547:               </div>
+ 548: 
+ 549:               <div
+ 550:                 className={styles.fieldWide}
+ 551:               >
+ 552:                 <label htmlFor="billing-email">
+ 553:                   Billing contact email
+ 554:                 </label>
+ 555: 
+ 556:                 <input
+ 557:                   id="billing-email"
+ 558:                   type="email"
+ 559:                   value={form.billingEmail}
+ 560:                   onChange={(
+ 561:                     event
+ 562:                   ) =>
+ 563:                     updateField(
+ 564:                       "billingEmail",
+ 565:                       event.target.value
+ 566:                     )
+ 567:                   }
+ 568:                   required
+ 569:                   autoComplete="email"
+ 570:                 />
+ 571: 
+ 572:                 <span
+ 573:                   className={styles.fieldHint}
+ 574:                 >
+ 575:                   Used for future contract and payment communication.
+ 576:                 </span>
+ 577:               </div>
+ 578:             </div>
+ 579:           </section>
+ 580: 
+ 581:           <section className="contentCard">
+ 582:             <div
+ 583:               className={styles.sectionHeader}
+ 584:             >
+ 585:               <div>
+ 586:                 <h2 className="sectionTitle">
+ 587:                   Primary contact
+ 588:                 </h2>
+ 589: 
+ 590:                 <p className="sectionDescription">
+ 591:                   Main person responsible for this Client workspace.
+ 592:                 </p>
+ 593:               </div>
+ 594: 
+ 595:               <span
+ 596:                 className={styles.primaryBadge}
+ 597:               >
+ 598:                 Primary client
+ 599:               </span>
+ 600:             </div>
+ 601: 
+ 602:             <div
+ 603:               className={styles.formGrid}
+ 604:             >
+ 605:               <div className={styles.field}>
+ 606:                 <label htmlFor="contact-name">
+ 607:                   Full name
+ 608:                 </label>
+ 609: 
+ 610:                 <input
+ 611:                   id="contact-name"
+ 612:                   value={form.contactName}
+ 613:                   onChange={(
+ 614:                     event
+ 615:                   ) =>
+ 616:                     updateField(
+ 617:                       "contactName",
+ 618:                       event.target.value
+ 619:                     )
+ 620:                   }
+ 621:                   required
+ 622:                   autoComplete="name"
+ 623:                 />
+ 624:               </div>
+ 625: 
+ 626:               <div className={styles.field}>
+ 627:                 <label htmlFor="job-title">
+ 628:                   Job title
+ 629:                 </label>
+ 630: 
+ 631:                 <input
+ 632:                   id="job-title"
+ 633:                   value={form.jobTitle}
+ 634:                   onChange={(
+ 635:                     event
+ 636:                   ) =>
+ 637:                     updateField(
+ 638:                       "jobTitle",
+ 639:                       event.target.value
+ 640:                     )
+ 641:                   }
+ 642:                   required
+ 643:                   autoComplete="organization-title"
+ 644:                 />
+ 645:               </div>
+ 646: 
+ 647:               <div className={styles.field}>
+ 648:                 <label htmlFor="business-email">
+ 649:                   Business email
+ 650:                 </label>
+ 651: 
+ 652:                 <input
+ 653:                   id="business-email"
+ 654:                   type="email"
+ 655:                   value={form.businessEmail}
+ 656:                   onChange={(
+ 657:                     event
+ 658:                   ) =>
+ 659:                     updateField(
+ 660:                       "businessEmail",
+ 661:                       event.target.value
+ 662:                     )
+ 663:                   }
+ 664:                   required
+ 665:                   autoComplete="email"
+ 666:                 />
+ 667:               </div>
+ 668: 
+ 669:               <div className={styles.field}>
+ 670:                 <label htmlFor="phone">
+ 671:                   Phone
+ 672:                 </label>
+ 673: 
+ 674:                 <input
+ 675:                   id="phone"
+ 676:                   type="tel"
+ 677:                   value={form.phone}
+ 678:                   onChange={(
+ 679:                     event
+ 680:                   ) =>
+ 681:                     updateField(
+ 682:                       "phone",
+ 683:                       event.target.value
+ 684:                     )
+ 685:                   }
+ 686:                   placeholder="+91"
+ 687:                   autoComplete="tel"
+ 688:                 />
+ 689:               </div>
+ 690:             </div>
+ 691:           </section>
+ 692:         </div>
+ 693:       </section>
+ 694: 
+ 695:       {saved ? (
+ 696:         <div
+ 697:           className={styles.success}
+ 698:           role="status"
+ 699:         >
+ 700:           Account changes saved for this frontend demonstration.
+ 701:         </div>
+ 702:       ) : null}
+ 703: 
+ 704:       <div
+ 705:         className={styles.actions}
+ 706:       >
+ 707:         <button
+ 708:           type="button"
+ 709:           className="secondaryButton"
+ 710:           onClick={resetChanges}
+ 711:         >
+ 712:           Reset
+ 713:         </button>
+ 714: 
+ 715:         <button
+ 716:           type="submit"
+ 717:           className="primaryButton"
+ 718:         >
+ 719:           Save changes
+ 720:         </button>
+ 721:       </div>
+ 722: 
+ 723:       <p
+ 724:         className={styles.demoNote}
+ 725:       >
+ 726:         Development environment Â· Production account changes will be stored
+ 727:         through authenticated organization APIs.
+ 728:       </p>
+ 729:     </form>
+ 730:   );
+ 731: }
+

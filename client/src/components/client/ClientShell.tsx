@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type {
   ReactNode,
@@ -32,6 +32,7 @@ type NavigationIcon =
   | "new"
   | "campaigns"
   | "performance"
+  | "payments"
   | "account";
 
 interface NavigationItem {
@@ -65,6 +66,11 @@ const navigation: NavigationItem[] = [
     href: "/performance",
     label: "Performance",
     icon: "performance",
+  },
+  {
+    href: "/payments",
+    label: "Payments",
+    icon: "payments",
   },
 
 ];
@@ -252,6 +258,28 @@ function NavIcon({
     );
   }
 
+  if (
+    name ===
+    "payments"
+  ) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="6"
+          width="18"
+          height="13"
+          rx="2"
+        />
+
+        <path d="M3 10h18" />
+        <path d="M7 15h4" />
+      </svg>
+    );
+  }
   return (
     <svg
       viewBox="0 0 24 24"
@@ -470,3 +498,7 @@ export default function ClientShell({
     </div>
   );
 }
+
+
+
+

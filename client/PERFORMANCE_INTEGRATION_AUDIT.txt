@@ -1,0 +1,1442 @@
+﻿===== .\src\app\(portal)\performance\page.tsx =====
+   1: import PerformanceDashboard from "@/features/performance/PerformanceDashboard";
+   2: 
+   3: export default function PerformancePage() {
+   4:   return (
+   5:     <>
+   6:       <header className="pageHeader">
+   7:         <div>
+   8:           <div className="pageEyebrow">
+   9:             Campaign results
+  10:           </div>
+  11: 
+  12:           <h1 className="pageTitle">
+  13:             Performance
+  14:           </h1>
+  15: 
+  16:           <p className="pageDescription">
+  17:             Track delivery, engagement, conversions, and commission.
+  18:           </p>
+  19:         </div>
+  20:       </header>
+  21: 
+  22:       <PerformanceDashboard />
+  23:     </>
+  24:   );
+  25: }
+
+===== .\src\features\performance\PerformanceDashboard.tsx =====
+   1: "use client";
+   2: 
+   3: import {
+   4:   useMemo,
+   5:   useState,
+   6: } from "react";
+   7: 
+   8: import Link from "next/link";
+   9: 
+  10: import {
+  11:   formatClientCurrency,
+  12:   formatClientNumber,
+  13:   getCampaignStatusLabel,
+  14:   getCampaignTypeLabel,
+  15:   getPlacementLabel,
+  16:   getTrackingStatusLabel,
+  17: } from "@/features/workspace/workspace.formatters";
+  18: 
+  19: import {
+  20:   getCampaignPerformanceSnapshot,
+  21:   getPerformanceWindowLabel,
+  22:   placementPerformanceSnapshots,
+  23: } from "@/features/workspace/workspace.performance";
+  24: 
+  25: import type {
+  26:   PerformanceWindow,
+  27: } from "@/features/workspace/workspace.performance";
+  28: 
+  29: import {
+  30:   getOrganizationCampaigns,
+  31: } from "@/features/workspace/workspace.selectors";
+  32: 
+  33: import {
+  34:   calculateConversionRate,
+  35:   calculateCtr,
+  36: } from "@/features/workspace/workspace.types";
+  37: 
+  38: import type {
+  39:   CampaignStatus,
+  40: } from "@/features/workspace/workspace.types";
+  41: 
+  42: import styles from "./PerformanceDashboard.module.css";
+  43: 
+  44: type CampaignSelection =
+  45:   | "all"
+  46:   | string;
+  47: 
+  48: const clientCampaigns =
+  49:   getOrganizationCampaigns();
+  50: 
+  51: const windowOptions: {
+  52:   value: PerformanceWindow;
+  53:   label: string;
+  54: }[] = [
+  55:   {
+  56:     value: "7d",
+  57:     label: "7 days",
+  58:   },
+  59: 
+  60:   {
+  61:     value: "30d",
+  62:     label: "30 days",
+  63:   },
+  64: 
+  65:   {
+  66:     value: "all",
+  67:     label: "All time",
+  68:   },
+  69: ];
+  70: 
+  71: function getStatusClass(
+  72:   status: CampaignStatus
+  73: ): string {
+  74:   switch (status) {
+  75:     case "active":
+  76:       return "statusBadge statusActive";
+  77: 
+  78:     case "scheduled":
+  79:       return "statusBadge statusScheduled";
+  80: 
+  81:     case "paused":
+  82:       return "statusBadge statusAttention";
+  83: 
+  84:     case "draft":
+  85:     case "ended":
+  86:     case "disabled":
+  87:       return `statusBadge ${styles.statusNeutral}`;
+  88:   }
+  89: }
+  90: 
+  91: export default function PerformanceDashboard() {
+  92:   const [
+  93:     selectedWindow,
+  94:     setSelectedWindow,
+  95:   ] =
+  96:     useState<PerformanceWindow>(
+  97:       "30d"
+  98:     );
+  99: 
+ 100:   const [
+ 101:     selectedCampaign,
+ 102:     setSelectedCampaign,
+ 103:   ] =
+ 104:     useState<CampaignSelection>(
+ 105:       "all"
+ 106:     );
+ 107: 
+ 108:   const visibleCampaigns =
+ 109:     useMemo(
+ 110:       () => {
+ 111:         if (
+ 112:           selectedCampaign ===
+ 113:           "all"
+ 114:         ) {
+ 115:           return clientCampaigns;
+ 116:         }
+ 117: 
+ 118:         return clientCampaigns.filter(
+ 119:           (
+ 120:             campaign
+ 121:           ) =>
+ 122:             campaign.id ===
+ 123:             selectedCampaign
+ 124:         );
+ 125:       },
+ 126:       [
+ 127:         selectedCampaign,
+ 128:       ]
+ 129:     );
+ 130: 
+ 131:   const campaignRows =
+ 132:     useMemo(
+ 133:       () =>
+ 134:         visibleCampaigns.map(
+ 135:           (
+ 136:             campaign
+ 137:           ) => {
+ 138:             const snapshot =
+ 139:               getCampaignPerformanceSnapshot(
+ 140:                 campaign.id
+ 141:               );
+ 142: 
+ 143:             const metrics =
+ 144:               snapshot?.windows[
+ 145:                 selectedWindow
+ 146:               ] ?? {
+ 147:                 impressions:
+ 148:                   0,
+ 149: 
+ 150:                 clicks:
+ 151:                   0,
+ 152: 
+ 153:                 conversions:
+ 154:                   null,
+ 155:               };
+ 156: 
+ 157:             const ctr =
+ 158:               calculateCtr(
+ 159:                 metrics.impressions,
+ 160:                 metrics.clicks
+ 161:               );
+ 162: 
+ 163:             const conversionRate =
+ 164:               calculateConversionRate(
+ 165:                 metrics.clicks,
+ 166:                 metrics.conversions
+ 167:               );
+ 168: 
+ 169:             return {
+ 170:               campaign,
+ 171:               metrics,
+ 172:               ctr,
+ 173:               conversionRate,
+ 174:             };
+ 175:           }
+ 176:         ),
+ 177:       [
+ 178:         selectedWindow,
+ 179:         visibleCampaigns,
+ 180:       ]
+ 181:     );
+ 182: 
+ 183:   const totals =
+ 184:     useMemo(
+ 185:       () => {
+ 186:         let impressions =
+ 187:           0;
+ 188: 
+ 189:         let clicks =
+ 190:           0;
+ 191: 
+ 192:         let trackedClicks =
+ 193:           0;
+ 194: 
+ 195:         let conversions =
+ 196:           0;
+ 197: 
+ 198:         let trackedCampaigns =
+ 199:           0;
+ 200: 
+ 201:         let untrackedCampaigns =
+ 202:           0;
+ 203: 
+ 204:         let commission =
+ 205:           0;
+ 206: 
+ 207:         campaignRows.forEach(
+ 208:           (
+ 209:             row
+ 210:           ) => {
+ 211:             impressions +=
+ 212:               row.metrics
+ 213:                 .impressions;
+ 214: 
+ 215:             clicks +=
+ 216:               row.metrics.clicks;
+ 217: 
+ 218:             commission +=
+ 219:               row.metrics
+ 220:                 .commission ??
+ 221:               0;
+ 222: 
+ 223:             if (
+ 224:               row.metrics
+ 225:                 .conversions ===
+ 226:               null
+ 227:             ) {
+ 228:               untrackedCampaigns +=
+ 229:                 1;
+ 230: 
+ 231:               return;
+ 232:             }
+ 233: 
+ 234:             trackedCampaigns +=
+ 235:               1;
+ 236: 
+ 237:             trackedClicks +=
+ 238:               row.metrics.clicks;
+ 239: 
+ 240:             conversions +=
+ 241:               row.metrics
+ 242:                 .conversions;
+ 243:           }
+ 244:         );
+ 245: 
+ 246:         return {
+ 247:           impressions,
+ 248: 
+ 249:           clicks,
+ 250: 
+ 251:           ctr:
+ 252:             calculateCtr(
+ 253:               impressions,
+ 254:               clicks
+ 255:             ),
+ 256: 
+ 257:           conversions:
+ 258:             trackedCampaigns >
+ 259:             0
+ 260:               ? conversions
+ 261:               : null,
+ 262: 
+ 263:           conversionRate:
+ 264:             trackedCampaigns >
+ 265:             0
+ 266:               ? calculateConversionRate(
+ 267:                   trackedClicks,
+ 268:                   conversions
+ 269:                 )
+ 270:               : null,
+ 271: 
+ 272:           commission,
+ 273: 
+ 274:           untrackedCampaigns,
+ 275:         };
+ 276:       },
+ 277:       [
+ 278:         campaignRows,
+ 279:       ]
+ 280:     );
+ 281: 
+ 282:   const maximumPlacementImpressions =
+ 283:     Math.max(
+ 284:       ...placementPerformanceSnapshots.map(
+ 285:         (
+ 286:           placement
+ 287:         ) =>
+ 288:           placement.windows[
+ 289:             selectedWindow
+ 290:           ].impressions
+ 291:       ),
+ 292:       1
+ 293:     );
+ 294: 
+ 295:   return (
+ 296:     <>
+ 297:       <section
+ 298:         className={
+ 299:           styles.controls
+ 300:         }
+ 301:       >
+ 302:         <div
+ 303:           className={
+ 304:             styles.windowFilters
+ 305:           }
+ 306:           aria-label="Performance date range"
+ 307:         >
+ 308:           {windowOptions.map(
+ 309:             (
+ 310:               option
+ 311:             ) => (
+ 312:               <button
+ 313:                 key={
+ 314:                   option.value
+ 315:                 }
+ 316:                 type="button"
+ 317:                 className={
+ 318:                   selectedWindow ===
+ 319:                   option.value
+ 320:                     ? styles.windowButtonActive
+ 321:                     : styles.windowButton
+ 322:                 }
+ 323:                 onClick={() =>
+ 324:                   setSelectedWindow(
+ 325:                     option.value
+ 326:                   )
+ 327:                 }
+ 328:               >
+ 329:                 {
+ 330:                   option.label
+ 331:                 }
+ 332:               </button>
+ 333:             )
+ 334:           )}
+ 335:         </div>
+ 336: 
+ 337:         <label
+ 338:           className={
+ 339:             styles.campaignFilter
+ 340:           }
+ 341:         >
+ 342:           <span>
+ 343:             Campaign
+ 344:           </span>
+ 345: 
+ 346:           <select
+ 347:             value={
+ 348:               selectedCampaign
+ 349:             }
+ 350:             onChange={(
+ 351:               event
+ 352:             ) =>
+ 353:               setSelectedCampaign(
+ 354:                 event.target.value
+ 355:               )
+ 356:             }
+ 357:           >
+ 358:             <option
+ 359:               value="all"
+ 360:             >
+ 361:               All campaigns
+ 362:             </option>
+ 363: 
+ 364:             {clientCampaigns.map(
+ 365:               (
+ 366:                 campaign
+ 367:               ) => (
+ 368:                 <option
+ 369:                   key={
+ 370:                     campaign.id
+ 371:                   }
+ 372:                   value={
+ 373:                     campaign.id
+ 374:                   }
+ 375:                 >
+ 376:                   {
+ 377:                     campaign.id
+ 378:                   }
+ 379:                   {" · "}
+ 380:                   {
+ 381:                     campaign.name
+ 382:                   }
+ 383:                 </option>
+ 384:               )
+ 385:             )}
+ 386:           </select>
+ 387:         </label>
+ 388:       </section>
+ 389: 
+ 390:       <div
+ 391:         className={
+ 392:           styles.periodLabel
+ 393:         }
+ 394:       >
+ 395:         {getPerformanceWindowLabel(
+ 396:           selectedWindow
+ 397:         )}
+ 398:       </div>
+ 399: 
+ 400:       <section
+ 401:         className={
+ 402:           styles.metrics
+ 403:         }
+ 404:       >
+ 405:         <article
+ 406:           className={
+ 407:             styles.metric
+ 408:           }
+ 409:         >
+ 410:           <span>
+ 411:             Impressions
+ 412:           </span>
+ 413: 
+ 414:           <strong>
+ 415:             {formatClientNumber(
+ 416:               totals.impressions
+ 417:             )}
+ 418:           </strong>
+ 419: 
+ 420:           <small>
+ 421:             Recorded delivery
+ 422:           </small>
+ 423:         </article>
+ 424: 
+ 425:         <article
+ 426:           className={
+ 427:             styles.metric
+ 428:           }
+ 429:         >
+ 430:           <span>
+ 431:             Clicks
+ 432:           </span>
+ 433: 
+ 434:           <strong>
+ 435:             {formatClientNumber(
+ 436:               totals.clicks
+ 437:             )}
+ 438:           </strong>
+ 439: 
+ 440:           <small>
+ 441:             Recorded engagement
+ 442:           </small>
+ 443:         </article>
+ 444: 
+ 445:         <article
+ 446:           className={
+ 447:             styles.metric
+ 448:           }
+ 449:         >
+ 450:           <span>
+ 451:             CTR
+ 452:           </span>
+ 453: 
+ 454:           <strong>
+ 455:             {totals.ctr.toFixed(
+ 456:               2
+ 457:             )}
+ 458:             %
+ 459:           </strong>
+ 460: 
+ 461:           <small>
+ 462:             Click-through rate
+ 463:           </small>
+ 464:         </article>
+ 465: 
+ 466:         <article
+ 467:           className={
+ 468:             styles.metric
+ 469:           }
+ 470:         >
+ 471:           <span>
+ 472:             Conversions
+ 473:           </span>
+ 474: 
+ 475:           <strong>
+ 476:             {totals.conversions ===
+ 477:             null
+ 478:               ? "Not tracked"
+ 479:               : formatClientNumber(
+ 480:                   totals.conversions
+ 481:                 )}
+ 482:           </strong>
+ 483: 
+ 484:           <small>
+ 485:             {totals.conversionRate ===
+ 486:             null
+ 487:               ? "No connected tracking"
+ 488:               : `${totals.conversionRate.toFixed(
+ 489:                   2
+ 490:                 )}% conversion rate`}
+ 491:           </small>
+ 492:         </article>
+ 493: 
+ 494:         <article
+ 495:           className={
+ 496:             styles.metric
+ 497:           }
+ 498:         >
+ 499:           <span>
+ 500:             Affiliate commission
+ 501:           </span>
+ 502: 
+ 503:           <strong>
+ 504:             {formatClientCurrency(
+ 505:               totals.commission
+ 506:             )}
+ 507:           </strong>
+ 508: 
+ 509:           <small>
+ 510:             Recorded commission
+ 511:           </small>
+ 512:         </article>
+ 513:       </section>
+ 514: 
+ 515:       {totals.untrackedCampaigns >
+ 516:       0 ? (
+ 517:         <div
+ 518:           className={
+ 519:             styles.trackingNotice
+ 520:           }
+ 521:         >
+ 522:           {
+ 523:             totals.untrackedCampaigns
+ 524:           }
+ 525:           {" "}
+ 526:           {totals.untrackedCampaigns ===
+ 527:           1
+ 528:             ? "campaign does"
+ 529:             : "campaigns do"}
+ 530:           {" "}
+ 531:           not currently have conversion tracking.
+ 532:         </div>
+ 533:       ) : null}
+ 534: 
+ 535:       <section
+ 536:         className="contentCard"
+ 537:       >
+ 538:         <div
+ 539:           className={
+ 540:             styles.cardHeader
+ 541:           }
+ 542:         >
+ 543:           <div>
+ 544:             <h2
+ 545:               className="sectionTitle"
+ 546:             >
+ 547:               Campaign comparison
+ 548:             </h2>
+ 549: 
+ 550:             <p
+ 551:               className="sectionDescription"
+ 552:             >
+ 553:               Performance and tracking by campaign.
+ 554:             </p>
+ 555:           </div>
+ 556:         </div>
+ 557: 
+ 558:         <div
+ 559:           className={
+ 560:             styles.table
+ 561:           }
+ 562:         >
+ 563:           <div
+ 564:             className={
+ 565:               styles.tableHeader
+ 566:             }
+ 567:           >
+ 568:             <span>
+ 569:               Campaign
+ 570:             </span>
+ 571: 
+ 572:             <span>
+ 573:               Impressions
+ 574:             </span>
+ 575: 
+ 576:             <span>
+ 577:               Clicks / CTR
+ 578:             </span>
+ 579: 
+ 580:             <span>
+ 581:               Conversions
+ 582:             </span>
+ 583: 
+ 584:             <span>
+ 585:               Tracking
+ 586:             </span>
+ 587: 
+ 588:             <span>
+ 589:               Status
+ 590:             </span>
+ 591:           </div>
+ 592: 
+ 593:           {campaignRows.map(
+ 594:             (
+ 595:               row
+ 596:             ) => (
+ 597:               <Link
+ 598:                 key={
+ 599:                   row.campaign.id
+ 600:                 }
+ 601:                 href={`/campaigns/${row.campaign.id}`}
+ 602:                 className={
+ 603:                   styles.tableRow
+ 604:                 }
+ 605:               >
+ 606:                 <div
+ 607:                   className={
+ 608:                     styles.campaignInfo
+ 609:                   }
+ 610:                 >
+ 611:                   <strong>
+ 612:                     {
+ 613:                       row.campaign.name
+ 614:                     }
+ 615:                   </strong>
+ 616: 
+ 617:                   <span>
+ 618:                     {
+ 619:                       row.campaign.id
+ 620:                     }
+ 621:                     {" · "}
+ 622:                     {getCampaignTypeLabel(
+ 623:                       row.campaign.type
+ 624:                     )}
+ 625:                   </span>
+ 626:                 </div>
+ 627: 
+ 628:                 <strong>
+ 629:                   {formatClientNumber(
+ 630:                     row.metrics
+ 631:                       .impressions
+ 632:                   )}
+ 633:                 </strong>
+ 634: 
+ 635:                 <div
+ 636:                   className={
+ 637:                     styles.compactMetric
+ 638:                   }
+ 639:                 >
+ 640:                   <strong>
+ 641:                     {formatClientNumber(
+ 642:                       row.metrics
+ 643:                         .clicks
+ 644:                     )}
+ 645:                   </strong>
+ 646: 
+ 647:                   <span>
+ 648:                     {row.ctr.toFixed(
+ 649:                       2
+ 650:                     )}
+ 651:                     % CTR
+ 652:                   </span>
+ 653:                 </div>
+ 654: 
+ 655:                 <div
+ 656:                   className={
+ 657:                     styles.compactMetric
+ 658:                   }
+ 659:                 >
+ 660:                   <strong>
+ 661:                     {row.metrics
+ 662:                       .conversions ===
+ 663:                     null
+ 664:                       ? "Not tracked"
+ 665:                       : formatClientNumber(
+ 666:                           row.metrics
+ 667:                             .conversions
+ 668:                         )}
+ 669:                   </strong>
+ 670: 
+ 671:                   <span>
+ 672:                     {row.conversionRate ===
+ 673:                     null
+ 674:                       ? "—"
+ 675:                       : `${row.conversionRate.toFixed(
+ 676:                           2
+ 677:                         )}%`}
+ 678:                   </span>
+ 679:                 </div>
+ 680: 
+ 681:                 <span
+ 682:                   className={
+ 683:                     styles.tracking
+ 684:                   }
+ 685:                 >
+ 686:                   {getTrackingStatusLabel(
+ 687:                     row.campaign
+ 688:                       .trackingStatus
+ 689:                   )}
+ 690:                 </span>
+ 691: 
+ 692:                 <span
+ 693:                   className={getStatusClass(
+ 694:                     row.campaign.status
+ 695:                   )}
+ 696:                 >
+ 697:                   {getCampaignStatusLabel(
+ 698:                     row.campaign.status
+ 699:                   )}
+ 700:                 </span>
+ 701:               </Link>
+ 702:             )
+ 703:           )}
+ 704:         </div>
+ 705:       </section>
+ 706: 
+ 707:       {selectedCampaign ===
+ 708:       "all" ? (
+ 709:         <section
+ 710:           className="contentCard"
+ 711:         >
+ 712:           <div
+ 713:             className={
+ 714:               styles.cardHeader
+ 715:             }
+ 716:           >
+ 717:             <div>
+ 718:               <h2
+ 719:                 className="sectionTitle"
+ 720:               >
+ 721:                 Placement performance
+ 722:               </h2>
+ 723: 
+ 724:               <p
+ 725:                 className="sectionDescription"
+ 726:               >
+ 727:                 Home, Search, and Trending results.
+ 728:               </p>
+ 729:             </div>
+ 730:           </div>
+ 731: 
+ 732:           <div
+ 733:             className={
+ 734:               styles.placementList
+ 735:             }
+ 736:           >
+ 737:             {placementPerformanceSnapshots.map(
+ 738:               (
+ 739:                 placement
+ 740:               ) => {
+ 741:                 const metrics =
+ 742:                   placement.windows[
+ 743:                     selectedWindow
+ 744:                   ];
+ 745: 
+ 746:                 const ctr =
+ 747:                   calculateCtr(
+ 748:                     metrics.impressions,
+ 749:                     metrics.clicks
+ 750:                   );
+ 751: 
+ 752:                 const width =
+ 753:                   (
+ 754:                     metrics.impressions /
+ 755:                     maximumPlacementImpressions
+ 756:                   ) *
+ 757:                   100;
+ 758: 
+ 759:                 return (
+ 760:                   <article
+ 761:                     key={
+ 762:                       placement.placement
+ 763:                     }
+ 764:                     className={
+ 765:                       styles.placementRow
+ 766:                     }
+ 767:                   >
+ 768:                     <div
+ 769:                       className={
+ 770:                         styles.placementName
+ 771:                       }
+ 772:                     >
+ 773:                       <strong>
+ 774:                         {getPlacementLabel(
+ 775:                           placement.placement
+ 776:                         )}
+ 777:                       </strong>
+ 778: 
+ 779:                       <span>
+ 780:                         {formatClientNumber(
+ 781:                           metrics.impressions
+ 782:                         )}
+ 783:                         {" impressions"}
+ 784:                       </span>
+ 785:                     </div>
+ 786: 
+ 787:                     <div
+ 788:                       className={
+ 789:                         styles.placementBar
+ 790:                       }
+ 791:                     >
+ 792:                       <span
+ 793:                         style={{
+ 794:                           width:
+ 795:                             `${width}%`,
+ 796:                         }}
+ 797:                       />
+ 798:                     </div>
+ 799: 
+ 800:                     <div
+ 801:                       className={
+ 802:                         styles.placementMetrics
+ 803:                       }
+ 804:                     >
+ 805:                       <strong>
+ 806:                         {formatClientNumber(
+ 807:                           metrics.clicks
+ 808:                         )}
+ 809:                         {" clicks"}
+ 810:                       </strong>
+ 811: 
+ 812:                       <span>
+ 813:                         {ctr.toFixed(
+ 814:                           2
+ 815:                         )}
+ 816:                         % CTR
+ 817:                       </span>
+ 818:                     </div>
+ 819:                   </article>
+ 820:                 );
+ 821:               }
+ 822:             )}
+ 823:           </div>
+ 824:         </section>
+ 825:       ) : null}
+ 826: 
+ 827:       <p
+ 828:         className={
+ 829:           styles.demoNote
+ 830:         }
+ 831:       >
+ 832:         Frontend demonstration snapshots · Real reporting will use
+ 833:         organization-scoped campaign analytics APIs.
+ 834:       </p>
+ 835:     </>
+ 836:   );
+ 837: }
+
+===== .\src\features\performance\PerformanceDashboard.module.css =====
+   1: /* =========================================================
+   2:    CONTROLS
+   3:    ========================================================= */
+   4: 
+   5: .controls {
+   6:   display: flex;
+   7: 
+   8:   align-items: flex-end;
+   9:   justify-content: space-between;
+  10: 
+  11:   gap: 18px;
+  12: 
+  13:   margin-bottom: 12px;
+  14: }
+  15: 
+  16: .windowFilters {
+  17:   display: flex;
+  18: 
+  19:   gap: 4px;
+  20: 
+  21:   padding: 3px;
+  22: 
+  23:   border: 1px solid var(--border);
+  24:   border-radius: var(--radius-md);
+  25: 
+  26:   background: var(--surface);
+  27: }
+  28: 
+  29: .windowButton,
+  30: .windowButtonActive {
+  31:   min-height: 32px;
+  32: 
+  33:   padding:
+  34:     5px
+  35:     10px;
+  36: 
+  37:   border-radius: 5px;
+  38: 
+  39:   font-size: 10px;
+  40:   line-height: 16px;
+  41:   font-weight: 680;
+  42: }
+  43: 
+  44: .windowButton {
+  45:   border: 1px solid transparent;
+  46: 
+  47:   background: transparent;
+  48:   color: var(--text-secondary);
+  49: }
+  50: 
+  51: .windowButton:hover {
+  52:   color: var(--text);
+  53: }
+  54: 
+  55: .windowButtonActive {
+  56:   border: 1px solid var(--border);
+  57: 
+  58:   background: #ffffff;
+  59:   color: var(--primary-dark);
+  60: 
+  61:   box-shadow:
+  62:     0 1px 2px
+  63:     rgba(15, 23, 42, 0.04);
+  64: }
+  65: 
+  66: .campaignFilter {
+  67:   display: grid;
+  68: 
+  69:   gap: 4px;
+  70: }
+  71: 
+  72: .campaignFilter span {
+  73:   color: var(--text-secondary);
+  74: 
+  75:   font-size: 9px;
+  76:   line-height: 15px;
+  77:   font-weight: 700;
+  78: 
+  79:   letter-spacing: 0.04em;
+  80:   text-transform: uppercase;
+  81: }
+  82: 
+  83: .campaignFilter select {
+  84:   min-width: 270px;
+  85:   min-height: 38px;
+  86: 
+  87:   padding:
+  88:     7px
+  89:     10px;
+  90: 
+  91:   border: 1px solid var(--border-strong);
+  92:   border-radius: var(--radius-md);
+  93: 
+  94:   outline: none;
+  95: 
+  96:   background: #ffffff;
+  97:   color: var(--text);
+  98: 
+  99:   font-size: 11px;
+ 100: }
+ 101: 
+ 102: .campaignFilter select:focus {
+ 103:   border-color: var(--primary);
+ 104: 
+ 105:   box-shadow: var(--shadow-focus);
+ 106: }
+ 107: 
+ 108: .periodLabel {
+ 109:   margin-bottom: 8px;
+ 110: 
+ 111:   color: var(--text-muted);
+ 112: 
+ 113:   font-size: 10px;
+ 114:   line-height: 16px;
+ 115:   font-weight: 600;
+ 116: }
+ 117: 
+ 118: /* =========================================================
+ 119:    KPI STRIP
+ 120:    ========================================================= */
+ 121: 
+ 122: .metrics {
+ 123:   display: grid;
+ 124: 
+ 125:   grid-template-columns:
+ 126:     repeat(5, minmax(0, 1fr));
+ 127: 
+ 128:   margin-bottom: 18px;
+ 129: 
+ 130:   border-top: 1px solid var(--border);
+ 131:   border-bottom: 1px solid var(--border);
+ 132: }
+ 133: 
+ 134: .metric {
+ 135:   min-width: 0;
+ 136: 
+ 137:   padding:
+ 138:     16px
+ 139:     17px;
+ 140: }
+ 141: 
+ 142: .metric:first-child {
+ 143:   padding-left: 0;
+ 144: }
+ 145: 
+ 146: .metric + .metric {
+ 147:   border-left: 1px solid var(--border);
+ 148: }
+ 149: 
+ 150: .metric span,
+ 151: .metric strong,
+ 152: .metric small {
+ 153:   display: block;
+ 154: }
+ 155: 
+ 156: .metric span {
+ 157:   color: var(--text-secondary);
+ 158: 
+ 159:   font-size: 10px;
+ 160:   line-height: 15px;
+ 161:   font-weight: 650;
+ 162: }
+ 163: 
+ 164: .metric strong {
+ 165:   margin-top: 6px;
+ 166: 
+ 167:   overflow-wrap: anywhere;
+ 168: 
+ 169:   color: var(--text);
+ 170: 
+ 171:   font-size: 20px;
+ 172:   line-height: 27px;
+ 173:   font-weight: 700;
+ 174: 
+ 175:   letter-spacing: -0.025em;
+ 176: }
+ 177: 
+ 178: .metric small {
+ 179:   margin-top: 3px;
+ 180: 
+ 181:   color: var(--text-muted);
+ 182: 
+ 183:   font-size: 9px;
+ 184:   line-height: 15px;
+ 185: }
+ 186: 
+ 187: .trackingNotice {
+ 188:   margin-bottom: 18px;
+ 189: 
+ 190:   padding:
+ 191:     10px
+ 192:     13px;
+ 193: 
+ 194:   border-left: 3px solid var(--warning);
+ 195: 
+ 196:   background: #fffdf8;
+ 197: 
+ 198:   color: #8a5a22;
+ 199: 
+ 200:   font-size: 10px;
+ 201:   line-height: 17px;
+ 202: }
+ 203: 
+ 204: /* =========================================================
+ 205:    SECTION HEADER
+ 206:    ========================================================= */
+ 207: 
+ 208: .cardHeader {
+ 209:   display: flex;
+ 210: 
+ 211:   align-items: flex-end;
+ 212:   justify-content: space-between;
+ 213: 
+ 214:   gap: 18px;
+ 215: 
+ 216:   margin-bottom: 11px;
+ 217: }
+ 218: 
+ 219: /* =========================================================
+ 220:    CAMPAIGN COMPARISON
+ 221:    ========================================================= */
+ 222: 
+ 223: .table {
+ 224:   overflow-x: auto;
+ 225: 
+ 226:   margin:
+ 227:     0
+ 228:     -20px
+ 229:     -20px;
+ 230: 
+ 231:   border-top: 1px solid var(--border);
+ 232: }
+ 233: 
+ 234: .tableHeader,
+ 235: .tableRow {
+ 236:   display: grid;
+ 237: 
+ 238:   min-width: 920px;
+ 239: 
+ 240:   grid-template-columns:
+ 241:     minmax(260px, 1.45fr)
+ 242:     minmax(110px, 0.65fr)
+ 243:     minmax(135px, 0.75fr)
+ 244:     minmax(145px, 0.8fr)
+ 245:     minmax(120px, 0.65fr)
+ 246:     minmax(95px, 0.5fr);
+ 247: 
+ 248:   gap: 16px;
+ 249: 
+ 250:   align-items: center;
+ 251: 
+ 252:   padding:
+ 253:     0
+ 254:     20px;
+ 255: }
+ 256: 
+ 257: .tableHeader {
+ 258:   min-height: 38px;
+ 259: 
+ 260:   background: #fbfcfe;
+ 261: 
+ 262:   color: var(--text-muted);
+ 263: 
+ 264:   font-size: 9px;
+ 265:   line-height: 14px;
+ 266:   font-weight: 650;
+ 267: 
+ 268:   letter-spacing: 0.045em;
+ 269:   text-transform: uppercase;
+ 270: }
+ 271: 
+ 272: .tableRow {
+ 273:   min-height: 70px;
+ 274: 
+ 275:   border-top: 1px solid var(--border);
+ 276: 
+ 277:   transition:
+ 278:     background-color 120ms ease;
+ 279: }
+ 280: 
+ 281: .tableRow:hover {
+ 282:   background: #fafcff;
+ 283: }
+ 284: 
+ 285: .campaignInfo {
+ 286:   min-width: 0;
+ 287: }
+ 288: 
+ 289: .campaignInfo strong,
+ 290: .campaignInfo span {
+ 291:   display: block;
+ 292: }
+ 293: 
+ 294: .campaignInfo strong {
+ 295:   overflow: hidden;
+ 296: 
+ 297:   color: #273244;
+ 298: 
+ 299:   font-size: 12px;
+ 300:   line-height: 18px;
+ 301:   font-weight: 650;
+ 302: 
+ 303:   text-overflow: ellipsis;
+ 304:   white-space: nowrap;
+ 305: }
+ 306: 
+ 307: .campaignInfo span {
+ 308:   margin-top: 2px;
+ 309: 
+ 310:   color: var(--text-muted);
+ 311: 
+ 312:   font-size: 9px;
+ 313:   line-height: 15px;
+ 314: }
+ 315: 
+ 316: .tableRow > strong {
+ 317:   color: #334155;
+ 318: 
+ 319:   font-size: 11px;
+ 320:   line-height: 17px;
+ 321:   font-weight: 650;
+ 322: }
+ 323: 
+ 324: .compactMetric strong,
+ 325: .compactMetric span {
+ 326:   display: block;
+ 327: }
+ 328: 
+ 329: .compactMetric strong {
+ 330:   color: #334155;
+ 331: 
+ 332:   font-size: 11px;
+ 333:   line-height: 17px;
+ 334:   font-weight: 650;
+ 335: }
+ 336: 
+ 337: .compactMetric span {
+ 338:   margin-top: 2px;
+ 339: 
+ 340:   color: var(--text-muted);
+ 341: 
+ 342:   font-size: 9px;
+ 343:   line-height: 15px;
+ 344: }
+ 345: 
+ 346: .tracking {
+ 347:   color: var(--text-secondary);
+ 348: 
+ 349:   font-size: 10px;
+ 350:   line-height: 16px;
+ 351:   font-weight: 600;
+ 352: }
+ 353: 
+ 354: .statusNeutral {
+ 355:   background: var(--surface);
+ 356: 
+ 357:   color: var(--text-secondary);
+ 358: }
+ 359: 
+ 360: /* =========================================================
+ 361:    PLACEMENT PERFORMANCE
+ 362:    ========================================================= */
+ 363: 
+ 364: .placementList {
+ 365:   margin:
+ 366:     0
+ 367:     -20px
+ 368:     -20px;
+ 369: 
+ 370:   border-top: 1px solid var(--border);
+ 371: }
+ 372: 
+ 373: .placementRow {
+ 374:   display: grid;
+ 375: 
+ 376:   grid-template-columns:
+ 377:     minmax(145px, 0.7fr)
+ 378:     minmax(220px, 1.6fr)
+ 379:     minmax(155px, 0.7fr);
+ 380: 
+ 381:   gap: 20px;
+ 382: 
+ 383:   min-height: 68px;
+ 384: 
+ 385:   align-items: center;
+ 386: 
+ 387:   padding:
+ 388:     11px
+ 389:     20px;
+ 390: 
+ 391:   border-bottom: 1px solid var(--border);
+ 392: }
+ 393: 
+ 394: .placementRow:last-child {
+ 395:   border-bottom: 0;
+ 396: }
+ 397: 
+ 398: .placementName strong,
+ 399: .placementName span {
+ 400:   display: block;
+ 401: }
+ 402: 
+ 403: .placementName strong {
+ 404:   color: #273244;
+ 405: 
+ 406:   font-size: 11px;
+ 407:   line-height: 17px;
+ 408:   font-weight: 650;
+ 409: }
+ 410: 
+ 411: .placementName span {
+ 412:   margin-top: 2px;
+ 413: 
+ 414:   color: var(--text-muted);
+ 415: 
+ 416:   font-size: 9px;
+ 417:   line-height: 15px;
+ 418: }
+ 419: 
+ 420: .placementBar {
+ 421:   height: 5px;
+ 422: 
+ 423:   overflow: hidden;
+ 424: 
+ 425:   border-radius: 999px;
+ 426: 
+ 427:   background: #e8edf3;
+ 428: }
+ 429: 
+ 430: .placementBar span {
+ 431:   display: block;
+ 432: 
+ 433:   height: 100%;
+ 434: 
+ 435:   border-radius: inherit;
+ 436: 
+ 437:   background: var(--primary);
+ 438: }
+ 439: 
+ 440: .placementMetrics {
+ 441:   text-align: right;
+ 442: }
+ 443: 
+ 444: .placementMetrics strong,
+ 445: .placementMetrics span {
+ 446:   display: block;
+ 447: }
+ 448: 
+ 449: .placementMetrics strong {
+ 450:   color: #334155;
+ 451: 
+ 452:   font-size: 10px;
+ 453:   line-height: 16px;
+ 454:   font-weight: 650;
+ 455: }
+ 456: 
+ 457: .placementMetrics span {
+ 458:   margin-top: 2px;
+ 459: 
+ 460:   color: var(--text-muted);
+ 461: 
+ 462:   font-size: 9px;
+ 463:   line-height: 15px;
+ 464: }
+ 465: 
+ 466: .demoNote {
+ 467:   margin-top: 14px;
+ 468: 
+ 469:   color: var(--text-muted);
+ 470: 
+ 471:   font-size: 9px;
+ 472:   line-height: 16px;
+ 473: }
+ 474: 
+ 475: /* =========================================================
+ 476:    RESPONSIVE
+ 477:    ========================================================= */
+ 478: 
+ 479: @media (max-width: 1100px) {
+ 480:   .metrics {
+ 481:     grid-template-columns:
+ 482:       repeat(3, minmax(0, 1fr));
+ 483:   }
+ 484: 
+ 485:   .metric:nth-child(4) {
+ 486:     border-left: 0;
+ 487:   }
+ 488: 
+ 489:   .metric:nth-child(-n + 3) {
+ 490:     border-bottom: 1px solid var(--border);
+ 491:   }
+ 492: }
+ 493: 
+ 494: @media (max-width: 820px) {
+ 495:   .controls {
+ 496:     align-items: stretch;
+ 497: 
+ 498:     flex-direction: column;
+ 499:   }
+ 500: 
+ 501:   .windowFilters {
+ 502:     width: fit-content;
+ 503:   }
+ 504: 
+ 505:   .campaignFilter select {
+ 506:     width: 100%;
+ 507:     min-width: 0;
+ 508:   }
+ 509: 
+ 510:   .placementRow {
+ 511:     grid-template-columns:
+ 512:       130px
+ 513:       minmax(150px, 1fr)
+ 514:       130px;
+ 515:   }
+ 516: }
+ 517: 
+ 518: @media (max-width: 650px) {
+ 519:   .metrics {
+ 520:     grid-template-columns: 1fr;
+ 521:   }
+ 522: 
+ 523:   .metric,
+ 524:   .metric:first-child,
+ 525:   .metric + .metric {
+ 526:     padding:
+ 527:       13px
+ 528:       0;
+ 529: 
+ 530:     border-left: 0;
+ 531:     border-bottom: 1px solid var(--border);
+ 532:   }
+ 533: 
+ 534:   .metric:last-child {
+ 535:     border-bottom: 0;
+ 536:   }
+ 537: 
+ 538:   .windowFilters {
+ 539:     width: 100%;
+ 540:   }
+ 541: 
+ 542:   .windowButton,
+ 543:   .windowButtonActive {
+ 544:     flex: 1;
+ 545:   }
+ 546: 
+ 547:   .placementList {
+ 548:     margin:
+ 549:       0
+ 550:       -16px
+ 551:       -16px;
+ 552:   }
+ 553: 
+ 554:   .placementRow {
+ 555:     grid-template-columns: 1fr;
+ 556: 
+ 557:     gap: 8px;
+ 558: 
+ 559:     padding:
+ 560:       13px
+ 561:       16px;
+ 562:   }
+ 563: 
+ 564:   .placementMetrics {
+ 565:     text-align: left;
+ 566:   }
+ 567: 
+ 568:   .table {
+ 569:     margin:
+ 570:       0
+ 571:       -16px
+ 572:       -16px;
+ 573:   }
+ 574: }
+
