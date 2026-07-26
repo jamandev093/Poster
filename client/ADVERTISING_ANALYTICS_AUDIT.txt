@@ -1,0 +1,8242 @@
+
+==================================================
+FILE: .\src\features\performance\PerformanceDashboard.tsx
+==================================================
+
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import Link from "next/link";
+
+import {
+  formatClientCurrency,
+  formatClientNumber,
+  getCampaignStatusLabel,
+  getCampaignTypeLabel,
+  getPlacementLabel,
+  getTrackingStatusLabel,
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getCampaignPerformanceSnapshot,
+  getPerformanceWindowLabel,
+  placementPerformanceSnapshots,
+} from "@/features/workspace/workspace.performance";
+
+import type {
+  PerformanceWindow,
+} from "@/features/workspace/workspace.performance";
+
+import {
+  getOrganizationCampaigns,
+} from "@/features/workspace/workspace.selectors";
+
+import {
+  calculateConversionRate,
+  calculateCtr,
+} from "@/features/workspace/workspace.types";
+
+import type {
+  CampaignStatus,
+} from "@/features/workspace/workspace.types";
+
+import styles from "./PerformanceDashboard.module.css";
+
+type CampaignSelection =
+  | "all"
+  | string;
+
+const clientCampaigns =
+  getOrganizationCampaigns();
+
+const windowOptions: {
+  value: PerformanceWindow;
+  label: string;
+}[] = [
+  {
+    value: "7d",
+    label: "7 days",
+  },
+
+  {
+    value: "30d",
+    label: "30 days",
+  },
+
+  {
+    value: "all",
+    label: "All time",
+  },
+];
+
+function getStatusClass(
+  status: CampaignStatus
+): string {
+  switch (status) {
+    case "active":
+      return "statusBadge statusActive";
+
+    case "scheduled":
+      return "statusBadge statusScheduled";
+
+    case "paused":
+      return "statusBadge statusAttention";
+
+    case "draft":
+    case "ended":
+    case "disabled":
+      return `statusBadge ${styles.statusNeutral}`;
+  }
+}
+
+export default function PerformanceDashboard() {
+  const [
+    selectedWindow,
+    setSelectedWindow,
+  ] =
+    useState<PerformanceWindow>(
+      "30d"
+    );
+
+  const [
+    selectedCampaign,
+    setSelectedCampaign,
+  ] =
+    useState<CampaignSelection>(
+      "all"
+    );
+
+  const visibleCampaigns =
+    useMemo(
+      () => {
+        if (
+          selectedCampaign ===
+          "all"
+        ) {
+          return clientCampaigns;
+        }
+
+        return clientCampaigns.filter(
+          (
+            campaign
+          ) =>
+            campaign.id ===
+            selectedCampaign
+        );
+      },
+      [
+        selectedCampaign,
+      ]
+    );
+
+  const campaignRows =
+    useMemo(
+      () =>
+        visibleCampaigns.map(
+          (
+            campaign
+          ) => {
+            const snapshot =
+              getCampaignPerformanceSnapshot(
+                campaign.id
+              );
+
+            const metrics =
+              snapshot?.windows[
+                selectedWindow
+              ] ?? {
+                impressions:
+                  0,
+
+                clicks:
+                  0,
+
+                conversions:
+                  null,
+              };
+
+            const ctr =
+              calculateCtr(
+                metrics.impressions,
+                metrics.clicks
+              );
+
+            const conversionRate =
+              calculateConversionRate(
+                metrics.clicks,
+                metrics.conversions
+              );
+
+            return {
+              campaign,
+              metrics,
+              ctr,
+              conversionRate,
+            };
+          }
+        ),
+      [
+        selectedWindow,
+        visibleCampaigns,
+      ]
+    );
+
+  const totals =
+    useMemo(
+      () => {
+        let impressions =
+          0;
+
+        let clicks =
+          0;
+
+        let trackedClicks =
+          0;
+
+        let conversions =
+          0;
+
+        let trackedCampaigns =
+          0;
+
+        let untrackedCampaigns =
+          0;
+
+        let commission =
+          0;
+
+        campaignRows.forEach(
+          (
+            row
+          ) => {
+            impressions +=
+              row.metrics
+                .impressions;
+
+            clicks +=
+              row.metrics.clicks;
+
+            commission +=
+              row.metrics
+                .commission ??
+              0;
+
+            if (
+              row.metrics
+                .conversions ===
+              null
+            ) {
+              untrackedCampaigns +=
+                1;
+
+              return;
+            }
+
+            trackedCampaigns +=
+              1;
+
+            trackedClicks +=
+              row.metrics.clicks;
+
+            conversions +=
+              row.metrics
+                .conversions;
+          }
+        );
+
+        return {
+          impressions,
+
+          clicks,
+
+          ctr:
+            calculateCtr(
+              impressions,
+              clicks
+            ),
+
+          conversions:
+            trackedCampaigns >
+            0
+              ? conversions
+              : null,
+
+          conversionRate:
+            trackedCampaigns >
+            0
+              ? calculateConversionRate(
+                  trackedClicks,
+                  conversions
+                )
+              : null,
+
+          commission,
+
+          untrackedCampaigns,
+        };
+      },
+      [
+        campaignRows,
+      ]
+    );
+
+  const maximumPlacementImpressions =
+    Math.max(
+      ...placementPerformanceSnapshots.map(
+        (
+          placement
+        ) =>
+          placement.windows[
+            selectedWindow
+          ].impressions
+      ),
+      1
+    );
+
+  return (
+    <>
+      <section
+        className={
+          styles.controls
+        }
+      >
+        <div
+          className={
+            styles.windowFilters
+          }
+          aria-label="Performance date range"
+        >
+          {windowOptions.map(
+            (
+              option
+            ) => (
+              <button
+                key={
+                  option.value
+                }
+                type="button"
+                className={
+                  selectedWindow ===
+                  option.value
+                    ? styles.windowButtonActive
+                    : styles.windowButton
+                }
+                onClick={() =>
+                  setSelectedWindow(
+                    option.value
+                  )
+                }
+              >
+                {
+                  option.label
+                }
+              </button>
+            )
+          )}
+        </div>
+
+        <label
+          className={
+            styles.campaignFilter
+          }
+        >
+          <span>
+            Campaign
+          </span>
+
+          <select
+            value={
+              selectedCampaign
+            }
+            onChange={(
+              event
+            ) =>
+              setSelectedCampaign(
+                event.target.value
+              )
+            }
+          >
+            <option
+              value="all"
+            >
+              All campaigns
+            </option>
+
+            {clientCampaigns.map(
+              (
+                campaign
+              ) => (
+                <option
+                  key={
+                    campaign.id
+                  }
+                  value={
+                    campaign.id
+                  }
+                >
+                  {
+                    campaign.id
+                  }
+                  {" � "}
+                  {
+                    campaign.name
+                  }
+                </option>
+              )
+            )}
+          </select>
+        </label>
+      </section>
+
+      <div
+        className={
+          styles.periodLabel
+        }
+      >
+        {getPerformanceWindowLabel(
+          selectedWindow
+        )}
+      </div>
+
+      <section
+        className={
+          styles.metrics
+        }
+      >
+        <article
+          className={
+            styles.metric
+          }
+        >
+          <span>
+            Impressions
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totals.impressions
+            )}
+          </strong>
+
+          <small>
+            Recorded delivery
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.metric
+          }
+        >
+          <span>
+            Clicks
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totals.clicks
+            )}
+          </strong>
+
+          <small>
+            Recorded engagement
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.metric
+          }
+        >
+          <span>
+            CTR
+          </span>
+
+          <strong>
+            {totals.ctr.toFixed(
+              2
+            )}
+            %
+          </strong>
+
+          <small>
+            Click-through rate
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.metric
+          }
+        >
+          <span>
+            Conversions
+          </span>
+
+          <strong>
+            {totals.conversions ===
+            null
+              ? "Not tracked"
+              : formatClientNumber(
+                  totals.conversions
+                )}
+          </strong>
+
+          <small>
+            {totals.conversionRate ===
+            null
+              ? "No connected tracking"
+              : `${totals.conversionRate.toFixed(
+                  2
+                )}% conversion rate`}
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.metric
+          }
+        >
+          <span>
+            Affiliate commission
+          </span>
+
+          <strong>
+            {formatClientCurrency(
+              totals.commission
+            )}
+          </strong>
+
+          <small>
+            Recorded commission
+          </small>
+        </article>
+      </section>
+
+      {totals.untrackedCampaigns >
+      0 ? (
+        <div
+          className={
+            styles.trackingNotice
+          }
+        >
+          {
+            totals.untrackedCampaigns
+          }
+          {" "}
+          {totals.untrackedCampaigns ===
+          1
+            ? "campaign does"
+            : "campaigns do"}
+          {" "}
+          not currently have conversion tracking.
+        </div>
+      ) : null}
+
+      <section
+        className="contentCard"
+      >
+        <div
+          className={
+            styles.cardHeader
+          }
+        >
+          <div>
+            <h2
+              className="sectionTitle"
+            >
+              Campaign comparison
+            </h2>
+
+            <p
+              className="sectionDescription"
+            >
+              Performance and tracking by campaign.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.table
+          }
+        >
+          <div
+            className={
+              styles.tableHeader
+            }
+          >
+            <span>
+              Campaign
+            </span>
+
+            <span>
+              Impressions
+            </span>
+
+            <span>
+              Clicks / CTR
+            </span>
+
+            <span>
+              Conversions
+            </span>
+
+            <span>
+              Tracking
+            </span>
+
+            <span>
+              Status
+            </span>
+          </div>
+
+          {campaignRows.map(
+            (
+              row
+            ) => (
+              <Link
+                key={
+                  row.campaign.id
+                }
+                href={`/campaigns/${row.campaign.id}`}
+                className={
+                  styles.tableRow
+                }
+              >
+                <div
+                  className={
+                    styles.campaignInfo
+                  }
+                >
+                  <strong>
+                    {
+                      row.campaign.name
+                    }
+                  </strong>
+
+                  <span>
+                    {
+                      row.campaign.id
+                    }
+                    {" � "}
+                    {getCampaignTypeLabel(
+                      row.campaign.type
+                    )}
+                  </span>
+                </div>
+
+                <strong>
+                  {formatClientNumber(
+                    row.metrics
+                      .impressions
+                  )}
+                </strong>
+
+                <div
+                  className={
+                    styles.compactMetric
+                  }
+                >
+                  <strong>
+                    {formatClientNumber(
+                      row.metrics
+                        .clicks
+                    )}
+                  </strong>
+
+                  <span>
+                    {row.ctr.toFixed(
+                      2
+                    )}
+                    % CTR
+                  </span>
+                </div>
+
+                <div
+                  className={
+                    styles.compactMetric
+                  }
+                >
+                  <strong>
+                    {row.metrics
+                      .conversions ===
+                    null
+                      ? "Not tracked"
+                      : formatClientNumber(
+                          row.metrics
+                            .conversions
+                        )}
+                  </strong>
+
+                  <span>
+                    {row.conversionRate ===
+                    null
+                      ? "�"
+                      : `${row.conversionRate.toFixed(
+                          2
+                        )}%`}
+                  </span>
+                </div>
+
+                <span
+                  className={
+                    styles.tracking
+                  }
+                >
+                  {getTrackingStatusLabel(
+                    row.campaign
+                      .trackingStatus
+                  )}
+                </span>
+
+                <span
+                  className={getStatusClass(
+                    row.campaign.status
+                  )}
+                >
+                  {getCampaignStatusLabel(
+                    row.campaign.status
+                  )}
+                </span>
+              </Link>
+            )
+          )}
+        </div>
+      </section>
+
+      {selectedCampaign ===
+      "all" ? (
+        <section
+          className="contentCard"
+        >
+          <div
+            className={
+              styles.cardHeader
+            }
+          >
+            <div>
+              <h2
+                className="sectionTitle"
+              >
+                Placement performance
+              </h2>
+
+              <p
+                className="sectionDescription"
+              >
+                Home, Search, and Trending results.
+              </p>
+            </div>
+          </div>
+
+          <div
+            className={
+              styles.placementList
+            }
+          >
+            {placementPerformanceSnapshots.map(
+              (
+                placement
+              ) => {
+                const metrics =
+                  placement.windows[
+                    selectedWindow
+                  ];
+
+                const ctr =
+                  calculateCtr(
+                    metrics.impressions,
+                    metrics.clicks
+                  );
+
+                const width =
+                  (
+                    metrics.impressions /
+                    maximumPlacementImpressions
+                  ) *
+                  100;
+
+                return (
+                  <article
+                    key={
+                      placement.placement
+                    }
+                    className={
+                      styles.placementRow
+                    }
+                  >
+                    <div
+                      className={
+                        styles.placementName
+                      }
+                    >
+                      <strong>
+                        {getPlacementLabel(
+                          placement.placement
+                        )}
+                      </strong>
+
+                      <span>
+                        {formatClientNumber(
+                          metrics.impressions
+                        )}
+                        {" impressions"}
+                      </span>
+                    </div>
+
+                    <div
+                      className={
+                        styles.placementBar
+                      }
+                    >
+                      <span
+                        style={{
+                          width:
+                            `${width}%`,
+                        }}
+                      />
+                    </div>
+
+                    <div
+                      className={
+                        styles.placementMetrics
+                      }
+                    >
+                      <strong>
+                        {formatClientNumber(
+                          metrics.clicks
+                        )}
+                        {" clicks"}
+                      </strong>
+
+                      <span>
+                        {ctr.toFixed(
+                          2
+                        )}
+                        % CTR
+                      </span>
+                    </div>
+                  </article>
+                );
+              }
+            )}
+          </div>
+        </section>
+      ) : null}
+
+      <p
+        className={
+          styles.demoNote
+        }
+      >
+        Frontend demonstration snapshots � Real reporting will use
+        organization-scoped campaign analytics APIs.
+      </p>
+    </>
+  );
+}
+
+==================================================
+FILE: .\src\features\performance\PerformanceDashboard.module.css
+==================================================
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.controls {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 12px;
+}
+
+.windowFilters {
+  display: flex;
+
+  gap: 4px;
+
+  padding: 3px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: var(--surface);
+}
+
+.windowButton,
+.windowButtonActive {
+  min-height: 32px;
+
+  padding:
+    5px
+    10px;
+
+  border-radius: 5px;
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 680;
+}
+
+.windowButton {
+  border: 1px solid transparent;
+
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.windowButton:hover {
+  color: var(--text);
+}
+
+.windowButtonActive {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+  color: var(--primary-dark);
+
+  box-shadow:
+    0 1px 2px
+    rgba(15, 23, 42, 0.04);
+}
+
+.campaignFilter {
+  display: grid;
+
+  gap: 4px;
+}
+
+.campaignFilter span {
+  color: var(--text-secondary);
+
+  font-size: 9px;
+  line-height: 15px;
+  font-weight: 700;
+
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.campaignFilter select {
+  min-width: 270px;
+  min-height: 38px;
+
+  padding:
+    7px
+    10px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+
+  outline: none;
+
+  background: #ffffff;
+  color: var(--text);
+
+  font-size: 11px;
+}
+
+.campaignFilter select:focus {
+  border-color: var(--primary);
+
+  box-shadow: var(--shadow-focus);
+}
+
+.periodLabel {
+  margin-bottom: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   KPI STRIP
+   ========================================================= */
+
+.metrics {
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  margin-bottom: 18px;
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.metric {
+  min-width: 0;
+
+  padding:
+    16px
+    17px;
+}
+
+.metric:first-child {
+  padding-left: 0;
+}
+
+.metric + .metric {
+  border-left: 1px solid var(--border);
+}
+
+.metric span,
+.metric strong,
+.metric small {
+  display: block;
+}
+
+.metric span {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  line-height: 15px;
+  font-weight: 650;
+}
+
+.metric strong {
+  margin-top: 6px;
+
+  overflow-wrap: anywhere;
+
+  color: var(--text);
+
+  font-size: 20px;
+  line-height: 27px;
+  font-weight: 700;
+
+  letter-spacing: -0.025em;
+}
+
+.metric small {
+  margin-top: 3px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.trackingNotice {
+  margin-bottom: 18px;
+
+  padding:
+    10px
+    13px;
+
+  border-left: 3px solid var(--warning);
+
+  background: #fffdf8;
+
+  color: #8a5a22;
+
+  font-size: 10px;
+  line-height: 17px;
+}
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.cardHeader {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 11px;
+}
+
+/* =========================================================
+   CAMPAIGN COMPARISON
+   ========================================================= */
+
+.table {
+  overflow-x: auto;
+
+  margin:
+    0
+    -20px
+    -20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.tableHeader,
+.tableRow {
+  display: grid;
+
+  min-width: 920px;
+
+  grid-template-columns:
+    minmax(260px, 1.45fr)
+    minmax(110px, 0.65fr)
+    minmax(135px, 0.75fr)
+    minmax(145px, 0.8fr)
+    minmax(120px, 0.65fr)
+    minmax(95px, 0.5fr);
+
+  gap: 16px;
+
+  align-items: center;
+
+  padding:
+    0
+    20px;
+}
+
+.tableHeader {
+  min-height: 38px;
+
+  background: #fbfcfe;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 14px;
+  font-weight: 650;
+
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.tableRow {
+  min-height: 70px;
+
+  border-top: 1px solid var(--border);
+
+  transition:
+    background-color 120ms ease;
+}
+
+.tableRow:hover {
+  background: #fafcff;
+}
+
+.campaignInfo {
+  min-width: 0;
+}
+
+.campaignInfo strong,
+.campaignInfo span {
+  display: block;
+}
+
+.campaignInfo strong {
+  overflow: hidden;
+
+  color: #273244;
+
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaignInfo span {
+  margin-top: 2px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.tableRow > strong {
+  color: #334155;
+
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 650;
+}
+
+.compactMetric strong,
+.compactMetric span {
+  display: block;
+}
+
+.compactMetric strong {
+  color: #334155;
+
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 650;
+}
+
+.compactMetric span {
+  margin-top: 2px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.tracking {
+  color: var(--text-secondary);
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.statusNeutral {
+  background: var(--surface);
+
+  color: var(--text-secondary);
+}
+
+/* =========================================================
+   PLACEMENT PERFORMANCE
+   ========================================================= */
+
+.placementList {
+  margin:
+    0
+    -20px
+    -20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.placementRow {
+  display: grid;
+
+  grid-template-columns:
+    minmax(145px, 0.7fr)
+    minmax(220px, 1.6fr)
+    minmax(155px, 0.7fr);
+
+  gap: 20px;
+
+  min-height: 68px;
+
+  align-items: center;
+
+  padding:
+    11px
+    20px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.placementRow:last-child {
+  border-bottom: 0;
+}
+
+.placementName strong,
+.placementName span {
+  display: block;
+}
+
+.placementName strong {
+  color: #273244;
+
+  font-size: 11px;
+  line-height: 17px;
+  font-weight: 650;
+}
+
+.placementName span {
+  margin-top: 2px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.placementBar {
+  height: 5px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #e8edf3;
+}
+
+.placementBar span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--primary);
+}
+
+.placementMetrics {
+  text-align: right;
+}
+
+.placementMetrics strong,
+.placementMetrics span {
+  display: block;
+}
+
+.placementMetrics strong {
+  color: #334155;
+
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 650;
+}
+
+.placementMetrics span {
+  margin-top: 2px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.demoNote {
+  margin-top: 14px;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  line-height: 16px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .metrics {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .metric:nth-child(4) {
+    border-left: 0;
+  }
+
+  .metric:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 820px) {
+  .controls {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .windowFilters {
+    width: fit-content;
+  }
+
+  .campaignFilter select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .placementRow {
+    grid-template-columns:
+      130px
+      minmax(150px, 1fr)
+      130px;
+  }
+}
+
+@media (max-width: 650px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric,
+  .metric:first-child,
+  .metric + .metric {
+    padding:
+      13px
+      0;
+
+    border-left: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric:last-child {
+    border-bottom: 0;
+  }
+
+  .windowFilters {
+    width: 100%;
+  }
+
+  .windowButton,
+  .windowButtonActive {
+    flex: 1;
+  }
+
+  .placementList {
+    margin:
+      0
+      -16px
+      -16px;
+  }
+
+  .placementRow {
+    grid-template-columns: 1fr;
+
+    gap: 8px;
+
+    padding:
+      13px
+      16px;
+  }
+
+  .placementMetrics {
+    text-align: left;
+  }
+
+  .table {
+    margin:
+      0
+      -16px
+      -16px;
+  }
+}
+
+==================================================
+FILE: .\src\features\workspace\workspace.performance.ts
+==================================================
+
+import type {
+  Placement,
+} from "./workspace.types";
+
+export type PerformanceWindow =
+  | "7d"
+  | "30d"
+  | "all";
+
+export interface PerformanceWindowMetrics {
+  impressions: number;
+  clicks: number;
+
+  /**
+   * null means conversions are not available or
+   * tracking is not configured.
+   *
+   * 0 means tracking exists and recorded zero.
+   */
+  conversions: number | null;
+
+  commission?: number;
+  revenue?: number;
+}
+
+export interface CampaignPerformanceSnapshot {
+  campaignId: string;
+
+  windows: Record<
+    PerformanceWindow,
+    PerformanceWindowMetrics
+  >;
+}
+
+export interface PlacementPerformanceSnapshot {
+  placement: Placement;
+
+  windows: Record<
+    PerformanceWindow,
+    {
+      impressions: number;
+      clicks: number;
+    }
+  >;
+}
+
+/**
+ * Time-window snapshots are kept separate from campaign
+ * identity/configuration.
+ *
+ * Campaign names, status, placements, tracking state,
+ * financials and all-time totals continue to come from
+ * the canonical workspace campaign records.
+ */
+export const campaignPerformanceSnapshots:
+  CampaignPerformanceSnapshot[] = [
+    {
+      campaignId: "CMP-3001",
+
+      windows: {
+        "7d": {
+          impressions: 210000,
+          clicks: 5600,
+          conversions: 190,
+        },
+
+        "30d": {
+          impressions: 728000,
+          clicks: 18240,
+          conversions: 620,
+        },
+
+        all: {
+          impressions: 728000,
+          clicks: 18240,
+          conversions: 620,
+        },
+      },
+    },
+
+    {
+      campaignId: "CMP-3010",
+
+      windows: {
+        "7d": {
+          impressions: 0,
+          clicks: 0,
+          conversions: null,
+        },
+
+        "30d": {
+          impressions: 0,
+          clicks: 0,
+          conversions: null,
+        },
+
+        all: {
+          impressions: 0,
+          clicks: 0,
+          conversions: null,
+        },
+      },
+    },
+
+    {
+      campaignId: "CMP-3020",
+
+      windows: {
+        "7d": {
+          impressions: 18000,
+          clicks: 690,
+          conversions: 34,
+
+          commission: 13600,
+          revenue: 13600,
+        },
+
+        "30d": {
+          impressions: 64000,
+          clicks: 2240,
+          conversions: 104,
+
+          commission: 41600,
+          revenue: 41600,
+        },
+
+        all: {
+          impressions: 64000,
+          clicks: 2240,
+          conversions: 104,
+
+          commission: 41600,
+          revenue: 41600,
+        },
+      },
+    },
+  ];
+
+export const placementPerformanceSnapshots:
+  PlacementPerformanceSnapshot[] = [
+    {
+      placement: "home",
+
+      windows: {
+        "7d": {
+          impressions: 120000,
+          clicks: 3100,
+        },
+
+        "30d": {
+          impressions: 420000,
+          clicks: 10500,
+        },
+
+        all: {
+          impressions: 420000,
+          clicks: 10500,
+        },
+      },
+    },
+
+    {
+      placement: "search",
+
+      windows: {
+        "7d": {
+          impressions: 70000,
+          clicks: 2000,
+        },
+
+        "30d": {
+          impressions: 240000,
+          clicks: 6500,
+        },
+
+        all: {
+          impressions: 240000,
+          clicks: 6500,
+        },
+      },
+    },
+
+    {
+      placement: "trending",
+
+      windows: {
+        "7d": {
+          impressions: 38000,
+          clicks: 1190,
+        },
+
+        "30d": {
+          impressions: 132000,
+          clicks: 3480,
+        },
+
+        all: {
+          impressions: 132000,
+          clicks: 3480,
+        },
+      },
+    },
+  ];
+
+export function getCampaignPerformanceSnapshot(
+  campaignId: string
+): CampaignPerformanceSnapshot | undefined {
+  return campaignPerformanceSnapshots.find(
+    (snapshot) =>
+      snapshot.campaignId ===
+      campaignId
+  );
+}
+
+export function getPerformanceWindowLabel(
+  window: PerformanceWindow
+): string {
+  switch (window) {
+    case "7d":
+      return "Last 7 days";
+
+    case "30d":
+      return "Last 30 days";
+
+    case "all":
+      return "All recorded activity";
+  }
+}
+
+==================================================
+FILE: .\src\features\workspace\workspace.types.ts
+==================================================
+
+export type CommercialRequestType =
+  | "direct_sponsorship"
+  | "affiliate";
+
+export type CommercialRequestStatus =
+  | "pending_review"
+  | "changes_requested"
+  | "approved"
+  | "rejected";
+
+export type CampaignStatus =
+  | "draft"
+  | "scheduled"
+  | "active"
+  | "paused"
+  | "ended"
+  | "disabled";
+
+export type Placement =
+  | "home"
+  | "search"
+  | "trending";
+
+export type TrackingStatus =
+  | "connected"
+  | "not_configured"
+  | "unavailable";
+
+export type BillingModel =
+  | "fixed_contract"
+  | "budget_based"
+  | "cpc"
+  | "cpm"
+  | "cpa"
+  | "affiliate";
+
+/**
+ * Creative format is independent from:
+ *
+ * - commercial request type;
+ * - campaign placement.
+ *
+ * Both Direct Sponsorship and Affiliate may request
+ * either supported creative layout.
+ */
+export type CreativeLayout =
+  | "standard"
+  | "sliding";
+
+export type CreativeMediaType =
+  | "image"
+  | "video";
+
+export type CreativeMediaRole =
+  | "primary"
+  | "logo"
+  | "slide";
+
+export type CreativeFrameProfile =
+  | "standard_media"
+  | "sliding_card_media";
+
+export interface CreativeMediaAsset {
+  id?: string;
+
+  role: CreativeMediaRole;
+
+  type: CreativeMediaType;
+
+  frameProfile?: CreativeFrameProfile;
+
+  fileName: string;
+
+  mimeType?: string;
+
+  sizeBytes?: number;
+
+  width?: number;
+
+  height?: number;
+
+  /**
+   * Browser-side duration detection is supported.
+   *
+   * Poster advertising videos are limited to
+   * 10 seconds maximum.
+   */
+  durationSeconds?: number;
+
+  /**
+   * Browser File APIs do not reliably expose true FPS.
+   *
+   * Backend media processing will verify that uploaded
+   * advertising video is between 30 and 45 FPS.
+   */
+  framesPerSecond?: number;
+
+  altText?: string;
+
+  /**
+   * Permanent URL is populated only after Backend /
+   * object-storage upload.
+   *
+   * Never persist a browser object URL here.
+   */
+  url?: string;
+
+  /**
+   * Generated or uploaded preview/poster for video.
+   */
+  thumbnailUrl?: string;
+}
+
+export type SlidingCardSlot =
+  | 1
+  | 2
+  | 3;
+
+export interface SlidingCreativeCard {
+  /**
+   * Locked Poster sliding-ad structure:
+   *
+   * Card 1 -> video
+   * Card 2 -> image
+   * Card 3 -> image
+   *
+   * All three render inside the already-finalized
+   * square 1:1 sliding-card media frame.
+   */
+  slot: SlidingCardSlot;
+
+  title: string;
+
+  media: CreativeMediaAsset;
+}
+
+export interface CommercialCreative {
+  /**
+   * STANDARD
+   *
+   * One image OR one video.
+   * Existing finalized mobile frame: 16:9 landscape.
+   *
+   * SLIDING
+   *
+   * Exactly three square cards:
+   *
+   * 1 -> video
+   * 2 -> image
+   * 3 -> image
+   */
+  layout?: CreativeLayout;
+
+  headline: string;
+
+  body: string;
+
+  callToAction: string;
+
+  destinationUrl: string;
+
+  /**
+   * Used only by standard layout.
+   *
+   * May be image OR video.
+   */
+  primaryMedia?: CreativeMediaAsset;
+
+  /**
+   * Used only by sliding layout.
+   *
+   * Locked:
+   *
+   * - exactly 3 cards;
+   * - Card 1 video;
+   * - Card 2 image;
+   * - Card 3 image;
+   * - every card fits the finalized 1:1 frame.
+   */
+  slidingCards?: SlidingCreativeCard[];
+
+  /**
+   * Optional organization/advertiser logo.
+   */
+  logoMedia?: CreativeMediaAsset;
+
+  /**
+   * Temporary backward-compatible fields.
+   *
+   * Remove only after all legacy mock/request data has
+   * migrated to CreativeMediaAsset records.
+   */
+  imageName?: string;
+
+  logoName?: string;
+}
+
+export interface RequestReview {
+  requestedChanges: string[];
+
+  reviewNote?: string;
+
+  reviewedAt?: string;
+}
+
+export interface CommercialRequest {
+  id: string;
+
+  organizationId: string;
+
+  organizationName: string;
+
+  type: CommercialRequestType;
+
+  status: CommercialRequestStatus;
+
+  campaignName: string;
+
+  submittedAt: string;
+
+  updatedAt: string;
+
+  requestedPlacements: Placement[];
+
+  requestedStartDate: string;
+
+  requestedEndDate: string;
+
+  proposedBudget?: number;
+
+  proposedContractValue?: number;
+
+  commissionModel?: string;
+
+  conversionDefinition?: string;
+
+  contactName: string;
+
+  businessEmail: string;
+
+  website: string;
+
+  rightsConfirmed: boolean;
+
+  creative: CommercialCreative;
+
+  review?: RequestReview;
+
+  linkedCampaignId?: string;
+}
+
+export interface CampaignPerformance {
+  impressions: number;
+
+  clicks: number;
+
+  /**
+   * null = conversion tracking unavailable.
+   *
+   * 0 = tracking active but zero conversions recorded.
+   */
+  conversions: number | null;
+}
+
+export interface CampaignFinancials {
+  currency: "INR";
+
+  contractValue?: number;
+
+  budget?: number;
+
+  utilized?: number;
+
+  commission?: number;
+
+  revenue?: number;
+
+  cost?: number;
+
+  netEarnings?: number;
+
+  deliveryTarget?: number;
+
+  delivered?: number;
+}
+
+export interface ClientCampaign {
+  id: string;
+
+  requestId: string;
+
+  organizationId: string;
+
+  organizationName: string;
+
+  name: string;
+
+  type: CommercialRequestType;
+
+  status: CampaignStatus;
+
+  placements: Placement[];
+
+  billingModel: BillingModel;
+
+  startDate: string;
+
+  endDate: string;
+
+  destinationUrl?: string;
+
+  trackingStatus: TrackingStatus;
+
+  conversionDefinition?: string;
+
+  /**
+   * Exact Admin-approved creative snapshot attached
+   * to this campaign.
+   *
+   * Campaign Details can therefore show both:
+   *
+   * - what advertisement is running;
+   * - how that exact campaign is performing.
+   */
+  creative?: CommercialCreative;
+
+  performance: CampaignPerformance;
+
+  financials: CampaignFinancials;
+}
+
+export interface ClientOrganization {
+  id: string;
+
+  name: string;
+
+  primaryContactName: string;
+
+  primaryContactEmail: string;
+
+  website: string;
+}
+
+export function calculateCtr(
+  impressions: number,
+  clicks: number
+): number {
+  if (
+    impressions <=
+    0
+  ) {
+    return 0;
+  }
+
+  return (
+    clicks /
+    impressions
+  ) * 100;
+}
+
+export function calculateConversionRate(
+  clicks: number,
+  conversions: number | null
+): number | null {
+  if (
+    conversions ===
+    null
+  ) {
+    return null;
+  }
+
+  if (
+    clicks <=
+    0
+  ) {
+    return conversions ===
+      0
+      ? 0
+      : null;
+  }
+
+  return (
+    conversions /
+    clicks
+  ) * 100;
+}
+
+export function calculateDeliveryProgress(
+  target?: number,
+  delivered?: number
+): number | null {
+  if (
+    target ===
+      undefined ||
+    delivered ===
+      undefined ||
+    target <=
+      0
+  ) {
+    return null;
+  }
+
+  return Math.min(
+    (
+      delivered /
+      target
+    ) * 100,
+    100
+  );
+}
+
+export function calculateRevenuePerClick(
+  clicks: number,
+  revenue?: number
+): number | null {
+  if (
+    revenue ===
+    undefined
+  ) {
+    return null;
+  }
+
+  if (
+    clicks <=
+    0
+  ) {
+    return 0;
+  }
+
+  return (
+    revenue /
+    clicks
+  );
+}
+
+==================================================
+FILE: .\src\features\workspace\workspace.mock.ts
+==================================================
+
+import type {
+  ClientCampaign,
+  ClientOrganization,
+  CommercialRequest,
+} from "./workspace.types";
+
+export const currentOrganization: ClientOrganization = {
+  id: "ORG-1001",
+
+  name: "Example Cloud",
+
+  primaryContactName:
+    "Aarav Mehta",
+
+  primaryContactEmail:
+    "marketing@examplecloud.com",
+
+  website:
+    "https://examplecloud.com",
+};
+
+export const commercialRequests: CommercialRequest[] = [
+  {
+    id: "ADV-1001",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    type:
+      "direct_sponsorship",
+
+    status:
+      "pending_review",
+
+    campaignName:
+      "Cloud Skills Campaign",
+
+    submittedAt:
+      "2026-07-20T10:30:00Z",
+
+    updatedAt:
+      "2026-07-20T10:30:00Z",
+
+    requestedPlacements: [
+      "home",
+      "search",
+    ],
+
+    requestedStartDate:
+      "2026-08-01",
+
+    requestedEndDate:
+      "2026-08-31",
+
+    proposedContractValue:
+      500000,
+
+    contactName:
+      "Aarav Mehta",
+
+    businessEmail:
+      "marketing@examplecloud.com",
+
+    website:
+      "https://examplecloud.com",
+
+    rightsConfirmed:
+      true,
+
+    creative: {
+      layout:
+        "standard",
+
+      headline:
+        "Build your cloud skills",
+
+      body:
+        "Professional cloud learning for teams and individuals.",
+
+      callToAction:
+        "Explore courses",
+
+      destinationUrl:
+        "https://examplecloud.com/cloud-skills",
+
+      primaryMedia: {
+        role:
+          "primary",
+
+        type:
+          "image",
+
+        frameProfile:
+          "standard_media",
+
+        fileName:
+          "cloud-skills-campaign.jpg",
+
+        mimeType:
+          "image/jpeg",
+
+        sizeBytes:
+          2180000,
+
+        width:
+          1280,
+
+        height:
+          720,
+
+        altText:
+          "Professionals learning cloud technology together",
+
+        url:
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+      },
+
+      logoMedia: {
+        role:
+          "logo",
+
+        type:
+          "image",
+
+        fileName:
+          "example-cloud-logo.png",
+
+        mimeType:
+          "image/png",
+
+        sizeBytes:
+          184000,
+
+        width:
+          512,
+
+        height:
+          512,
+
+        altText:
+          "Example Cloud logo",
+      },
+
+      imageName:
+        "cloud-skills-campaign.jpg",
+
+      logoName:
+        "example-cloud-logo.png",
+    },
+  },
+
+  {
+    id: "ADV-1002",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    type:
+      "affiliate",
+
+    status:
+      "changes_requested",
+
+    campaignName:
+      "Learning Partner Offer",
+
+    submittedAt:
+      "2026-07-18T09:15:00Z",
+
+    updatedAt:
+      "2026-07-21T07:40:00Z",
+
+    requestedPlacements: [
+      "search",
+      "trending",
+    ],
+
+    requestedStartDate:
+      "2026-08-05",
+
+    requestedEndDate:
+      "2026-09-05",
+
+    commissionModel:
+      "12% commission per completed purchase",
+
+    conversionDefinition:
+      "Completed paid course enrollment",
+
+    contactName:
+      "Aarav Mehta",
+
+    businessEmail:
+      "marketing@examplecloud.com",
+
+    website:
+      "https://examplecloud.com",
+
+    rightsConfirmed:
+      true,
+
+    creative: {
+      layout:
+        "sliding",
+
+      headline:
+        "Advance your professional skills",
+
+      body:
+        "Explore practical learning paths for career growth.",
+
+      callToAction:
+        "View learning paths",
+
+      destinationUrl:
+        "https://examplecloud.com/learning",
+
+      slidingCards: [
+        {
+          slot:
+            1,
+
+          title:
+            "Professional Learning",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "image",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "professional-learning.jpg",
+
+            mimeType:
+              "image/jpeg",
+
+            sizeBytes:
+              1640000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            altText:
+              "Professionals collaborating during a learning session",
+
+            url:
+              "https://images.unsplash.com/photo-1531482615713-2afd69097998",
+          },
+        },
+
+        {
+          slot:
+            2,
+
+          title:
+            "Learning in Action",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "video",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "learning-in-action.mp4",
+
+            mimeType:
+              "video/mp4",
+
+            sizeBytes:
+              8400000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            durationSeconds:
+              8.4,
+
+            /**
+             * Production Backend will verify the actual encoded FPS.
+             * This mock represents an already-inspected creative.
+             */
+            framesPerSecond:
+              30,
+
+            altText:
+              "Short video showing professional learning activities",
+          },
+        },
+
+        {
+          slot:
+            3,
+
+          title:
+            "Career Growth",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "image",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "career-growth.jpg",
+
+            mimeType:
+              "image/jpeg",
+
+            sizeBytes:
+              1920000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            altText:
+              "Team collaborating on professional development",
+
+            url:
+              "https://images.unsplash.com/photo-1521737711867-e3b97375f902",
+          },
+        },
+      ],
+
+      logoMedia: {
+        role:
+          "logo",
+
+        type:
+          "image",
+
+        fileName:
+          "example-cloud-logo.png",
+
+        mimeType:
+          "image/png",
+
+        sizeBytes:
+          184000,
+
+        width:
+          512,
+
+        height:
+          512,
+
+        altText:
+          "Example Cloud logo",
+      },
+
+      logoName:
+        "example-cloud-logo.png",
+    },
+
+    review: {
+      requestedChanges: [
+        "Confirm the conversion tracking method.",
+        "Replace the campaign video with the final approved creative.",
+      ],
+
+      reviewNote:
+        "Update these items and resubmit the request for review.",
+
+      reviewedAt:
+        "2026-07-21T07:40:00Z",
+    },
+  },
+
+  {
+    id: "ADV-1003",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    type:
+      "direct_sponsorship",
+
+    status:
+      "approved",
+
+    campaignName:
+      "Future Skills Sponsorship",
+
+    submittedAt:
+      "2026-07-10T08:00:00Z",
+
+    updatedAt:
+      "2026-07-16T13:20:00Z",
+
+    requestedPlacements: [
+      "home",
+    ],
+
+    requestedStartDate:
+      "2026-08-10",
+
+    requestedEndDate:
+      "2026-09-10",
+
+    proposedContractValue:
+      300000,
+
+    contactName:
+      "Aarav Mehta",
+
+    businessEmail:
+      "marketing@examplecloud.com",
+
+    website:
+      "https://examplecloud.com",
+
+    rightsConfirmed:
+      true,
+
+    creative: {
+      layout:
+        "standard",
+
+      headline:
+        "Skills for the future",
+
+      body:
+        "Professional learning designed for emerging careers.",
+
+      callToAction:
+        "Explore programs",
+
+      destinationUrl:
+        "https://examplecloud.com/future-skills",
+
+      primaryMedia: {
+        role:
+          "primary",
+
+        type:
+          "image",
+
+        frameProfile:
+          "standard_media",
+
+        fileName:
+          "future-skills.jpg",
+
+        mimeType:
+          "image/jpeg",
+
+        sizeBytes:
+          2460000,
+
+        width:
+          1280,
+
+        height:
+          720,
+
+        altText:
+          "Professionals collaborating on future skills",
+
+        url:
+          "https://images.unsplash.com/photo-1521737711867-e3b97375f902",
+      },
+
+      imageName:
+        "future-skills.jpg",
+    },
+
+    linkedCampaignId:
+      "CMP-3010",
+  },
+];
+
+export const campaigns: ClientCampaign[] = [
+  {
+    id:
+      "CMP-3001",
+
+    requestId:
+      "ADV-0998",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    name:
+      "Cloud Skills Campaign",
+
+    type:
+      "direct_sponsorship",
+
+    status:
+      "active",
+
+    placements: [
+      "home",
+      "search",
+    ],
+
+    billingModel:
+      "fixed_contract",
+
+    startDate:
+      "2026-07-01",
+
+    endDate:
+      "2026-07-31",
+
+    destinationUrl:
+      "https://examplecloud.com/cloud-skills",
+
+    trackingStatus:
+      "connected",
+
+    conversionDefinition:
+      "Completed course registration",
+
+    /**
+     * Exact approved/running creative snapshot.
+     *
+     * This is intentionally stored with the campaign rather than
+     * dynamically reading the original ADV submission.
+     *
+     * The original request and approved running creative may differ
+     * after Admin-requested corrections.
+     */
+    creative: {
+      layout:
+        "standard",
+
+      headline:
+        "Build your cloud skills",
+
+      body:
+        "Professional cloud learning for teams and individuals.",
+
+      callToAction:
+        "Explore courses",
+
+      destinationUrl:
+        "https://examplecloud.com/cloud-skills",
+
+      primaryMedia: {
+        role:
+          "primary",
+
+        type:
+          "image",
+
+        frameProfile:
+          "standard_media",
+
+        fileName:
+          "cloud-skills-approved.jpg",
+
+        mimeType:
+          "image/jpeg",
+
+        sizeBytes:
+          2260000,
+
+        width:
+          1280,
+
+        height:
+          720,
+
+        altText:
+          "Approved Cloud Skills campaign creative",
+
+        url:
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+      },
+    },
+
+    performance: {
+      impressions:
+        728000,
+
+      clicks:
+        18240,
+
+      conversions:
+        620,
+    },
+
+    financials: {
+      currency:
+        "INR",
+
+      contractValue:
+        500000,
+
+      deliveryTarget:
+        1000000,
+
+      delivered:
+        728000,
+    },
+  },
+
+  {
+    id:
+      "CMP-3010",
+
+    requestId:
+      "ADV-1003",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    name:
+      "Future Skills Sponsorship",
+
+    type:
+      "direct_sponsorship",
+
+    status:
+      "draft",
+
+    placements: [
+      "home",
+    ],
+
+    billingModel:
+      "fixed_contract",
+
+    startDate:
+      "2026-08-10",
+
+    endDate:
+      "2026-09-10",
+
+    destinationUrl:
+      "https://examplecloud.com/future-skills",
+
+    trackingStatus:
+      "not_configured",
+
+    creative: {
+      layout:
+        "standard",
+
+      headline:
+        "Skills for the future",
+
+      body:
+        "Professional learning designed for emerging careers.",
+
+      callToAction:
+        "Explore programs",
+
+      destinationUrl:
+        "https://examplecloud.com/future-skills",
+
+      primaryMedia: {
+        role:
+          "primary",
+
+        type:
+          "image",
+
+        frameProfile:
+          "standard_media",
+
+        fileName:
+          "future-skills.jpg",
+
+        mimeType:
+          "image/jpeg",
+
+        sizeBytes:
+          2460000,
+
+        width:
+          1280,
+
+        height:
+          720,
+
+        altText:
+          "Future Skills approved campaign creative",
+
+        url:
+          "https://images.unsplash.com/photo-1521737711867-e3b97375f902",
+      },
+    },
+
+    performance: {
+      impressions:
+        0,
+
+      clicks:
+        0,
+
+      conversions:
+        null,
+    },
+
+    financials: {
+      currency:
+        "INR",
+
+      contractValue:
+        300000,
+
+      deliveryTarget:
+        600000,
+
+      delivered:
+        0,
+    },
+  },
+
+  {
+    id:
+      "CMP-3020",
+
+    requestId:
+      "ADV-0995",
+
+    organizationId:
+      "ORG-1001",
+
+    organizationName:
+      "Example Cloud",
+
+    name:
+      "Professional Learning Partnership",
+
+    type:
+      "affiliate",
+
+    status:
+      "active",
+
+    placements: [
+      "search",
+      "trending",
+    ],
+
+    billingModel:
+      "affiliate",
+
+    startDate:
+      "2026-07-05",
+
+    endDate:
+      "2026-08-05",
+
+    destinationUrl:
+      "https://examplecloud.com/professional-learning",
+
+    trackingStatus:
+      "connected",
+
+    conversionDefinition:
+      "Completed paid enrollment",
+
+    /**
+     * Sliding campaign using the exact finalized Poster mobile
+     * structure:
+     *
+     * 3 square cards
+     * ├── 2 images
+     * └── 1 short video
+     */
+    creative: {
+      layout:
+        "sliding",
+
+      headline:
+        "Professional learning built for career growth",
+
+      body:
+        "Explore practical programs designed for modern professional skills.",
+
+      callToAction:
+        "Explore learning",
+
+      destinationUrl:
+        "https://examplecloud.com/professional-learning",
+
+      slidingCards: [
+        {
+          slot:
+            1,
+
+          title:
+            "Practical Learning",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "image",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "practical-learning.jpg",
+
+            mimeType:
+              "image/jpeg",
+
+            sizeBytes:
+              1580000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            altText:
+              "Professionals learning together",
+
+            url:
+              "https://images.unsplash.com/photo-1531482615713-2afd69097998",
+          },
+        },
+
+        {
+          slot:
+            2,
+
+          title:
+            "Skills in Action",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "video",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "skills-in-action.mp4",
+
+            mimeType:
+              "video/mp4",
+
+            sizeBytes:
+              9100000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            durationSeconds:
+              9.2,
+
+            framesPerSecond:
+              30,
+
+            altText:
+              "Short video demonstrating practical professional learning",
+          },
+        },
+
+        {
+          slot:
+            3,
+
+          title:
+            "Grow Your Career",
+
+          media: {
+            role:
+              "slide",
+
+            type:
+              "image",
+
+            frameProfile:
+              "sliding_card_media",
+
+            fileName:
+              "career-development.jpg",
+
+            mimeType:
+              "image/jpeg",
+
+            sizeBytes:
+              1870000,
+
+            width:
+              720,
+
+            height:
+              720,
+
+            altText:
+              "Team working together on career development",
+
+            url:
+              "https://images.unsplash.com/photo-1521737711867-e3b97375f902",
+          },
+        },
+      ],
+    },
+
+    performance: {
+      impressions:
+        64000,
+
+      clicks:
+        2240,
+
+      conversions:
+        104,
+    },
+
+    financials: {
+      currency:
+        "INR",
+
+      commission:
+        41600,
+
+      revenue:
+        41600,
+    },
+  },
+];
+
+==================================================
+FILE: .\src\features\workspace\workspace.selectors.ts
+==================================================
+
+import {
+  campaigns,
+  commercialRequests,
+  currentOrganization,
+} from "./workspace.mock";
+
+import type {
+  ClientCampaign,
+  CommercialRequest,
+} from "./workspace.types";
+
+export function getCurrentOrganization() {
+  return currentOrganization;
+}
+
+export function getOrganizationRequests(): CommercialRequest[] {
+  return commercialRequests.filter(
+    (request) =>
+      request.organizationId ===
+      currentOrganization.id
+  );
+}
+
+export function getOrganizationCampaigns(): ClientCampaign[] {
+  return campaigns.filter(
+    (campaign) =>
+      campaign.organizationId ===
+      currentOrganization.id
+  );
+}
+
+export function getRequestById(
+  requestId: string
+): CommercialRequest | undefined {
+  return getOrganizationRequests().find(
+    (request) =>
+      request.id === requestId
+  );
+}
+
+export function getCampaignById(
+  campaignId: string
+): ClientCampaign | undefined {
+  return getOrganizationCampaigns().find(
+    (campaign) =>
+      campaign.id === campaignId
+  );
+}
+
+export function getRequestsNeedingAction(): CommercialRequest[] {
+  return getOrganizationRequests().filter(
+    (request) =>
+      request.status ===
+      "changes_requested"
+  );
+}
+
+export function getPendingRequests(): CommercialRequest[] {
+  return getOrganizationRequests().filter(
+    (request) =>
+      request.status ===
+      "pending_review"
+  );
+}
+
+export function getApprovedRequests(): CommercialRequest[] {
+  return getOrganizationRequests().filter(
+    (request) =>
+      request.status ===
+      "approved"
+  );
+}
+
+export function getActiveCampaigns(): ClientCampaign[] {
+  return getOrganizationCampaigns().filter(
+    (campaign) =>
+      campaign.status ===
+      "active"
+  );
+}
+
+export function clientCanEditRequest(
+  request: CommercialRequest
+): boolean {
+  return (
+    request.status ===
+    "changes_requested"
+  );
+}
+
+export function clientCanControlCampaign(): false {
+  return false;
+}
+
+export function getCampaignForRequest(
+  request: CommercialRequest
+): ClientCampaign | undefined {
+  if (!request.linkedCampaignId) {
+    return undefined;
+  }
+
+  return getCampaignById(
+    request.linkedCampaignId
+  );
+}
+
+==================================================
+FILE: .\src\features\workspace\workspace.formatters.ts
+==================================================
+
+import type {
+  CampaignStatus,
+  CommercialRequestStatus,
+  CommercialRequestType,
+  Placement,
+  TrackingStatus,
+} from "./workspace.types";
+
+export function formatClientDate(
+  value: string
+): string {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }
+  ).format(date);
+}
+
+export function formatClientCurrency(
+  value: number
+): string {
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }
+  ).format(value);
+}
+
+export function formatClientNumber(
+  value: number
+): string {
+  return new Intl.NumberFormat(
+    "en-IN"
+  ).format(value);
+}
+
+export function getRequestTypeLabel(
+  type: CommercialRequestType
+): string {
+  switch (type) {
+    case "direct_sponsorship":
+      return "Direct Sponsorship";
+
+    case "affiliate":
+      return "Affiliate";
+  }
+}
+
+export function getCampaignTypeLabel(
+  type: CommercialRequestType
+): string {
+  return getRequestTypeLabel(type);
+}
+
+export function getRequestStatusLabel(
+  status: CommercialRequestStatus
+): string {
+  switch (status) {
+    case "pending_review":
+      return "Pending review";
+
+    case "changes_requested":
+      return "Changes requested";
+
+    case "approved":
+      return "Approved";
+
+    case "rejected":
+      return "Rejected";
+  }
+}
+
+export function getCampaignStatusLabel(
+  status: CampaignStatus
+): string {
+  switch (status) {
+    case "draft":
+      return "Draft";
+
+    case "scheduled":
+      return "Scheduled";
+
+    case "active":
+      return "Active";
+
+    case "paused":
+      return "Paused";
+
+    case "ended":
+      return "Ended";
+
+    case "disabled":
+      return "Disabled";
+  }
+}
+
+export function getTrackingStatusLabel(
+  status: TrackingStatus
+): string {
+  switch (status) {
+    case "connected":
+      return "Connected";
+
+    case "not_configured":
+      return "Not configured";
+
+    case "unavailable":
+      return "Unavailable";
+  }
+}
+
+export function getPlacementLabel(
+  placement: Placement
+): string {
+  switch (placement) {
+    case "home":
+      return "Home";
+
+    case "search":
+      return "Search";
+
+    case "trending":
+      return "Trending";
+  }
+}
+
+==================================================
+FILE: .\src\features\workspace\creative.rules.ts
+==================================================
+
+import type {
+  CommercialCreative,
+  CreativeFrameProfile,
+  CreativeMediaAsset,
+  SlidingCreativeCard,
+  SlidingCardSlot,
+} from "./workspace.types";
+
+interface CreativeFrameRule {
+  label: string;
+
+  aspectRatio: number;
+
+  /**
+   * Small tolerance for exported media whose dimensions
+   * differ slightly from the mathematical ratio.
+   */
+  aspectRatioTolerance: number;
+
+  maxVideoWidth: number;
+
+  maxVideoHeight: number;
+}
+
+/**
+ * These profiles come directly from the finalized Poster
+ * mobile advertising UI.
+ *
+ * Creative must fit the UI.
+ * The UI must not adapt to unsupported advertiser ratios.
+ */
+export const CREATIVE_FRAME_RULES: Record<
+  CreativeFrameProfile,
+  CreativeFrameRule
+> = {
+  standard_media: {
+    label:
+      "Poster standard ad frame",
+
+    aspectRatio:
+      16 / 9,
+
+    aspectRatioTolerance:
+      0.02,
+
+    maxVideoWidth:
+      1280,
+
+    maxVideoHeight:
+      720,
+  },
+
+  sliding_card_media: {
+    label:
+      "Poster sliding-card frame",
+
+    aspectRatio:
+      1,
+
+    aspectRatioTolerance:
+      0.02,
+
+    maxVideoWidth:
+      720,
+
+    maxVideoHeight:
+      720,
+  },
+};
+
+export const CREATIVE_RULES = {
+  video: {
+    maximumDurationSeconds:
+      10,
+
+    maximumBytes:
+      20 *
+      1024 *
+      1024,
+
+    minimumFramesPerSecond:
+      30,
+
+    maximumFramesPerSecond:
+      45,
+
+    preferredFramesPerSecond:
+      30,
+
+    acceptedMimeTypes: [
+      "video/mp4",
+      "video/webm",
+    ] as const,
+  },
+
+  image: {
+    acceptedMimeTypes: [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+    ] as const,
+  },
+
+  sliding: {
+    totalCards:
+      3,
+
+    /**
+     * Locked finalized media order.
+     */
+    videoSlot:
+      1 as SlidingCardSlot,
+
+    imageSlots: [
+      2,
+      3,
+    ] as readonly SlidingCardSlot[],
+  },
+} as const;
+
+export interface CreativeValidationResult {
+  valid: boolean;
+
+  errors: string[];
+}
+
+function isAspectRatioValid(
+  width: number,
+  height: number,
+  expectedRatio: number,
+  tolerance: number
+): boolean {
+  if (
+    width <=
+      0 ||
+    height <=
+      0
+  ) {
+    return false;
+  }
+
+  const actualRatio =
+    width /
+    height;
+
+  const relativeDifference =
+    Math.abs(
+      actualRatio -
+        expectedRatio
+    ) /
+    expectedRatio;
+
+  return (
+    relativeDifference <=
+    tolerance
+  );
+}
+
+function validateMediaFrame(
+  media:
+    CreativeMediaAsset,
+
+  requiredProfile:
+    CreativeFrameProfile
+): string[] {
+  const errors:
+    string[] = [];
+
+  const rule =
+    CREATIVE_FRAME_RULES[
+      requiredProfile
+    ];
+
+  if (
+    media.frameProfile &&
+    media.frameProfile !==
+      requiredProfile
+  ) {
+    errors.push(
+      `Media must use the ${rule.label}.`
+    );
+  }
+
+  if (
+    media.width !==
+      undefined &&
+    media.height !==
+      undefined
+  ) {
+    const ratioValid =
+      isAspectRatioValid(
+        media.width,
+        media.height,
+        rule.aspectRatio,
+        rule.aspectRatioTolerance
+      );
+
+    if (
+      !ratioValid
+    ) {
+      errors.push(
+        requiredProfile ===
+          "standard_media"
+          ? "Standard ad media must use a 16:9 landscape frame."
+          : "Sliding-card media must use Poster�s square 1:1 card frame."
+      );
+    }
+
+    if (
+      media.type ===
+        "video" &&
+      (
+        media.width >
+          rule.maxVideoWidth ||
+        media.height >
+          rule.maxVideoHeight
+      )
+    ) {
+      errors.push(
+        requiredProfile ===
+          "standard_media"
+          ? "Standard video must not exceed 1280 � 720."
+          : "Sliding-card video must not exceed 720 � 720."
+      );
+    }
+  }
+
+  return errors;
+}
+
+function validateVideoBasics(
+  media:
+    CreativeMediaAsset
+): string[] {
+  const errors:
+    string[] = [];
+
+  if (
+    media.type !==
+    "video"
+  ) {
+    return errors;
+  }
+
+  if (
+    media.mimeType &&
+    !CREATIVE_RULES
+      .video
+      .acceptedMimeTypes
+      .includes(
+        media.mimeType as
+          | "video/mp4"
+          | "video/webm"
+      )
+  ) {
+    errors.push(
+      "Supported video formats are MP4 and WebM."
+    );
+  }
+
+  if (
+    media.durationSeconds !==
+      undefined &&
+    media.durationSeconds >
+      CREATIVE_RULES
+        .video
+        .maximumDurationSeconds
+  ) {
+    errors.push(
+      `Video must be ${CREATIVE_RULES.video.maximumDurationSeconds} seconds or shorter.`
+    );
+  }
+
+  if (
+    media.sizeBytes !==
+      undefined &&
+    media.sizeBytes >
+      CREATIVE_RULES
+        .video
+        .maximumBytes
+  ) {
+    errors.push(
+      "Video must be 20 MB or smaller."
+    );
+  }
+
+  /**
+   * Browser APIs do not reliably expose true FPS.
+   *
+   * This validation runs when FPS is known, such as
+   * after Backend media inspection.
+   */
+  if (
+    media.framesPerSecond !==
+      undefined &&
+    (
+      media.framesPerSecond <
+        CREATIVE_RULES
+          .video
+          .minimumFramesPerSecond ||
+      media.framesPerSecond >
+        CREATIVE_RULES
+          .video
+          .maximumFramesPerSecond
+    )
+  ) {
+    errors.push(
+      "Video frame rate must be between 30 and 45 FPS."
+    );
+  }
+
+  return errors;
+}
+
+function validateImageBasics(
+  media:
+    CreativeMediaAsset
+): string[] {
+  const errors:
+    string[] = [];
+
+  if (
+    media.type !==
+    "image"
+  ) {
+    return errors;
+  }
+
+  if (
+    media.mimeType &&
+    !CREATIVE_RULES
+      .image
+      .acceptedMimeTypes
+      .includes(
+        media.mimeType as
+          | "image/png"
+          | "image/jpeg"
+          | "image/webp"
+      )
+  ) {
+    errors.push(
+      "Supported images are PNG, JPG/JPEG, and WebP."
+    );
+  }
+
+  return errors;
+}
+
+function validateMedia(
+  media:
+    CreativeMediaAsset,
+
+  requiredProfile:
+    CreativeFrameProfile
+): string[] {
+  return [
+    ...validateMediaFrame(
+      media,
+      requiredProfile
+    ),
+
+    ...validateVideoBasics(
+      media
+    ),
+
+    ...validateImageBasics(
+      media
+    ),
+  ];
+}
+
+function findSlidingCard(
+  cards:
+    SlidingCreativeCard[],
+
+  slot:
+    SlidingCardSlot
+):
+  SlidingCreativeCard |
+  undefined {
+  return cards.find(
+    (
+      card
+    ) =>
+      card.slot ===
+      slot
+  );
+}
+
+export function validateSlidingCards(
+  cards:
+    SlidingCreativeCard[]
+):
+  CreativeValidationResult {
+  const errors:
+    string[] = [];
+
+  if (
+    cards.length !==
+    CREATIVE_RULES
+      .sliding
+      .totalCards
+  ) {
+    errors.push(
+      "Sliding ads require exactly 3 cards."
+    );
+  }
+
+  const slots =
+    new Set(
+      cards.map(
+        (
+          card
+        ) =>
+          card.slot
+      )
+    );
+
+  if (
+    slots.size !==
+    cards.length
+  ) {
+    errors.push(
+      "Sliding-card positions must be unique."
+    );
+  }
+
+  const card1 =
+    findSlidingCard(
+      cards,
+      1
+    );
+
+  const card2 =
+    findSlidingCard(
+      cards,
+      2
+    );
+
+  const card3 =
+    findSlidingCard(
+      cards,
+      3
+    );
+
+  if (
+    !card1
+  ) {
+    errors.push(
+      "Sliding ad requires Card 1."
+    );
+  }
+
+  if (
+    !card2
+  ) {
+    errors.push(
+      "Sliding ad requires Card 2."
+    );
+  }
+
+  if (
+    !card3
+  ) {
+    errors.push(
+      "Sliding ad requires Card 3."
+    );
+  }
+
+  /**
+   * Locked creative contract:
+   *
+   * Card 1 = video
+   * Card 2 = image
+   * Card 3 = image
+   */
+  if (
+    card1 &&
+    card1.media.type !==
+      "video"
+  ) {
+    errors.push(
+      "Sliding ad Card 1 must be a video."
+    );
+  }
+
+  if (
+    card2 &&
+    card2.media.type !==
+      "image"
+  ) {
+    errors.push(
+      "Sliding ad Card 2 must be an image."
+    );
+  }
+
+  if (
+    card3 &&
+    card3.media.type !==
+      "image"
+  ) {
+    errors.push(
+      "Sliding ad Card 3 must be an image."
+    );
+  }
+
+  for (
+    const card of
+    cards
+  ) {
+    if (
+      !card.title.trim()
+    ) {
+      errors.push(
+        `Card ${card.slot} requires a title.`
+      );
+    }
+
+    errors.push(
+      ...validateMedia(
+        card.media,
+        "sliding_card_media"
+      )
+    );
+  }
+
+  return {
+    valid:
+      errors.length ===
+      0,
+
+    errors,
+  };
+}
+
+export function validateCommercialCreative(
+  creative:
+    CommercialCreative
+):
+  CreativeValidationResult {
+  const errors:
+    string[] = [];
+
+  if (
+    !creative.headline.trim()
+  ) {
+    errors.push(
+      "Headline is required."
+    );
+  }
+
+  if (
+    !creative.body.trim()
+  ) {
+    errors.push(
+      "Description is required."
+    );
+  }
+
+  if (
+    !creative.callToAction.trim()
+  ) {
+    errors.push(
+      "Call to action is required."
+    );
+  }
+
+  if (
+    !creative.destinationUrl.trim()
+  ) {
+    errors.push(
+      "Destination URL is required."
+    );
+  }
+
+  if (
+    creative.layout ===
+    "standard"
+  ) {
+    if (
+      !creative.primaryMedia
+    ) {
+      errors.push(
+        "Standard ads require one main media asset."
+      );
+    } else {
+      errors.push(
+        ...validateMedia(
+          creative.primaryMedia,
+          "standard_media"
+        )
+      );
+    }
+  }
+
+  if (
+    creative.layout ===
+    "sliding"
+  ) {
+    const result =
+      validateSlidingCards(
+        creative.slidingCards ??
+          []
+      );
+
+    errors.push(
+      ...result.errors
+    );
+  }
+
+  if (
+    !creative.layout
+  ) {
+    errors.push(
+      "Choose a creative layout."
+    );
+  }
+
+  return {
+    valid:
+      errors.length ===
+      0,
+
+    errors,
+  };
+}
+
+==================================================
+FILE: .\src\features\requests\NewRequestForm.tsx
+==================================================
+
+"use client";
+
+import {
+  type FormEvent,
+  useMemo,
+  useState,
+} from "react";
+
+import Link from "next/link";
+
+import CreativeMediaUploader, {
+  type CreativeMediaSelection,
+} from "@/components/media/CreativeMediaUploader";
+
+import {
+  validateCommercialCreative,
+} from "@/features/workspace/creative.rules";
+
+import {
+  currentOrganization,
+} from "@/features/workspace/workspace.mock";
+
+import {
+  getRequestTypeLabel,
+} from "@/features/workspace/workspace.formatters";
+
+import type {
+  CommercialCreative,
+  CommercialRequest,
+  CommercialRequestType,
+  CreativeLayout,
+  CreativeMediaAsset,
+  Placement,
+  SlidingCardSlot,
+  SlidingCreativeCard,
+} from "@/features/workspace/workspace.types";
+
+import styles from "./NewRequestForm.module.css";
+
+interface NewRequestFormProps {
+  initialRequest?: CommercialRequest;
+}
+
+interface FormState {
+  type: CommercialRequestType;
+
+  organizationName: string;
+
+  contactName: string;
+
+  businessEmail: string;
+
+  website: string;
+
+  campaignName: string;
+
+  requestedStartDate: string;
+
+  requestedEndDate: string;
+
+  proposedContractValue: string;
+
+  proposedBudget: string;
+
+  commissionModel: string;
+
+  conversionDefinition: string;
+
+  headline: string;
+
+  body: string;
+
+  callToAction: string;
+
+  destinationUrl: string;
+
+  rightsConfirmed: boolean;
+}
+
+const placementOptions: {
+  value: Placement;
+
+  label: string;
+}[] = [
+  {
+    value:
+      "home",
+
+    label:
+      "Home",
+  },
+
+  {
+    value:
+      "search",
+
+    label:
+      "Search",
+  },
+
+  {
+    value:
+      "trending",
+
+    label:
+      "Trending",
+  },
+];
+
+const slidingSlots:
+  readonly SlidingCardSlot[] = [
+  1,
+  2,
+  3,
+];
+
+const MAX_VIDEO_BYTES =
+  20 *
+  1024 *
+  1024;
+
+function createInitialState(
+  request?: CommercialRequest
+):
+  FormState {
+  return {
+    type:
+      request?.type ??
+      "direct_sponsorship",
+
+    organizationName:
+      request?.organizationName ??
+      currentOrganization.name,
+
+    contactName:
+      request?.contactName ??
+      currentOrganization.primaryContactName,
+
+    businessEmail:
+      request?.businessEmail ??
+      currentOrganization.primaryContactEmail,
+
+    website:
+      request?.website ??
+      currentOrganization.website,
+
+    campaignName:
+      request?.campaignName ??
+      "",
+
+    requestedStartDate:
+      request?.requestedStartDate ??
+      "",
+
+    requestedEndDate:
+      request?.requestedEndDate ??
+      "",
+
+    proposedContractValue:
+      request?.proposedContractValue !==
+      undefined
+        ? String(
+            request.proposedContractValue
+          )
+        : "",
+
+    proposedBudget:
+      request?.proposedBudget !==
+      undefined
+        ? String(
+            request.proposedBudget
+          )
+        : "",
+
+    commissionModel:
+      request?.commissionModel ??
+      "",
+
+    conversionDefinition:
+      request?.conversionDefinition ??
+      "",
+
+    headline:
+      request?.creative.headline ??
+      "",
+
+    body:
+      request?.creative.body ??
+      "",
+
+    callToAction:
+      request?.creative.callToAction ??
+      "",
+
+    destinationUrl:
+      request?.creative.destinationUrl ??
+      "",
+
+    rightsConfirmed:
+      request?.rightsConfirmed ??
+      false,
+  };
+}
+
+function createInitialLayout(
+  request?: CommercialRequest
+):
+  CreativeLayout {
+  if (
+    request?.creative.layout
+  ) {
+    return request.creative.layout;
+  }
+
+  if (
+    request?.creative
+      .slidingCards
+      ?.length
+  ) {
+    return "sliding";
+  }
+
+  return "standard";
+}
+
+function createInitialStandardMedia(
+  request?: CommercialRequest
+):
+  CreativeMediaAsset |
+  undefined {
+  if (
+    request?.creative
+      .primaryMedia
+  ) {
+    return request.creative
+      .primaryMedia;
+  }
+
+  if (
+    request?.creative
+      .imageName
+  ) {
+    return {
+      role:
+        "primary",
+
+      type:
+        "image",
+
+      frameProfile:
+        "standard_media",
+
+      fileName:
+        request.creative
+          .imageName,
+    };
+  }
+
+  return undefined;
+}
+
+function createInitialLogoMedia(
+  request?: CommercialRequest
+):
+  CreativeMediaAsset |
+  undefined {
+  if (
+    request?.creative
+      .logoMedia
+  ) {
+    return request.creative
+      .logoMedia;
+  }
+
+  if (
+    request?.creative
+      .logoName
+  ) {
+    return {
+      role:
+        "logo",
+
+      type:
+        "image",
+
+      fileName:
+        request.creative
+          .logoName,
+    };
+  }
+
+  return undefined;
+}
+
+function createInitialSlideTitles(
+  request?: CommercialRequest
+):
+  Record<
+    SlidingCardSlot,
+    string
+  > {
+  const findTitle = (
+    slot:
+      SlidingCardSlot
+  ) =>
+    request?.creative
+      .slidingCards
+      ?.find(
+        (
+          card
+        ) =>
+          card.slot ===
+          slot
+      )
+      ?.title ??
+    "";
+
+  return {
+    1:
+      findTitle(
+        1
+      ),
+
+    2:
+      findTitle(
+        2
+      ),
+
+    3:
+      findTitle(
+        3
+      ),
+  };
+}
+
+function createInitialSlideMedia(
+  request?: CommercialRequest
+):
+  Partial<
+    Record<
+      SlidingCardSlot,
+      CreativeMediaAsset
+    >
+  > {
+  const result:
+    Partial<
+      Record<
+        SlidingCardSlot,
+        CreativeMediaAsset
+      >
+    > = {};
+
+  for (
+    const card of
+    request?.creative
+      .slidingCards ??
+    []
+  ) {
+    result[
+      card.slot
+    ] =
+      card.media;
+  }
+
+  return result;
+}
+
+function createPreviewReference():
+  string {
+  const suffix =
+    Date.now()
+      .toString()
+      .slice(
+        -6
+      );
+
+  return `ADV-PREVIEW-${suffix}`;
+}
+
+export default function NewRequestForm({
+  initialRequest,
+}: NewRequestFormProps) {
+  const isEditMode =
+    initialRequest?.status ===
+    "changes_requested";
+
+  const initialState =
+    useMemo(
+      () =>
+        createInitialState(
+          initialRequest
+        ),
+      [
+        initialRequest,
+      ]
+    );
+
+  const [
+    form,
+    setForm,
+  ] =
+    useState<FormState>(
+      initialState
+    );
+
+  const [
+    placements,
+    setPlacements,
+  ] =
+    useState<
+      Placement[]
+    >(
+      initialRequest
+        ?.requestedPlacements ??
+        []
+    );
+
+  const [
+    creativeLayout,
+    setCreativeLayout,
+  ] =
+    useState<CreativeLayout>(
+      () =>
+        createInitialLayout(
+          initialRequest
+        )
+    );
+
+  const [
+    standardMedia,
+    setStandardMedia,
+  ] =
+    useState<
+      CreativeMediaAsset |
+      undefined
+    >(
+      () =>
+        createInitialStandardMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    logoMedia,
+    setLogoMedia,
+  ] =
+    useState<
+      CreativeMediaAsset |
+      undefined
+    >(
+      () =>
+        createInitialLogoMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    slideTitles,
+    setSlideTitles,
+  ] =
+    useState<
+      Record<
+        SlidingCardSlot,
+        string
+      >
+    >(
+      () =>
+        createInitialSlideTitles(
+          initialRequest
+        )
+    );
+
+  const [
+    slideMedia,
+    setSlideMedia,
+  ] =
+    useState<
+      Partial<
+        Record<
+          SlidingCardSlot,
+          CreativeMediaAsset
+        >
+      >
+    >(
+      () =>
+        createInitialSlideMedia(
+          initialRequest
+        )
+    );
+
+  const [
+    formResetVersion,
+    setFormResetVersion,
+  ] =
+    useState(
+      0
+    );
+
+  const [
+    error,
+    setError,
+  ] =
+    useState(
+      ""
+    );
+
+  const [
+    submittedReference,
+    setSubmittedReference,
+  ] =
+    useState(
+      ""
+    );
+
+  const updateField = <
+    Key extends keyof FormState,
+  >(
+    key:
+      Key,
+
+    value:
+      FormState[
+        Key
+      ]
+  ) => {
+    setForm(
+      (
+        current
+      ) => ({
+        ...current,
+
+        [key]:
+          value,
+      })
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const selectType = (
+    type:
+      CommercialRequestType
+  ) => {
+    if (
+      isEditMode
+    ) {
+      return;
+    }
+
+    updateField(
+      "type",
+      type
+    );
+  };
+
+  const selectCreativeLayout = (
+    layout:
+      CreativeLayout
+  ) => {
+    setCreativeLayout(
+      layout
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const togglePlacement = (
+    placement:
+      Placement
+  ) => {
+    setPlacements(
+      (
+        current
+      ) =>
+        current.includes(
+          placement
+        )
+          ? current.filter(
+              (
+                value
+              ) =>
+                value !==
+                placement
+            )
+          : [
+              ...current,
+              placement,
+            ]
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateSlideTitle = (
+    slot:
+      SlidingCardSlot,
+
+    value:
+      string
+  ) => {
+    setSlideTitles(
+      (
+        current
+      ) => ({
+        ...current,
+
+        [slot]:
+          value,
+      })
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateStandardMedia = (
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setStandardMedia(
+      selection?.asset
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateLogoMedia = (
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setLogoMedia(
+      selection?.asset
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const updateSlideMedia = (
+    slot:
+      SlidingCardSlot,
+
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => {
+    setSlideMedia(
+      (
+        current
+      ) => {
+        const next = {
+          ...current,
+        };
+
+        if (
+          selection
+        ) {
+          next[
+            slot
+          ] =
+            selection.asset;
+        } else {
+          delete next[
+            slot
+          ];
+        }
+
+        return next;
+      }
+    );
+
+    setError(
+      ""
+    );
+  };
+
+  const buildCreative =
+    ():
+      CommercialCreative => {
+      const base:
+        CommercialCreative = {
+        layout:
+          creativeLayout,
+
+        headline:
+          form.headline
+            .trim(),
+
+        body:
+          form.body
+            .trim(),
+
+        callToAction:
+          form.callToAction
+            .trim(),
+
+        destinationUrl:
+          form.destinationUrl
+            .trim(),
+
+        logoMedia,
+
+        logoName:
+          logoMedia
+            ?.fileName ??
+          initialRequest
+            ?.creative
+            .logoName,
+      };
+
+      if (
+        creativeLayout ===
+        "standard"
+      ) {
+        return {
+          ...base,
+
+          primaryMedia:
+            standardMedia,
+
+          imageName:
+            standardMedia
+              ?.type ===
+              "image"
+              ? standardMedia
+                  .fileName
+              : initialRequest
+                  ?.creative
+                  .imageName,
+        };
+      }
+
+      const slidingCards:
+        SlidingCreativeCard[] = [];
+
+      for (
+        const slot of
+        slidingSlots
+      ) {
+        const media =
+          slideMedia[
+            slot
+          ];
+
+        if (
+          !media
+        ) {
+          continue;
+        }
+
+        slidingCards.push({
+          slot,
+
+          title:
+            slideTitles[
+              slot
+            ].trim(),
+
+          media,
+        });
+      }
+
+      return {
+        ...base,
+
+        slidingCards,
+      };
+    };
+
+  const resetForm =
+    () => {
+      setForm(
+        initialState
+      );
+
+      setPlacements(
+        initialRequest
+          ?.requestedPlacements ??
+          []
+      );
+
+      setCreativeLayout(
+        createInitialLayout(
+          initialRequest
+        )
+      );
+
+      setStandardMedia(
+        createInitialStandardMedia(
+          initialRequest
+        )
+      );
+
+      setLogoMedia(
+        createInitialLogoMedia(
+          initialRequest
+        )
+      );
+
+      setSlideTitles(
+        createInitialSlideTitles(
+          initialRequest
+        )
+      );
+
+      setSlideMedia(
+        createInitialSlideMedia(
+          initialRequest
+        )
+      );
+
+      setFormResetVersion(
+        (
+          current
+        ) =>
+          current +
+          1
+      );
+
+      setSubmittedReference(
+        ""
+      );
+
+      setError(
+        ""
+      );
+    };
+
+  const submitRequest = (
+    event:
+      FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    if (
+      placements.length ===
+      0
+    ) {
+      setError(
+        "Select at least one requested placement."
+      );
+
+      return;
+    }
+
+    if (
+      form.requestedStartDate >
+      form.requestedEndDate
+    ) {
+      setError(
+        "The requested end date must be after the start date."
+      );
+
+      return;
+    }
+
+    if (
+      form.type ===
+        "direct_sponsorship" &&
+      Number(
+        form.proposedContractValue
+      ) <=
+        0
+    ) {
+      setError(
+        "Enter a valid proposed contract value."
+      );
+
+      return;
+    }
+
+    if (
+      form.type ===
+        "affiliate" &&
+      !form.commissionModel
+        .trim()
+    ) {
+      setError(
+        "Enter the proposed commission model."
+      );
+
+      return;
+    }
+
+    const creative =
+      buildCreative();
+
+    const creativeValidation =
+      validateCommercialCreative(
+        creative
+      );
+
+    if (
+      !creativeValidation
+        .valid
+    ) {
+      setError(
+        creativeValidation
+          .errors[
+          0
+        ] ??
+          "Review the advertising creative before submitting."
+      );
+
+      return;
+    }
+
+    if (
+      !form.rightsConfirmed
+    ) {
+      setError(
+        "Confirm that you have permission to submit the creative, links, and commercial information."
+      );
+
+      return;
+    }
+
+    setError(
+      ""
+    );
+
+    /*
+     * Frontend-only workflow.
+     *
+     * Backend integration will later:
+     *
+     * - authenticate the client;
+     * - enforce organization ownership;
+     * - upload media to secure object storage;
+     * - re-verify MIME, codec, FPS, duration,
+     *   dimensions and aspect ratio;
+     * - generate permanent media asset IDs/URLs;
+     * - create/update the ADV request;
+     * - preserve immutable review history;
+     * - notify Admin;
+     * - return the permanent request reference.
+     *
+     * Browser File objects and object URLs are never
+     * persisted as canonical campaign data.
+     */
+    void creative;
+
+    setSubmittedReference(
+      initialRequest
+        ?.id ??
+        createPreviewReference()
+    );
+  };
+
+  if (
+    submittedReference
+  ) {
+    return (
+      <section
+        className={
+          styles.success
+        }
+      >
+        <div
+          className={
+            styles.successMark
+          }
+        >
+          ✓
+        </div>
+
+        <div>
+          <div
+            className={
+              styles.successEyebrow
+            }
+          >
+            {isEditMode
+              ? "Corrections ready"
+              : "Request prepared"}
+          </div>
+
+          <h2>
+            {isEditMode
+              ? "Your changes are ready to return to Poster for review."
+              : "Your advertising request is ready for Poster review."}
+          </h2>
+
+          <p>
+            Reference:{" "}
+            <strong>
+              {
+                submittedReference
+              }
+            </strong>
+          </p>
+
+          <p>
+            This development build does not persist submissions until
+            backend services are connected.
+          </p>
+
+          <div
+            className={
+              styles.successActions
+            }
+          >
+            <Link
+              href={
+                isEditMode &&
+                initialRequest
+                  ? `/requests/${initialRequest.id}`
+                  : "/requests"
+              }
+              className="primaryButton"
+            >
+              {isEditMode
+                ? "Back to request"
+                : "View requests"}
+            </Link>
+
+            <button
+              type="button"
+              className="secondaryButton"
+              onClick={
+                resetForm
+              }
+            >
+              {isEditMode
+                ? "Edit again"
+                : "Submit another"}
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <form
+      className={
+        styles.form
+      }
+      onSubmit={
+        submitRequest
+      }
+    >
+      {isEditMode &&
+      initialRequest ? (
+        <section
+          className={
+            styles.adminNotice
+          }
+        >
+          <div>
+            <strong>
+              Poster requested changes
+            </strong>
+
+            <span>
+              {
+                initialRequest.id
+              }
+            </span>
+          </div>
+
+          {initialRequest
+            .review
+            ?.requestedChanges
+            .length ? (
+            <ul>
+              {initialRequest.review.requestedChanges.map(
+                (
+                  change
+                ) => (
+                  <li
+                    key={
+                      change
+                    }
+                  >
+                    {
+                      change
+                    }
+                  </li>
+                )
+              )}
+            </ul>
+          ) : null}
+
+          {initialRequest
+            .review
+            ?.reviewNote ? (
+            <p>
+              {
+                initialRequest.review.reviewNote
+              }
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section
+        className={
+          styles.section
+        }
+      >
+        <div
+          className={
+            styles.sectionHeader
+          }
+        >
+          <span>
+            1
+          </span>
+
+          <div>
+            <h2>
+              Request type
+            </h2>
+
+            <p>
+              Choose the commercial relationship. Creative format and
+              placement are selected independently.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.typeGrid
+          }
+        >
+          <button
+            type="button"
+            disabled={
+              isEditMode
+            }
+            className={
+              form.type ===
+              "direct_sponsorship"
+                ? styles.typeCardActive
+                : styles.typeCard
+            }
+            onClick={() =>
+              selectType(
+                "direct_sponsorship"
+              )
+            }
+          >
+            <strong>
+              Direct Sponsorship
+            </strong>
+
+            <span>
+              Contract-based advertising with agreed commercial terms,
+              placements, schedule, and delivery.
+            </span>
+          </button>
+
+          <button
+            type="button"
+            disabled={
+              isEditMode
+            }
+            className={
+              form.type ===
+              "affiliate"
+                ? styles.typeCardActive
+                : styles.typeCard
+            }
+            onClick={() =>
+              selectType(
+                "affiliate"
+              )
+            }
+          >
+            <strong>
+              Affiliate
+            </strong>
+
+            <span>
+              Performance partnership based on tracked conversions
+              and commission.
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section
+        className={
+          styles.section
+        }
+      >
+        <div
+          className={
+            styles.sectionHeader
+          }
+        >
+          <span>
+            2
+          </span>
+
+          <div>
+            <h2>
+              Business contact
+            </h2>
+
+            <p>
+              The organization submitting this request.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.formGrid
+          }
+        >
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-organization">
+              Organization *
+            </label>
+
+            <input
+              id="request-organization"
+              value={
+                form.organizationName
+              }
+              readOnly
+            />
+          </div>
+
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-contact">
+              Contact name *
+            </label>
+
+            <input
+              id="request-contact"
+              value={
+                form.contactName
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "contactName",
+                  event.target.value
+                )
+              }
+              required
+              autoComplete="name"
+            />
+          </div>
+
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-email">
+              Business email *
+            </label>
+
+            <input
+              id="request-email"
+              type="email"
+              value={
+                form.businessEmail
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "businessEmail",
+                  event.target.value
+                )
+              }
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-website">
+              Website *
+            </label>
+
+            <input
+              id="request-website"
+              type="url"
+              value={
+                form.website
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "website",
+                  event.target.value
+                )
+              }
+              required
+            />
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={
+          styles.section
+        }
+      >
+        <div
+          className={
+            styles.sectionHeader
+          }
+        >
+          <span>
+            3
+          </span>
+
+          <div>
+            <h2>
+              Campaign request
+            </h2>
+
+            <p>
+              Choose where the campaign may be delivered.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.field
+          }
+        >
+          <label htmlFor="request-campaign-name">
+            Campaign name *
+          </label>
+
+          <input
+            id="request-campaign-name"
+            value={
+              form.campaignName
+            }
+            onChange={(
+              event
+            ) =>
+              updateField(
+                "campaignName",
+                event.target.value
+              )
+            }
+            required
+            placeholder="Professional Skills Campaign"
+          />
+        </div>
+
+        <div
+          className={
+            styles.fieldGroup
+          }
+        >
+          <label>
+            Requested placements *
+          </label>
+
+          <div
+            className={
+              styles.placements
+            }
+          >
+            {placementOptions.map(
+              (
+                placement
+              ) => {
+                const selected =
+                  placements.includes(
+                    placement.value
+                  );
+
+                return (
+                  <button
+                    key={
+                      placement.value
+                    }
+                    type="button"
+                    className={
+                      selected
+                        ? styles.placementActive
+                        : styles.placement
+                    }
+                    aria-pressed={
+                      selected
+                    }
+                    onClick={() =>
+                      togglePlacement(
+                        placement.value
+                      )
+                    }
+                  >
+                    <span
+                      className={
+                        styles.squareCheck
+                      }
+                    >
+                      {selected
+                        ? "✓"
+                        : ""}
+                    </span>
+
+                    {
+                      placement.label
+                    }
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.formGrid
+          }
+        >
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-start-date">
+              Requested start *
+            </label>
+
+            <input
+              id="request-start-date"
+              type="date"
+              value={
+                form.requestedStartDate
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "requestedStartDate",
+                  event.target.value
+                )
+              }
+              required
+            />
+          </div>
+
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-end-date">
+              Requested end *
+            </label>
+
+            <input
+              id="request-end-date"
+              type="date"
+              value={
+                form.requestedEndDate
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "requestedEndDate",
+                  event.target.value
+                )
+              }
+              required
+            />
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={
+          styles.section
+        }
+      >
+        <div
+          className={
+            styles.sectionHeader
+          }
+        >
+          <span>
+            4
+          </span>
+
+          <div>
+            <h2>
+              Commercial terms
+            </h2>
+
+            <p>
+              Proposed business terms for Poster to review.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.formGrid
+          }
+        >
+          {form.type ===
+          "direct_sponsorship" ? (
+            <div
+              className={
+                styles.field
+              }
+            >
+              <label htmlFor="request-contract-value">
+                Proposed contract value *
+              </label>
+
+              <div
+                className={
+                  styles.moneyInput
+                }
+              >
+                <span>
+
+                </span>
+
+                <input
+                  id="request-contract-value"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={
+                    form.proposedContractValue
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    updateField(
+                      "proposedContractValue",
+                      event.target.value
+                    )
+                  }
+                  required
+                  placeholder="500000"
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div
+                className={
+                  styles.field
+                }
+              >
+                <label htmlFor="request-budget">
+                  Proposed budget
+                </label>
+
+                <div
+                  className={
+                    styles.moneyInput
+                  }
+                >
+                  <span>
+
+                  </span>
+
+                  <input
+                    id="request-budget"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={
+                      form.proposedBudget
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateField(
+                        "proposedBudget",
+                        event.target.value
+                      )
+                    }
+                    placeholder="150000"
+                  />
+                </div>
+              </div>
+
+              <div
+                className={
+                  styles.field
+                }
+              >
+                <label htmlFor="request-commission">
+                  Commission model *
+                </label>
+
+                <input
+                  id="request-commission"
+                  value={
+                    form.commissionModel
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    updateField(
+                      "commissionModel",
+                      event.target.value
+                    )
+                  }
+                  required
+                  placeholder="12% per completed purchase"
+                />
+              </div>
+            </>
+          )}
+
+          <div
+            className={
+              styles.fieldWide
+            }
+          >
+            <label htmlFor="request-conversion">
+              Conversion definition
+            </label>
+
+            <input
+              id="request-conversion"
+              value={
+                form.conversionDefinition
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "conversionDefinition",
+                  event.target.value
+                )
+              }
+              placeholder="Completed paid course enrollment"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={
+          styles.section
+        }
+      >
+        <div
+          className={
+            styles.sectionHeader
+          }
+        >
+          <span>
+            5
+          </span>
+
+          <div>
+            <h2>
+              Creative
+            </h2>
+
+            <p>
+              Choose a creative format independently from the commercial
+              type and requested placements.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.formGrid
+          }
+        >
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-headline">
+              Headline *
+            </label>
+
+            <input
+              id="request-headline"
+              value={
+                form.headline
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "headline",
+                  event.target.value
+                )
+              }
+              required
+              maxLength={
+                90
+              }
+            />
+          </div>
+
+          <div
+            className={
+              styles.field
+            }
+          >
+            <label htmlFor="request-cta">
+              Call to action *
+            </label>
+
+            <input
+              id="request-cta"
+              value={
+                form.callToAction
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "callToAction",
+                  event.target.value
+                )
+              }
+              required
+              placeholder="Explore courses"
+            />
+          </div>
+
+          <div
+            className={
+              styles.fieldWide
+            }
+          >
+            <label htmlFor="request-body">
+              Description *
+            </label>
+
+            <textarea
+              id="request-body"
+              value={
+                form.body
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "body",
+                  event.target.value
+                )
+              }
+              required
+              maxLength={
+                240
+              }
+            />
+          </div>
+
+          <div
+            className={
+              styles.fieldWide
+            }
+          >
+            <label htmlFor="request-destination">
+              Destination URL *
+            </label>
+
+            <input
+              id="request-destination"
+              type="url"
+              value={
+                form.destinationUrl
+              }
+              onChange={(
+                event
+              ) =>
+                updateField(
+                  "destinationUrl",
+                  event.target.value
+                )
+              }
+              required
+              placeholder="https://"
+            />
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.fieldGroup
+          }
+        >
+          <label>
+            Creative format *
+          </label>
+
+          <div
+            className={
+              styles.typeGrid
+            }
+          >
+            <button
+              type="button"
+              className={
+                creativeLayout ===
+                "standard"
+                  ? styles.typeCardActive
+                  : styles.typeCard
+              }
+              onClick={() =>
+                selectCreativeLayout(
+                  "standard"
+                )
+              }
+            >
+              <strong>
+                Standard ad
+              </strong>
+
+              <span>
+                One 16:9 landscape image or short video in Poster&apos;s
+                finalized standard advertising frame.
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                creativeLayout ===
+                "sliding"
+                  ? styles.typeCardActive
+                  : styles.typeCard
+              }
+              onClick={() =>
+                selectCreativeLayout(
+                  "sliding"
+                )
+              }
+            >
+              <strong>
+                Sliding ad
+              </strong>
+
+              <span>
+                Three square cards: Card 1 video, then two image cards.
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {creativeLayout ===
+        "standard" ? (
+          <div
+            className={
+              styles.uploadGrid
+            }
+          >
+            <CreativeMediaUploader
+              key={`standard-${formResetVersion}`}
+              label="Main advertising media"
+              description="16:9 image or video. Video: maximum 10 seconds, 20 MB, 30–45 FPS, maximum 1280 × 720."
+              role="primary"
+              frameProfile="standard_media"
+              accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"
+              allowVideo
+              required
+              maxVideoBytes={
+                MAX_VIDEO_BYTES
+              }
+              maxVideoDurationSeconds={
+                10
+              }
+              initialAsset={
+                standardMedia
+              }
+              initialFileName={
+                initialRequest
+                  ?.creative
+                  .imageName
+              }
+              altTextRequired
+              onChange={
+                updateStandardMedia
+              }
+            />
+
+            <CreativeMediaUploader
+              key={`logo-${formResetVersion}`}
+              label="Organization logo"
+              description="Optional logo. PNG, JPG or WebP."
+              role="logo"
+              accept="image/png,image/jpeg,image/webp"
+              initialAsset={
+                logoMedia
+              }
+              initialFileName={
+                initialRequest
+                  ?.creative
+                  .logoName
+              }
+              onChange={
+                updateLogoMedia
+              }
+            />
+          </div>
+        ) : (
+          <>
+            <div
+              className={
+                styles.adminNotice
+              }
+            >
+              <div>
+                <strong>
+                  Sliding creative format
+                </strong>
+
+                <span>
+                  Fixed structure
+                </span>
+              </div>
+
+              <p>
+                Poster&apos;s finalized sliding ad uses exactly three
+                square cards: Card 1 is a short video, Card 2 is an image,
+                and Card 3 is an image.
+              </p>
+            </div>
+
+            {slidingSlots.map(
+              (
+                slot
+              ) => {
+                const isVideo =
+                  slot ===
+                  1;
+
+                return (
+                  <div
+                    key={
+                      slot
+                    }
+                    className={
+                      styles.fieldGroup
+                    }
+                  >
+                    <div
+                      className={
+                        styles.field
+                      }
+                    >
+                      <label
+                        htmlFor={`request-slide-${slot}-title`}
+                      >
+                        Card {slot} title *
+                      </label>
+
+                      <input
+                        id={`request-slide-${slot}-title`}
+                        value={
+                          slideTitles[
+                            slot
+                          ]
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          updateSlideTitle(
+                            slot,
+                            event.target.value
+                          )
+                        }
+                        required
+                        maxLength={
+                          70
+                        }
+                        placeholder={
+                          slot ===
+                          1
+                            ? "Research in Motion"
+                            : slot ===
+                                2
+                              ? "Shared Research Workspace"
+                              : "Team Collaboration"
+                        }
+                      />
+                    </div>
+
+                    <CreativeMediaUploader
+                      key={`slide-${formResetVersion}-${slot}`}
+                      label={
+                        isVideo
+                          ? "Card 1 video"
+                          : `Card ${slot} image`
+                      }
+                      description={
+                        isVideo
+                          ? "Required square 1:1 video. Maximum 10 seconds, 20 MB, 30–45 FPS, maximum 720 × 720."
+                          : "Required square 1:1 image for Poster’s finalized sliding-card frame."
+                      }
+                      role="slide"
+                      frameProfile="sliding_card_media"
+                      accept={
+                        isVideo
+                          ? "video/mp4,video/webm"
+                          : "image/png,image/jpeg,image/webp"
+                      }
+                      allowVideo={
+                        isVideo
+                      }
+                      required
+                      maxVideoBytes={
+                        MAX_VIDEO_BYTES
+                      }
+                      maxVideoDurationSeconds={
+                        10
+                      }
+                      initialAsset={
+                        slideMedia[
+                          slot
+                        ]
+                      }
+                      altTextRequired
+                      onChange={(
+                        selection
+                      ) =>
+                        updateSlideMedia(
+                          slot,
+                          selection
+                        )
+                      }
+                    />
+                  </div>
+                );
+              }
+            )}
+
+            <div
+              className={
+                styles.uploadGrid
+              }
+            >
+              <CreativeMediaUploader
+                key={`sliding-logo-${formResetVersion}`}
+                label="Organization logo"
+                description="Optional logo. PNG, JPG or WebP."
+                role="logo"
+                accept="image/png,image/jpeg,image/webp"
+                initialAsset={
+                  logoMedia
+                }
+                initialFileName={
+                  initialRequest
+                    ?.creative
+                    .logoName
+                }
+                onChange={
+                  updateLogoMedia
+                }
+              />
+            </div>
+          </>
+        )}
+      </section>
+
+      <section
+        className={
+          styles.declaration
+        }
+      >
+        <label>
+          <input
+            type="checkbox"
+            checked={
+              form.rightsConfirmed
+            }
+            onChange={(
+              event
+            ) =>
+              updateField(
+                "rightsConfirmed",
+                event.target.checked
+              )
+            }
+          />
+
+          <span>
+            I confirm that I am authorized to submit this creative,
+            branding, destination, and commercial information to Poster.
+          </span>
+        </label>
+      </section>
+
+      {error ? (
+        <div
+          className={
+            styles.error
+          }
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
+
+      <div
+        className={
+          styles.actions
+        }
+      >
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={
+            resetForm
+          }
+        >
+          Reset
+        </button>
+
+        <button
+          type="submit"
+          className="primaryButton"
+        >
+          {isEditMode
+            ? "Resubmit changes"
+            : `Submit ${getRequestTypeLabel(
+                form.type
+              )} request`}
+        </button>
+      </div>
+
+      <p
+        className={
+          styles.controlNote
+        }
+      >
+        Poster reviews requests and controls campaign approval,
+        scheduling, activation, pausing, and completion.
+      </p>
+    </form>
+  );
+}
+
+==================================================
+FILE: .\src\features\requests\RequestsManager.tsx
+==================================================
+
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import Link from "next/link";
+
+import {
+  formatClientDate,
+  getRequestStatusLabel,
+  getRequestTypeLabel,
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getOrganizationRequests,
+} from "@/features/workspace/workspace.selectors";
+
+import type {
+  CommercialRequest,
+  CommercialRequestStatus,
+} from "@/features/workspace/workspace.types";
+
+import styles from "./RequestsManager.module.css";
+
+type RequestFilter =
+  | "all"
+  | "needs_action"
+  | CommercialRequestStatus;
+
+interface FilterOption {
+  key: RequestFilter;
+  label: string;
+}
+
+const filters: FilterOption[] = [
+  {
+    key: "all",
+    label: "All",
+  },
+  {
+    key: "needs_action",
+    label: "Needs action",
+  },
+  {
+    key: "pending_review",
+    label: "Pending review",
+  },
+  {
+    key: "approved",
+    label: "Approved",
+  },
+  {
+    key: "rejected",
+    label: "Rejected",
+  },
+];
+
+const requests =
+  getOrganizationRequests();
+
+function matchesFilter(
+  request: CommercialRequest,
+  filter: RequestFilter
+): boolean {
+  if (filter === "all") {
+    return true;
+  }
+
+  if (
+    filter ===
+    "needs_action"
+  ) {
+    return (
+      request.status ===
+      "changes_requested"
+    );
+  }
+
+  return (
+    request.status === filter
+  );
+}
+
+function getStatusClass(
+  status: CommercialRequestStatus
+): string {
+  switch (status) {
+    case "pending_review":
+      return "statusBadge statusScheduled";
+
+    case "changes_requested":
+      return "statusBadge statusAttention";
+
+    case "approved":
+      return "statusBadge statusActive";
+
+    case "rejected":
+      return `statusBadge ${styles.statusRejected}`;
+  }
+}
+
+export default function RequestsManager() {
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    filter,
+    setFilter,
+  ] =
+    useState<RequestFilter>(
+      "all"
+    );
+
+  const visibleRequests =
+    useMemo(
+      () => {
+        const normalizedSearch =
+          search
+            .trim()
+            .toLowerCase();
+
+        return requests.filter(
+          (
+            request
+          ) => {
+            if (
+              !matchesFilter(
+                request,
+                filter
+              )
+            ) {
+              return false;
+            }
+
+            if (
+              !normalizedSearch
+            ) {
+              return true;
+            }
+
+            const searchable = [
+              request.id,
+              request.campaignName,
+              request.organizationName,
+              getRequestTypeLabel(
+                request.type
+              ),
+              getRequestStatusLabel(
+                request.status
+              ),
+              request.linkedCampaignId ??
+                "",
+            ]
+              .join(" ")
+              .toLowerCase();
+
+            return searchable.includes(
+              normalizedSearch
+            );
+          }
+        );
+      },
+      [
+        filter,
+        search,
+      ]
+    );
+
+  const needsAction =
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "changes_requested"
+    ).length;
+
+  const pending =
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "pending_review"
+    ).length;
+
+  const approved =
+    requests.filter(
+      (
+        request
+      ) =>
+        request.status ===
+        "approved"
+    ).length;
+
+  return (
+    <>
+      <section
+        className={
+          styles.summaryGrid
+        }
+      >
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Total requests
+          </span>
+
+          <strong>
+            {requests.length}
+          </strong>
+
+          <small>
+            Submitted to Poster
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.attentionCard
+          }
+        >
+          <span>
+            Needs action
+          </span>
+
+          <strong>
+            {needsAction}
+          </strong>
+
+          <small>
+            Changes requested
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Pending review
+          </span>
+
+          <strong>
+            {pending}
+          </strong>
+
+          <small>
+            Poster is reviewing
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Approved
+          </span>
+
+          <strong>
+            {approved}
+          </strong>
+
+          <small>
+            Ready for campaign workflow
+          </small>
+        </article>
+      </section>
+
+      <section className="contentCard">
+        <div
+          className={
+            styles.toolbar
+          }
+        >
+          <input
+            className={
+              styles.searchInput
+            }
+            value={search}
+            onChange={(
+              event
+            ) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search request, campaign, or ID"
+            aria-label="Search requests"
+          />
+
+          <div
+            className={
+              styles.filters
+            }
+            aria-label="Request status filters"
+          >
+            {filters.map(
+              (
+                option
+              ) => {
+                const active =
+                  filter ===
+                  option.key;
+
+                return (
+                  <button
+                    key={
+                      option.key
+                    }
+                    type="button"
+                    className={
+                      active
+                        ? styles.filterButtonActive
+                        : styles.filterButton
+                    }
+                    onClick={() =>
+                      setFilter(
+                        option.key
+                      )
+                    }
+                  >
+                    {
+                      option.label
+                    }
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.table
+          }
+        >
+          <div
+            className={
+              styles.tableHeader
+            }
+          >
+            <span>
+              Request
+            </span>
+
+            <span>
+              Type
+            </span>
+
+            <span>
+              Submitted
+            </span>
+
+            <span>
+              Status
+            </span>
+          </div>
+
+          {visibleRequests.length >
+          0 ? (
+            visibleRequests.map(
+              (
+                request
+              ) => (
+                <Link
+                  key={
+                    request.id
+                  }
+                  href={`/requests/${request.id}`}
+                  className={
+                    styles.row
+                  }
+                >
+                  <div
+                    className={
+                      styles.requestInfo
+                    }
+                  >
+                    <strong>
+                      {
+                        request.campaignName
+                      }
+                    </strong>
+
+                    <span>
+                      {
+                        request.id
+                      }
+
+                      {request.linkedCampaignId
+                        ? ` · ${request.linkedCampaignId}`
+                        : ""}
+                    </span>
+                  </div>
+
+                  <span
+                    className={
+                      styles.typeLabel
+                    }
+                  >
+                    {getRequestTypeLabel(
+                      request.type
+                    )}
+                  </span>
+
+                  <span
+                    className={
+                      styles.dateCell
+                    }
+                  >
+                    {formatClientDate(
+                      request.submittedAt
+                    )}
+                  </span>
+
+                  <span
+                    className={getStatusClass(
+                      request.status
+                    )}
+                  >
+                    {getRequestStatusLabel(
+                      request.status
+                    )}
+                  </span>
+                </Link>
+              )
+            )
+          ) : (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              No requests match your search or filter.
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+
+==================================================
+FILE: .\src\features\campaigns\CampaignsManager.tsx
+==================================================
+
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import Link from "next/link";
+
+import {
+  formatClientNumber,
+  getCampaignStatusLabel,
+  getCampaignTypeLabel,
+} from "@/features/workspace/workspace.formatters";
+
+import {
+  getOrganizationCampaigns,
+} from "@/features/workspace/workspace.selectors";
+
+import {
+  calculateCtr,
+  calculateDeliveryProgress,
+} from "@/features/workspace/workspace.types";
+
+import type {
+  CampaignStatus,
+} from "@/features/workspace/workspace.types";
+
+import styles from "./CampaignsManager.module.css";
+
+type CampaignFilter =
+  | "all"
+  | CampaignStatus;
+
+interface FilterOption {
+  key: CampaignFilter;
+  label: string;
+}
+
+const filters: FilterOption[] = [
+  {
+    key: "all",
+    label: "All",
+  },
+  {
+    key: "draft",
+    label: "Draft",
+  },
+  {
+    key: "scheduled",
+    label: "Scheduled",
+  },
+  {
+    key: "active",
+    label: "Active",
+  },
+  {
+    key: "paused",
+    label: "Paused",
+  },
+  {
+    key: "ended",
+    label: "Ended",
+  },
+  {
+    key: "disabled",
+    label: "Disabled",
+  },
+];
+
+const campaigns =
+  getOrganizationCampaigns();
+
+function getStatusClass(
+  status: CampaignStatus
+): string {
+  switch (status) {
+    case "active":
+      return "statusBadge statusActive";
+
+    case "scheduled":
+      return "statusBadge statusScheduled";
+
+    case "draft":
+      return `statusBadge ${styles.statusDraft}`;
+
+    case "paused":
+      return "statusBadge statusAttention";
+
+    case "ended":
+      return `statusBadge ${styles.statusEnded}`;
+
+    case "disabled":
+      return "statusBadge statusAttention";
+  }
+}
+
+export default function CampaignsManager() {
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    filter,
+    setFilter,
+  ] =
+    useState<CampaignFilter>(
+      "all"
+    );
+
+  const visibleCampaigns =
+    useMemo(
+      () => {
+        const normalizedSearch =
+          search
+            .trim()
+            .toLowerCase();
+
+        return campaigns.filter(
+          (
+            campaign
+          ) => {
+            if (
+              filter !==
+                "all" &&
+              campaign.status !==
+                filter
+            ) {
+              return false;
+            }
+
+            if (
+              !normalizedSearch
+            ) {
+              return true;
+            }
+
+            const searchable = [
+              campaign.id,
+              campaign.requestId,
+              campaign.name,
+              campaign.organizationName,
+              getCampaignTypeLabel(
+                campaign.type
+              ),
+              getCampaignStatusLabel(
+                campaign.status
+              ),
+            ]
+              .join(" ")
+              .toLowerCase();
+
+            return searchable.includes(
+              normalizedSearch
+            );
+          }
+        );
+      },
+      [
+        filter,
+        search,
+      ]
+    );
+
+  const activeCount =
+    campaigns.filter(
+      (
+        campaign
+      ) =>
+        campaign.status ===
+        "active"
+    ).length;
+
+  const upcomingCount =
+    campaigns.filter(
+      (
+        campaign
+      ) =>
+        campaign.status ===
+          "draft" ||
+        campaign.status ===
+          "scheduled"
+    ).length;
+
+  const totalImpressions =
+    campaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance
+          .impressions,
+      0
+    );
+
+  const totalClicks =
+    campaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance
+          .clicks,
+      0
+    );
+
+  return (
+    <>
+      <section
+        className={
+          styles.summaryGrid
+        }
+      >
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Active campaigns
+          </span>
+
+          <strong>
+            {activeCount}
+          </strong>
+
+          <small>
+            Currently delivering
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Upcoming
+          </span>
+
+          <strong>
+            {upcomingCount}
+          </strong>
+
+          <small>
+            Draft or scheduled
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Impressions
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalImpressions
+            )}
+          </strong>
+
+          <small>
+            Across your campaigns
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Clicks
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalClicks
+            )}
+          </strong>
+
+          <small>
+            Recorded engagement
+          </small>
+        </article>
+      </section>
+
+      <section className="contentCard">
+        <div
+          className={
+            styles.toolbar
+          }
+        >
+          <input
+            className={
+              styles.searchInput
+            }
+            value={search}
+            onChange={(
+              event
+            ) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search campaign, request, or ID"
+            aria-label="Search campaigns"
+          />
+
+          <div
+            className={
+              styles.filters
+            }
+            aria-label="Campaign status filters"
+          >
+            {filters.map(
+              (
+                option
+              ) => {
+                const active =
+                  filter ===
+                  option.key;
+
+                return (
+                  <button
+                    key={
+                      option.key
+                    }
+                    type="button"
+                    className={
+                      active
+                        ? styles.filterButtonActive
+                        : styles.filterButton
+                    }
+                    onClick={() =>
+                      setFilter(
+                        option.key
+                      )
+                    }
+                  >
+                    {
+                      option.label
+                    }
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        <div
+          className={
+            styles.table
+          }
+        >
+          <div
+            className={
+              styles.tableHeader
+            }
+          >
+            <span>
+              Campaign
+            </span>
+
+            <span>
+              Type
+            </span>
+
+            <span>
+              Delivery
+            </span>
+
+            <span>
+              Performance
+            </span>
+
+            <span>
+              Status
+            </span>
+          </div>
+
+          {visibleCampaigns.length >
+          0 ? (
+            visibleCampaigns.map(
+              (
+                campaign
+              ) => {
+                const delivery =
+                  calculateDeliveryProgress(
+                    campaign
+                      .financials
+                      .deliveryTarget,
+                    campaign
+                      .financials
+                      .delivered
+                  );
+
+                const ctr =
+                  calculateCtr(
+                    campaign
+                      .performance
+                      .impressions,
+                    campaign
+                      .performance
+                      .clicks
+                  );
+
+                return (
+                  <Link
+                    key={
+                      campaign.id
+                    }
+                    href={`/campaigns/${campaign.id}`}
+                    className={
+                      styles.row
+                    }
+                  >
+                    <div
+                      className={
+                        styles.campaignInfo
+                      }
+                    >
+                      <strong>
+                        {
+                          campaign.name
+                        }
+                      </strong>
+
+                      <span>
+                        {
+                          campaign.id
+                        }
+                        {" · "}
+                        {
+                          campaign.requestId
+                        }
+                      </span>
+                    </div>
+
+                    <span
+                      className={
+                        styles.typeLabel
+                      }
+                    >
+                      {getCampaignTypeLabel(
+                        campaign.type
+                      )}
+                    </span>
+
+                    <div
+                      className={
+                        styles.delivery
+                      }
+                    >
+                      <strong>
+                        {delivery ===
+                        null
+                          ? campaign.type ===
+                            "affiliate"
+                            ? "Performance based"
+                            : "Not configured"
+                          : `${delivery.toFixed(
+                              1
+                            )}%`}
+                      </strong>
+
+                      {delivery !==
+                      null ? (
+                        <div
+                          className={
+                            styles.progressTrack
+                          }
+                        >
+                          <span
+                            style={{
+                              width: `${delivery}%`,
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={
+                        styles.performance
+                      }
+                    >
+                      <strong>
+                        {ctr.toFixed(
+                          2
+                        )}
+                        % CTR
+                      </strong>
+
+                      <span>
+                        {formatClientNumber(
+                          campaign
+                            .performance
+                            .impressions
+                        )}
+                        {
+                          " impressions"
+                        }
+                      </span>
+                    </div>
+
+                    <span
+                      className={getStatusClass(
+                        campaign.status
+                      )}
+                    >
+                      {getCampaignStatusLabel(
+                        campaign.status
+                      )}
+                    </span>
+                  </Link>
+                );
+              }
+            )
+          ) : (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              No campaigns match your search or filter.
+            </div>
+          )}
+        </div>
+      </section>
+
+      <p
+        className={
+          styles.note
+        }
+      >
+        Campaign setup, scheduling, activation, pausing,
+        and completion are controlled by Poster Admin.
+      </p>
+    </>
+  );
+}
+
+==================================================
+FILE: .\src\components\media\CreativeMediaUploader.tsx
+==================================================
+
+"use client";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import type {
+  ChangeEvent,
+} from "react";
+
+import type {
+  CreativeFrameProfile,
+  CreativeMediaAsset,
+  CreativeMediaRole,
+  CreativeMediaType,
+} from "@/features/workspace/workspace.types";
+
+import styles from "./CreativeMediaUploader.module.css";
+
+export interface CreativeMediaSelection {
+  /**
+   * Local browser File object.
+   *
+   * Frontend-only preview state.
+   * Do not store this object inside canonical request/campaign mock data.
+   */
+  file: File;
+
+  /**
+   * Temporary browser object URL.
+   *
+   * Never persist this as a production media URL.
+   */
+  previewUrl: string;
+
+  /**
+   * Canonical metadata that may later be sent to Backend/storage.
+   */
+  asset: CreativeMediaAsset;
+}
+
+interface CreativeMediaUploaderProps {
+  label: string;
+
+  description: string;
+
+  role: CreativeMediaRole;
+
+  /**
+   * Identifies which already-finalized Poster mobile media frame
+   * this creative is intended to fit.
+   *
+   * Exact dimensions/aspect-ratio validation will be added only
+   * after reading the existing mobile frame implementation.
+   */
+  frameProfile?: CreativeFrameProfile;
+
+  accept: string;
+
+  allowVideo?: boolean;
+
+  required?: boolean;
+
+  maxImageBytes?: number;
+
+  maxVideoBytes?: number;
+
+  maxVideoDurationSeconds?: number;
+
+  initialAsset?: CreativeMediaAsset;
+
+  /**
+   * Temporary compatibility with older mock records that only
+   * contain imageName/logoName.
+   */
+  initialFileName?: string;
+
+  altTextRequired?: boolean;
+
+  onChange: (
+    selection:
+      | CreativeMediaSelection
+      | null
+  ) => void;
+}
+
+const DEFAULT_MAX_IMAGE_BYTES =
+  10 * 1024 * 1024;
+
+const DEFAULT_MAX_VIDEO_BYTES =
+  20 * 1024 * 1024;
+
+const DEFAULT_MAX_VIDEO_DURATION_SECONDS =
+  10;
+
+const ACCEPTED_IMAGE_MIME_TYPES =
+  new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+  ]);
+
+const ACCEPTED_VIDEO_MIME_TYPES =
+  new Set([
+    "video/mp4",
+    "video/webm",
+  ]);
+
+function formatBytes(
+  bytes: number
+): string {
+  if (
+    bytes <
+    1024
+  ) {
+    return `${bytes} B`;
+  }
+
+  const kilobytes =
+    bytes /
+    1024;
+
+  if (
+    kilobytes <
+    1024
+  ) {
+    return `${kilobytes.toFixed(
+      1
+    )} KB`;
+  }
+
+  const megabytes =
+    kilobytes /
+    1024;
+
+  return `${megabytes.toFixed(
+    1
+  )} MB`;
+}
+
+function getMediaType(
+  file: File
+): CreativeMediaType | null {
+  if (
+    file.type.startsWith(
+      "image/"
+    )
+  ) {
+    return "image";
+  }
+
+  if (
+    file.type.startsWith(
+      "video/"
+    )
+  ) {
+    return "video";
+  }
+
+  return null;
+}
+
+function isSupportedImage(
+  file: File
+): boolean {
+  return ACCEPTED_IMAGE_MIME_TYPES.has(
+    file.type
+  );
+}
+
+function isSupportedVideo(
+  file: File
+): boolean {
+  return ACCEPTED_VIDEO_MIME_TYPES.has(
+    file.type
+  );
+}
+
+function readImageMetadata(
+  previewUrl: string
+): Promise<{
+  width: number;
+  height: number;
+}> {
+  return new Promise(
+    (
+      resolve,
+      reject
+    ) => {
+      const image =
+        new Image();
+
+      image.onload =
+        () => {
+          resolve({
+            width:
+              image.naturalWidth,
+
+            height:
+              image.naturalHeight,
+          });
+        };
+
+      image.onerror =
+        () => {
+          reject(
+            new Error(
+              "Unable to read image metadata."
+            )
+          );
+        };
+
+      image.src =
+        previewUrl;
+    }
+  );
+}
+
+function readVideoMetadata(
+  previewUrl: string
+): Promise<{
+  width: number;
+  height: number;
+  durationSeconds: number;
+}> {
+  return new Promise(
+    (
+      resolve,
+      reject
+    ) => {
+      const video =
+        document.createElement(
+          "video"
+        );
+
+      video.preload =
+        "metadata";
+
+      video.onloadedmetadata =
+        () => {
+          const duration =
+            Number.isFinite(
+              video.duration
+            )
+              ? video.duration
+              : 0;
+
+          resolve({
+            width:
+              video.videoWidth,
+
+            height:
+              video.videoHeight,
+
+            durationSeconds:
+              duration,
+          });
+        };
+
+      video.onerror =
+        () => {
+          reject(
+            new Error(
+              "Unable to read video metadata."
+            )
+          );
+        };
+
+      video.src =
+        previewUrl;
+    }
+  );
+}
+
+export default function CreativeMediaUploader({
+  label,
+  description,
+  role,
+  frameProfile,
+  accept,
+  allowVideo = false,
+  required = false,
+  maxImageBytes =
+    DEFAULT_MAX_IMAGE_BYTES,
+  maxVideoBytes =
+    DEFAULT_MAX_VIDEO_BYTES,
+  maxVideoDurationSeconds =
+    DEFAULT_MAX_VIDEO_DURATION_SECONDS,
+  initialAsset,
+  initialFileName,
+  altTextRequired = false,
+  onChange,
+}: CreativeMediaUploaderProps) {
+  const [
+    selection,
+    setSelection,
+  ] =
+    useState<CreativeMediaSelection | null>(
+      null
+    );
+
+  const [
+    existingFileName,
+    setExistingFileName,
+  ] =
+    useState(
+      initialAsset?.fileName ??
+        initialFileName ??
+        ""
+    );
+
+  const [
+    altText,
+    setAltText,
+  ] =
+    useState(
+      initialAsset?.altText ??
+        ""
+    );
+
+  const [
+    error,
+    setError,
+  ] =
+    useState("");
+
+  const [
+    reading,
+    setReading,
+  ] =
+    useState(false);
+
+  const fileInputRef =
+    useRef<HTMLInputElement | null>(
+      null
+    );
+
+  const previewUrlRef =
+    useRef<string | null>(
+      null
+    );
+
+  useEffect(
+    () => {
+      return () => {
+        if (
+          previewUrlRef.current
+        ) {
+          URL.revokeObjectURL(
+            previewUrlRef.current
+          );
+        }
+      };
+    },
+    []
+  );
+
+  const updateParent =
+    (
+      current:
+        CreativeMediaSelection |
+        null,
+      nextAltText: string
+    ) => {
+      if (!current) {
+        onChange(
+          null
+        );
+
+        return;
+      }
+
+      const updated:
+        CreativeMediaSelection = {
+        ...current,
+
+        asset: {
+          ...current.asset,
+
+          altText:
+            nextAltText.trim() ||
+            undefined,
+        },
+      };
+
+      setSelection(
+        updated
+      );
+
+      onChange(
+        updated
+      );
+    };
+
+  const clearSelection =
+    () => {
+      if (
+        previewUrlRef.current
+      ) {
+        URL.revokeObjectURL(
+          previewUrlRef.current
+        );
+
+        previewUrlRef.current =
+          null;
+      }
+
+      setSelection(
+        null
+      );
+
+      setExistingFileName(
+        ""
+      );
+
+      setAltText(
+        ""
+      );
+
+      setError(
+        ""
+      );
+
+      if (
+        fileInputRef.current
+      ) {
+        fileInputRef.current.value =
+          "";
+      }
+
+      onChange(
+        null
+      );
+    };
+
+  const chooseFile =
+    () => {
+      fileInputRef.current?.click();
+    };
+
+  const handleFileChange =
+    async (
+      event:
+        ChangeEvent<HTMLInputElement>
+    ) => {
+      const file =
+        event.target.files?.[0];
+
+      if (!file) {
+        return;
+      }
+
+      setError(
+        ""
+      );
+
+      const mediaType =
+        getMediaType(
+          file
+        );
+
+      if (!mediaType) {
+        setError(
+          "Choose a supported image or video file."
+        );
+
+        event.target.value =
+          "";
+
+        return;
+      }
+
+      if (
+        mediaType ===
+          "image" &&
+        !isSupportedImage(
+          file
+        )
+      ) {
+        setError(
+          "Supported images are PNG, JPG/JPEG, and WebP."
+        );
+
+        event.target.value =
+          "";
+
+        return;
+      }
+
+      if (
+        mediaType ===
+        "video"
+      ) {
+        if (
+          !allowVideo
+        ) {
+          setError(
+            "Video is not supported for this creative slot."
+          );
+
+          event.target.value =
+            "";
+
+          return;
+        }
+
+        if (
+          !isSupportedVideo(
+            file
+          )
+        ) {
+          setError(
+            "Supported video formats are MP4 and WebM."
+          );
+
+          event.target.value =
+            "";
+
+          return;
+        }
+      }
+
+      const maximumBytes =
+        mediaType ===
+        "video"
+          ? maxVideoBytes
+          : maxImageBytes;
+
+      if (
+        file.size >
+        maximumBytes
+      ) {
+        setError(
+          `${
+            mediaType ===
+            "video"
+              ? "Video"
+              : "Image"
+          } must be ${formatBytes(
+            maximumBytes
+          )} or smaller.`
+        );
+
+        event.target.value =
+          "";
+
+        return;
+      }
+
+      if (
+        previewUrlRef.current
+      ) {
+        URL.revokeObjectURL(
+          previewUrlRef.current
+        );
+
+        previewUrlRef.current =
+          null;
+      }
+
+      const previewUrl =
+        URL.createObjectURL(
+          file
+        );
+
+      previewUrlRef.current =
+        previewUrl;
+
+      setReading(
+        true
+      );
+
+      try {
+        let width:
+          number | undefined;
+
+        let height:
+          number | undefined;
+
+        let durationSeconds:
+          number | undefined;
+
+        if (
+          mediaType ===
+          "image"
+        ) {
+          const metadata =
+            await readImageMetadata(
+              previewUrl
+            );
+
+          width =
+            metadata.width;
+
+          height =
+            metadata.height;
+        } else {
+          const metadata =
+            await readVideoMetadata(
+              previewUrl
+            );
+
+          if (
+            metadata.durationSeconds <=
+            0
+          ) {
+            URL.revokeObjectURL(
+              previewUrl
+            );
+
+            previewUrlRef.current =
+              null;
+
+            setError(
+              "Poster could not determine the video duration. Choose another video."
+            );
+
+            event.target.value =
+              "";
+
+            return;
+          }
+
+          if (
+            metadata.durationSeconds >
+            maxVideoDurationSeconds
+          ) {
+            URL.revokeObjectURL(
+              previewUrl
+            );
+
+            previewUrlRef.current =
+              null;
+
+            setError(
+              `Video ads must be ${maxVideoDurationSeconds} seconds or shorter.`
+            );
+
+            event.target.value =
+              "";
+
+            return;
+          }
+
+          width =
+            metadata.width;
+
+          height =
+            metadata.height;
+
+          durationSeconds =
+            metadata.durationSeconds;
+        }
+
+        const nextSelection:
+          CreativeMediaSelection = {
+          file,
+
+          previewUrl,
+
+          asset: {
+            role,
+
+            type:
+              mediaType,
+
+            frameProfile,
+
+            fileName:
+              file.name,
+
+            mimeType:
+              file.type,
+
+            sizeBytes:
+              file.size,
+
+            width,
+
+            height,
+
+            durationSeconds,
+
+            altText:
+              altText.trim() ||
+              undefined,
+          },
+        };
+
+        setSelection(
+          nextSelection
+        );
+
+        setExistingFileName(
+          ""
+        );
+
+        onChange(
+          nextSelection
+        );
+      } catch {
+        URL.revokeObjectURL(
+          previewUrl
+        );
+
+        previewUrlRef.current =
+          null;
+
+        setError(
+          `Poster could not read this ${
+            mediaType ===
+            "video"
+              ? "video"
+              : "image"
+          }. Choose another file.`
+        );
+
+        event.target.value =
+          "";
+      } finally {
+        setReading(
+          false
+        );
+      }
+    };
+
+  const displayFileName =
+    selection?.asset.fileName ??
+    existingFileName;
+
+  return (
+    <section
+      className={
+        styles.uploader
+      }
+    >
+      <div
+        className={
+          styles.header
+        }
+      >
+        <div>
+          <strong>
+            {label}
+            {required
+              ? " *"
+              : ""}
+          </strong>
+
+          <span>
+            {description}
+          </span>
+        </div>
+
+        {displayFileName ? (
+          <span
+            className={
+              styles.selectedStatus
+            }
+          >
+            Selected
+          </span>
+        ) : null}
+      </div>
+
+      {selection ? (
+        <div
+          className={
+            styles.preview
+          }
+        >
+          {selection.asset.type ===
+          "image" ? (
+            // This is a temporary local browser preview.
+            // It is not a permanent production asset URL.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={
+                selection.previewUrl
+              }
+              alt={
+                altText ||
+                "Selected advertising creative preview"
+              }
+            />
+          ) : (
+            <video
+              src={
+                selection.previewUrl
+              }
+              controls
+              muted
+              playsInline
+              preload="metadata"
+            />
+          )}
+        </div>
+      ) : existingFileName ? (
+        <div
+          className={
+            styles.existingAsset
+          }
+        >
+          <span>
+            Existing creative
+          </span>
+
+          <strong>
+            {
+              existingFileName
+            }
+          </strong>
+
+          <small>
+            A permanent preview will be available after Backend media storage is connected.
+          </small>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={
+            styles.emptyUpload
+          }
+          onClick={
+            chooseFile
+          }
+        >
+          <span
+            className={
+              styles.uploadIcon
+            }
+            aria-hidden="true"
+          >
+            ↑
+          </span>
+
+          <strong>
+            Choose media
+          </strong>
+
+          <small>
+            {allowVideo
+              ? "PNG, JPG, WebP, MP4 or WebM"
+              : "PNG, JPG or WebP"}
+          </small>
+
+          {allowVideo ? (
+            <small>
+              Video: maximum 10 seconds · 20 MB
+            </small>
+          ) : null}
+        </button>
+      )}
+
+      <input
+        ref={
+          fileInputRef
+        }
+        type="file"
+        accept={
+          accept
+        }
+        className={
+          styles.hiddenInput
+        }
+        onChange={
+          handleFileChange
+        }
+      />
+
+      {reading ? (
+        <div
+          className={
+            styles.reading
+          }
+          role="status"
+        >
+          Reading media metadata…
+        </div>
+      ) : null}
+
+      {selection ? (
+        <div
+          className={
+            styles.metadata
+          }
+        >
+          <div>
+            <span>
+              File
+            </span>
+
+            <strong>
+              {
+                selection.asset.fileName
+              }
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Type
+            </span>
+
+            <strong>
+              {selection.asset.type ===
+              "video"
+                ? "Video"
+                : "Image"}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Size
+            </span>
+
+            <strong>
+              {formatBytes(
+                selection.asset.sizeBytes ??
+                  0
+              )}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Dimensions
+            </span>
+
+            <strong>
+              {selection.asset.width &&
+              selection.asset.height
+                ? `${selection.asset.width} × ${selection.asset.height}`
+                : "Unavailable"}
+            </strong>
+          </div>
+
+          {selection.asset.type ===
+          "video" ? (
+            <div>
+              <span>
+                Duration
+              </span>
+
+              <strong>
+                {selection.asset.durationSeconds !==
+                undefined
+                  ? `${selection.asset.durationSeconds.toFixed(
+                      1
+                    )} sec`
+                  : "Unavailable"}
+              </strong>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {role ===
+      "primary" ||
+      role ===
+      "slide" ? (
+        <div
+          className={
+            styles.altField
+          }
+        >
+          <label>
+            Alt text
+            {altTextRequired
+              ? " *"
+              : ""}
+          </label>
+
+          <input
+            value={
+              altText
+            }
+            onChange={(
+              event
+            ) => {
+              const value =
+                event.target.value;
+
+              setAltText(
+                value
+              );
+
+              if (
+                selection
+              ) {
+                updateParent(
+                  selection,
+                  value
+                );
+              }
+            }}
+            required={
+              altTextRequired &&
+              Boolean(
+                selection
+              )
+            }
+            placeholder="Describe this creative for accessibility"
+          />
+        </div>
+      ) : null}
+
+      {selection?.asset.type ===
+      "video" ? (
+        <div
+          className={
+            styles.reading
+          }
+        >
+          Frame rate must be 30–45 FPS. Final FPS and codec verification will occur during Backend media processing.
+        </div>
+      ) : null}
+
+      {frameProfile ? (
+        <div
+          className={
+            styles.reading
+          }
+        >
+          Creative must fit Poster&apos;s finalized{" "}
+          {frameProfile ===
+          "sliding_card_media"
+            ? "sliding-card"
+            : "standard ad"}{" "}
+          media frame.
+        </div>
+      ) : null}
+
+      {error ? (
+        <div
+          className={
+            styles.error
+          }
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
+
+      <div
+        className={
+          styles.actions
+        }
+      >
+        {displayFileName ? (
+          <>
+            <button
+              type="button"
+              className={
+                styles.secondaryAction
+              }
+              onClick={
+                chooseFile
+              }
+            >
+              Replace
+            </button>
+
+            <button
+              type="button"
+              className={
+                styles.removeAction
+              }
+              onClick={
+                clearSelection
+              }
+            >
+              Remove
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className={
+              styles.secondaryAction
+            }
+            onClick={
+              chooseFile
+            }
+          >
+            Choose file
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
