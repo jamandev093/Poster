@@ -85,3 +85,5 @@ export * from "./payments/payment.formatters";
    ========================================================= */
 
 export * from "./wallet/wallet.types";
+
+export * from "./wallet/wallet.funding.types";

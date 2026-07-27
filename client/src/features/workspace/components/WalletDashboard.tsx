@@ -10,6 +10,8 @@ import {
   getCurrentWalletSummary,
 } from "../wallet/wallet.selectors";
 
+import AddFundsPanel from "./AddFundsPanel";
+
 import styles from "./WalletDashboard.module.css";
 
 export default function WalletDashboard() {
@@ -41,18 +43,13 @@ export default function WalletDashboard() {
             campaign allowances.
           </p>
         </div>
-
-        <button
-          type="button"
-          className={
-            styles.addFundsButton
-          }
-          disabled
-          title="Razorpay Checkout will be connected in the next development batch."
-        >
-          Add funds
-        </button>
       </div>
+
+      <AddFundsPanel
+        wallet={
+          wallet
+        }
+      />
 
       <div
         className={

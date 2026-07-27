@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Poster workspace service exports.
  *
  * This file is a service import boundary only.
@@ -21,3 +21,5 @@
 export * from "./analytics-workspace.service";
 
 export * from "./payment-workspace.service";
+
+export * from "./wallet-funding.service";
