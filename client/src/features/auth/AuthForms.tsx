@@ -646,7 +646,7 @@ export function VerifyEmailForm({
        * Email delivery is not connected yet.
        */
       setResendMessage(
-        "Email delivery is not connected in this frontend build."
+        "Verification email service is temporarily unavailable. Please try again later."
       );
     };
 
@@ -727,8 +727,7 @@ export function VerifyEmailForm({
         </strong>
 
         <span>
-          Email delivery is not connected yet. Any 6-digit
-          code continues the current frontend flow.
+          Verification email service is temporarily unavailable. Please try again later.
         </span>
       </div>
 
@@ -1191,9 +1190,7 @@ export function ForgotPasswordForm() {
         </h3>
 
         <p>
-          Email delivery is not connected in this frontend build.
-          Production recovery will send a secure reset link to the
-          verified business email.
+          Password recovery is temporarily unavailable. Please try again later.
         </p>
 
         <Link
