@@ -8,6 +8,8 @@ import {
 
 import Link from "next/link";
 
+import CampaignAllowanceField from "./CampaignAllowanceField";
+
 import CreativeMediaUploader, {
   type CreativeMediaSelection,
 } from "@/components/media/CreativeMediaUploader";
@@ -34,6 +36,18 @@ import type {
   SlidingCardSlot,
   SlidingCreativeCard,
 } from "@/features/workspace/workspace.types";
+
+import {
+  getCurrentWalletSummary,
+} from "@/features/workspace/wallet/wallet.selectors";
+
+import {
+  majorToMinorAmount,
+} from "@/features/workspace/payments/currency.types";
+
+import {
+  canRequestCampaignAllowance,
+} from "@/features/workspace/wallet/wallet.types";
 
 import styles from "./NewRequestForm.module.css";
 
@@ -380,6 +394,9 @@ function createPreviewReference():
 export default function NewRequestForm({
   initialRequest,
 }: NewRequestFormProps) {
+  const walletSummary =
+    getCurrentWalletSummary();
+
   const isEditMode =
     initialRequest?.status ===
     "changes_requested";
@@ -893,6 +910,47 @@ export default function NewRequestForm({
 
       return;
     }
+    const requestedAllowanceMajor =
+      Number(
+        form.proposedBudget
+      );
+
+    const requestedAllowanceMinor =
+      Number.isFinite(
+        requestedAllowanceMajor
+      ) &&
+      requestedAllowanceMajor >
+        0
+        ? majorToMinorAmount(
+            requestedAllowanceMajor,
+            walletSummary.currency
+          )
+        : 0;
+
+    if (
+      requestedAllowanceMinor <=
+      0
+    ) {
+      setError(
+        "Enter a valid campaign allowance."
+      );
+
+      return;
+    }
+
+    if (
+      !canRequestCampaignAllowance(
+        walletSummary.availableMinor,
+        requestedAllowanceMinor
+      )
+    ) {
+      setError(
+        "The requested campaign allowance exceeds your available Wallet balance."
+      );
+
+      return;
+    }
+
 
     const creative =
       buildCreative();
@@ -1574,44 +1632,6 @@ export default function NewRequestForm({
             </div>
           ) : (
             <>
-              <div
-                className={
-                  styles.field
-                }
-              >
-                <label htmlFor="request-budget">
-                  Proposed budget
-                </label>
-
-                <div
-                  className={
-                    styles.moneyInput
-                  }
-                >
-                  <span>
-
-                  </span>
-
-                  <input
-                    id="request-budget"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={
-                      form.proposedBudget
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      updateField(
-                        "proposedBudget",
-                        event.target.value
-                      )
-                    }
-                    placeholder="150000"
-                  />
-                </div>
-              </div>
 
               <div
                 className={
@@ -1641,6 +1661,26 @@ export default function NewRequestForm({
               </div>
             </>
           )}
+          <CampaignAllowanceField
+            value={
+              form.proposedBudget
+            }
+            availableMinor={
+              walletSummary.availableMinor
+            }
+            currency={
+              walletSummary.currency
+            }
+            onChange={(
+              value
+            ) =>
+              updateField(
+                "proposedBudget",
+                value
+              )
+            }
+          />
+
 
           <div
             className={

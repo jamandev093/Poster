@@ -1,0 +1,199 @@
+.card {
+  display: grid;
+  gap: 18px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #dbe4f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.heading h3 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.heading p {
+  max-width: 640px;
+  margin: 7px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.eyebrow {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.walletLink {
+  flex: 0 0 auto;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.balanceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.balanceGrid > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px 16px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.balanceGrid > div:last-child {
+  border-right: 0;
+}
+
+.balanceGrid span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.balanceGrid strong {
+  color: var(--text);
+  font-size: 17px;
+  overflow-wrap: break-word;
+}
+
+.remainingBalance {
+  background: #f0fdf4;
+}
+
+.remainingBalance strong {
+  color: #047857;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.field small {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.moneyInput,
+.moneyInputError {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.moneyInput {
+  border: 1px solid var(--border-strong);
+}
+
+.moneyInputError {
+  border: 1px solid #ef4444;
+}
+
+.moneyInput:focus-within,
+.moneyInputError:focus-within {
+  border-color: #5b86e5;
+  box-shadow: 0 0 0 3px rgba(91, 134, 229, 0.14);
+}
+
+.moneyInput span,
+.moneyInputError span {
+  display: grid;
+  min-width: 46px;
+  place-items: center;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.moneyInput input,
+.moneyInputError input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 13px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.warning a {
+  flex: 0 0 auto;
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .balanceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .balanceGrid > div {
+    border-right: 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .balanceGrid > div:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .heading,
+  .warning {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .walletLink {
+    align-self: flex-start;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
