@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useMemo,
@@ -653,8 +653,7 @@ export default function PerformanceDashboard() {
           styles.demoNote
         }
       >
-        Frontend demonstration snapshots · Real reporting will use
-        organization-scoped campaign analytics APIs.
+        Campaign performance updates as validated reporting data becomes available.
       </p>
     </>
   );

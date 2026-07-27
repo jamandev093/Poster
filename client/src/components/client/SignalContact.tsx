@@ -28,7 +28,7 @@ export default function SignalContact() {
       <div
         className={styles.contactDisabled}
         aria-disabled="true"
-        title="Signal support is not configured yet"
+        title="Signal support is currently unavailable."
       >
         <span className={styles.icon}>
           <SignalIcon />

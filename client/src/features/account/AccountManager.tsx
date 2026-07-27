@@ -697,7 +697,7 @@ export default function AccountManager() {
           className={styles.success}
           role="status"
         >
-          Account changes saved for this frontend demonstration.
+          Account changes saved.
         </div>
       ) : null}
 

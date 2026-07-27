@@ -22,7 +22,7 @@ function getApiBaseUrl():
     !configuredBaseUrl
   ) {
     throw new Error(
-      "Wallet funding is not connected to the Poster Backend yet."
+      "Wallet funding is temporarily unavailable. Please try again later."
     );
   }
 

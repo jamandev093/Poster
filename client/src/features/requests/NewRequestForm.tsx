@@ -1078,8 +1078,7 @@ export default function NewRequestForm({
           </p>
 
           <p>
-            This development build does not persist submissions until
-            backend services are connected.
+            Your request has been prepared. Secure submission is currently unavailable.
           </p>
 
           <div

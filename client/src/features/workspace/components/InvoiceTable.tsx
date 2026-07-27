@@ -344,7 +344,7 @@ export function InvoiceTable(
                             title={
                               props.onPayInvoice
                                 ? undefined
-                                : "Online payment will be enabled when Razorpay integration is connected."
+                                : "Online payment is currently unavailable."
                             }
                             type="button"
                           >
