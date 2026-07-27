@@ -30,3 +30,29 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+/* ===== PAYMENTS PANEL SHRINK SAFETY 1.62 ===== */
+
+.panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.panel > * {
+  min-width: 0;
+}
+
+.summary {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.summary > * {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    gap: 16px;
+  }
+}

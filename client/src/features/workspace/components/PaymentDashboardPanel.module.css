@@ -23,3 +23,29 @@
   background: #fffdf5;
   color: #92400e;
 }
+
+/* ===== PAYMENTS PANEL SHRINK SAFETY 1.62 ===== */
+
+.panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.panel > * {
+  min-width: 0;
+}
+
+.summary {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.summary > * {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    gap: 16px;
+  }
+}

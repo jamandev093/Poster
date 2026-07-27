@@ -55,3 +55,25 @@
     padding: 8px 11px;
   }
 }
+
+/* ===== PAYMENTS RESPONSIVE HARDENING 1.62 ===== */
+
+.navigation {
+  min-width: 0;
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.link,
+.activeLink {
+  scroll-margin-inline: 12px;
+}
+
+@media (max-width: 720px) {
+  .navigation {
+    gap: 2px;
+    padding-bottom: 2px;
+  }
+}

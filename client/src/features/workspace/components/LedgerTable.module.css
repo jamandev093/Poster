@@ -217,3 +217,34 @@
     border-radius: 12px;
   }
 }
+
+/* ===== PAYMENTS TABLE OVERFLOW SAFETY 1.62 ===== */
+
+.card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tableScroller {
+  min-width: 0;
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table th,
+.table td {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .table th,
+  .table td {
+    padding: 12px;
+  }
+
+  .empty {
+    padding: 32px 18px;
+  }
+}
