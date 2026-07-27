@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type {
   ReactNode,
@@ -33,6 +33,7 @@ type NavigationIcon =
   | "campaigns"
   | "performance"
   | "payments"
+  | "wallet"
   | "account";
 
 interface NavigationItem {
@@ -71,6 +72,11 @@ const navigation: NavigationItem[] = [
     href: "/payments",
     label: "Payments",
     icon: "payments",
+  },
+  {
+    href: "/wallet",
+    label: "Wallet",
+    icon: "wallet",
   },
 
 ];
@@ -277,6 +283,21 @@ function NavIcon({
 
         <path d="M3 10h18" />
         <path d="M7 15h4" />
+      </svg>
+    );
+  }
+  if (
+    name ===
+    "wallet"
+  ) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v2" />
+        <path d="M4 7.5v9A2.5 2.5 0 0 0 6.5 19H20V9H6.5A2.5 2.5 0 0 1 4 6.5" />
+        <path d="M16 13h2" />
       </svg>
     );
   }

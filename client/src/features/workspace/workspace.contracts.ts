@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Canonical Poster advertising workspace exports.
  *
  * This file is an import boundary only.
@@ -79,3 +79,9 @@ export * from "./payments/budget.types";
 export * from "./payments/payment.status";
 
 export * from "./payments/payment.formatters";
+
+/* =========================================================
+   ADVERTISER WALLET
+   ========================================================= */
+
+export * from "./wallet/wallet.types";

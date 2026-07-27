@@ -43,3 +43,5 @@ export * from "./RefundsTable";
 export * from "./RefundsDashboardPanel";
 export * from "./LedgerTable";
 export * from "./LedgerDashboardPanel";
+
+export { default as WalletDashboard } from "./WalletDashboard";
