@@ -249,6 +249,24 @@ export default function CampaignAllowanceField({
             Add funds
           </Link>
         </div>
+      ) : validAllowance ? (
+        <div
+          className={
+            styles.validStatus
+          }
+          role="status"
+        >
+          <strong>
+            OK
+          </strong>
+
+          <span>
+            {requestedMinor ===
+            availableMinor
+              ? "This allowance will use your full available Wallet balance."
+              : "Allowance is within your available Wallet balance."}
+          </span>
+        </div>
       ) : null}
     </section>
   );
