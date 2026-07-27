@@ -72,9 +72,9 @@
 }
 
 .balanceGrid strong {
+  overflow-wrap: break-word;
   color: var(--text);
   font-size: 17px;
-  overflow-wrap: break-word;
 }
 
 .remainingBalance {
@@ -167,28 +167,56 @@
   font-weight: 800;
 }
 
-.validStatus {
+.consent,
+.consentAccepted {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid #a7f3d0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
   border-radius: 9px;
+  cursor: pointer;
+}
+
+.consent {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+}
+
+.consentAccepted {
+  border: 1px solid #86efac;
   background: #f0fdf4;
-  color: #047857;
-  font-size: 13px;
-  line-height: 19px;
 }
 
-.validStatus strong {
+.consent input,
+.consentAccepted input {
   flex: 0 0 auto;
-  color: #047857;
-  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: #2563eb;
+  cursor: pointer;
 }
 
-.validStatus span {
+.consent > span,
+.consentAccepted > span {
+  display: grid;
+  gap: 4px;
   min-width: 0;
 }
+
+.consent strong,
+.consentAccepted strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.consent small,
+.consentAccepted small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 18px;
+}
+
 @media (max-width: 760px) {
   .balanceGrid {
     grid-template-columns: 1fr;

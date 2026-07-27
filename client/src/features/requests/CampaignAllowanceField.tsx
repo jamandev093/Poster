@@ -31,10 +31,19 @@ interface CampaignAllowanceFieldProps {
   currency:
     SupportedCurrency;
 
+  accepted:
+    boolean;
+
   onChange:
     (
       value:
         string
+    ) => void;
+
+  onAcceptedChange:
+    (
+      accepted:
+        boolean
     ) => void;
 }
 
@@ -42,7 +51,9 @@ export default function CampaignAllowanceField({
   value,
   availableMinor,
   currency,
+  accepted,
   onChange,
+  onAcceptedChange,
 }: CampaignAllowanceFieldProps) {
   const parsedMajor =
     Number(
@@ -213,11 +224,15 @@ export default function CampaignAllowanceField({
             }
             onChange={(
               event
-            ) =>
+            ) => {
               onChange(
                 event.target.value
-              )
-            }
+              );
+
+              onAcceptedChange(
+                false
+              );
+            }}
             placeholder="50000"
             aria-describedby="campaign-allowance-help"
             aria-invalid={
@@ -250,23 +265,43 @@ export default function CampaignAllowanceField({
           </Link>
         </div>
       ) : validAllowance ? (
-        <div
+        <label
           className={
-            styles.validStatus
+            accepted
+              ? styles.consentAccepted
+              : styles.consent
           }
-          role="status"
         >
-          <strong>
-            OK
-          </strong>
+          <input
+            type="checkbox"
+            checked={
+              accepted
+            }
+            onChange={(
+              event
+            ) =>
+              onAcceptedChange(
+                event.target.checked
+              )
+            }
+          />
 
           <span>
-            {requestedMinor ===
-            availableMinor
-              ? "This allowance will use your full available Wallet balance."
-              : "Allowance is within your available Wallet balance."}
+            <strong>
+              Yes, I agree
+            </strong>
+
+            <small>
+              Request{" "}
+              {formatMoneyMinor(
+                requestedMinor,
+                currency
+              )}{" "}
+              from my Wallet for this campaign after Poster
+              approval.
+            </small>
           </span>
-        </div>
+        </label>
       ) : null}
     </section>
   );

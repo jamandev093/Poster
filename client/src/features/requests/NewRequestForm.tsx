@@ -76,6 +76,10 @@ interface FormState {
 
   proposedBudget: string;
 
+
+
+  campaignAllowanceAccepted:
+    boolean;
   commissionModel: string;
 
   conversionDefinition: string;
@@ -185,6 +189,9 @@ function createInitialState(
             request.proposedBudget
           )
         : "",
+
+    campaignAllowanceAccepted:
+      false,
 
     commissionModel:
       request?.commissionModel ??
@@ -952,6 +959,16 @@ export default function NewRequestForm({
     }
 
 
+    if (
+      !form.campaignAllowanceAccepted
+    ) {
+      setError(
+        "Confirm that you agree to request this campaign allowance from your Wallet."
+      );
+
+      return;
+    }
+
     const creative =
       buildCreative();
 
@@ -1671,12 +1688,23 @@ export default function NewRequestForm({
             currency={
               walletSummary.currency
             }
+            accepted={
+              form.campaignAllowanceAccepted
+            }
             onChange={(
               value
             ) =>
               updateField(
                 "proposedBudget",
                 value
+              )
+            }
+            onAcceptedChange={(
+              accepted
+            ) =>
+              updateField(
+                "campaignAllowanceAccepted",
+                accepted
               )
             }
           />
