@@ -233,9 +233,15 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.table th,
+.table th {
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+
 .table td {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 @media (max-width: 720px) {
