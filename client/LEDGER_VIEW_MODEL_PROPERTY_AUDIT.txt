@@ -1,0 +1,133 @@
+﻿  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:422:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:423:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:424:export interface PaymentDashboardViewModel {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:425:  summary:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:426:    PaymentDashboardSummary;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:427:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:428:  campaignBalances:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:429:    PaymentDashboardBalanceSummary[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:430:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:431:  invoices:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:432:    PaymentDashboardInvoiceRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:433:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:434:  payments:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:435:    PaymentDashboardPaymentRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:436:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:437:  settlements:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:438:    PaymentDashboardSettlementRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:439:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:440:  refunds:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:441:    PaymentDashboardRefundRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:442:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:443:  ledger:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:444:    PaymentDashboardLedgerRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:445:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:446:  warnings:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:447:    string[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:448:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:449:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:450:export interface CreatePaymentDashboardViewModelInput {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:451:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:452:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:453:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:454:  currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:455:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:456:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:457:  budgets:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:458:    CampaignBudget[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:459:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:460:  invoices:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:461:    AdvertiserInvoice[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:462:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:463:  payments:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:464:    AdvertiserPayment[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:465:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:466:  settlements:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:467:    AdvertiserPaymentSettlement[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:468:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:469:  refunds:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:470:    AdvertiserRefund[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:471:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:472:  ledgerEntries:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:473:    LedgerEntry[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:474:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:475:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:476:function assertMatchingCurrency(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:477:  valueCurrency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:478:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:479:  expectedCurrency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:480:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:481:  label:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:482:    string
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:483:): void {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:484:  if (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:485:    valueCurrency !==
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:486:    expectedCurrency
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:487:  ) {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:488:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:489:      `${label} currency must match dashboard currency ${expectedCurrency}.`
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:490:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:491:  }
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:492:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:493:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:494:function isPaymentVerified(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:495:  payment:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:496:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:497:): boolean {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:440:  refunds:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:441:    PaymentDashboardRefundRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:442:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:443:  ledger:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:444:    PaymentDashboardLedgerRow[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:445:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:446:  warnings:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:447:    string[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:448:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:449:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:450:export interface CreatePaymentDashboardViewModelInput {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:451:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:452:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:453:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:469:  refunds:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:470:    AdvertiserRefund[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:471:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:472:  ledgerEntries:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:473:    LedgerEntry[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:474:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:475:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:476:function assertMatchingCurrency(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:477:  valueCurrency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:478:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:479:  expectedCurrency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:480:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:481:  label:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:482:    string
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:844:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:845:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:846:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:847:function createLedgerRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:848:  entry:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:849:    LedgerEntry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:850:): PaymentDashboardLedgerRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:851:  return {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:852:    ledgerEntryId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:853:      entry.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:854:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:855:    campaignId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:856:      entry.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:857:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1179:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1180:  const ledger =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1181:    getLatestFirst(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1182:      organizationLedgerEntries.map(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1183:        createLedgerRow
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1184:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1185:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1186:        entry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1187:      ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1188:        entry.finalizedAt ??
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1189:        entry.occurredAt
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1190:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1191:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1192:  const warnings =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1193:    Array.from(

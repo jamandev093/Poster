@@ -1,0 +1,247 @@
+﻿ 143: export interface PaymentDashboardInvoiceRow {
+ 144:   invoiceId:
+ 145:     string;
+ 146: 
+ 147:   invoiceNumber:
+ 148:     string;
+ 149: 
+ 150:   campaignId?:
+ 151:     CampaignId;
+ 152: 
+ 153:   status:
+ 154:     InvoiceStatus;
+ 155: 
+ 156:   currency:
+ 157:     SupportedCurrency;
+ 158: 
+ 159:   totalMinor:
+ 160:     number;
+ 161: 
+ 162:   paidMinor:
+ 163:     number;
+ 164: 
+ 165:   refundedMinor:
+ 166:     number;
+ 167: 
+ 168:   outstandingMinor:
+ 169:     number;
+ 170: 
+ 171:   issuedAt?:
+ 172:     string;
+ 173: 
+ 174:   dueAt?:
+ 175:     string;
+ 176: 
+ 177:   paidAt?:
+ 178:     string;
+ 179: 
+ 180:   documentUrl?:
+ 181:     string;
+ 182: }
+ 183: 
+ 211: export function getInvoiceStatusPresentation(
+ 212:   status:
+ 213:     InvoiceStatus
+ 214: ): FinancialStatusPresentation {
+ 215:   switch (status) {
+ 216:     case "draft":
+ 217:       return {
+ 218:         label:
+ 219:           "Draft",
+ 220: 
+ 221:         tone:
+ 222:           "neutral",
+ 223: 
+ 224:         description:
+ 225:           "The invoice has not yet been issued.",
+ 226:       };
+ 227: 
+ 228:     case "issued":
+ 229:       return {
+ 230:         label:
+ 231:           "Issued",
+ 232: 
+ 233:         tone:
+ 234:           "information",
+ 235: 
+ 236:         description:
+ 237:           "The invoice has been issued and is available for payment.",
+ 238:       };
+ 239: 
+ 240:     case "payment_pending":
+ 241:       return {
+ 242:         label:
+ 243:           "Payment pending",
+ 244: 
+ 245:         tone:
+ 246:           "attention",
+ 247: 
+ 248:         description:
+ 249:           "Payment is required for this invoice.",
+ 250:       };
+ 251: 
+ 252:     case "partially_paid":
+ 253:       return {
+ 254:         label:
+ 255:           "Partially paid",
+ 256: 
+ 257:         tone:
+ 258:           "attention",
+ 259: 
+ 260:         description:
+ 261:           "The invoice has an outstanding balance.",
+ 262:       };
+ 263: 
+ 264:     case "paid":
+ 265:       return {
+ 266:         label:
+ 267:           "Paid",
+ 268: 
+ 269:         tone:
+ 270:           "success",
+ 271: 
+ 272:         description:
+ 273:           "The invoice has been paid in full.",
+ 274:       };
+ 275: 
+ 276:     case "overdue":
+ 277:       return {
+ 278:         label:
+ 279:           "Overdue",
+ 280: 
+ 281:         tone:
+ 282:           "danger",
+ 283: 
+ 284:         description:
+ 285:           "The invoice passed its due date with an outstanding amount.",
+ 286:       };
+ 287: 
+ 288:     case "cancelled":
+ 289:       return {
+ 290:         label:
+ 291:           "Cancelled",
+ 292: 
+ 293:         tone:
+ 294:           "neutral",
+ 295: 
+ 296:         description:
+ 297:           "The invoice is no longer payable.",
+ 298:       };
+ 299: 
+ 300:     case "refund_pending":
+ 301:       return {
+ 302:         label:
+ 303:           "Refund pending",
+ 304: 
+ 305:         tone:
+ 306:           "attention",
+ 307: 
+ 308:         description:
+ 309:           "A refund linked to this invoice is being processed.",
+ 310:       };
+ 311: 
+ 312:     case "partially_refunded":
+ 313:       return {
+ 314:         label:
+ 315:           "Partially refunded",
+ 316: 
+ 317:         tone:
+ 318:           "information",
+ 319: 
+ 320:         description:
+ 321:           "Part of the paid invoice amount has been refunded.",
+ 322:       };
+ 323: 
+ 324:     case "refunded":
+ 325:       return {
+ 326:         label:
+ 327:           "Refunded",
+ 328: 
+ 329:         tone:
+ 330:           "success",
+ 331: 
+  46: export type InvoiceStatus =
+  47:   | "draft"
+  48:   | "issued"
+  49:   | "payment_pending"
+  50:   | "partially_paid"
+  51:   | "paid"
+  52:   | "overdue"
+  53:   | "cancelled"
+  54:   | "refund_pending"
+  55:   | "partially_refunded"
+  56:   | "refunded";
+  57: 
+ 702: export function canInvoiceAcceptPayment(
+ 703:   invoice:
+ 704:     AdvertiserInvoice
+ 705: ): boolean {
+ 706:   return (
+ 707:     invoice.totals
+ 708:       .outstandingMinor >
+ 709:       0 &&
+ 710:     (
+ 711:       invoice.status ===
+ 712:         "issued" ||
+ 713:       invoice.status ===
+ 714:         "payment_pending" ||
+ 715:       invoice.status ===
+ 716:         "partially_paid" ||
+ 717:       invoice.status ===
+ 718:         "overdue"
+ 719:     )
+ 720:   );
+ 721: }
+ 722: 
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:60:export function formatMoneyMinor(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:61:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:62:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:63:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:64:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:65:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:66:    CurrencyFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:67:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:68:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:69:    !Number.isSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:70:      amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:71:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:72:  ) {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:154:export function formatFinancialDate(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:155:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:156:    string |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:157:    undefined,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:158:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:159:    DateTimeFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:160:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:161:  if (!value) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:162:    return "—";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:163:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:164:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:165:  const date =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:166:    new Date(value);
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:198:export function formatFinancialDateTime(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:199:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:200:    string |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:201:    undefined,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:202:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:203:    DateTimeFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:204:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:205:  if (!value) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:206:    return "—";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:207:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:208:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:209:  const date =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:210:    new Date(value);
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:565:export function formatDataUpdatedLabel(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:566:  updatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:567:    string |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:568:    undefined
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:569:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:570:  if (!updatedAt) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:571:    return "Update time unavailable";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:572:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:573:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:574:  return `Updated ${formatFinancialDateTime(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:575:    updatedAt
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:576:  )}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:577:}

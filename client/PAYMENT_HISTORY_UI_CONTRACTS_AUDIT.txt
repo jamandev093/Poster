@@ -1,0 +1,1488 @@
+﻿ 184: export interface PaymentDashboardPaymentRow {
+ 185:   paymentId:
+ 186:     string;
+ 187: 
+ 188:   invoiceId:
+ 189:     string;
+ 190: 
+ 191:   campaignId?:
+ 192:     CampaignId;
+ 193: 
+ 194:   provider:
+ 195:     PaymentProvider;
+ 196: 
+ 197:   status:
+ 198:     PaymentStatus;
+ 199: 
+ 200:   amountMinor:
+ 201:     number;
+ 202: 
+ 203:   capturedAmountMinor:
+ 204:     number;
+ 205: 
+ 206:   refundedAmountMinor:
+ 207:     number;
+ 208: 
+ 209:   currency:
+ 210:     SupportedCurrency;
+ 211: 
+ 212:   methodDetails:
+ 213:     PaymentMethodDetails;
+ 214: 
+ 215:   providerPaymentId?:
+ 216:     string;
+ 217: 
+ 218:   paymentVerified:
+ 219:     boolean;
+ 220: 
+ 221:   riskAccepted:
+ 222:     boolean;
+ 223: 
+ 224:   paidAt?:
+ 225:     string;
+ 226: 
+ 227:   createdAt:
+ 228:     string;
+ 229: }
+ 230: 
+  69: export type PaymentStatus =
+  70:   | "created"
+  71:   | "pending"
+  72:   | "authorized"
+  73:   | "captured"
+  74:   | "paid"
+  75:   | "partially_paid"
+  76:   | "failed"
+  77:   | "cancelled"
+  78:   | "expired"
+  79:   | "refund_pending"
+  80:   | "partially_refunded"
+  81:   | "refunded"
+  82:   | "disputed";
+  83: 
+  84: export type PaymentAttemptStatus =
+  85:   | "created"
+  86:   | "checkout_opened"
+  87:   | "processing"
+  88:   | "authorized"
+  89:   | "captured"
+  90:   | "failed"
+  91:   | "cancelled"
+  92:   | "timed_out";
+  93: 
+  94: export type WebhookVerificationStatus =
+  95:   | "not_received"
+  96:   | "received"
+  97:   | "verified"
+  98:   | "rejected"
+  99:   | "duplicate";
+ 100: 
+ 101: export type PaymentRiskStatus =
+ 102:   | "not_evaluated"
+ 103:   | "accepted"
+ 104:   | "manual_review"
+ 105:   | "rejected";
+ 106: 
+ 107: export type PaymentChannel =
+ 108:   | "client_web"
+ 109:   | "admin_web"
+ 110:   | "manual_operations"
+ 111:   | "backend";
+ 112: 
+ 113: export interface PaymentMethodDetails {
+ 114:   method:
+ 115:     PaymentMethod;
+ 116: 
+ 117:   cardNetwork?:
+ 118:     CardNetwork;
+ 119: 
+ 120:   cardLastFour?:
+ 121:     string;
+ 122: 
+ 123:   cardIssuer?:
+ 124:     string;
+ 125: 
+ 126:   cardCountryCode?:
+ 127:     string;
+ 128: 
+ 129:   upiHandleMasked?:
+ 130:     string;
+ 131: 
+ 132:   bankName?:
+ 133:     string;
+ 134: 
+ 135:   international:
+ 136:     boolean;
+ 137: }
+ 138: 
+ 139: export interface RazorpayOrderReference {
+ 140:   provider:
+ 141:     "razorpay";
+ 142: 
+ 143:   /**
+ 144:    * Provider-generated Razorpay order ID.
+ 145:    */
+ 146:   providerOrderId:
+ 147:     string;
+ 148: 
+ 149:   providerReceiptReference:
+ 150:     string;
+ 151: 
+ 152:   checkoutKeyId:
+ 153:     string;
+ 154: 
+ 155:   createdAt:
+ 156:     string;
+ 157: 
+ 158:   expiresAt?:
+ 159:     string;
+ 160: }
+ 161: 
+ 162: export interface ManualBankTransferReference {
+ 163:   provider:
+ 164:     "manual_bank_transfer";
+ 165: 
+ 166:   bankReference?:
+ 167:     string;
+ 168: 
+ 169:   transferDate?:
+ 170:     string;
+ 171: 
+ 172:   proofDocumentId?:
+ 173:     string;
+ 174: 
+ 175:   reconciliationNote?:
+ 176:     string;
+ 177: }
+ 178: 
+ 179: export type PaymentOrderProviderReference =
+ 180:   | RazorpayOrderReference
+ 181:   | ManualBankTransferReference;
+ 182: 
+ 183: export interface AdvertiserPaymentOrder {
+ 184:   id:
+ 185:     PaymentOrderId;
+ 186: 
+ 187:   organizationId:
+ 188:     OrganizationId;
+ 189: 
+ 190:   requestId?:
+ 191:     AdvertisingRequestId;
+ 192: 
+ 193:   campaignId?:
+ 194:     CampaignId;
+ 195: 
+ 196:   invoiceId:
+ 197:     InvoiceId;
+ 198: 
+ 199:   purpose:
+ 200:     PaymentPurpose;
+ 201: 
+ 202:   amount:
+ 203:     MoneyAmount;
+ 204: 
+ 205:   provider:
+ 206:     PaymentProvider;
+ 207: 
+ 208:   providerReference:
+ 209:     PaymentOrderProviderReference;
+  48: export function getPaymentStatusPresentation(
+  49:   status:
+  50:     PaymentStatus
+  51: ): FinancialStatusPresentation {
+  52:   switch (status) {
+  53:     case "created":
+  54:       return {
+  55:         label:
+  56:           "Created",
+  57: 
+  58:         tone:
+  59:           "neutral",
+  60: 
+  61:         description:
+  62:           "The payment record has been created.",
+  63:       };
+  64: 
+  65:     case "pending":
+  66:       return {
+  67:         label:
+  68:           "Payment pending",
+  69: 
+  70:         tone:
+  71:           "attention",
+  72: 
+  73:         description:
+  74:           "Poster is waiting for the payment to complete.",
+  75:       };
+  76: 
+  77:     case "authorized":
+  78:       return {
+  79:         label:
+  80:           "Authorized",
+  81: 
+  82:         tone:
+  83:           "information",
+  84: 
+  85:         description:
+  86:           "The payment was authorized but is not yet confirmed as captured.",
+  87:       };
+  88: 
+  89:     case "captured":
+  90:       return {
+  91:         label:
+  92:           "Captured",
+  93: 
+  94:         tone:
+  95:           "success",
+  96: 
+  97:         description:
+  98:           "The payment was captured and is awaiting final account processing.",
+  99:       };
+ 100: 
+ 101:     case "paid":
+ 102:       return {
+ 103:         label:
+ 104:           "Paid",
+ 105: 
+ 106:         tone:
+ 107:           "success",
+ 108: 
+ 109:         description:
+ 110:           "The payment has been verified successfully.",
+ 111:       };
+ 112: 
+ 113:     case "partially_paid":
+ 114:       return {
+ 115:         label:
+ 116:           "Partially paid",
+ 117: 
+ 118:         tone:
+ 119:           "attention",
+ 120: 
+ 121:         description:
+ 122:           "Part of the required payment has been received.",
+ 123:       };
+ 124: 
+ 125:     case "failed":
+ 126:       return {
+ 127:         label:
+ 128:           "Payment failed",
+ 129: 
+ 130:         tone:
+ 131:           "danger",
+ 132: 
+ 133:         description:
+ 134:           "The payment could not be completed.",
+ 135:       };
+ 136: 
+ 137:     case "cancelled":
+ 138:       return {
+ 139:         label:
+ 140:           "Cancelled",
+ 141: 
+ 142:         tone:
+ 143:           "neutral",
+ 144: 
+ 145:         description:
+ 146:           "The payment was cancelled.",
+ 147:       };
+ 148: 
+ 149:     case "expired":
+ 150:       return {
+ 151:         label:
+ 152:           "Expired",
+ 153: 
+ 154:         tone:
+ 155:           "neutral",
+ 156: 
+ 157:         description:
+ 158:           "The payment request expired before completion.",
+ 159:       };
+ 160: 
+ 161:     case "refund_pending":
+ 162:       return {
+ 163:         label:
+ 164:           "Refund pending",
+ 165: 
+ 166:         tone:
+ 167:           "attention",
+ 168: 
+ 169:         description:
+ 170:           "An approved refund is being processed.",
+ 171:       };
+ 172: 
+ 173:     case "partially_refunded":
+ 174:       return {
+ 175:         label:
+ 176:           "Partially refunded",
+ 177: 
+ 178:         tone:
+ 179:           "information",
+ 180: 
+ 181:         description:
+ 182:           "Part of the captured amount has been refunded.",
+ 183:       };
+ 184: 
+ 185:     case "refunded":
+ 186:       return {
+ 187:         label:
+ 188:           "Refunded",
+ 189: 
+ 190:         tone:
+ 191:           "success",
+ 192: 
+ 193:         description:
+ 194:           "The approved amount has been refunded.",
+ 195:       };
+ 196: 
+ 197:     case "disputed":
+ 198:       return {
+ 199:         label:
+ 200:           "Disputed",
+ 201: 
+ 202:         tone:
+ 203:           "danger",
+ 204: 
+ 205:         description:
+ 206:           "The payment is subject to a dispute or chargeback review.",
+ 207:       };
+ 208:   }
+ 209: }
+ 210: 
+ 211: export function getInvoiceStatusPresentation(
+ 212:   status:
+ 213:     InvoiceStatus
+ 214: ): FinancialStatusPresentation {
+ 215:   switch (status) {
+ 216:     case "draft":
+ 217:       return {
+ 218:         label:
+ 219:           "Draft",
+ 220: 
+ 221:         tone:
+ 222:           "neutral",
+ 223: 
+ 224:         description:
+ 225:           "The invoice has not yet been issued.",
+ 226:       };
+ 227: 
+ 228:     case "issued":
+ 229:       return {
+ 230:         label:
+ 231:           "Issued",
+ 232: 
+ 233:         tone:
+ 234:           "information",
+ 235: 
+ 236:         description:
+ 237:           "The invoice has been issued and is available for payment.",
+ 238:       };
+ 239: 
+ 240:     case "payment_pending":
+ 241:       return {
+ 242:         label:
+ 243:           "Payment pending",
+ 244: 
+ 245:         tone:
+ 246:           "attention",
+ 247: 
+ 248:         description:
+ 249:           "Payment is required for this invoice.",
+ 250:       };
+ 251: 
+ 252:     case "partially_paid":
+ 253:       return {
+ 254:         label:
+ 255:           "Partially paid",
+ 256: 
+ 257:         tone:
+ 258:           "attention",
+ 259: 
+ 260:         description:
+ 261:           "The invoice has an outstanding balance.",
+ 262:       };
+ 263: 
+ 264:     case "paid":
+ 265:       return {
+ 266:         label:
+ 267:           "Paid",
+ 268: 
+ 269:         tone:
+ 270:           "success",
+ 271: 
+ 272:         description:
+ 273:           "The invoice has been paid in full.",
+ 274:       };
+ 275: 
+ 276:     case "overdue":
+ 277:       return {
+ 278:         label:
+ 279:           "Overdue",
+ 280: 
+ 281:         tone:
+ 282:           "danger",
+ 283: 
+ 284:         description:
+ 285:           "The invoice passed its due date with an outstanding amount.",
+ 286:       };
+ 287: 
+ 288:     case "cancelled":
+ 289:       return {
+ 290:         label:
+ 291:           "Cancelled",
+ 292: 
+ 293:         tone:
+ 294:           "neutral",
+ 295: 
+ 296:         description:
+ 297:           "The invoice is no longer payable.",
+ 298:       };
+ 299: 
+ 300:     case "refund_pending":
+ 301:       return {
+ 302:         label:
+ 303:           "Refund pending",
+ 304: 
+ 305:         tone:
+ 306:           "attention",
+ 307: 
+ 308:         description:
+ 309:           "A refund linked to this invoice is being processed.",
+ 310:       };
+ 311: 
+ 312:     case "partially_refunded":
+ 313:       return {
+ 314:         label:
+ 315:           "Partially refunded",
+ 316: 
+ 317:         tone:
+ 318:           "information",
+ 319: 
+ 320:         description:
+ 321:           "Part of the paid invoice amount has been refunded.",
+ 322:       };
+ 323: 
+ 324:     case "refunded":
+ 325:       return {
+ 326:         label:
+ 327:           "Refunded",
+ 328: 
+ 329:         tone:
+ 330:           "success",
+ 331: 
+ 332:         description:
+ 333:           "The approved invoice amount has been refunded.",
+ 334:       };
+ 335:   }
+ 336: }
+ 337: 
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:6:} from "../advertising/advertising.types";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:7:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:8:import type {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:9:  MoneyAmount,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:10:  SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:11:} from "./currency.types";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:12:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:13:/**
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:14: * Canonical advertiser-payment contracts.
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:15: *
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:16: * Poster v1 payment provider:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:17: *
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:18: * - Razorpay only
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:19: * - Stripe excluded
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:20: * - PayPal excluded
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:21: *
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:22: * Payment confirmation must come from a verified Backend
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:23: * webhook. Browser checkout callbacks are never authoritative.
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:24: */
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:25:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:26:export type PaymentId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:27:  `PAY-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:28:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:29:export type PaymentOrderId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:30:  `ORD-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:31:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:32:export type PaymentAttemptId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:33:  `PAT-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:34:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:35:export type PaymentProviderEventId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:36:  `PWE-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:37:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:38:export type InvoiceId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:39:  `INV-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:40:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:41:export type ReceiptId =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:42:  `RCT-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:43:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:44:export type PaymentProvider =
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:45:  | "razorpay"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:46:  | "manual_bank_transfer";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:47:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:48:export type PaymentPurpose =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:49:  | "campaign_funding"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:50:  | "invoice_payment"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:51:  | "balance_top_up"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:52:  | "approved_adjustment";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:53:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:54:export type PaymentMethod =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:55:  | "upi"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:56:  | "card"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:57:  | "netbanking"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:58:  | "bank_transfer"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:59:  | "wallet"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:60:  | "unknown";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:61:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:62:export type CardNetwork =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:73:  | "captured"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:74:  | "paid"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:75:  | "partially_paid"
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:76:  | "failed"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:77:  | "cancelled"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:78:  | "expired"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:79:  | "refund_pending"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:80:  | "partially_refunded"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:81:  | "refunded"
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:82:  | "disputed";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:83:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:84:export type PaymentAttemptStatus =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:85:  | "created"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:86:  | "checkout_opened"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:87:  | "processing"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:88:  | "authorized"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:89:  | "captured"
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:90:  | "failed"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:91:  | "cancelled"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:92:  | "timed_out";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:93:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:94:export type WebhookVerificationStatus =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:95:  | "not_received"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:96:  | "received"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:97:  | "verified"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:98:  | "rejected"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:110:  | "manual_operations"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:111:  | "backend";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:112:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:113:export interface PaymentMethodDetails {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:114:  method:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:115:    PaymentMethod;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:116:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:117:  cardNetwork?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:118:    CardNetwork;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:119:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:120:  cardLastFour?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:121:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:122:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:123:  cardIssuer?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:136:    boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:137:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:138:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:139:export interface RazorpayOrderReference {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:140:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:141:    "razorpay";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:142:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:143:  /**
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:144:   * Provider-generated Razorpay order ID.
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:145:   */
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:146:  providerOrderId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:147:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:148:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:149:  providerReceiptReference:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:150:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:151:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:152:  checkoutKeyId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:153:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:154:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:155:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:156:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:157:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:160:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:161:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:162:export interface ManualBankTransferReference {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:163:  provider:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:164:    "manual_bank_transfer";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:165:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:166:  bankReference?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:167:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:168:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:169:  transferDate?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:170:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:171:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:176:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:177:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:178:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:179:export type PaymentOrderProviderReference =
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:180:  | RazorpayOrderReference
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:181:  | ManualBankTransferReference;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:182:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:183:export interface AdvertiserPaymentOrder {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:184:  id:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:185:    PaymentOrderId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:186:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:187:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:188:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:189:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:190:  requestId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:191:    AdvertisingRequestId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:192:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:193:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:199:  purpose:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:200:    PaymentPurpose;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:201:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:202:  amount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:203:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:204:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:205:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:206:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:207:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:208:  providerReference:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:209:    PaymentOrderProviderReference;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:210:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:211:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:212:    PaymentStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:213:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:214:  channel:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:215:    PaymentChannel;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:216:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:217:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:234:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:235:    PaymentAttemptId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:236:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:237:  paymentOrderId:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:238:    PaymentOrderId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:239:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:240:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:241:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:242:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:243:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:244:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:245:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:246:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:247:    PaymentAttemptStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:248:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:249:  amount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:250:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:251:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:252:  methodDetails?:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:253:    PaymentMethodDetails;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:254:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:255:  providerPaymentId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:256:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:257:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:258:  providerErrorCode?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:259:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:260:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:261:  providerErrorDescription?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:262:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:263:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:264:  checkoutOpenedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:265:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:266:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:267:  authorizedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:268:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:269:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:270:  capturedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:271:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:272:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:273:  failedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:274:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:275:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:276:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:277:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:278:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:279:  updatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:280:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:281:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:282:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:283:export interface PaymentWebhookVerification {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:284:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:285:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:286:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:287:  providerEventId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:288:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:289:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:290:  internalEventId:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:291:    PaymentProviderEventId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:292:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:293:  paymentOrderId?:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:294:    PaymentOrderId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:295:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:296:  paymentId?:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:297:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:298:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:299:  verificationStatus:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:300:    WebhookVerificationStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:301:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:302:  signatureHeaderPresent:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:303:    boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:304:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:305:  signatureVerified:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:323:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:324:export interface AdvertiserPayment {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:325:  id:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:326:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:327:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:328:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:329:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:330:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:331:  requestId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:332:    AdvertisingRequestId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:333:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:334:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:337:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:338:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:339:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:340:  paymentOrderId:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:341:    PaymentOrderId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:342:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:343:  purpose:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:344:    PaymentPurpose;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:345:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:346:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:347:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:348:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:349:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:350:    PaymentStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:351:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:352:  amount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:353:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:354:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:355:  capturedAmount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:356:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:357:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:358:  refundedAmount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:359:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:360:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:361:  methodDetails:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:362:    PaymentMethodDetails;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:363:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:364:  providerPaymentId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:365:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:366:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:367:  providerOrderId?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:368:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:369:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:370:  webhookVerification:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:371:    PaymentWebhookVerification;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:372:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:373:  riskStatus:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:374:    PaymentRiskStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:375:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:376:  receiptId?:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:377:    ReceiptId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:378:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:379:  authorizedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:380:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:381:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:382:  capturedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:383:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:384:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:385:  paidAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:386:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:387:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:388:  failedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:389:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:390:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:391:  cancelledAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:392:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:393:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:394:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:395:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:396:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:399:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:400:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:401:export interface PaymentConfirmationResult {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:402:  paymentId:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:403:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:404:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:405:  paymentOrderId:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:406:    PaymentOrderId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:407:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:408:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:409:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:410:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:411:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:412:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:413:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:414:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:420:  balanceEligibleForCredit:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:421:    boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:422:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:423:  confirmedAmount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:424:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:425:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:426:  confirmedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:427:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:428:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:429:  warningMessages:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:430:    string[];
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:431:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:432:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:446:  purpose:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:447:    PaymentPurpose;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:448:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:449:  amount:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:450:    MoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:451:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:452:  provider:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:453:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:454:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:455:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:456:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:457:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:458:  requestedBy:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:459:    AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:460:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:461:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:550:          true,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:551:      };
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:552:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:553:    case "failed":
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:554:    case "cancelled":
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:555:    case "expired":
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:556:      return {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:557:        status,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:558:        paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:559:          false,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:560:        captured:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:561:          false,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:565:          true,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:566:      };
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:567:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:568:    case "disputed":
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:569:      return {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:570:        status,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:571:        paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:572:          true,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:573:        captured:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:574:          true,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:575:        refundable:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:576:          false,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:604:      payment.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:605:        "refunded" ||
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:606:      payment.status ===
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:607:        "disputed"
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:608:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:609:  );
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:610:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:611:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:612:export function isPaymentEligibleForBalanceCredit(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:613:  payment:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:614:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:615:): boolean {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:619:    ) &&
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:620:    payment.riskStatus ===
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:621:      "accepted" &&
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:622:    payment.capturedAmount
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:623:      .currency ===
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:624:      payment.amount.currency &&
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:625:    payment.capturedAmount
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:626:      .amountMinor >
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:627:      0
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:628:  );
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:629:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:630:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:631:export function getRemainingRefundableAmountMinor(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:632:  payment:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:633:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:634:): number {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:635:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:636:    payment.capturedAmount
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:637:      .currency !==
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:638:      payment.refundedAmount
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:639:        .currency
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:640:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:641:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:642:      "Captured and refunded payment currencies must match."
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:643:    );
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:644:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:645:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:646:  return Math.max(
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:647:    payment.capturedAmount
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:648:      .amountMinor -
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:649:      payment.refundedAmount
+> F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:650:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:651:    0
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:652:  );
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:653:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:654:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:655:export function isPaymentCurrencySupported(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:656:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:657:    string
+  F:\Project\Poster\client\src\features\workspace\payments\payment.types.ts:658:): currency is SupportedCurrency {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:27:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:28:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:29:  AdvertiserPayment,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:30:  PaymentMethodDetails,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:31:  PaymentProvider,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:32:  PaymentStatus,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:33:} from "../payments/payment.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:34:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:35:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:36:  AdvertiserRefund,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:37:  RefundReason,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:38:  RefundStatus,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:39:} from "../payments/refund.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:57: * This file must not:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:58: *
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:59: * - create payment orders;
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:60: * - verify provider webhooks;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:61: * - approve or execute refunds;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:62: * - mutate ledger records;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:63: * - calculate authoritative Backend balances;
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:64: * - determine settlement provider behavior.
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:65: */
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:66:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:67:export interface PaymentDashboardBalanceSummary {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:68:  campaignId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:69:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:70:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:71:  budgetStatus:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:72:    CampaignBudgetStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:110:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:111:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:112:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:113:  disputedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:114:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:115:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:116:  remainingMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:117:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:118:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:119:  utilizationPercentage:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:120:    number |
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:121:    null;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:174:  dueAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:175:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:176:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:177:  paidAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:178:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:179:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:180:  documentUrl?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:181:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:182:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:183:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:184:export interface PaymentDashboardPaymentRow {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:185:  paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:186:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:187:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:188:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:189:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:190:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:191:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:192:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:193:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:194:  provider:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:195:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:196:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:197:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:198:    PaymentStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:199:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:200:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:201:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:202:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:203:  capturedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:204:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:205:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:206:  refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:207:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:208:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:209:  currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:210:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:211:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:212:  methodDetails:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:213:    PaymentMethodDetails;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:214:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:215:  providerPaymentId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:216:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:217:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:218:  paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:219:    boolean;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:220:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:221:  riskAccepted:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:222:    boolean;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:223:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:224:  paidAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:225:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:226:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:227:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:228:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:229:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:230:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:231:export interface PaymentDashboardSettlementRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:232:  settlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:241:  currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:242:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:243:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:244:  grossAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:245:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:246:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:247:  providerFeeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:248:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:249:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:250:  taxMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:251:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:252:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:253:  adjustmentMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:254:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:255:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:256:  netAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:257:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:258:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:259:  expectedSettlementAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:260:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:261:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:262:  settledAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:263:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:264:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:265:  providerSettlementId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:266:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:267:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:268:  providerUtr?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:269:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:270:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:271:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:272:export interface PaymentDashboardRefundRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:273:  refundId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:274:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:275:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:276:  refundRequestId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:277:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:278:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:279:  paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:280:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:281:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:282:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:283:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:284:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:285:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:286:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:287:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:294:  currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:295:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:296:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:297:  requestedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:298:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:299:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:300:  approvedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:301:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:302:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:303:  refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:304:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:305:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:306:  executionMode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:307:    AdvertiserRefund[
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:308:      "executionMode"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:309:    ];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:310:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:311:  providerRefundId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:312:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:313:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:314:  approvedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:315:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:316:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:317:  refundedAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:318:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:319:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:320:  failedAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:321:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:322:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:323:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:324:export interface PaymentDashboardLedgerRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:325:  ledgerEntryId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:326:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:327:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:328:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:331:  invoiceId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:332:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:333:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:334:  paymentId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:335:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:336:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:337:  refundId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:338:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:339:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:340:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:341:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:342:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:352:  currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:353:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:354:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:355:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:356:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:357:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:358:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:359:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:360:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:361:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:362:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:363:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:405:  totalRefundedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:406:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:407:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:408:  totalDisputedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:409:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:410:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:411:  totalRemainingMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:412:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:413:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:414:  unpaidInvoiceCount:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:415:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:416:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:524:      budget.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:525:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:526:    allocatedMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:527:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:528:        .allocatedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:529:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:530:    paidMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:531:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:532:        .paidMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:533:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:534:    availableMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:535:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:536:        .availableMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:537:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:538:    reservedMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:539:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:540:        .reservedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:541:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:542:    estimatedSpendMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:543:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:544:        .estimatedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:545:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:546:    pendingValidationSpendMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:547:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:548:        .pendingValidationSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:549:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:550:    finalizedSpendMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:551:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:552:        .finalizedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:553:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:554:    invalidTrafficCreditMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:555:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:556:        .invalidTrafficCreditMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:557:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:558:    adjustmentCreditMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:559:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:560:        .adjustmentCreditMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:561:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:562:    adjustmentDebitMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:563:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:564:        .adjustmentDebitMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:565:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:566:    refundReservedMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:567:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:568:        .refundReservedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:569:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:570:    refundedMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:571:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:572:        .refundedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:573:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:574:    disputedMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:575:      budget.amounts
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:576:        .disputedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:577:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:578:    remainingMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:579:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:580:        .remainingMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:581:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:582:    utilizationPercentage:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:583:      calculateBudgetUtilizationPercentage(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:584:        budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:585:          .paidMinor,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:586:        budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:587:          .finalizedSpendMinor
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:588:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:589:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:590:    remainingPercentage:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:591:      calculateBudgetRemainingPercentage(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:592:        budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:593:          .paidMinor,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:594:        budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:595:          .remainingMinor
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:596:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:597:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:598:    dataThrough:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:599:      budget.freshness
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:600:        .dataThrough,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:601:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:602:    finalizedThrough:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:660:    dueAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:661:      invoice.dueAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:662:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:663:    paidAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:664:      invoice.paidAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:665:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:666:    documentUrl:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:667:      invoice.documentUrl,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:668:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:669:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:670:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:671:function createPaymentRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:672:  payment:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:673:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:674:): PaymentDashboardPaymentRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:675:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:676:    paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:677:      payment.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:678:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:679:    invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:680:      payment.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:681:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:682:    campaignId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:683:      payment.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:684:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:685:    provider:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:686:      payment.provider,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:687:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:688:    status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:689:      payment.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:690:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:691:    amountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:692:      payment.amount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:693:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:694:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:695:    capturedAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:696:      payment.capturedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:697:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:698:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:699:    refundedAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:700:      payment.refundedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:701:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:702:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:703:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:704:      payment.amount
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:705:        .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:706:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:707:    methodDetails:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:708:      payment.methodDetails,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:709:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:710:    providerPaymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:711:      payment.providerPaymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:712:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:713:    paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:714:      isPaymentVerified(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:715:        payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:716:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:717:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:718:    riskAccepted:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:719:      payment.riskStatus ===
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:720:      "accepted",
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:721:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:722:    paidAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:723:      payment.paidAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:724:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:725:    createdAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:726:      payment.createdAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:727:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:728:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:729:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:730:function createSettlementRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:731:  settlement:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:745:      settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:746:        .settlementCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:747:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:748:    grossAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:749:      settlement.grossAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:750:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:751:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:752:    providerFeeMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:753:      settlement.providerFee
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:754:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:755:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:756:    taxMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:757:      settlement.taxAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:758:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:759:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:760:    adjustmentMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:761:      settlement.adjustmentAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:762:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:763:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:764:    netAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:765:      settlement.netAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:766:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:767:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:768:    expectedSettlementAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:769:      settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:770:        .expectedSettlementAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:771:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:772:    settledAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:773:      settlement.settledAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:774:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:775:    providerSettlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:776:      settlement
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:777:        .providerReference
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:778:        .providerSettlementId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:779:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:780:    providerUtr:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:781:      settlement
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:782:        .providerReference
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:783:        .providerUtr,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:784:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:785:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:786:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:787:function createRefundRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:788:  refund:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:789:    AdvertiserRefund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:790:): PaymentDashboardRefundRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:791:  return {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:795:    refundRequestId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:796:      refund.refundRequestId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:797:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:798:    paymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:799:      refund.paymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:800:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:801:    invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:802:      refund.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:803:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:804:    campaignId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:805:      refund.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:806:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:807:    reason:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:811:      refund.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:812:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:813:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:814:      refund.approvedAmount
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:815:        .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:816:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:817:    requestedAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:818:      refund.requestedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:819:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:820:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:821:    approvedAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:822:      refund.approvedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:823:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:824:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:825:    refundedAmountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:826:      refund.refundedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:827:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:828:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:829:    executionMode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:830:      refund.executionMode,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:831:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:832:    providerRefundId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:833:      refund.providerReference
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:834:        .providerRefundId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:835:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:836:    approvedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:837:      refund.approvedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:838:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:839:    refundedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:840:      refund.refundedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:841:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:842:    failedAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:843:      refund.failedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:844:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:845:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:846:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:847:function createLedgerRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:848:  entry:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:849:    LedgerEntry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:850:): PaymentDashboardLedgerRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:851:  return {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:858:    invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:859:      entry.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:860:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:861:    paymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:862:      entry.paymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:863:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:864:    refundId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:865:      entry.refundId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:866:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:867:    settlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:868:      entry.settlementId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:869:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:870:    type:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:877:      entry.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:878:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:879:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:880:      entry.amount.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:881:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:882:    amountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:883:      entry.amount.amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:884:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:885:    balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:886:      entry.balanceBeforeMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:887:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:888:    balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:889:      entry.balanceAfterMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:890:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:891:    description:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1081:      payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1082:    ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1083:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1084:        payment.amount
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1085:          .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1086:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1087:        "Payment"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1088:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1089:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1090:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1091:  organizationSettlements.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1092:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1105:      refund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1106:    ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1107:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1108:        refund.approvedAmount
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1109:          .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1110:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1111:        "Refund"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1112:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1113:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1114:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1115:  organizationLedgerEntries.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1116:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1117:      entry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1118:    ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1119:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1120:        entry.amount.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1121:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1122:        "Ledger entry"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1123:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1124:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1125:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1126:  const campaignBalances =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1127:    organizationBudgets.map(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1128:      createBalanceSummary
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1147:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1148:        payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1149:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1150:        payment.paidAt ??
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1151:        payment.createdAt
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1152:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1153:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1154:  const settlements =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1155:    getLatestFirst(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1156:      organizationSettlements.map(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1157:        createSettlementRow
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1158:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1173:        refund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1174:      ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1175:        refund.refundedAt ??
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1176:        refund.failedAt ??
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1177:        refund.approvedAt
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1178:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1179:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1180:  const ledger =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1181:    getLatestFirst(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1182:      organizationLedgerEntries.map(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1183:        createLedgerRow
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1184:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1313:          0
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1314:        ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1315:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1316:      totalDisputedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1317:        campaignBalances.reduce(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1318:          (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1319:            total,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1320:            budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1321:          ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1322:            total +
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1323:            budget.disputedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1324:          0
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1325:        ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1326:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1327:      totalRemainingMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1328:        campaignBalances.reduce(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1329:          (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1330:            total,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1331:            budget

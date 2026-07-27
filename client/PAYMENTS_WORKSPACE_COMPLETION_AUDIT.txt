@@ -1,0 +1,340 @@
+﻿POSTER CLIENT PAYMENTS WORKSPACE COMPLETION AUDIT
+Generated: 2026-07-27T10:58:22.2672360+05:30
+
+===== ROUTE FILES =====
+
+Route              Exists SizeBytes File                                         
+-----              ------ --------- ----                                         
+/payments            True      1312 .\src\app\(portal)\payments\page.tsx         
+/payments/invoices   True      1259 .\src\app\(portal)\payments\invoices\page.tsx
+/payments/history    True      1308 .\src\app\(portal)\payments\history\page.tsx 
+/payments/balances   True      1357 .\src\app\(portal)\payments\balances\page.tsx
+/payments/refunds    True      1296 .\src\app\(portal)\payments\refunds\page.tsx 
+/payments/ledger     True      1317 .\src\app\(portal)\payments\ledger\page.tsx  
+
+
+
+===== COMPONENTS AND EXPORTS =====
+
+Component                      TsxExists ExportPresent
+---------                      --------- -------------
+InvoicesDashboardPanel              True          True
+InvoiceTable                        True          True
+PaymentHistoryDashboardPanel        True          True
+PaymentHistoryTable                 True          True
+CampaignBalancesDashboardPanel      True          True
+CampaignBalancesTable               True          True
+RefundsDashboardPanel               True          True
+RefundsTable                        True          True
+LedgerDashboardPanel                True          True
+LedgerTable                         True          True
+
+
+
+===== PAYMENTS NAVIGATION LINKS =====
+
+Route              NavigationLinkPresent
+-----              ---------------------
+/payments                           True
+/payments/invoices                  True
+/payments/history                   True
+/payments/balances                  True
+/payments/refunds                   True
+/payments/ledger                    True
+
+
+
+===== LAYOUT =====
+import type {
+  ReactNode,
+} from "react";
+
+import {
+  PaymentsNavigation,
+} from "@/features/workspace/components";
+
+interface PaymentsLayoutProps {
+  children:
+    ReactNode;
+}
+
+export default function PaymentsLayout(
+  props:
+    PaymentsLayoutProps
+) {
+  return (
+    <>
+      <PaymentsNavigation />
+
+      {props.children}
+    </>
+  );
+}
+
+===== PAYMENTS NAVIGATION COMPONENT =====
+"use client";
+
+import Link from "next/link";
+
+import {
+  usePathname,
+} from "next/navigation";
+
+import styles from "./PaymentsNavigation.module.css";
+
+interface PaymentsNavigationItem {
+  href:
+    string;
+
+  label:
+    string;
+}
+
+const paymentNavigationItems:
+  PaymentsNavigationItem[] = [
+    {
+      href:
+        "/payments",
+
+      label:
+        "Overview",
+    },
+    {
+      href:
+        "/payments/invoices",
+
+      label:
+        "Invoices",
+    },
+    {
+      href:
+        "/payments/history",
+
+      label:
+        "Payment history",
+    },
+    {
+      href:
+        "/payments/balances",
+
+      label:
+        "Campaign balances",
+    },
+    {
+      href:
+        "/payments/refunds",
+
+      label:
+        "Refunds",
+    },
+    {
+      href:
+        "/payments/ledger",
+
+      label:
+        "Ledger activity",
+    },
+  ];
+
+function isPaymentRouteActive(
+  pathname:
+    string,
+  href:
+    string
+): boolean {
+  if (
+    href ===
+    "/payments"
+  ) {
+    return pathname ===
+      href;
+  }
+
+  return (
+    pathname ===
+      href ||
+    pathname.startsWith(
+      `${href}/`
+    )
+  );
+}
+
+export function PaymentsNavigation() {
+  const pathname =
+    usePathname();
+
+  return (
+    <nav
+      aria-label="Payments workspace"
+      className={
+        styles.navigation
+      }
+    >
+      {paymentNavigationItems.map(
+        (
+          item
+        ) => {
+          const active =
+            isPaymentRouteActive(
+              pathname,
+              item.href
+            );
+
+          return (
+            <Link
+              aria-current={
+                active
+                  ? "page"
+                  : undefined
+              }
+              className={
+                active
+                  ? styles.activeLink
+                  : styles.link
+              }
+              href={
+                item.href
+              }
+              key={
+                item.href
+              }
+            >
+              {item.label}
+            </Link>
+          );
+        }
+      )}
+    </nav>
+  );
+}
+
+===== PAYMENTS NAVIGATION CSS =====
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.link,
+.activeLink {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 42px;
+  border-bottom: 2px solid transparent;
+  padding: 9px 13px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 18px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.link:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.activeLink {
+  border-bottom-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.link:focus-visible,
+.activeLink:focus-visible {
+  outline: 3px solid rgba(91, 134, 229, 0.2);
+  outline-offset: -3px;
+}
+
+@media (max-width: 720px) {
+  .navigation {
+    margin-bottom: 20px;
+  }
+
+  .link,
+  .activeLink {
+    min-height: 40px;
+    padding: 8px 11px;
+  }
+}
+
+===== PAYMENTS LANDING PAGE =====
+import {
+  PaymentDashboardPanel,
+} from "@/features/workspace/components";
+
+import type {
+  OrganizationId,
+} from "@/features/workspace/advertising/advertising.types";
+
+import {
+  getCurrentOrganization,
+} from "@/features/workspace/workspace.selectors";
+
+function normalizeOrganizationId(
+  value:
+    string
+): OrganizationId {
+  const normalized =
+    value.trim();
+
+  if (
+    !normalized.startsWith(
+      "ORG-"
+    )
+  ) {
+    throw new Error(
+      `Invalid organization ID: ${value}`
+    );
+  }
+
+  return normalized as
+    OrganizationId;
+}
+
+export default function PaymentsPage() {
+  const organization =
+    getCurrentOrganization();
+
+  const organizationId =
+    normalizeOrganizationId(
+      organization.id
+    );
+
+  return (
+    <>
+      <header className="pageHeader">
+        <div>
+          <div className="pageEyebrow">
+            Campaign funding
+          </div>
+
+          <h1 className="pageTitle">
+            Payments
+          </h1>
+
+          <p className="pageDescription">
+            Review verified payments, campaign balances, finalized spend,
+            refunds, and settlement records.
+          </p>
+        </div>
+      </header>
+
+      <PaymentDashboardPanel
+        currency="INR"
+        organizationId={
+          organizationId
+        }
+      />
+    </>
+  );
+}

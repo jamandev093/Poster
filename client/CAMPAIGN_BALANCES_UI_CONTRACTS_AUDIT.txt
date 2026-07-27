@@ -1,0 +1,927 @@
+﻿  67: export interface PaymentDashboardBalanceSummary {
+  68:   campaignId:
+  69:     CampaignId;
+  70: 
+  71:   budgetStatus:
+  72:     CampaignBudgetStatus;
+  73: 
+  74:   currency:
+  75:     SupportedCurrency;
+  76: 
+  77:   allocatedMinor:
+  78:     number;
+  79: 
+  80:   paidMinor:
+  81:     number;
+  82: 
+  83:   availableMinor:
+  84:     number;
+  85: 
+  86:   reservedMinor:
+  87:     number;
+  88: 
+  89:   estimatedSpendMinor:
+  90:     number;
+  91: 
+  92:   pendingValidationSpendMinor:
+  93:     number;
+  94: 
+  95:   finalizedSpendMinor:
+  96:     number;
+  97: 
+  98:   invalidTrafficCreditMinor:
+  99:     number;
+ 100: 
+ 101:   adjustmentCreditMinor:
+ 102:     number;
+ 103: 
+ 104:   adjustmentDebitMinor:
+ 105:     number;
+ 106: 
+ 107:   refundReservedMinor:
+ 108:     number;
+ 109: 
+ 110:   refundedMinor:
+ 111:     number;
+ 112: 
+ 113:   disputedMinor:
+ 114:     number;
+ 115: 
+ 116:   remainingMinor:
+ 117:     number;
+ 118: 
+ 119:   utilizationPercentage:
+ 120:     number |
+ 121:     null;
+ 122: 
+ 123:   remainingPercentage:
+ 124:     number |
+ 125:     null;
+ 126: 
+ 127:   dataThrough:
+ 128:     string;
+ 129: 
+ 130:   finalizedThrough?:
+ 131:     string;
+ 132: 
+ 133:   lastReconciledAt?:
+ 134:     string;
+ 135: 
+ 136:   updatedAt:
+ 137:     string;
+ 138: 
+ 139:   warningMessages:
+ 140:     string[];
+ 141: }
+ 142: 
+ 143: export interface PaymentDashboardInvoiceRow {
+ 144:   invoiceId:
+ 145:     string;
+ 146: 
+ 147:   invoiceNumber:
+ 148:     string;
+ 149: 
+ 150:   campaignId?:
+ 151:     CampaignId;
+ 152: 
+ 153:   status:
+ 154:     InvoiceStatus;
+ 155: 
+ 156:   currency:
+ 157:     SupportedCurrency;
+ 158: 
+ 159:   totalMinor:
+ 160:     number;
+ 161: 
+ 162:   paidMinor:
+ 163:     number;
+ 164: 
+ 165:   refundedMinor:
+ 166:     number;
+ 167: 
+ 168:   outstandingMinor:
+ 169:     number;
+ 170: 
+ 171:   issuedAt?:
+ 172:     string;
+ 173: 
+ 174:   dueAt?:
+ 175:     string;
+ 176: 
+ 177:   paidAt?:
+ 178:     string;
+ 179: 
+ 180:   documentUrl?:
+ 181:     string;
+ 182: }
+ 183: 
+ 184: export interface PaymentDashboardPaymentRow {
+ 185:   paymentId:
+ 186:     string;
+ 187: 
+ 188:   invoiceId:
+ 189:     string;
+ 190: 
+ 191:   campaignId?:
+ 192:     CampaignId;
+ 193: 
+ 194:   provider:
+ 195:     PaymentProvider;
+ 196: 
+ 197:   status:
+ 198:     PaymentStatus;
+ 199: 
+ 200:   amountMinor:
+ 201:     number;
+ 202: 
+ 203:   capturedAmountMinor:
+ 204:     number;
+ 205: 
+ 206:   refundedAmountMinor:
+ 207:     number;
+ 208: 
+ 209:   currency:
+ 210:     SupportedCurrency;
+ 211: 
+ 212:   methodDetails:
+ 213:     PaymentMethodDetails;
+ 214: 
+ 215:   providerPaymentId?:
+ 216:     string;
+ 217: 
+ 218:   paymentVerified:
+ 219:     boolean;
+ 220: 
+ 221:   riskAccepted:
+ 222:     boolean;
+ 223: 
+ 224:   paidAt?:
+ 225:     string;
+ 226: 
+ 227:   createdAt:
+  52: export type CampaignBudgetStatus =
+  53:   | "not_funded"
+  54:   | "funding_pending"
+  55:   | "available"
+  56:   | "partially_reserved"
+  57:   | "fully_reserved"
+  58:   | "low_balance"
+  59:   | "depleted"
+  60:   | "refund_pending"
+  61:   | "closed"
+  62:   | "blocked";
+  63: 
+  64: export type BudgetAllocationStatus =
+  65:   | "pending"
+  66:   | "available"
+  67:   | "reserved"
+  68:   | "partially_consumed"
+  69:   | "consumed"
+  70:   | "released"
+  71:   | "refunded"
+  72:   | "expired"
+  73:   | "cancelled";
+  74: 
+  75: export type BudgetReservationStatus =
+  76:   | "pending"
+  77:   | "active"
+  78:   | "partially_consumed"
+  79:   | "consumed"
+  80:   | "released"
+  81:   | "cancelled"
+  82:   | "expired";
+  83: 
+  84: export type BudgetAdjustmentType =
+  85:   | "invalid_traffic_credit"
+  86:   | "billing_credit"
+  87:   | "billing_debit"
+  88:   | "contract_credit"
+  89:   | "contract_debit"
+  90:   | "manual_credit"
+  91:   | "manual_debit"
+  92:   | "rounding_adjustment";
+  93: 
+  94: export type BudgetAvailabilityReason =
+  95:   | "verified_payment"
+  96:   | "manual_payment_reconciliation"
+  97:   | "approved_credit"
+  98:   | "released_reservation"
+  99:   | "refund_reversal"
+ 100:   | "opening_balance";
+ 101: 
+ 102: export interface CampaignBudgetAmounts {
+ 103:   currency:
+ 104:     SupportedCurrency;
+ 105: 
+ 106:   allocatedMinor:
+ 107:     number;
+ 108: 
+ 109:   paidMinor:
+ 110:     number;
+ 111: 
+ 112:   availableMinor:
+ 113:     number;
+ 114: 
+ 115:   reservedMinor:
+ 116:     number;
+ 117: 
+ 118:   estimatedSpendMinor:
+ 119:     number;
+ 120: 
+ 121:   pendingValidationSpendMinor:
+ 122:     number;
+ 123: 
+ 124:   finalizedSpendMinor:
+ 125:     number;
+ 126: 
+ 127:   invalidTrafficCreditMinor:
+ 128:     number;
+ 129: 
+ 130:   adjustmentCreditMinor:
+ 131:     number;
+ 132: 
+ 133:   adjustmentDebitMinor:
+ 134:     number;
+ 135: 
+ 136:   refundReservedMinor:
+ 137:     number;
+ 138: 
+ 139:   refundedMinor:
+ 140:     number;
+ 141: 
+ 142:   disputedMinor:
+ 143:     number;
+ 144: 
+ 145:   remainingMinor:
+ 146:     number;
+ 147: }
+ 148: 
+ 149: export interface CampaignBudgetAllocation {
+ 150:   id:
+ 151:     BudgetAllocationId;
+ 152: 
+ 153:   budgetId:
+ 154:     CampaignBudgetId;
+ 155: 
+ 156:   organizationId:
+ 157:     OrganizationId;
+ 158: 
+ 159:   campaignId:
+ 160:     CampaignId;
+ 161: 
+ 162:   invoiceId?:
+ 163:     InvoiceId;
+ 164: 
+ 165:   paymentId?:
+ 166:     PaymentId;
+ 167: 
+ 168:   ledgerEntryId:
+ 169:     LedgerEntryId;
+ 170: 
+ 171:   amount:
+ 172:     MoneyAmount;
+ 173: 
+ 174:   remainingAmount:
+ 175:     MoneyAmount;
+ 176: 
+ 177:   status:
+ 178:     BudgetAllocationStatus;
+ 179: 
+ 180:   availabilityReason:
+ 181:     BudgetAvailabilityReason;
+ 182: 
+ 183:   availableAt?:
+ 184:     string;
+ 185: 
+ 186:   reservedAt?:
+ 187:     string;
+ 188: 
+ 189:   consumedAt?:
+ 190:     string;
+ 191: 
+ 192:   releasedAt?:
+ 193:     string;
+ 194: 
+ 195:   refundedAt?:
+ 196:     string;
+ 197: 
+ 198:   expiresAt?:
+ 199:     string;
+ 200: 
+ 201:   createdAt:
+ 202:     string;
+ 203: 
+ 204:   updatedAt:
+ 205:     string;
+ 206: }
+ 207: 
+ 208: export interface CampaignBudgetReservation {
+ 209:   id:
+ 210:     BudgetReservationId;
+ 211: 
+ 212:   budgetId:
+ 102: export interface CampaignBudgetAmounts {
+ 103:   currency:
+ 104:     SupportedCurrency;
+ 105: 
+ 106:   allocatedMinor:
+ 107:     number;
+ 108: 
+ 109:   paidMinor:
+ 110:     number;
+ 111: 
+ 112:   availableMinor:
+ 113:     number;
+ 114: 
+ 115:   reservedMinor:
+ 116:     number;
+ 117: 
+ 118:   estimatedSpendMinor:
+ 119:     number;
+ 120: 
+ 121:   pendingValidationSpendMinor:
+ 122:     number;
+ 123: 
+ 124:   finalizedSpendMinor:
+ 125:     number;
+ 126: 
+ 127:   invalidTrafficCreditMinor:
+ 128:     number;
+ 129: 
+ 130:   adjustmentCreditMinor:
+ 131:     number;
+ 132: 
+ 133:   adjustmentDebitMinor:
+ 134:     number;
+ 135: 
+ 136:   refundReservedMinor:
+ 137:     number;
+ 138: 
+ 139:   refundedMinor:
+ 140:     number;
+ 141: 
+ 142:   disputedMinor:
+ 143:     number;
+ 144: 
+ 145:   remainingMinor:
+ 146:     number;
+ 147: }
+ 148: 
+ 149: export interface CampaignBudgetAllocation {
+ 150:   id:
+ 151:     BudgetAllocationId;
+ 152: 
+ 153:   budgetId:
+ 154:     CampaignBudgetId;
+ 155: 
+ 156:   organizationId:
+ 157:     OrganizationId;
+ 158: 
+ 159:   campaignId:
+ 160:     CampaignId;
+ 161: 
+ 162:   invoiceId?:
+ 163:     InvoiceId;
+ 164: 
+ 165:   paymentId?:
+ 166:     PaymentId;
+ 167: 
+ 168:   ledgerEntryId:
+ 169:     LedgerEntryId;
+ 170: 
+ 171:   amount:
+ 172:     MoneyAmount;
+ 173: 
+ 174:   remainingAmount:
+ 175:     MoneyAmount;
+ 176: 
+ 177:   status:
+ 178:     BudgetAllocationStatus;
+ 179: 
+ 180:   availabilityReason:
+ 181:     BudgetAvailabilityReason;
+ 182: 
+ 183:   availableAt?:
+ 184:     string;
+ 185: 
+ 186:   reservedAt?:
+ 187:     string;
+ 188: 
+ 189:   consumedAt?:
+ 190:     string;
+ 191: 
+ 192:   releasedAt?:
+ 193:     string;
+ 194: 
+ 195:   refundedAt?:
+ 196:     string;
+ 197: 
+ 198:   expiresAt?:
+ 199:     string;
+ 200: 
+ 201:   createdAt:
+ 202:     string;
+ 203: 
+ 204:   updatedAt:
+ 205:     string;
+ 206: }
+ 207: 
+ 208: export interface CampaignBudgetReservation {
+ 209:   id:
+ 210:     BudgetReservationId;
+ 211: 
+ 212:   budgetId:
+ 213:     CampaignBudgetId;
+ 214: 
+ 215:   organizationId:
+ 216:     OrganizationId;
+ 217: 
+ 218:   campaignId:
+ 219:     CampaignId;
+ 220: 
+ 221:   status:
+ 222:     BudgetReservationStatus;
+ 223: 
+ 224:   reservedAmount:
+ 225:     MoneyAmount;
+ 226: 
+ 227:   consumedAmount:
+ 228:     MoneyAmount;
+ 229: 
+ 230:   releasedAmount:
+ 231:     MoneyAmount;
+ 232: 
+ 233:   reserveLedgerEntryId:
+ 234:     LedgerEntryId;
+ 235: 
+ 236:   releaseLedgerEntryId?:
+ 237:     LedgerEntryId;
+ 238: 
+ 239:   purpose:
+ 240:     string;
+ 241: 
+ 242:   reservedAt:
+ 243:     string;
+ 244: 
+ 245:   consumedAt?:
+ 246:     string;
+ 247: 
+ 248:   releasedAt?:
+ 249:     string;
+ 250: 
+ 251:   expiresAt?:
+ 252:     string;
+ 253: 
+ 254:   createdAt:
+ 255:     string;
+ 256: 
+ 257:   updatedAt:
+ 258:     string;
+ 259: }
+ 260: 
+ 261: export interface CampaignBudgetAdjustment {
+ 262:   id:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:541:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:542:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:543:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:544:export function getCampaignBudgetStatusPresentation(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:545:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:546:    CampaignBudgetStatus
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:547:): FinancialStatusPresentation {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:548:  switch (status) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:549:    case "not_funded":
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:550:      return {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:551:        label:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:552:          "Not funded",
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:553:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:554:        tone:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:555:          "neutral",
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:556:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:704:  ).label;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:705:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:706:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:707:export function getCampaignBudgetStatusLabel(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:708:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:709:    CampaignBudgetStatus
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:710:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:711:  return getCampaignBudgetStatusPresentation(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:712:    status
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:713:  ).label;
+  F:\Project\Poster\client\src\features\workspace\payments\payment.status.ts:714:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:57:const DEFAULT_TIME_ZONE =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:58:  "Asia/Kolkata";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:59:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:60:export function formatMoneyMinor(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:61:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:62:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:63:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:64:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:65:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:66:    CurrencyFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:67:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:68:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:69:    !Number.isSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:70:      amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:71:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:72:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:256:  );
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:257:}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:258:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:259:export function formatPercentage(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:260:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:261:    number |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:262:    null |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:263:    undefined,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:264:  fractionDigits:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:265:    number = 2
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:266:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:267:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:268:    value === null ||
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:269:    value === undefined ||
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:270:    !Number.isFinite(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:271:      value
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:109:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:110:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:111:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:112:  availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:113:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:114:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:115:  reservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:116:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:117:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:118:  estimatedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:119:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:120:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:121:  pendingValidationSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:122:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:123:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:124:  finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:125:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:126:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:127:  invalidTrafficCreditMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:133:  adjustmentDebitMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:134:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:135:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:136:  refundReservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:137:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:138:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:139:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:140:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:141:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:142:  disputedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:143:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:144:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:145:  remainingMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:146:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:147:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:148:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:149:export interface CampaignBudgetAllocation {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:150:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:151:    BudgetAllocationId;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:152:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:153:  budgetId:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:154:    CampaignBudgetId;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:155:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:156:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:157:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:382:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:383:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:384:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:385:  availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:386:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:387:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:388:  estimatedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:389:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:390:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:391:  pendingValidationSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:392:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:393:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:394:  finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:395:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:396:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:397:  invalidTrafficCreditMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:398:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:399:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:400:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:401:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:402:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:403:  remainingMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:404:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:405:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:406:  lastUpdatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:407:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:408:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:409:  lastReconciledAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:410:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:411:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:412:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:413:export interface CalculateCampaignBudgetAmountsInput {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:414:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:415:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:420:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:421:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:422:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:423:  reservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:424:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:425:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:426:  estimatedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:427:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:428:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:429:  pendingValidationSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:430:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:431:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:432:  finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:433:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:434:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:435:  invalidTrafficCreditMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:441:  adjustmentDebitMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:442:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:443:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:444:  refundReservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:445:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:446:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:447:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:448:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:449:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:450:  disputedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:451:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:452:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:453:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:454:function assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:455:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:456:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:457:  label:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:458:    string
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:459:): void {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:460:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:461:    !Number.isSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:462:      value
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:484:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:485:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:486:      "Reserved amount",
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:487:      input.reservedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:488:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:489:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:490:      "Estimated spend",
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:491:      input.estimatedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:492:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:493:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:494:      "Pending-validation spend",
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:495:      input.pendingValidationSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:496:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:497:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:498:      "Finalized spend",
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:499:      input.finalizedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:512:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:513:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:514:      "Refund reservation",
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:515:      input.refundReservedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:516:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:517:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:518:      "Refunded amount",
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:519:      input.refundedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:520:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:521:    [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:522:      "Disputed amount",
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:523:      input.disputedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:524:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:525:  ] as const;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:526:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:527:  values.forEach(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:528:    (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:529:      [
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:530:        label,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:531:        value,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:532:      ]
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:533:    ) => {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:534:      assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:535:        value,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:538:    }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:539:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:540:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:541:  const availableMinor =
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:542:    Math.max(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:543:      input.paidMinor +
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:544:        input.invalidTrafficCreditMinor +
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:545:        input.adjustmentCreditMinor -
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:546:        input.adjustmentDebitMinor -
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:547:        input.reservedMinor -
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:548:        input.finalizedSpendMinor -
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:549:        input.refundReservedMinor -
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:550:        input.refundedMinor -
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:551:        input.disputedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:552:      0
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:553:    );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:554:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:555:  const remainingMinor =
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:556:    availableMinor;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:557:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:558:  return {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:559:    currency:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:560:      input.currency,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:561:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:562:    allocatedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:563:      input.allocatedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:564:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:565:    paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:566:      input.paidMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:567:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:568:    availableMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:569:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:570:    reservedMinor:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:571:      input.reservedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:572:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:573:    estimatedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:574:      input.estimatedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:575:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:576:    pendingValidationSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:577:      input.pendingValidationSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:578:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:579:    finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:580:      input.finalizedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:581:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:582:    invalidTrafficCreditMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:583:      input.invalidTrafficCreditMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:588:    adjustmentDebitMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:589:      input.adjustmentDebitMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:590:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:591:    refundReservedMinor:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:592:      input.refundReservedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:593:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:594:    refundedMinor:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:595:      input.refundedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:596:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:597:    disputedMinor:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:598:      input.disputedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:599:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:600:    remainingMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:601:  };
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:602:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:603:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:604:export function determineCampaignBudgetStatus(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:605:  input: {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:606:    funded:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:607:      boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:608:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:609:    fundingPending:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:610:      boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:611:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:612:    blocked:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:618:    refundPending:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:619:      boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:620:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:621:    availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:622:      number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:623:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:624:    reservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:625:      number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:626:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:627:    paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:628:      number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:629:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:630:    lowBalanceThresholdMinor?:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:631:      number;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:632:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:633:): CampaignBudgetStatus {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:634:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:635:    input.blocked
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:636:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:664:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:665:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:666:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:667:    input.availableMinor <= 0
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:668:  ) {
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:669:    return input.reservedMinor > 0
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:670:      ? "fully_reserved"
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:671:      : "depleted";
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:672:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:673:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:674:  const lowBalanceThreshold =
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:675:    input.lowBalanceThresholdMinor ??
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:676:    0;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:677:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:678:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:679:    lowBalanceThreshold > 0 &&
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:680:    input.availableMinor <=
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:681:      lowBalanceThreshold
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:682:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:683:    return "low_balance";
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:684:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:685:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:686:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:687:    input.reservedMinor > 0
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:688:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:689:    return "partially_reserved";
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:690:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:691:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:692:  return "available";
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:693:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:694:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:695:export function createCampaignBudgetSummary(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:696:  budget:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:697:    CampaignBudget
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:698:): CampaignBudgetSummary {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:699:  return {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:714:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:715:        .paidMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:716:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:717:    availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:718:      budget.amounts
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:719:        .availableMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:720:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:721:    estimatedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:722:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:723:        .estimatedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:724:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:725:    pendingValidationSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:726:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:727:        .pendingValidationSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:728:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:729:    finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:730:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:731:        .finalizedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:734:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:735:        .invalidTrafficCreditMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:736:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:737:    refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:738:      budget.amounts
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:739:        .refundedMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:740:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:741:    remainingMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:742:      budget.amounts
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:743:        .remainingMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:744:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:745:    lastUpdatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:746:      budget.freshness
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:747:        .updatedAt,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:748:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:749:    lastReconciledAt:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:750:      budget.freshness
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:751:        .lastReconciledAt,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:752:  };
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:753:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:754:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:755:export function isCampaignBudgetFunded(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:778:      budget
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:779:    ) &&
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:780:    budget.amounts
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:781:      .availableMinor >
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:782:      0 &&
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:783:    (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:784:      budget.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:785:        "available" ||
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:786:      budget.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:787:        "partially_reserved" ||
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:788:      budget.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:789:        "low_balance"
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:790:    )
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:791:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:792:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:793:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:810:    ) &&
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:811:    amountMinor <=
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:812:      budget.amounts
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:813:        .availableMinor
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:814:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:815:}
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:816:
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:817:export function calculateBudgetUtilizationPercentage(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:818:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:819:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:820:  finalizedSpendMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:821:    number
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:822:): number | null {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:823:  assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:824:    paidMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:825:    "Paid amount"
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:826:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:827:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:828:  assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:829:    finalizedSpendMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:845:export function calculateBudgetRemainingPercentage(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:846:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:847:    number,
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:848:  remainingMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:849:    number
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:850:): number | null {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:851:  assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:852:    paidMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:853:    "Paid amount"
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:854:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:855:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:856:  assertNonNegativeSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:857:    remainingMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:858:    "Remaining amount"
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:859:  );
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:860:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:861:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:862:    paidMinor <= 0
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:863:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:864:    return null;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:865:  }
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:866:
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:867:  return (
+> F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:868:    remainingMinor /
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:869:    paidMinor
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:870:  ) * 100;
+  F:\Project\Poster\client\src\features\workspace\payments\budget.types.ts:871:}

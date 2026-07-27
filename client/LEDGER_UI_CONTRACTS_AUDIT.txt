@@ -1,0 +1,1947 @@
+﻿ 324: export interface PaymentDashboardLedgerRow {
+ 325:   ledgerEntryId:
+ 326:     string;
+ 327: 
+ 328:   campaignId?:
+ 329:     CampaignId;
+ 330: 
+ 331:   invoiceId?:
+ 332:     string;
+ 333: 
+ 334:   paymentId?:
+ 335:     string;
+ 336: 
+ 337:   refundId?:
+ 338:     string;
+ 339: 
+ 340:   settlementId?:
+ 341:     string;
+ 342: 
+ 343:   type:
+ 344:     LedgerEntryType;
+ 345: 
+ 346:   direction:
+ 347:     LedgerEntryDirection;
+ 348: 
+ 349:   status:
+ 350:     LedgerEntryStatus;
+ 351: 
+ 352:   currency:
+ 353:     SupportedCurrency;
+ 354: 
+ 355:   amountMinor:
+ 356:     number;
+ 357: 
+ 358:   balanceBeforeMinor:
+ 359:     number;
+ 360: 
+ 361:   balanceAfterMinor:
+ 362:     number;
+ 363: 
+ 364:   description:
+ 365:     string;
+ 366: 
+ 367:   occurredAt:
+ 368:     string;
+ 369: 
+ 370:   finalizedAt?:
+ 371:     string;
+ 372: }
+ 373: 
+ 374: export interface PaymentDashboardSummary {
+ 375:   organizationId:
+ 376:     OrganizationId;
+ 377: 
+ 378:   currency:
+ 379:     SupportedCurrency;
+ 380: 
+ 381:   totalAllocatedMinor:
+ 382:     number;
+ 383: 
+ 384:   totalPaidMinor:
+ 385:     number;
+ 386: 
+ 387:   totalAvailableMinor:
+ 388:     number;
+ 389: 
+ 390:   totalReservedMinor:
+ 391:     number;
+ 392: 
+ 393:   totalEstimatedSpendMinor:
+ 394:     number;
+ 395: 
+ 396:   totalPendingValidationSpendMinor:
+ 397:     number;
+ 398: 
+ 399:   totalFinalizedSpendMinor:
+ 400:     number;
+ 401: 
+ 402:   totalInvalidTrafficCreditMinor:
+ 403:     number;
+ 404: 
+ 405:   totalRefundedMinor:
+ 406:     number;
+ 407: 
+ 408:   totalDisputedMinor:
+ 409:     number;
+ 410: 
+ 411:   totalRemainingMinor:
+ 412:     number;
+ 413: 
+ 414:   unpaidInvoiceCount:
+ 415:     number;
+ 416: 
+ 417:   activeRefundCount:
+ 418:     number;
+ 419: 
+ 420:   unsettledSettlementCount:
+ 421:     number;
+ 422: }
+ 423: 
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:37:export type LedgerEntryId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:38:  `LED-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:39:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:40:export type LedgerAccountId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:41:  `LAC-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:42:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:43:export type LedgerBatchId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:44:  `LBT-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:45:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:46:export type LedgerReferenceId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:47:  `LRF-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:48:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:49:export type LedgerEntryType =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:50:  | "payment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:51:  | "manual_payment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:52:  | "campaign_funds_reserved"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:53:  | "campaign_funds_released"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:54:  | "estimated_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:55:  | "pending_validation_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:56:  | "finalized_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:57:  | "invalid_traffic_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:58:  | "billing_adjustment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:59:  | "billing_adjustment_debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:60:  | "refund_reservation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:61:  | "refund_debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:62:  | "refund_release"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:63:  | "chargeback_debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:64:  | "dispute_hold"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:65:  | "dispute_release"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:66:  | "expired_balance_debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:67:  | "opening_balance"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:68:  | "migration_adjustment";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:69:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:70:export type LedgerEntryDirection =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:71:  | "credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:72:  | "debit";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:73:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:74:export type LedgerEntryStatus =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:75:  | "pending"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:76:  | "finalized"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:77:  | "reversed"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:78:  | "cancelled";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:79:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:80:export type LedgerBalanceCategory =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:81:  | "available"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:82:  | "reserved"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:83:  | "consumed"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:84:  | "pending_adjustment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:85:  | "refunded"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:86:  | "disputed"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:87:  | "expired";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:88:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:89:export type LedgerSource =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:90:  | "payment_webhook"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:91:  | "manual_reconciliation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:92:  | "analytics_finalization"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:93:  | "invalid_traffic_reconciliation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:94:  | "refund_processing"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:95:  | "settlement_processing"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:96:  | "admin_adjustment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:97:  | "system_migration";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:98:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:99:export type LedgerReferenceType =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:100:  | "payment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:101:  | "invoice"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:102:  | "campaign"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:103:  | "refund"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:104:  | "settlement"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:105:  | "analytics_aggregation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:106:  | "analytics_adjustment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:107:  | "dispute"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:108:  | "manual_operation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:109:  | "migration";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:110:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:111:export interface LedgerExternalReference {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:112:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:113:    LedgerReferenceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:114:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:115:  type:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:116:    LedgerReferenceType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:117:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:118:  referenceId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:119:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:120:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:121:  providerReference?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:122:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:123:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:124:  description?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:109:  | "migration";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:110:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:111:export interface LedgerExternalReference {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:112:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:113:    LedgerReferenceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:114:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:115:  type:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:116:    LedgerReferenceType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:117:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:118:  referenceId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:119:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:120:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:121:  providerReference?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:122:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:123:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:124:  description?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:125:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:126:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:127:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:128:export interface LedgerBalanceSnapshot {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:129:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:130:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:131:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:132:  availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:133:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:134:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:135:  reservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:136:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:137:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:138:  consumedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:139:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:140:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:141:  pendingAdjustmentMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:142:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:143:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:144:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:145:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:146:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:147:  disputedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:148:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:149:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:150:  expiredMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:151:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:152:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:153:  totalCreditsMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:154:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:155:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:156:  totalDebitsMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:157:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:158:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:159:  calculatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:160:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:161:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:162:  lastLedgerEntryId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:163:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:164:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:165:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:166:export interface LedgerEntry {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:167:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:168:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:169:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:170:  batchId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:171:    LedgerBatchId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:172:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:173:  ledgerAccountId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:174:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:175:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:176:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:177:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:178:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:179:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:180:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:181:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:182:  invoiceId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:183:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:184:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:185:  paymentId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:186:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:187:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:188:  refundId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:189:    RefundId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:190:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:191:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:192:    SettlementId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:193:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:194:  type:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:195:    LedgerEntryType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:196:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:197:  direction:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:198:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:199:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:200:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:201:    LedgerEntryStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:202:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:203:  balanceCategory:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:204:    LedgerBalanceCategory;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:205:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:206:  amount:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:207:    SignedMoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:208:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:209:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:210:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:211:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:212:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:213:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:214:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:215:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:216:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:255:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:256:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:257:export interface LedgerAccount {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:258:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:259:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:260:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:261:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:262:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:263:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:264:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:265:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:266:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:267:  active:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:268:    boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:269:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:270:  currentBalance:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:271:    LedgerBalanceSnapshot;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:272:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:273:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:274:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:275:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:276:  updatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:277:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:278:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:279:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:280:export interface LedgerBatch {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:281:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:282:    LedgerBatchId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:283:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:284:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:285:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:286:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:287:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:288:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:289:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:290:  source:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:291:    LedgerSource;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:292:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:293:  entryIds:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:294:    LedgerEntryId[];
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:295:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:296:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:297:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:298:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:299:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:300:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:301:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:302:  createdBy:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:303:    AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:304:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:305:  occurredAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:306:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:307:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:308:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:309:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:310:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:311:  finalizedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:312:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:313:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:314:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:315:export interface CreateLedgerEntryInput {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:316:  ledgerAccountId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:317:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:318:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:319:  organizationId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:320:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:321:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:322:  campaignId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:323:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:324:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:325:  invoiceId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:326:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:327:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:328:  paymentId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:329:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:330:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:331:  refundId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:332:    RefundId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:333:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:334:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:335:    SettlementId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:336:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:337:  type:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:338:    LedgerEntryType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:339:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:340:  direction:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:341:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:342:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:343:  balanceCategory:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:344:    LedgerBalanceCategory;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:345:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:346:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:347:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:348:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:349:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:350:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:351:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:352:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:353:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:354:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:355:  source:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:356:    LedgerSource;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:357:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:358:  references?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:359:    LedgerExternalReference[];
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:360:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:361:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:362:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:363:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:364:  reversesEntryId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:365:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:372:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:373:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:374:export interface LedgerBalanceMovement {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:375:  direction:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:376:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:377:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:378:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:379:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:380:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:381:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:382:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:383:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:384:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:385:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:386:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:387:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:388:function assertSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:389:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:390:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:391:  label:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:392:    string
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:393:): void {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:394:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:395:    !Number.isSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:396:      value
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:397:    )
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:398:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:399:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:400:      `${label} must be a safe integer in minor units.`
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:401:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:402:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:403:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:404:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:405:function assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:406:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:407:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:408:  label:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:409:    string
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:410:): void {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:411:  assertSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:412:    value,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:413:    label
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:414:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:415:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:416:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:417:    value < 0
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:418:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:419:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:420:      `${label} must not be negative.`
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:421:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:422:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:423:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:424:
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:60:export function formatMoneyMinor(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:61:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:62:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:63:  currency:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:64:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:65:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:66:    CurrencyFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:67:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:68:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:69:    !Number.isSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:70:      amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:71:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:72:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:73:    return "—";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:74:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:75:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:76:  const majorAmount =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:77:    minorToMajorAmount(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:78:      amountMinor,
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:198:export function formatFinancialDateTime(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:199:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:200:    string |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:201:    undefined,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:202:  options:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:203:    DateTimeFormatOptions = {}
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:204:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:205:  if (!value) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:206:    return "—";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:207:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:208:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:209:  const date =
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:210:    new Date(value);
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:211:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:212:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:213:    Number.isNaN(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:214:      date.getTime()
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:215:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:216:  ) {
+> F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:282:export function formatFinancialCount(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:283:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:284:    number |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:285:    null |
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:286:    undefined,
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:287:  locale:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:288:    string = DEFAULT_LOCALE
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:289:): string {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:290:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:291:    value === null ||
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:292:    value === undefined ||
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:293:    !Number.isFinite(
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:294:      value
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:295:    )
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:296:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:297:    return "—";
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:298:  }
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:299:
+  F:\Project\Poster\client\src\features\workspace\payments\payment.formatters.ts:300:  return new Intl.NumberFormat(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:1:import type {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:2:  AdvertisingActorReference,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:3:  CampaignId,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:4:  OrganizationId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:5:} from "../advertising/advertising.types";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:6:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:7:import type {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:8:  SignedMoneyAmount,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:9:  SupportedCurrency,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:10:} from "./currency.types";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:11:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:12:import type {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:13:  InvoiceId,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:14:  PaymentId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:15:} from "./payment.types";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:16:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:17:import type {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:18:  RefundId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:19:} from "./refund.types";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:20:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:21:import type {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:22:  SettlementId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:23:} from "./settlement.types";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:24:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:25:/**
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:26: * Canonical advertiser financial-ledger contracts.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:27: *
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:28: * The ledger is append-only.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:34: * Backend and PostgreSQL remain authoritative.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:35: */
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:36:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:37:export type LedgerEntryId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:38:  `LED-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:39:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:40:export type LedgerAccountId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:41:  `LAC-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:42:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:43:export type LedgerBatchId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:44:  `LBT-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:45:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:46:export type LedgerReferenceId =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:47:  `LRF-${string}`;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:48:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:49:export type LedgerEntryType =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:50:  | "payment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:51:  | "manual_payment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:52:  | "campaign_funds_reserved"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:53:  | "campaign_funds_released"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:54:  | "estimated_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:55:  | "pending_validation_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:56:  | "finalized_spend"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:57:  | "invalid_traffic_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:58:  | "billing_adjustment_credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:59:  | "billing_adjustment_debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:67:  | "opening_balance"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:68:  | "migration_adjustment";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:69:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:70:export type LedgerEntryDirection =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:71:  | "credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:72:  | "debit";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:73:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:74:export type LedgerEntryStatus =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:75:  | "pending"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:76:  | "finalized"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:77:  | "reversed"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:78:  | "cancelled";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:79:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:80:export type LedgerBalanceCategory =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:86:  | "disputed"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:87:  | "expired";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:88:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:89:export type LedgerSource =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:90:  | "payment_webhook"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:91:  | "manual_reconciliation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:92:  | "analytics_finalization"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:93:  | "invalid_traffic_reconciliation"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:94:  | "refund_processing"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:95:  | "settlement_processing"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:96:  | "admin_adjustment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:97:  | "system_migration";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:98:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:99:export type LedgerReferenceType =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:121:  providerReference?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:122:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:123:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:124:  description?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:125:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:126:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:127:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:128:export interface LedgerBalanceSnapshot {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:129:  currency:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:130:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:131:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:132:  availableMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:133:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:134:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:135:  reservedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:136:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:137:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:138:  consumedMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:139:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:140:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:159:  calculatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:160:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:161:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:162:  lastLedgerEntryId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:163:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:164:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:165:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:166:export interface LedgerEntry {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:167:  id:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:168:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:169:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:170:  batchId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:171:    LedgerBatchId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:172:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:173:  ledgerAccountId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:174:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:175:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:176:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:177:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:178:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:179:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:180:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:181:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:182:  invoiceId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:183:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:184:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:185:  paymentId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:186:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:187:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:188:  refundId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:189:    RefundId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:190:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:191:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:192:    SettlementId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:193:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:194:  type:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:195:    LedgerEntryType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:196:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:197:  direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:198:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:199:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:200:  status:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:201:    LedgerEntryStatus;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:202:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:203:  balanceCategory:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:204:    LedgerBalanceCategory;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:205:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:206:  amount:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:207:    SignedMoneyAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:208:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:209:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:210:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:211:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:212:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:213:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:214:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:215:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:216:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:217:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:218:  source:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:219:    LedgerSource;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:220:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:221:  references:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:222:    LedgerExternalReference[];
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:223:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:224:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:225:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:226:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:227:  /**
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:228:   * Set when this entry reverses or corrects an earlier entry.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:229:   */
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:230:  reversesEntryId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:231:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:232:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:233:  /**
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:234:   * Set on the original entry after a reversal has been written.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:235:   *
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:236:   * The original record remains immutable.
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:237:   */
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:238:  reversedByEntryId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:239:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:240:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:241:  createdBy:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:242:    AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:243:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:244:  occurredAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:245:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:246:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:247:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:248:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:249:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:250:  finalizedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:251:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:252:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:253:  reversedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:254:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:255:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:256:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:257:export interface LedgerAccount {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:258:  id:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:259:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:260:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:261:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:262:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:263:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:264:  currency:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:265:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:266:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:267:  active:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:268:    boolean;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:269:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:270:  currentBalance:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:271:    LedgerBalanceSnapshot;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:272:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:273:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:274:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:275:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:276:  updatedAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:277:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:278:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:279:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:280:export interface LedgerBatch {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:281:  id:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:282:    LedgerBatchId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:283:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:284:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:285:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:286:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:287:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:288:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:289:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:290:  source:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:291:    LedgerSource;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:292:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:293:  entryIds:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:294:    LedgerEntryId[];
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:295:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:296:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:297:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:298:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:299:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:300:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:301:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:302:  createdBy:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:303:    AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:304:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:305:  occurredAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:306:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:307:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:308:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:309:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:310:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:311:  finalizedAt?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:312:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:313:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:314:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:315:export interface CreateLedgerEntryInput {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:316:  ledgerAccountId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:317:    LedgerAccountId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:318:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:319:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:320:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:321:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:322:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:323:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:324:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:325:  invoiceId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:326:    InvoiceId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:327:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:328:  paymentId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:329:    PaymentId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:330:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:331:  refundId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:332:    RefundId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:333:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:334:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:335:    SettlementId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:336:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:337:  type:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:338:    LedgerEntryType;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:339:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:340:  direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:341:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:342:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:343:  balanceCategory:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:344:    LedgerBalanceCategory;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:345:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:346:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:347:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:348:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:349:  currency:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:350:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:351:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:352:  description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:353:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:354:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:355:  source:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:356:    LedgerSource;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:357:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:358:  references?:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:359:    LedgerExternalReference[];
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:360:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:361:  idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:362:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:363:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:364:  reversesEntryId?:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:365:    LedgerEntryId;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:366:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:367:  createdBy:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:368:    AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:369:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:370:  occurredAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:371:    string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:372:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:373:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:374:export interface LedgerBalanceMovement {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:375:  direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:376:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:377:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:378:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:379:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:380:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:381:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:382:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:383:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:384:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:385:    number;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:386:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:387:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:388:function assertSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:389:  value:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:390:    number,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:391:  label:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:392:    string
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:393:): void {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:394:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:423:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:424:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:425:export function calculateLedgerBalanceMovement(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:426:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:427:    number,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:428:  direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:429:    LedgerEntryDirection,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:430:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:431:    number
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:432:): LedgerBalanceMovement {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:433:  assertSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:434:    balanceBeforeMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:435:    "Ledger balance"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:436:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:437:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:438:  assertNonNegativeSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:439:    amountMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:440:    "Ledger amount"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:441:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:442:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:443:  const signedAmount =
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:444:    direction ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:445:      "credit"
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:446:      ? amountMinor
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:447:      : -amountMinor;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:448:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:449:  const balanceAfterMinor =
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:450:    balanceBeforeMinor +
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:451:    signedAmount;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:452:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:453:  assertSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:454:    balanceAfterMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:455:    "Resulting ledger balance"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:456:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:457:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:458:  return {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:459:    direction,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:460:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:461:    amountMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:462:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:463:    balanceBeforeMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:464:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:465:    balanceAfterMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:466:  };
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:467:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:468:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:469:export function getExpectedLedgerDirection(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:470:  type:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:471:    LedgerEntryType
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:472:): LedgerEntryDirection {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:473:  switch (type) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:474:    case "payment_credit":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:475:    case "manual_payment_credit":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:476:    case "campaign_funds_released":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:477:    case "invalid_traffic_credit":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:478:    case "billing_adjustment_credit":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:479:    case "refund_release":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:480:    case "dispute_release":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:481:    case "opening_balance":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:482:      return "credit";
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:495:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:496:    case "migration_adjustment":
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:497:      throw new Error(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:498:        "Migration adjustment direction must be selected explicitly."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:499:      );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:500:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:501:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:502:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:503:export function validateLedgerEntryDirection(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:504:  type:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:505:    LedgerEntryType,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:506:  direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:507:    LedgerEntryDirection
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:508:): boolean {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:509:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:510:    type ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:511:      "migration_adjustment"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:512:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:513:    return true;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:514:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:515:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:516:  return (
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:517:    getExpectedLedgerDirection(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:518:      type
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:519:    ) ===
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:520:    direction
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:521:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:522:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:523:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:524:export function assertLedgerEntryIntegrity(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:525:  entry:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:526:    LedgerEntry
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:527:): void {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:528:  assertNonNegativeSafeInteger(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:529:    Math.abs(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:530:      entry.amount.amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:531:    ),
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:532:    "Ledger entry amount"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:533:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:534:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:535:  assertSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:536:    entry.balanceBeforeMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:537:    "Ledger balance before"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:538:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:539:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:540:  assertSafeInteger(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:541:    entry.balanceAfterMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:542:    "Ledger balance after"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:543:  );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:544:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:545:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:546:    !validateLedgerEntryDirection(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:547:      entry.type,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:548:      entry.direction
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:549:    )
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:550:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:551:    throw new Error(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:552:      `Ledger entry type ${entry.type} does not match direction ${entry.direction}.`
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:553:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:554:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:555:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:556:  const expectedMovement =
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:557:    calculateLedgerBalanceMovement(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:558:      entry.balanceBeforeMinor,
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:559:      entry.direction,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:560:      Math.abs(
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:561:        entry.amount.amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:562:      )
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:563:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:564:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:565:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:566:    expectedMovement
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:567:      .balanceAfterMinor !==
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:568:    entry.balanceAfterMinor
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:569:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:570:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:571:      "Ledger balance-after value does not match the entry movement."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:572:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:573:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:574:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:575:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:576:    entry.direction ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:577:      "credit" &&
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:578:    entry.amount.amountMinor <
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:579:      0
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:580:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:581:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:582:      "Credit ledger entries must not contain a negative amount."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:583:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:584:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:585:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:586:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:587:    entry.direction ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:588:      "debit" &&
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:589:    entry.amount.amountMinor >
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:590:      0
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:591:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:592:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:593:      "Debit ledger entries must store a negative signed amount."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:594:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:595:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:596:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:597:  if (
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:598:    entry.reversesEntryId &&
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:599:    entry.reversesEntryId ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:600:      entry.id
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:601:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:602:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:603:      "Ledger entry cannot reverse itself."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:604:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:605:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:606:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:607:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:608:    entry.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:609:      "reversed" &&
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:617:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:618:    entry.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:619:      "finalized" &&
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:620:    !entry.finalizedAt
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:621:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:622:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:623:      "Finalized ledger entries require a finalization timestamp."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:624:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:625:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:626:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:627:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:628:export function calculateAvailableBalanceMinor(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:629:  entries:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:630:    LedgerEntry[],
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:631:  currency:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:632:    SupportedCurrency
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:633:): number {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:634:  return entries
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:635:    .filter(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:636:      (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:637:        entry
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:638:      ) =>
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:639:        entry.amount.currency ===
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:640:          currency &&
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:641:        entry.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:642:          "finalized" &&
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:643:        entry.balanceCategory ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:644:          "available"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:645:    )
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:646:    .reduce(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:647:      (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:648:        balance,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:649:        entry
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:650:      ) =>
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:651:        balance +
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:652:        entry.amount.amountMinor,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:653:      0
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:654:    );
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:655:}
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:656:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:657:export function isLedgerEntryMutable(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:658:  entry:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:659:    LedgerEntry
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:660:): boolean {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:661:  return (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:662:    entry.status ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:679:  original:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:680:    LedgerEntry,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:681:  input: {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:682:    idempotencyKey:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:683:      string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:684:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:685:    description:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:686:      string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:687:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:688:    createdBy:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:689:      AdvertisingActorReference;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:690:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:691:    occurredAt:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:692:      string;
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:693:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:694:): CreateLedgerEntryInput {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:695:  if (
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:696:    !canReverseLedgerEntry(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:697:      original
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:698:    )
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:699:  ) {
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:700:    throw new Error(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:701:      "Only finalized, unreversed ledger entries may be reversed."
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:703:  }
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:704:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:705:  return {
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:706:    ledgerAccountId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:707:      original.ledgerAccountId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:708:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:709:    organizationId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:710:      original.organizationId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:711:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:712:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:713:      original.campaignId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:714:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:715:    invoiceId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:716:      original.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:717:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:718:    paymentId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:719:      original.paymentId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:720:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:721:    refundId:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:722:      original.refundId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:723:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:724:    settlementId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:725:      original.settlementId,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:726:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:727:    type:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:728:      original.type,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:729:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:730:    direction:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:731:      original.direction ===
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:732:        "credit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:733:        ? "debit"
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:734:        : "credit",
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:735:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:736:    balanceCategory:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:737:      original.balanceCategory,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:738:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:739:    amountMinor:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:740:      Math.abs(
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:741:        original.amount
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:742:          .amountMinor
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:743:      ),
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:744:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:745:    currency:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:746:      original.amount.currency,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:747:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:748:    description:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:749:      input.description,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:750:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:751:    source:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:752:      original.source,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:753:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:754:    references: [
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:755:      ...original.references,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:756:    ],
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:757:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:758:    idempotencyKey:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:759:      input.idempotencyKey,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:760:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:761:    reversesEntryId:
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:762:      original.id,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:763:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:764:    createdBy:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:765:      input.createdBy,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:766:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:767:    occurredAt:
+> F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:768:      input.occurredAt,
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:769:  };
+  F:\Project\Poster\client\src\features\workspace\payments\ledger.types.ts:770:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1:import type {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:2:  CampaignId,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:3:  OrganizationId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:4:} from "../advertising/advertising.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:5:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:6:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:7:  CampaignBudget,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:8:  CampaignBudgetStatus,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:9:} from "../payments/budget.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:10:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:11:import {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:12:  calculateBudgetRemainingPercentage,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:13:  calculateBudgetUtilizationPercentage,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:20:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:21:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:22:  LedgerEntry,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:23:  LedgerEntryDirection,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:24:  LedgerEntryStatus,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:25:  LedgerEntryType,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:26:} from "../payments/ledger.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:27:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:28:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:29:  AdvertiserPayment,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:30:  PaymentMethodDetails,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:31:  PaymentProvider,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:32:  PaymentStatus,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:33:} from "../payments/payment.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:34:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:35:import type {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:45:} from "../payments/settlement.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:46:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:47:import type {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:48:  SupportedCurrency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:49:} from "../payments/currency.types";
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:50:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:51:/**
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:52: * Client financial dashboard adapter.
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:53: *
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:54: * Converts canonical payment-domain records into UI-ready
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:55: * Client view models.
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:56: *
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:57: * This file must not:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:58: *
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:59: * - create payment orders;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:65: */
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:66:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:67:export interface PaymentDashboardBalanceSummary {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:68:  campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:69:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:70:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:71:  budgetStatus:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:72:    CampaignBudgetStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:73:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:74:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:75:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:76:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:77:  allocatedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:78:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:79:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:80:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:81:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:82:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:83:  availableMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:84:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:85:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:141:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:142:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:143:export interface PaymentDashboardInvoiceRow {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:144:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:145:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:146:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:147:  invoiceNumber:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:148:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:149:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:150:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:151:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:152:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:153:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:154:    InvoiceStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:155:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:156:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:157:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:158:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:159:  totalMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:160:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:161:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:162:  paidMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:163:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:164:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:165:  refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:166:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:167:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:182:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:183:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:184:export interface PaymentDashboardPaymentRow {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:185:  paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:186:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:187:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:188:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:189:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:190:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:191:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:192:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:193:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:194:  provider:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:195:    PaymentProvider;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:196:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:197:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:198:    PaymentStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:199:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:200:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:201:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:202:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:203:  capturedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:204:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:205:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:206:  refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:207:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:208:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:209:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:210:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:211:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:212:  methodDetails:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:213:    PaymentMethodDetails;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:214:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:215:  providerPaymentId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:216:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:217:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:218:  paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:219:    boolean;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:220:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:221:  riskAccepted:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:222:    boolean;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:223:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:224:  paidAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:225:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:226:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:227:  createdAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:228:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:229:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:230:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:231:export interface PaymentDashboardSettlementRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:232:  settlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:233:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:234:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:235:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:236:    SettlementStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:237:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:238:  mode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:239:    SettlementMode;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:240:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:241:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:242:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:243:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:244:  grossAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:245:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:246:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:247:  providerFeeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:248:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:249:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:250:  taxMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:251:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:252:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:253:  adjustmentMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:254:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:255:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:256:  netAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:257:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:258:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:259:  expectedSettlementAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:260:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:261:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:262:  settledAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:263:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:264:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:265:  providerSettlementId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:266:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:270:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:271:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:272:export interface PaymentDashboardRefundRow {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:273:  refundId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:274:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:275:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:276:  refundRequestId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:277:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:278:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:279:  paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:280:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:281:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:282:  invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:283:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:284:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:285:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:286:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:287:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:288:  reason:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:289:    RefundReason;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:290:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:291:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:292:    RefundStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:293:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:294:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:295:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:296:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:297:  requestedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:298:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:299:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:300:  approvedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:301:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:302:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:303:  refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:304:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:305:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:306:  executionMode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:307:    AdvertiserRefund[
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:308:      "executionMode"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:309:    ];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:310:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:311:  providerRefundId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:312:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:313:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:314:  approvedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:315:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:316:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:317:  refundedAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:318:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:319:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:320:  failedAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:321:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:322:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:323:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:324:export interface PaymentDashboardLedgerRow {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:325:  ledgerEntryId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:326:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:327:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:328:  campaignId?:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:329:    CampaignId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:330:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:331:  invoiceId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:332:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:333:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:334:  paymentId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:335:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:336:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:337:  refundId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:338:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:339:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:340:  settlementId?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:341:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:342:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:343:  type:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:344:    LedgerEntryType;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:345:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:346:  direction:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:347:    LedgerEntryDirection;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:348:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:349:  status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:350:    LedgerEntryStatus;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:351:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:352:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:353:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:354:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:355:  amountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:356:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:357:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:358:  balanceBeforeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:359:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:360:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:361:  balanceAfterMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:362:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:363:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:364:  description:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:365:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:366:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:367:  occurredAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:368:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:369:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:370:  finalizedAt?:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:371:    string;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:372:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:373:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:374:export interface PaymentDashboardSummary {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:375:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:376:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:377:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:378:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:379:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:380:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:381:  totalAllocatedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:382:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:383:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:384:  totalPaidMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:385:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:386:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:387:  totalAvailableMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:388:    number;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:389:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:448:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:449:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:450:export interface CreatePaymentDashboardViewModelInput {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:451:  organizationId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:452:    OrganizationId;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:453:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:454:  currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:455:    SupportedCurrency;
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:456:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:457:  budgets:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:458:    CampaignBudget[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:459:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:460:  invoices:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:461:    AdvertiserInvoice[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:462:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:463:  payments:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:464:    AdvertiserPayment[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:465:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:473:    LedgerEntry[];
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:474:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:475:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:476:function assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:477:  valueCurrency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:478:    SupportedCurrency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:479:  expectedCurrency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:480:    SupportedCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:481:  label:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:482:    string
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:483:): void {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:484:  if (
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:485:    valueCurrency !==
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:486:    expectedCurrency
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:487:  ) {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:488:    throw new Error(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:489:      `${label} currency must match dashboard currency ${expectedCurrency}.`
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:490:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:491:  }
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:492:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:493:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:494:function isPaymentVerified(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:495:  payment:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:496:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:497:): boolean {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:498:  return (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:499:    payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:514:    CampaignBudget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:515:): PaymentDashboardBalanceSummary {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:516:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:517:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:518:      budget.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:519:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:520:    budgetStatus:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:521:      budget.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:522:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:523:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:524:      budget.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:525:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:526:    allocatedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:527:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:528:        .allocatedMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:529:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:530:    paidMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:531:      budget.amounts
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:532:        .paidMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:533:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:534:    availableMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:623:    AdvertiserInvoice
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:624:): PaymentDashboardInvoiceRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:625:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:626:    invoiceId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:627:      invoice.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:628:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:629:    invoiceNumber:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:630:      invoice.invoiceNumber,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:631:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:632:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:633:      invoice.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:634:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:635:    status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:636:      invoice.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:637:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:638:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:639:      invoice.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:640:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:641:    totalMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:642:      invoice.totals
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:643:        .totalMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:644:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:645:    paidMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:646:      invoice.totals
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:647:        .paidMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:648:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:649:    refundedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:673:    AdvertiserPayment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:674:): PaymentDashboardPaymentRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:675:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:676:    paymentId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:677:      payment.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:678:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:679:    invoiceId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:680:      payment.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:681:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:682:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:683:      payment.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:684:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:685:    provider:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:686:      payment.provider,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:687:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:688:    status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:689:      payment.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:690:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:691:    amountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:692:      payment.amount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:693:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:694:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:695:    capturedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:696:      payment.capturedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:697:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:698:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:699:    refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:700:      payment.refundedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:701:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:702:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:703:    currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:704:      payment.amount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:705:        .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:706:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:707:    methodDetails:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:708:      payment.methodDetails,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:709:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:710:    providerPaymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:711:      payment.providerPaymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:712:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:713:    paymentVerified:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:714:      isPaymentVerified(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:715:        payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:716:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:717:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:718:    riskAccepted:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:719:      payment.riskStatus ===
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:720:      "accepted",
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:721:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:722:    paidAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:723:      payment.paidAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:724:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:725:    createdAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:726:      payment.createdAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:727:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:728:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:729:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:730:function createSettlementRow(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:731:  settlement:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:732:    AdvertiserPaymentSettlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:733:): PaymentDashboardSettlementRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:734:  return {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:735:    settlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:736:      settlement.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:741:    mode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:742:      settlement.mode,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:743:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:744:    currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:745:      settlement
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:746:        .settlementCurrency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:747:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:748:    grossAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:749:      settlement.grossAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:750:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:751:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:752:    providerFeeMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:753:      settlement.providerFee
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:754:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:755:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:756:    taxMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:757:      settlement.taxAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:758:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:759:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:760:    adjustmentMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:761:      settlement.adjustmentAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:762:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:763:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:764:    netAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:765:      settlement.netAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:766:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:767:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:768:    expectedSettlementAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:769:      settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:770:        .expectedSettlementAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:771:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:772:    settledAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:773:      settlement.settledAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:774:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:775:    providerSettlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:776:      settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:789:    AdvertiserRefund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:790:): PaymentDashboardRefundRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:791:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:792:    refundId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:793:      refund.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:794:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:795:    refundRequestId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:796:      refund.refundRequestId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:797:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:798:    paymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:799:      refund.paymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:800:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:801:    invoiceId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:802:      refund.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:803:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:804:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:805:      refund.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:806:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:807:    reason:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:808:      refund.reason,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:809:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:810:    status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:811:      refund.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:812:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:813:    currency:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:814:      refund.approvedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:815:        .currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:816:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:817:    requestedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:818:      refund.requestedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:819:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:820:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:821:    approvedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:822:      refund.approvedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:823:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:824:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:825:    refundedAmountMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:826:      refund.refundedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:827:        .amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:828:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:829:    executionMode:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:830:      refund.executionMode,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:831:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:832:    providerRefundId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:833:      refund.providerReference
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:834:        .providerRefundId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:835:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:836:    approvedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:837:      refund.approvedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:838:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:839:    refundedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:840:      refund.refundedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:841:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:842:    failedAt:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:843:      refund.failedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:844:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:849:    LedgerEntry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:850:): PaymentDashboardLedgerRow {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:851:  return {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:852:    ledgerEntryId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:853:      entry.id,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:854:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:855:    campaignId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:856:      entry.campaignId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:857:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:858:    invoiceId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:859:      entry.invoiceId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:860:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:861:    paymentId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:862:      entry.paymentId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:863:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:864:    refundId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:865:      entry.refundId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:866:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:867:    settlementId:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:868:      entry.settlementId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:869:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:870:    type:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:871:      entry.type,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:872:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:873:    direction:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:874:      entry.direction,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:875:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:876:    status:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:877:      entry.status,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:878:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:879:    currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:880:      entry.amount.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:881:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:882:    amountMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:883:      entry.amount.amountMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:884:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:885:    balanceBeforeMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:886:      entry.balanceBeforeMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:887:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:888:    balanceAfterMinor:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:889:      entry.balanceAfterMinor,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:890:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:891:    description:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:892:      entry.description,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:893:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:894:    occurredAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:895:      entry.occurredAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:896:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:897:    finalizedAt:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:898:      entry.finalizedAt,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:899:  };
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:900:}
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:901:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:902:function isInvoiceUnpaid(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:903:  invoice:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:904:    AdvertiserInvoice
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:905:): boolean {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:906:  return (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:907:    invoice.totals
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:908:      .outstandingMinor >
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1005:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1006:        budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1007:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1008:        budget.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1009:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1010:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1011:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1012:  const organizationInvoices =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1013:    input.invoices.filter(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1014:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1015:        invoice
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1016:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1017:        invoice.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1018:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1019:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1020:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1021:  const organizationPayments =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1022:    input.payments.filter(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1023:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1024:        payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1025:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1026:        payment.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1027:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1028:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1029:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1030:  const organizationSettlements =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1031:    input.settlements.filter(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1032:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1033:        settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1034:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1035:        settlement.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1036:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1037:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1038:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1039:  const organizationRefunds =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1040:    input.refunds.filter(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1041:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1042:        refund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1043:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1044:        refund.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1045:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1046:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1047:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1048:  const organizationLedgerEntries =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1049:    input.ledgerEntries.filter(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1050:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1051:        entry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1052:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1053:        entry.organizationId ===
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1054:        input.organizationId
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1055:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1056:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1057:  organizationBudgets.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1058:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1059:      budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1060:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1061:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1062:        budget.currency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1063:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1064:        "Campaign budget"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1065:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1066:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1067:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1068:  organizationInvoices.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1069:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1070:      invoice
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1071:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1072:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1073:        invoice.currency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1074:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1075:        "Invoice"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1076:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1077:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1078:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1079:  organizationPayments.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1080:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1081:      payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1082:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1083:      assertMatchingCurrency(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1084:        payment.amount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1085:          .currency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1086:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1087:        "Payment"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1088:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1089:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1090:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1091:  organizationSettlements.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1092:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1093:      settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1094:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1095:      assertMatchingCurrency(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1096:        settlement
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1097:          .settlementCurrency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1098:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1099:        "Settlement"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1100:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1101:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1102:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1103:  organizationRefunds.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1104:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1105:      refund
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1106:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1107:      assertMatchingCurrency(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1108:        refund.approvedAmount
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1109:          .currency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1110:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1111:        "Refund"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1112:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1113:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1114:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1115:  organizationLedgerEntries.forEach(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1116:    (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1117:      entry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1118:    ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1119:      assertMatchingCurrency(
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1120:        entry.amount.currency,
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1121:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1122:        "Ledger entry"
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1123:      )
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1124:  );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1125:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1126:  const campaignBalances =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1127:    organizationBudgets.map(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1128:      createBalanceSummary
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1129:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1130:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1131:  const invoices =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1148:        payment
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1149:      ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1150:        payment.paidAt ??
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1151:        payment.createdAt
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1152:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1153:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1154:  const settlements =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1155:    getLatestFirst(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1156:      organizationSettlements.map(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1157:        createSettlementRow
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1158:      ),
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1159:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1160:        settlement
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1161:      ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1185:      (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1186:        entry
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1187:      ) =>
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1188:        entry.finalizedAt ??
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1189:        entry.occurredAt
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1190:    );
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1191:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1192:  const warnings =
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1193:    Array.from(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1194:      new Set(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1195:        campaignBalances.flatMap(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1196:          (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1197:            budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1198:          ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1199:            budget.warningMessages
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1203:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1204:  return {
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1205:    summary: {
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1206:      organizationId:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1207:        input.organizationId,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1208:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1209:      currency:
+> F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1210:        input.currency,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1211:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1212:      totalAllocatedMinor:
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1213:        campaignBalances.reduce(
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1214:          (
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1215:            total,
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1216:            budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1217:          ) =>
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1218:            total +
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1219:            budget
+  F:\Project\Poster\client\src\features\workspace\adapters\payment-dashboard.adapter.ts:1220:              .allocatedMinor,

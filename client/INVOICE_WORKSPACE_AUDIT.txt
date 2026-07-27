@@ -1,0 +1,320 @@
+﻿===== .\src\features\workspace\payments\invoice.types.ts =====
+   4:   CampaignId,
+  10:   SupportedCurrency,
+  11: } from "./currency.types";
+  14:   InvoiceId,
+  21:  * Canonical advertiser invoice contracts.
+  23:  * Invoice responsibilities:
+  31:  * - invoice lifecycle.
+  37: export type InvoiceLineItemId =
+  40: export type InvoiceAdjustmentId =
+  43: export type InvoiceDocumentId =
+  46: export type InvoiceStatus =
+  58: export type InvoiceLineItemType =
+  68: export type InvoiceAdjustmentType =
+  83: export interface InvoiceParty {
+ 121: export interface InvoiceTaxComponent {
+ 141: export interface InvoiceLineItem {
+ 143:     InvoiceLineItemId;
+ 146:     InvoiceLineItemType;
+ 161:     InvoiceTaxComponent[];
+ 172:   campaignId?:
+ 173:     CampaignId;
+ 188: export interface InvoiceAdjustment {
+ 190:     InvoiceAdjustmentId;
+ 193:     InvoiceAdjustmentType;
+ 211: export interface InvoiceTotals {
+ 212:   currency:
+ 213:     SupportedCurrency;
+ 215:   subtotalMinor:
+ 230:   totalMinor:
+ 239:   outstandingMinor:
+ 243: export interface InvoicePaymentAllocation {
+ 257: export interface InvoiceReceiptReference {
+ 264:   issuedAt:
+ 268:     InvoiceDocumentId;
+ 274: export interface AdvertiserInvoice {
+ 276:     InvoiceId;
+ 278:   invoiceNumber:
+ 287:   campaignId?:
+ 288:     CampaignId;
+ 291:     InvoiceStatus;
+ 293:   currency:
+ 294:     SupportedCurrency;
+ 297:     InvoiceParty;
+ 300:     InvoiceParty;
+ 303:     InvoiceLineItem[];
+ 306:     InvoiceAdjustment[];
+ 309:     InvoiceTotals;
+ 312:     InvoicePaymentAllocation[];
+ 315:     InvoiceReceiptReference[];
+ 326:   issuedAt?:
+ 329:   dueAt?:
+ 332:   paidAt?:
+ 335:   overdueAt?:
+ 351:     InvoiceDocumentId;
+ 357: export interface CreateInvoiceInput {
+ 364:   campaignId?:
+ 365:     CampaignId;
+ 367:   currency:
+ 368:     SupportedCurrency;
+ 371:     InvoiceParty;
+ 374:     InvoiceParty;
+ 377:     InvoiceLineItem[];
+ 380:     InvoiceAdjustment[];
+ 391:   dueAt:
+ 398: export interface InvoiceStatusSummary {
+ 400:     InvoiceStatus;
+ 430: export function calculateInvoiceOutstandingMinor(
+ 431:   totalMinor:
+ 440:       totalMinor
+ 450:       "Invoice totals must use non-negative safe integers in minor units."
+ 455:     totalMinor -
+ 462: export function calculateInvoiceTotals(
+ 464:     currency:
+ 465:       SupportedCurrency;
+ 467:     subtotalMinor:
+ 488: ): InvoiceTotals {
+ 490:     input.subtotalMinor,
+ 512:       "Invoice values must use safe integers in minor currency units."
+ 516:   const totalMinor =
+ 518:       input.subtotalMinor -
+ 527:     currency:
+ 528:       input.currency,
+ 530:     subtotalMinor:
+ 531:       input.subtotalMinor,
+ 545:     totalMinor,
+ 553:     outstandingMinor:
+ 554:       calculateInvoiceOutstandingMinor(
+ 555:         totalMinor,
+ 562: export function getInvoiceStatusSummary(
+ 564:     InvoiceStatus
+ 565: ): InvoiceStatusSummary {
+ 678: export function isInvoiceFullyPaid(
+ 679:   invoice:
+ 680:     AdvertiserInvoice
+ 683:     invoice.totals
+ 684:       .outstandingMinor ===
+ 686:     invoice.totals
+ 690:       invoice.status ===
+ 692:       invoice.status ===
+ 694:       invoice.status ===
+ 696:       invoice.status ===
+ 702: export function canInvoiceAcceptPayment(
+ 703:   invoice:
+ 704:     AdvertiserInvoice
+ 707:     invoice.totals
+ 708:       .outstandingMinor >
+ 711:       invoice.status ===
+ 713:       invoice.status ===
+ 715:       invoice.status ===
+ 717:       invoice.status ===
+ 723: export function assertInvoiceCurrencyConsistency(
+ 724:   invoice:
+ 725:     AdvertiserInvoice
+ 727:   const currency =
+ 728:     invoice.currency;
+ 731:     ...invoice.lineItems.flatMap(
+ 750:     ...invoice.adjustments.map(
+ 757:     ...invoice.paymentAllocations.map(
+ 770:         amount.currency !==
+ 771:         currency
+ 776:       "All invoice amounts must use the invoice currency."
+
+===== .\src\features\workspace\adapters\payment-dashboard.adapter.ts =====
+   2:   CampaignId,
+  17:   AdvertiserInvoice,
+  18:   InvoiceStatus,
+  19: } from "../payments/invoice.types";
+  48:   SupportedCurrency,
+  49: } from "../payments/currency.types";
+  68:   campaignId:
+  69:     CampaignId;
+  74:   currency:
+  75:     SupportedCurrency;
+ 143: export interface PaymentDashboardInvoiceRow {
+ 144:   invoiceId:
+ 147:   invoiceNumber:
+ 150:   campaignId?:
+ 151:     CampaignId;
+ 154:     InvoiceStatus;
+ 156:   currency:
+ 157:     SupportedCurrency;
+ 159:   totalMinor:
+ 168:   outstandingMinor:
+ 171:   issuedAt?:
+ 174:   dueAt?:
+ 177:   paidAt?:
+ 188:   invoiceId:
+ 191:   campaignId?:
+ 192:     CampaignId;
+ 209:   currency:
+ 210:     SupportedCurrency;
+ 224:   paidAt?:
+ 241:   currency:
+ 242:     SupportedCurrency;
+ 282:   invoiceId:
+ 285:   campaignId?:
+ 286:     CampaignId;
+ 294:   currency:
+ 295:     SupportedCurrency;
+ 328:   campaignId?:
+ 329:     CampaignId;
+ 331:   invoiceId?:
+ 352:   currency:
+ 353:     SupportedCurrency;
+ 378:   currency:
+ 379:     SupportedCurrency;
+ 414:   unpaidInvoiceCount:
+ 431:   invoices:
+ 432:     PaymentDashboardInvoiceRow[];
+ 454:   currency:
+ 455:     SupportedCurrency;
+ 460:   invoices:
+ 461:     AdvertiserInvoice[];
+ 476: function assertMatchingCurrency(
+ 477:   valueCurrency:
+ 478:     SupportedCurrency,
+ 479:   expectedCurrency:
+ 480:     SupportedCurrency,
+ 485:     valueCurrency !==
+ 486:     expectedCurrency
+ 489:       `${label} currency must match dashboard currency ${expectedCurrency}.`
+ 517:     campaignId:
+ 518:       budget.campaignId,
+ 523:     currency:
+ 524:       budget.currency,
+ 621: function createInvoiceRow(
+ 622:   invoice:
+ 623:     AdvertiserInvoice
+ 624: ): PaymentDashboardInvoiceRow {
+ 626:     invoiceId:
+ 627:       invoice.id,
+ 629:     invoiceNumber:
+ 630:       invoice.invoiceNumber,
+ 632:     campaignId:
+ 633:       invoice.campaignId,
+ 636:       invoice.status,
+ 638:     currency:
+ 639:       invoice.currency,
+ 641:     totalMinor:
+ 642:       invoice.totals
+ 643:         .totalMinor,
+ 646:       invoice.totals
+ 650:       invoice.totals
+ 653:     outstandingMinor:
+ 654:       invoice.totals
+ 655:         .outstandingMinor,
+ 657:     issuedAt:
+ 658:       invoice.issuedAt,
+ 660:     dueAt:
+ 661:       invoice.dueAt,
+ 663:     paidAt:
+ 664:       invoice.paidAt,
+ 667:       invoice.documentUrl,
+ 679:     invoiceId:
+ 680:       payment.invoiceId,
+ 682:     campaignId:
+ 683:       payment.campaignId,
+ 703:     currency:
+ 705:         .currency,
+ 722:     paidAt:
+ 723:       payment.paidAt,
+ 744:     currency:
+ 746:         .settlementCurrency,
+ 801:     invoiceId:
+ 802:       refund.invoiceId,
+ 804:     campaignId:
+ 805:       refund.campaignId,
+ 813:     currency:
+ 815:         .currency,
+ 855:     campaignId:
+ 856:       entry.campaignId,
+ 858:     invoiceId:
+ 859:       entry.invoiceId,
+ 879:     currency:
+ 880:       entry.amount.currency,
+ 902: function isInvoiceUnpaid(
+ 903:   invoice:
+ 904:     AdvertiserInvoice
+ 907:     invoice.totals
+ 908:       .outstandingMinor >
+ 910:     invoice.status !==
+ 912:     invoice.status !==
+1012:   const organizationInvoices =
+1013:     input.invoices.filter(
+1015:         invoice
+1017:         invoice.organizationId ===
+1061:       assertMatchingCurrency(
+1062:         budget.currency,
+1063:         input.currency,
+1068:   organizationInvoices.forEach(
+1070:       invoice
+1072:       assertMatchingCurrency(
+1073:         invoice.currency,
+1074:         input.currency,
+1075:         "Invoice"
+1083:       assertMatchingCurrency(
+1085:           .currency,
+1086:         input.currency,
+1095:       assertMatchingCurrency(
+1097:           .settlementCurrency,
+1098:         input.currency,
+1107:       assertMatchingCurrency(
+1109:           .currency,
+1110:         input.currency,
+1119:       assertMatchingCurrency(
+1120:         entry.amount.currency,
+1121:         input.currency,
+1131:   const invoices =
+1133:       organizationInvoices.map(
+1134:         createInvoiceRow
+1137:         invoice
+1139:         invoice.issuedAt
+1150:         payment.paidAt ??
+1209:       currency:
+1210:         input.currency,
+1338:       unpaidInvoiceCount:
+1339:         organizationInvoices.filter(
+1340:           isInvoiceUnpaid
+1356:     invoices,
+
+===== .\src\features\workspace\payments\payment.status.ts =====
+   6:   InvoiceStatus,
+   7: } from "./invoice.types";
+ 211: export function getInvoiceStatusPresentation(
+ 213:     InvoiceStatus
+ 225:           "The invoice has not yet been issued.",
+ 237:           "The invoice has been issued and is available for payment.",
+ 249:           "Payment is required for this invoice.",
+ 261:           "The invoice has an outstanding balance.",
+ 273:           "The invoice has been paid in full.",
+ 285:           "The invoice passed its due date with an outstanding amount.",
+ 297:           "The invoice is no longer payable.",
+ 309:           "A refund linked to this invoice is being processed.",
+ 321:           "Part of the paid invoice amount has been refunded.",
+ 333:           "The approved invoice amount has been refunded.",
+ 455:           "Poster is reviewing refund eligibility.",
+ 680: export function getInvoiceStatusLabel(
+ 682:     InvoiceStatus
+ 684:   return getInvoiceStatusPresentation(
+
+===== .\src\features\workspace\payments\payment.formatters.ts =====
+   2:   SupportedCurrency,
+   3: } from "./currency.types";
+   7: } from "./currency.types";
+  34: export interface CurrencyFormatOptions {
+  41:   showCurrencyCode?: boolean;
+  63:   currency:
+  64:     SupportedCurrency,
+  66:     CurrencyFormatOptions = {}
+  79:       currency
+  88:           "currency",
+  90:         currency,
+  92:         currencyDisplay:
+  93:           options.showCurrencyCode
+ 117:   currency:
+ 118:     SupportedCurrency,
+ 120:     CurrencyFormatOptions = {}
+ 135:       currency,
+
