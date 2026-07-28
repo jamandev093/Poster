@@ -37,6 +37,15 @@ export interface SignupEmailVerificationChallenge {
   purpose: "signup";
 
   /**
+   * Non-secret identifier of the persisted verification-token
+   * record.
+   *
+   * This value may be used as the email-provider idempotency
+   * key. It must not be treated as the verification secret.
+   */
+  tokenId: string;
+
+  /**
    * Raw verification code that must be passed directly to the
    * email-delivery boundary.
    *

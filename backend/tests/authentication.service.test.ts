@@ -355,6 +355,9 @@ describe(
             purpose:
               "signup",
 
+            tokenId:
+              TOKEN_RECORD.id,
+
             code:
               "123456",
 

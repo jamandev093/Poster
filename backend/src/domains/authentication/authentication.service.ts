@@ -416,6 +416,11 @@ export function createAuthenticationService(
             purpose:
               "signup",
 
+            tokenId:
+              registration
+                .verificationToken
+                .id,
+
             code:
               verificationCodePair.code,
 
