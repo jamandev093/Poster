@@ -9,6 +9,12 @@ import {
   getDatabaseConfiguration,
 } from "./database.config.js";
 
+export type DatabaseQueryExecutor =
+  Pick<
+    PoolClient,
+    "query"
+  >;
+
 let databasePool:
   Pool |
   null =
@@ -118,11 +124,14 @@ export async function executeDatabaseQuery<
   text: string,
   values:
     readonly unknown[] =
-    []
+    [],
+  executor:
+    DatabaseQueryExecutor =
+    getDatabasePool()
 ): Promise<
   QueryResult<TRow>
 > {
-  return await getDatabasePool()
+  return await executor
     .query<TRow>(
       text,
       Array.from(

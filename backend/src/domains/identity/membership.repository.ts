@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -141,7 +142,8 @@ function mapOptionalMembershipRow(
  * pair and one active primary contact per organization.
  */
 export async function createOrganizationMembership(
-  input: CreateOrganizationMembershipInput
+  input: CreateOrganizationMembershipInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord> {
   const result =
     await executeDatabaseQuery<
@@ -180,7 +182,8 @@ export async function createOrganizationMembership(
         input.invitedByUserId ?? null,
         input.invitedAt ?? null,
         input.joinedAt ?? null,
-      ]
+      ],
+      executor
     );
 
   const membership =
@@ -201,7 +204,8 @@ export async function createOrganizationMembership(
  * Retrieves one organization membership by immutable UUID.
  */
 export async function findOrganizationMembershipById(
-  membershipId: string
+  membershipId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -216,7 +220,8 @@ export async function findOrganizationMembershipById(
       `,
       [
         membershipId,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalMembershipRow(
@@ -230,7 +235,8 @@ export async function findOrganizationMembershipById(
  */
 export async function findOrganizationMembership(
   organizationId: string,
-  userId: string
+  userId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -248,7 +254,8 @@ export async function findOrganizationMembership(
       [
         organizationId,
         userId,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalMembershipRow(
@@ -263,7 +270,8 @@ export async function findOrganizationMembership(
  * organizations an authenticated user can enter.
  */
 export async function listActiveMembershipsForUser(
-  userId: string
+  userId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord[]> {
   const result =
     await executeDatabaseQuery<
@@ -282,7 +290,8 @@ export async function listActiveMembershipsForUser(
       `,
       [
         userId,
-      ]
+      ],
+      executor
     );
 
   return result.rows.map(
@@ -294,7 +303,8 @@ export async function listActiveMembershipsForUser(
  * Updates a membership role using optimistic concurrency.
  */
 export async function updateOrganizationMembershipRole(
-  input: UpdateOrganizationMembershipRoleInput
+  input: UpdateOrganizationMembershipRoleInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -313,7 +323,8 @@ export async function updateOrganizationMembershipRole(
         input.membershipId,
         input.expectedRowVersion,
         input.role,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalMembershipRow(
@@ -326,7 +337,8 @@ export async function updateOrganizationMembershipRole(
  * lifecycle timestamp.
  */
 export async function updateOrganizationMembershipStatus(
-  input: UpdateOrganizationMembershipStatusInput
+  input: UpdateOrganizationMembershipStatusInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationMembershipRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -370,7 +382,8 @@ export async function updateOrganizationMembershipStatus(
         input.expectedRowVersion,
         input.status,
         input.changedAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalMembershipRow(

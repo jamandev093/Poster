@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -124,7 +125,8 @@ function mapOptionalSessionRow(
  * Raw refresh tokens must never be stored in PostgreSQL.
  */
 export async function createUserSession(
-  input: CreateUserSessionInput
+  input: CreateUserSessionInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserSessionRecord> {
   const result =
     await executeDatabaseQuery<
@@ -167,7 +169,8 @@ export async function createUserSession(
         ),
 
         input.expiresAt,
-      ]
+      ],
+      executor
     );
 
   const session =
@@ -189,7 +192,8 @@ export async function createUserSession(
  * refresh-token digest.
  */
 export async function findActiveUserSessionByDigest(
-  refreshTokenDigest: string
+  refreshTokenDigest: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserSessionRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -209,7 +213,8 @@ export async function findActiveUserSessionByDigest(
         normalizeRequiredIdentityText(
           refreshTokenDigest
         ),
-      ]
+      ],
+      executor
     );
 
   return mapOptionalSessionRow(
@@ -221,7 +226,8 @@ export async function findActiveUserSessionByDigest(
  * Retrieves one session by immutable UUID.
  */
 export async function findUserSessionById(
-  sessionId: string
+  sessionId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserSessionRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -236,7 +242,8 @@ export async function findUserSessionById(
       `,
       [
         sessionId,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalSessionRow(
@@ -249,7 +256,8 @@ export async function findUserSessionById(
  * unexpired and unrevoked.
  */
 export async function touchUserSession(
-  input: TouchUserSessionInput
+  input: TouchUserSessionInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserSessionRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -268,7 +276,8 @@ export async function touchUserSession(
       [
         input.sessionId,
         input.seenAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalSessionRow(
@@ -281,7 +290,8 @@ export async function touchUserSession(
  * overwrite the original revocation time or reason.
  */
 export async function revokeUserSession(
-  input: RevokeUserSessionInput
+  input: RevokeUserSessionInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserSessionRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -305,7 +315,8 @@ export async function revokeUserSession(
         normalizeOptionalIdentityText(
           input.reason
         ),
-      ]
+      ],
+      executor
     );
 
   return mapOptionalSessionRow(
@@ -320,7 +331,8 @@ export async function revokeUserSession(
  * events, suspensions, and explicit global logout.
  */
 export async function revokeAllUserSessions(
-  input: RevokeAllUserSessionsInput
+  input: RevokeAllUserSessionsInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<number> {
   const result =
     await executeDatabaseQuery<
@@ -344,7 +356,8 @@ export async function revokeAllUserSessions(
         normalizeOptionalIdentityText(
           input.reason
         ),
-      ]
+      ],
+      executor
     );
 
   return result.rowCount ?? 0;

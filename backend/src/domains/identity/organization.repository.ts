@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -130,7 +131,8 @@ function mapOptionalOrganizationRow(
  * format and all required organization fields.
  */
 export async function createOrganization(
-  input: CreateOrganizationInput
+  input: CreateOrganizationInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationRecord> {
   const normalizedBillingEmail =
     normalizeOptionalIdentityText(
@@ -181,7 +183,8 @@ export async function createOrganization(
         normalizeCountryCode(
           input.countryCode
         ),
-      ]
+      ],
+      executor
     );
 
   const organization =
@@ -202,7 +205,8 @@ export async function createOrganization(
  * Retrieves one organization by immutable UUID.
  */
 export async function findOrganizationById(
-  organizationId: string
+  organizationId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -217,7 +221,8 @@ export async function findOrganizationById(
       `,
       [
         organizationId,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalOrganizationRow(
@@ -230,7 +235,8 @@ export async function findOrganizationById(
  * optimistic concurrency control.
  */
 export async function updateOrganizationProfile(
-  input: UpdateOrganizationProfileInput
+  input: UpdateOrganizationProfileInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationRecord | null> {
   const normalizedBillingEmail =
     normalizeOptionalIdentityText(
@@ -280,7 +286,8 @@ export async function updateOrganizationProfile(
         normalizeCountryCode(
           input.countryCode
         ),
-      ]
+      ],
+      executor
     );
 
   return mapOptionalOrganizationRow(
@@ -296,7 +303,8 @@ export async function updateOrganizationProfile(
  * concurrent writes.
  */
 export async function updateOrganizationStatus(
-  input: UpdateOrganizationStatusInput
+  input: UpdateOrganizationStatusInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<OrganizationRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -331,7 +339,8 @@ export async function updateOrganizationStatus(
         input.expectedRowVersion,
         input.status,
         input.changedAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalOrganizationRow(

@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -135,7 +136,8 @@ function mapOptionalUserRow(
  * PostgreSQL. The database unique index remains authoritative.
  */
 export async function createUser(
-  input: CreateUserInput
+  input: CreateUserInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord> {
   const result =
     await executeDatabaseQuery<
@@ -167,7 +169,8 @@ export async function createUser(
         normalizeRequiredIdentityText(
           input.fullName
         ),
-      ]
+      ],
+      executor
     );
 
   const user =
@@ -190,7 +193,8 @@ export async function createUser(
  * Soft-deleted users are intentionally excluded.
  */
 export async function findUserById(
-  userId: string
+  userId: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -207,7 +211,8 @@ export async function findUserById(
       `,
       [
         userId,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalUserRow(
@@ -222,7 +227,8 @@ export async function findUserById(
  * authentication use. It must never be exposed in an API DTO.
  */
 export async function findUserByEmail(
-  email: string
+  email: string,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -241,7 +247,8 @@ export async function findUserByEmail(
         normalizeIdentityEmail(
           email
         ),
-      ]
+      ],
+      executor
     );
 
   return mapOptionalUserRow(
@@ -257,7 +264,8 @@ export async function findUserByEmail(
  * row version was no longer current.
  */
 export async function markUserEmailVerified(
-  input: MarkUserEmailVerifiedInput
+  input: MarkUserEmailVerifiedInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -284,7 +292,8 @@ export async function markUserEmailVerified(
         input.userId,
         input.expectedRowVersion,
         input.verifiedAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalUserRow(
@@ -297,7 +306,8 @@ export async function markUserEmailVerified(
  * previous failed-login lock state.
  */
 export async function recordSuccessfulUserLogin(
-  input: RecordSuccessfulUserLoginInput
+  input: RecordSuccessfulUserLoginInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -320,7 +330,8 @@ export async function recordSuccessfulUserLogin(
         input.userId,
         input.expectedRowVersion,
         input.loggedInAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalUserRow(
@@ -336,7 +347,8 @@ export async function recordSuccessfulUserLogin(
  * separate explicit repository operation.
  */
 export async function updateUserStatus(
-  input: UpdateUserStatusInput
+  input: UpdateUserStatusInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<UserIdentityRecord | null> {
   const result =
     await executeDatabaseQuery<
@@ -357,7 +369,8 @@ export async function updateUserStatus(
         input.userId,
         input.expectedRowVersion,
         input.status,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalUserRow(
