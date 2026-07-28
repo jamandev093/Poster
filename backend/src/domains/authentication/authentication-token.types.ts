@@ -70,6 +70,12 @@ export interface CreateEmailVerificationTokenInput {
   expiresAt: Date;
 }
 
+export interface FindPendingEmailVerificationTokenInput {
+  userId: string;
+
+  purpose: EmailVerificationPurpose;
+}
+
 export interface RecordEmailVerificationAttemptInput {
   tokenDigest: string;
 

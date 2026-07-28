@@ -30,6 +30,7 @@ import {
   createNumericVerificationCodePair,
   createOpaqueTokenPair,
   createPasswordResetToken,
+  findPendingEmailVerificationToken,
   hashPassword,
   invalidateEmailVerificationTokens,
   invalidatePasswordResetTokens,
@@ -800,5 +801,76 @@ describe(
         ).resolves.toBeNull();
       }
     );
+
+
+    it(
+      "returns an expired pending signup token for service-level error classification",
+      async () => {
+        const userId =
+          await createTestUser();
+
+        const now =
+          new Date();
+
+        const createdAt =
+          shiftDate(
+            now,
+            -120_000
+          );
+
+        const expiresAt =
+          shiftDate(
+            now,
+            -60_000
+          );
+
+        const verificationPair =
+          createNumericVerificationCodePair();
+
+        const createdToken =
+          await createEmailVerificationToken({
+            userId,
+
+            tokenDigest:
+              verificationPair.digest,
+
+            purpose:
+              "signup",
+
+            createdAt,
+
+            expiresAt,
+          });
+
+        const pendingToken =
+          await findPendingEmailVerificationToken({
+            userId,
+
+            purpose:
+              "signup",
+          });
+
+        expect(
+          pendingToken?.id
+        ).toBe(
+          createdToken.id
+        );
+
+        expect(
+          pendingToken?.expiresAt.getTime()
+        ).toBe(
+          expiresAt.getTime()
+        );
+
+        expect(
+          pendingToken?.consumedAt
+        ).toBeNull();
+
+        expect(
+          pendingToken?.invalidatedAt
+        ).toBeNull();
+      }
+    );
+
   }
 );

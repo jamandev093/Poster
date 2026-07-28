@@ -20,6 +20,7 @@ import type {
   CreateEmailVerificationTokenInput,
   EmailVerificationPurpose,
   EmailVerificationTokenRecord,
+  FindPendingEmailVerificationTokenInput,
   InvalidateEmailVerificationTokensInput,
   RecordEmailVerificationAttemptInput,
 } from "./authentication-token.types.js";
@@ -209,6 +210,50 @@ export async function createEmailVerificationToken(
       return createdToken;
     },
     executor
+  );
+}
+
+/**
+ * Finds the newest pending email-verification token for one
+ * user and purpose.
+ *
+ * Consumed and invalidated tokens are excluded, while expired
+ * tokens remain visible so the service can return the correct
+ * domain error. FOR UPDATE serializes verification attempts
+ * when this function runs inside the service transaction.
+ */
+export async function findPendingEmailVerificationToken(
+  input: FindPendingEmailVerificationTokenInput,
+  executor?: DatabaseQueryExecutor
+): Promise<EmailVerificationTokenRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      EmailVerificationTokenDatabaseRow
+    >(
+      `
+        SELECT
+          ${EMAIL_VERIFICATION_RETURNING_COLUMNS}
+        FROM app.email_verification_tokens
+        WHERE
+          user_id = $1::uuid
+          AND purpose = $2
+          AND consumed_at IS NULL
+          AND invalidated_at IS NULL
+        ORDER BY
+          created_at DESC,
+          id DESC
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [
+        input.userId,
+        input.purpose,
+      ],
+      executor
+    );
+
+  return mapOptionalEmailVerificationTokenRow(
+    result.rows[0]
   );
 }
 

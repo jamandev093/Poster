@@ -11,14 +11,21 @@ import {
 import {
   createUser,
   findUserByEmail,
+  markUserEmailVerified,
 } from "../identity/user.repository.js";
 
 import {
+  AuthenticationConcurrencyError,
   AuthenticationConflictError,
+  AuthenticationTokenExpiredError,
+  AuthenticationTokenInvalidError,
 } from "./authentication.errors.js";
 
 import {
+  consumeEmailVerificationToken,
   createEmailVerificationToken,
+  findPendingEmailVerificationToken,
+  recordEmailVerificationAttempt,
 } from "./email-verification-token.repository.js";
 
 import {
@@ -27,17 +34,26 @@ import {
 
 import {
   createNumericVerificationCodePair,
+  verifyAuthenticationSecretDigest,
 } from "./token.security.js";
 
 import type {
   AuthenticationAccountSummary,
   RegisterAuthenticationAccountInput,
   RegisterAuthenticationAccountResult,
+  VerifySignupEmailInput,
+  VerifySignupEmailResult,
 } from "./authentication.service.types.js";
 
 export const AUTHENTICATION_SERVICE_POLICY = {
   signupVerificationLifetimeMilliseconds:
     10 * 60 * 1000,
+
+  signupVerificationMaximumAttempts:
+    5,
+
+  signupVerificationCodeDigits:
+    6,
 } as const;
 
 const DUPLICATE_EMAIL_MESSAGE =
@@ -55,6 +71,21 @@ export interface AuthenticationServiceDependencies {
 
   createEmailVerificationToken:
     typeof createEmailVerificationToken;
+
+  findPendingEmailVerificationToken:
+    typeof findPendingEmailVerificationToken;
+
+  recordEmailVerificationAttempt:
+    typeof recordEmailVerificationAttempt;
+
+  consumeEmailVerificationToken:
+    typeof consumeEmailVerificationToken;
+
+  markUserEmailVerified:
+    typeof markUserEmailVerified;
+
+  verifyAuthenticationSecretDigest:
+    typeof verifyAuthenticationSecretDigest;
 
   hashPassword:
     typeof hashPassword;
@@ -74,6 +105,14 @@ export interface AuthenticationService {
     ) => Promise<
       RegisterAuthenticationAccountResult
     >;
+
+  verifySignupEmail:
+    (
+      input:
+        VerifySignupEmailInput
+    ) => Promise<
+      VerifySignupEmailResult
+    >;
 }
 
 const DEFAULT_AUTHENTICATION_SERVICE_DEPENDENCIES:
@@ -85,6 +124,16 @@ const DEFAULT_AUTHENTICATION_SERVICE_DEPENDENCIES:
     createUser,
 
     createEmailVerificationToken,
+
+    findPendingEmailVerificationToken,
+
+    recordEmailVerificationAttempt,
+
+    consumeEmailVerificationToken,
+
+    markUserEmailVerified,
+
+    verifyAuthenticationSecretDigest,
 
     hashPassword,
 
@@ -146,6 +195,25 @@ function normalizeRegistrationFullName(
   }
 
   return normalizedFullName;
+}
+
+function normalizeSignupVerificationCode(
+  code: string
+): string {
+  return code.trim();
+}
+
+function isSignupVerificationCodeFormatValid(
+  code: string
+): boolean {
+  return new RegExp(
+    `^\\d{${
+      AUTHENTICATION_SERVICE_POLICY
+        .signupVerificationCodeDigits
+    }}$`
+  ).test(
+    code
+  );
 }
 
 function mapAuthenticationAccountSummary(
@@ -373,6 +441,191 @@ export function createAuthenticationService(
         throw error;
       }
     },
+
+    async verifySignupEmail(
+      input
+    ) {
+      const email =
+        normalizeRegistrationEmail(
+          input.email
+        );
+
+      const code =
+        normalizeSignupVerificationCode(
+          input.code
+        );
+
+      const verifiedAt =
+        dependencies.now();
+
+      assertValidServiceDate(
+        verifiedAt
+      );
+
+      const outcome =
+        await dependencies
+          .runDatabaseTransaction(
+            async (
+              executor
+            ) => {
+              const user =
+                await dependencies
+                  .findUserByEmail(
+                    email,
+                    executor
+                  );
+
+              if (
+                !user ||
+                user.status !==
+                  "pending_verification" ||
+                user.emailVerifiedAt !==
+                  null
+              ) {
+                throw new AuthenticationTokenInvalidError();
+              }
+
+              const token =
+                await dependencies
+                  .findPendingEmailVerificationToken(
+                    {
+                      userId:
+                        user.id,
+
+                      purpose:
+                        "signup",
+                    },
+                    executor
+                  );
+
+              if (!token) {
+                throw new AuthenticationTokenInvalidError();
+              }
+
+              if (
+                token.expiresAt.getTime() <=
+                verifiedAt.getTime()
+              ) {
+                throw new AuthenticationTokenExpiredError();
+              }
+
+              if (
+                token.attemptCount >=
+                AUTHENTICATION_SERVICE_POLICY
+                  .signupVerificationMaximumAttempts
+              ) {
+                throw new AuthenticationTokenInvalidError();
+              }
+
+              const matches =
+                isSignupVerificationCodeFormatValid(
+                  code
+                ) &&
+                dependencies
+                  .verifyAuthenticationSecretDigest(
+                    code,
+                    token.tokenDigest
+                  );
+
+              if (!matches) {
+                const attemptedToken =
+                  await dependencies
+                    .recordEmailVerificationAttempt(
+                      {
+                        tokenDigest:
+                          token.tokenDigest,
+
+                        attemptedAt:
+                          verifiedAt,
+
+                        maximumAttempts:
+                          AUTHENTICATION_SERVICE_POLICY
+                            .signupVerificationMaximumAttempts,
+                      },
+                      executor
+                    );
+
+                if (!attemptedToken) {
+                  throw new AuthenticationConcurrencyError();
+                }
+
+                /*
+                 * Return instead of throwing here so the failed
+                 * attempt commits. The public error is raised
+                 * after the transaction has completed.
+                 */
+                return {
+                  status:
+                    "invalid",
+                } as const;
+              }
+
+              const consumedToken =
+                await dependencies
+                  .consumeEmailVerificationToken(
+                    {
+                      tokenDigest:
+                        token.tokenDigest,
+
+                      consumedAt:
+                        verifiedAt,
+
+                      maximumAttempts:
+                        AUTHENTICATION_SERVICE_POLICY
+                          .signupVerificationMaximumAttempts,
+                    },
+                    executor
+                  );
+
+              if (!consumedToken) {
+                throw new AuthenticationConcurrencyError();
+              }
+
+              const verifiedUser =
+                await dependencies
+                  .markUserEmailVerified(
+                    {
+                      userId:
+                        user.id,
+
+                      expectedRowVersion:
+                        user.rowVersion,
+
+                      verifiedAt,
+                    },
+                    executor
+                  );
+
+              if (!verifiedUser) {
+                throw new AuthenticationConcurrencyError();
+              }
+
+              return {
+                status:
+                  "verified",
+
+                user:
+                  verifiedUser,
+              } as const;
+            }
+          );
+
+      if (
+        outcome.status ===
+        "invalid"
+      ) {
+        throw new AuthenticationTokenInvalidError();
+      }
+
+      return {
+        account:
+          mapAuthenticationAccountSummary(
+            outcome.user
+          ),
+
+        verifiedAt,
+      };
+    },
   };
 }
 
@@ -391,6 +644,22 @@ export async function registerAuthenticationAccount(
 > {
   return await defaultAuthenticationService
     .registerAuthenticationAccount(
+      input
+    );
+}
+
+/**
+ * Verifies one signup email challenge and activates the
+ * corresponding account atomically.
+ */
+export async function verifySignupEmail(
+  input:
+    VerifySignupEmailInput
+): Promise<
+  VerifySignupEmailResult
+> {
+  return await defaultAuthenticationService
+    .verifySignupEmail(
       input
     );
 }

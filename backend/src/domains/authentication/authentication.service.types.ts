@@ -54,3 +54,16 @@ export interface RegisterAuthenticationAccountResult {
   emailVerification:
     SignupEmailVerificationChallenge;
 }
+
+export interface VerifySignupEmailInput {
+  email: string;
+
+  code: string;
+}
+
+export interface VerifySignupEmailResult {
+  account:
+    AuthenticationAccountSummary;
+
+  verifiedAt: Date;
+}
