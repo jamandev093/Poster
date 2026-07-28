@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -115,7 +116,8 @@ function mapOptionalPasswordResetTokenRow(
  * password-reset token is invalidated before insertion.
  */
 export async function createPasswordResetToken(
-  input: CreatePasswordResetTokenInput
+  input: CreatePasswordResetTokenInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<PasswordResetTokenRecord> {
   assertAuthenticationTokenLifetime(
     input.createdAt,
@@ -217,7 +219,8 @@ export async function createPasswordResetToken(
       }
 
       return createdToken;
-    }
+    },
+    executor
   );
 }
 
@@ -225,7 +228,8 @@ export async function createPasswordResetToken(
  * Consumes one usable password-reset token atomically.
  */
 export async function consumePasswordResetToken(
-  input: ConsumePasswordResetTokenInput
+  input: ConsumePasswordResetTokenInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<PasswordResetTokenRecord | null> {
   assertValidAuthenticationDate(
     input.consumedAt,
@@ -256,7 +260,8 @@ export async function consumePasswordResetToken(
       [
         tokenDigest,
         input.consumedAt,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalPasswordResetTokenRow(
@@ -268,7 +273,8 @@ export async function consumePasswordResetToken(
  * Invalidates all active password-reset tokens for a user.
  */
 export async function invalidatePasswordResetTokens(
-  input: InvalidatePasswordResetTokensInput
+  input: InvalidatePasswordResetTokensInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<number> {
   assertValidAuthenticationDate(
     input.invalidatedAt,
@@ -289,7 +295,8 @@ export async function invalidatePasswordResetTokens(
       [
         input.userId,
         input.invalidatedAt,
-      ]
+      ],
+      executor
     );
 
   return result.rowCount ?? 0;

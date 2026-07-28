@@ -4,6 +4,7 @@ import type {
 
 import {
   executeDatabaseQuery,
+  type DatabaseQueryExecutor,
 } from "../../database/database.pool.js";
 
 import {
@@ -113,7 +114,8 @@ function mapOptionalEmailVerificationTokenRow(
  * same purpose is invalidated before the new token is inserted.
  */
 export async function createEmailVerificationToken(
-  input: CreateEmailVerificationTokenInput
+  input: CreateEmailVerificationTokenInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<EmailVerificationTokenRecord> {
   assertAuthenticationTokenLifetime(
     input.createdAt,
@@ -205,7 +207,8 @@ export async function createEmailVerificationToken(
       }
 
       return createdToken;
-    }
+    },
+    executor
   );
 }
 
@@ -216,7 +219,8 @@ export async function createEmailVerificationToken(
  * count reaches the supplied maximum.
  */
 export async function recordEmailVerificationAttempt(
-  input: RecordEmailVerificationAttemptInput
+  input: RecordEmailVerificationAttemptInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<EmailVerificationTokenRecord | null> {
   assertMaximumVerificationAttempts(
     input.maximumAttempts
@@ -262,7 +266,8 @@ export async function recordEmailVerificationAttempt(
         tokenDigest,
         input.attemptedAt,
         input.maximumAttempts,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalEmailVerificationTokenRow(
@@ -277,7 +282,8 @@ export async function recordEmailVerificationAttempt(
  * null because consumed_at is no longer null.
  */
 export async function consumeEmailVerificationToken(
-  input: ConsumeEmailVerificationTokenInput
+  input: ConsumeEmailVerificationTokenInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<EmailVerificationTokenRecord | null> {
   assertMaximumVerificationAttempts(
     input.maximumAttempts
@@ -314,7 +320,8 @@ export async function consumeEmailVerificationToken(
         tokenDigest,
         input.consumedAt,
         input.maximumAttempts,
-      ]
+      ],
+      executor
     );
 
   return mapOptionalEmailVerificationTokenRow(
@@ -329,7 +336,8 @@ export async function consumeEmailVerificationToken(
  * email-change tokens.
  */
 export async function invalidateEmailVerificationTokens(
-  input: InvalidateEmailVerificationTokensInput
+  input: InvalidateEmailVerificationTokensInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<number> {
   assertValidAuthenticationDate(
     input.invalidatedAt,
@@ -355,7 +363,8 @@ export async function invalidateEmailVerificationTokens(
         input.userId,
         input.invalidatedAt,
         input.purpose ?? null,
-      ]
+      ],
+      executor
     );
 
   return result.rowCount ?? 0;

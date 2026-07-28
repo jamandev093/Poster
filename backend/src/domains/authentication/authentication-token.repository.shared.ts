@@ -1,6 +1,6 @@
 import type {
-  PoolClient,
-} from "pg";
+  DatabaseQueryExecutor,
+} from "../../database/database.pool.js";
 
 import {
   runDatabaseTransaction,
@@ -117,10 +117,27 @@ export function assertMaximumVerificationAttempts(
 export async function runAuthenticationTokenTransaction<T>(
   operation:
     (
-      client: PoolClient
-    ) => Promise<T>
+      executor:
+        DatabaseQueryExecutor
+    ) => Promise<T>,
+  executor?:
+    DatabaseQueryExecutor
 ): Promise<T> {
+  if (
+    executor
+  ) {
+    return await operation(
+      executor
+    );
+  }
+
   return await runDatabaseTransaction(
-    operation
+    async (
+      client
+    ) => {
+      return await operation(
+        client
+      );
+    }
   );
 }
