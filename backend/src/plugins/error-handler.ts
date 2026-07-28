@@ -1,18 +1,33 @@
 import type {
   FastifyError,
-  FastifyInstance
+  FastifyInstance,
 } from "fastify";
+
+import {
+  AuthenticationDomainError,
+} from "../domains/authentication/authentication.errors.js";
+
+import {
+  ApiRequestValidationError,
+  type ApiValidationIssue,
+} from "../http/request-validation.js";
 
 interface ApiErrorResponse {
   error: {
     code: string;
+
     message: string;
+
     requestId: string;
+
+    details?:
+      readonly ApiValidationIssue[];
   };
 }
 
 export function registerErrorHandler(
-  app: FastifyInstance
+  app:
+    FastifyInstance
 ): void {
   app.setNotFoundHandler(
     (
@@ -22,26 +37,113 @@ export function registerErrorHandler(
       const response:
         ApiErrorResponse = {
           error: {
-            code: "ROUTE_NOT_FOUND",
+            code:
+              "ROUTE_NOT_FOUND",
+
             message:
               "The requested API route was not found.",
+
             requestId:
-              request.id
-          }
+              request.id,
+          },
         };
 
       return reply
-        .status(404)
-        .send(response);
+        .status(
+          404
+        )
+        .send(
+          response
+        );
     }
   );
 
   app.setErrorHandler(
     (
-      error: FastifyError,
+      error:
+        FastifyError,
       request,
       reply
     ) => {
+      if (
+        error instanceof
+        ApiRequestValidationError
+      ) {
+        request.log.info(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster API request validation failed."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+
+              details:
+                error.issues,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      if (
+        error instanceof
+        AuthenticationDomainError
+      ) {
+        request.log.warn(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster authentication request was rejected."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
       const statusCode =
         typeof error.statusCode ===
           "number" &&
@@ -53,8 +155,9 @@ export function registerErrorHandler(
       request.log.error(
         {
           error,
+
           requestId:
-            request.id
+            request.id,
         },
         "Poster API request failed."
       );
@@ -71,16 +174,20 @@ export function registerErrorHandler(
             message:
               statusCode >= 500
                 ? "The request could not be completed."
-                : error.message,
+                : "The request could not be processed.",
 
             requestId:
-              request.id
-          }
+              request.id,
+          },
         };
 
       return reply
-        .status(statusCode)
-        .send(response);
+        .status(
+          statusCode
+        )
+        .send(
+          response
+        );
     }
   );
 }

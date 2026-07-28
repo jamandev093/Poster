@@ -1,23 +1,61 @@
-import cors from "@fastify/cors";
-import helmet from "@fastify/helmet";
+import cors
+  from "@fastify/cors";
+
+import helmet
+  from "@fastify/helmet";
+
 import Fastify, {
-  type FastifyInstance
+  type FastifyInstance,
 } from "fastify";
 
 import {
-  getEnvironment
+  createSignupRegistrationService,
+  type SignupRegistrationService,
+} from "./application/authentication/signup-registration.service.js";
+
+import {
+  getEnvironment,
 } from "./config/environment.js";
 
 import {
-  registerErrorHandler
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerErrorHandler,
 } from "./plugins/error-handler.js";
 
 import {
-  healthRoutes
-} from "./routes/health.routes.js";
+  authenticationRoutes,
+  healthRoutes,
+  type AuthenticationRoutesOptions,
+} from "./routes/index.js";
 
-export async function buildApp():
-  Promise<FastifyInstance> {
+import {
+  createDevelopmentEmailDeliveryProvider,
+  type EmailDeliveryProvider,
+} from "./services/email/index.js";
+
+export interface BuildAppOptions {
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+}
+
+export async function buildApp(
+  options:
+    BuildAppOptions =
+    {}
+): Promise<
+  FastifyInstance
+> {
   const environment =
     getEnvironment();
 
@@ -29,32 +67,35 @@ export async function buildApp():
           ? false
           : {
               level:
-                environment.LOG_LEVEL
+                environment.LOG_LEVEL,
             },
 
-      trustProxy: true,
+      trustProxy:
+        true,
 
       requestIdHeader:
-        "x-request-id"
+        "x-request-id",
     });
 
   await app.register(
     helmet,
     {
-      global: true
+      global:
+        true,
     }
   );
 
   const allowedOrigins =
     new Set([
       environment.CLIENT_WEB_ORIGIN,
-      environment.ADMIN_WEB_ORIGIN
+      environment.ADMIN_WEB_ORIGIN,
     ]);
 
   await app.register(
     cors,
     {
-      credentials: true,
+      credentials:
+        true,
 
       origin: (
         origin,
@@ -75,7 +116,7 @@ export async function buildApp():
             origin
           )
         );
-      }
+      },
     }
   );
 
@@ -87,7 +128,35 @@ export async function buildApp():
     healthRoutes,
     {
       prefix:
-        "/api/v1"
+        "/api/v1",
+    }
+  );
+
+  const signupRegistrationService =
+    options
+      .signupRegistrationService ??
+    createSignupRegistrationService({
+      emailDeliveryProvider:
+        options
+          .emailDeliveryProvider ??
+        createDevelopmentEmailDeliveryProvider({
+          nodeEnvironment:
+            environment.NODE_ENV,
+        }),
+    });
+
+  await app.register(
+    authenticationRoutes,
+    {
+      prefix:
+        "/api/v1/auth",
+
+      signupRegistrationService,
+
+      verifySignupEmail:
+        options
+          .verifySignupEmail ??
+        verifySignupEmail,
     }
   );
 
@@ -101,7 +170,7 @@ export async function buildApp():
         "running",
 
       apiVersion:
-        "v1"
+        "v1",
     })
   );
 
