@@ -3,9 +3,8 @@ import type {
 } from "pg";
 
 import {
-  withDatabaseClient,
-} from "../../database/database.pool.js";
-
+  runDatabaseTransaction,
+} from "../../database/database.transaction.js";
 import {
   AuthenticationTokenInvalidError,
 } from "./authentication.errors.js";
@@ -108,42 +107,20 @@ export function assertMaximumVerificationAttempts(
   }
 }
 
+/**
+ * Executes authentication-token issuance through the
+ * authoritative Poster database transaction boundary.
+ *
+ * The domain-level helper remains available so token
+ * repositories do not depend directly on transaction details.
+ */
 export async function runAuthenticationTokenTransaction<T>(
   operation:
     (
       client: PoolClient
     ) => Promise<T>
 ): Promise<T> {
-  return await withDatabaseClient(
-    async (
-      client
-    ) => {
-      await client.query(
-        "BEGIN"
-      );
-
-      try {
-        const result =
-          await operation(
-            client
-          );
-
-        await client.query(
-          "COMMIT"
-        );
-
-        return result;
-      } catch (error) {
-        try {
-          await client.query(
-            "ROLLBACK"
-          );
-        } catch (rollbackError) {
-          void rollbackError;
-        }
-
-        throw error;
-      }
-    }
+  return await runDatabaseTransaction(
+    operation
   );
 }
