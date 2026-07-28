@@ -1,0 +1,366 @@
+import type {
+  QueryResultRow,
+} from "pg";
+
+import {
+  executeDatabaseQuery,
+} from "../../database/database.pool.js";
+
+import {
+  normalizeIdentityEmail,
+  normalizeRequiredIdentityText,
+  type CreateUserInput,
+  type MarkUserEmailVerifiedInput,
+  type RecordSuccessfulUserLoginInput,
+  type UpdateUserStatusInput,
+  type UserIdentityRecord,
+  type UserStatus,
+} from "./identity.types.js";
+
+interface UserDatabaseRow
+  extends QueryResultRow {
+  id: string;
+
+  email: string;
+
+  password_hash: string;
+
+  full_name: string;
+
+  status: UserStatus;
+
+  email_verified_at:
+    Date |
+    null;
+
+  last_login_at:
+    Date |
+    null;
+
+  failed_login_attempts: number;
+
+  locked_until:
+    Date |
+    null;
+
+  created_at: Date;
+
+  updated_at: Date;
+
+  deleted_at:
+    Date |
+    null;
+
+  row_version: string;
+}
+
+const USER_RETURNING_COLUMNS = `
+  id,
+  email,
+  password_hash,
+  full_name,
+  status,
+  email_verified_at,
+  last_login_at,
+  failed_login_attempts,
+  locked_until,
+  created_at,
+  updated_at,
+  deleted_at,
+  row_version::text
+    AS row_version
+`;
+
+function mapUserDatabaseRow(
+  row: UserDatabaseRow
+): UserIdentityRecord {
+  return {
+    id:
+      row.id,
+
+    email:
+      row.email,
+
+    passwordHash:
+      row.password_hash,
+
+    fullName:
+      row.full_name,
+
+    status:
+      row.status,
+
+    emailVerifiedAt:
+      row.email_verified_at,
+
+    lastLoginAt:
+      row.last_login_at,
+
+    failedLoginAttempts:
+      row.failed_login_attempts,
+
+    lockedUntil:
+      row.locked_until,
+
+    createdAt:
+      row.created_at,
+
+    updatedAt:
+      row.updated_at,
+
+    deletedAt:
+      row.deleted_at,
+
+    rowVersion:
+      row.row_version,
+  };
+}
+
+function mapOptionalUserRow(
+  row:
+    UserDatabaseRow |
+    undefined
+): UserIdentityRecord | null {
+  return row
+    ? mapUserDatabaseRow(
+        row
+      )
+    : null;
+}
+
+/**
+ * Creates a new Poster user identity.
+ *
+ * Email normalization is performed before the value reaches
+ * PostgreSQL. The database unique index remains authoritative.
+ */
+export async function createUser(
+  input: CreateUserInput
+): Promise<UserIdentityRecord> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        INSERT INTO app.users (
+          email,
+          password_hash,
+          full_name
+        )
+        VALUES (
+          $1,
+          $2,
+          $3
+        )
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        normalizeIdentityEmail(
+          input.email
+        ),
+
+        normalizeRequiredIdentityText(
+          input.passwordHash
+        ),
+
+        normalizeRequiredIdentityText(
+          input.fullName
+        ),
+      ]
+    );
+
+  const user =
+    mapOptionalUserRow(
+      result.rows[0]
+    );
+
+  if (!user) {
+    throw new Error(
+      "PostgreSQL did not return the created user."
+    );
+  }
+
+  return user;
+}
+
+/**
+ * Finds an active database record by its immutable UUID.
+ *
+ * Soft-deleted users are intentionally excluded.
+ */
+export async function findUserById(
+  userId: string
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        SELECT
+          ${USER_RETURNING_COLUMNS}
+        FROM app.users
+        WHERE
+          id = $1::uuid
+          AND deleted_at IS NULL
+        LIMIT 1
+      `,
+      [
+        userId,
+      ]
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Finds a user by their normalized email address.
+ *
+ * The returned record contains the password hash for internal
+ * authentication use. It must never be exposed in an API DTO.
+ */
+export async function findUserByEmail(
+  email: string
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        SELECT
+          ${USER_RETURNING_COLUMNS}
+        FROM app.users
+        WHERE
+          email = $1
+          AND deleted_at IS NULL
+        LIMIT 1
+      `,
+      [
+        normalizeIdentityEmail(
+          email
+        ),
+      ]
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Records successful email verification.
+ *
+ * The row-version condition prevents stale concurrent writes.
+ * A null result means the user was not found or the supplied
+ * row version was no longer current.
+ */
+export async function markUserEmailVerified(
+  input: MarkUserEmailVerifiedInput
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          email_verified_at = $3,
+          status =
+            CASE
+              WHEN status = 'pending_verification'
+                THEN 'active'
+              ELSE status
+            END
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+        input.verifiedAt,
+      ]
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Records a successful authentication event and clears any
+ * previous failed-login lock state.
+ */
+export async function recordSuccessfulUserLogin(
+  input: RecordSuccessfulUserLoginInput
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          last_login_at = $3,
+          failed_login_attempts = 0,
+          locked_until = NULL
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+        input.loggedInAt,
+      ]
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Updates a non-deleted user status using optimistic
+ * concurrency control.
+ *
+ * Permanent soft deletion will be implemented through a
+ * separate explicit repository operation.
+ */
+export async function updateUserStatus(
+  input: UpdateUserStatusInput
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          status = $3
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+        input.status,
+      ]
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
