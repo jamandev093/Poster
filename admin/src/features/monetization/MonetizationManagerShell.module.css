@@ -1,0 +1,76 @@
+﻿.workspace {
+  display: grid;
+  gap: 18px;
+}
+
+.navigation {
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--card);
+}
+
+.navigationButton,
+.navigationActive {
+  min-height: 36px;
+
+  padding: 0 14px;
+
+  border: 0;
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.navigationButton {
+  color: var(--text-secondary);
+
+  background: transparent;
+}
+
+.navigationButton:hover {
+  color: var(--text);
+
+  background: var(--surface);
+}
+
+.navigationActive {
+  color: var(--primary);
+
+  background:
+    rgb(91 134 229 / 0.09);
+}
+
+.loading {
+  min-height: 180px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+}
+
+@media (max-width: 620px) {
+  .navigation {
+    width: 100%;
+  }
+
+  .navigationButton,
+  .navigationActive {
+    flex: 1;
+  }
+}
