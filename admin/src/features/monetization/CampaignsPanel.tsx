@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   Suspense,
@@ -54,7 +54,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "17 Jul 2026 · 12:15",
+        "17 Jul 2026 Â· 12:15",
     },
   ],
 
@@ -70,7 +70,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "16 Jul 2026 · 10:30",
+        "16 Jul 2026 Â· 10:30",
     },
   ],
 
@@ -86,7 +86,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "19 Jul 2026 · 08:40",
+        "19 Jul 2026 Â· 08:40",
     },
 
     {
@@ -100,7 +100,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "15 Jul 2026 · 09:00",
+        "15 Jul 2026 Â· 09:00",
     },
   ],
 
@@ -116,7 +116,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "19 Jul 2026 · 14:10",
+        "19 Jul 2026 Â· 14:10",
     },
   ],
 
@@ -132,7 +132,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "System",
 
       timestamp:
-        "19 Jul 2026 · 00:00",
+        "19 Jul 2026 Â· 00:00",
     },
   ],
 
@@ -148,7 +148,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "20 Jul 2026 · 13:10",
+        "20 Jul 2026 Â· 13:10",
     },
 
     {
@@ -162,7 +162,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "20 Jul 2026 · 13:08",
+        "20 Jul 2026 Â· 13:08",
     },
   ],
 
@@ -178,7 +178,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "19 Jul 2026 · 16:20",
+        "19 Jul 2026 Â· 16:20",
     },
 
     {
@@ -192,7 +192,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "15 Jun 2026 · 09:00",
+        "15 Jun 2026 Â· 09:00",
     },
   ],
 
@@ -208,7 +208,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "20 Jul 2026 · 11:45",
+        "20 Jul 2026 Â· 11:45",
     },
 
     {
@@ -222,7 +222,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "20 Jul 2026 · 11:40",
+        "20 Jul 2026 Â· 11:40",
     },
   ],
 
@@ -238,7 +238,7 @@ const INITIAL_AUDIT_BY_CAMPAIGN:
         "Admin",
 
       timestamp:
-        "20 Jul 2026 · 15:30",
+        "20 Jul 2026 Â· 15:30",
     },
   ],
 };
@@ -1113,7 +1113,7 @@ function CampaignsContent() {
                           campaign.id
                         }
 
-                        {" · "}
+                        {" Â· "}
 
                         {
                           campaign.organization
@@ -1138,7 +1138,7 @@ function CampaignsContent() {
                         campaign.startDate
                       )}
 
-                      {" → "}
+                      {" â†’ "}
 
                       {formatDate(
                         campaign.endDate
@@ -1163,7 +1163,7 @@ function CampaignsContent() {
                         }
                       >
                         {campaign.performance.impressions.toLocaleString()}
-                        {" imp · "}
+                        {" imp Â· "}
                         {campaign.performance.clicks.toLocaleString()}
                         {" clicks"}
                       </span>
@@ -1182,67 +1182,20 @@ function CampaignsContent() {
                     </td>
 
                     <td>
-                      {campaign.status ===
-                      "active" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            pauseCampaign(
-                              campaign
-                            )
-                          }
-                        >
-                          Pause
-                        </button>
-                      ) : campaign.status ===
-                        "paused" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            resumeCampaign(
-                              campaign
-                            )
-                          }
-                        >
-                          Resume
-                        </button>
-                      ) : campaign.status ===
-                        "draft" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            setSelectedId(
-                              campaign.id
-                            )
-                          }
-                        >
-                          Review
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            setSelectedId(
-                              campaign.id
-                            )
-                          }
-                        >
-                          View
-                        </button>
-                      )}
-                    </td>
+  <button
+    type="button"
+    className={
+      styles.actionButton
+    }
+    onClick={() =>
+      setSelectedId(
+        campaign.id
+      )
+    }
+  >
+    View
+  </button>
+</td>
                   </tr>
                 )
               )}
@@ -1346,7 +1299,7 @@ function CampaignsContent() {
                   )
                 }
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -1431,7 +1384,7 @@ function CampaignsContent() {
                         ? `Sponsored by ${selectedCampaign.organization}`
                         : selectedCampaign.type ===
                           "affiliate"
-                        ? "Affiliate · Poster may earn a commission"
+                        ? "Affiliate Â· Poster may earn a commission"
                         : selectedCampaign.type ===
                           "poster_promotion"
                         ? "Promoted by Poster"
@@ -1647,7 +1600,7 @@ function CampaignsContent() {
                               entry.actor
                             }
 
-                            {" · "}
+                            {" Â· "}
 
                             {
                               entry.timestamp
@@ -1838,7 +1791,7 @@ function CampaignsContent() {
                 }
               </strong>
 
-              {" · "}
+              {" Â· "}
 
               {
                 endTarget.name

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useMemo,
@@ -105,7 +105,7 @@ const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
           "System",
 
         timestamp:
-          "20 Jul 2026 · 09:15",
+          "20 Jul 2026 Â· 09:15",
       },
 
       {
@@ -119,7 +119,7 @@ const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
           "Admin",
 
         timestamp:
-          "17 Jul 2026 · 12:15",
+          "17 Jul 2026 Â· 12:15",
       },
     ],
   },
@@ -175,7 +175,7 @@ const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 14:40",
+          "19 Jul 2026 Â· 14:40",
       },
     ],
   },
@@ -231,7 +231,7 @@ const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 16:05",
+          "19 Jul 2026 Â· 16:05",
       },
 
       {
@@ -245,7 +245,7 @@ const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
           "Admin",
 
         timestamp:
-          "10 Jul 2026 · 08:00",
+          "10 Jul 2026 Â· 08:00",
       },
     ],
   },
@@ -1043,52 +1043,20 @@ export default function DirectSponsorshipManager() {
                       </td>
 
                       <td>
-                        {sponsorship.status ===
-                        "active" ? (
-                          <button
-                            type="button"
-                            className={
-                              styles.actionButton
-                            }
-                            onClick={() =>
-                              pauseCampaign(
-                                sponsorship
-                              )
-                            }
-                          >
-                            Pause
-                          </button>
-                        ) : sponsorship.status ===
-                          "paused" ? (
-                          <button
-                            type="button"
-                            className={
-                              styles.actionButton
-                            }
-                            onClick={() =>
-                              resumeCampaign(
-                                sponsorship
-                              )
-                            }
-                          >
-                            Resume
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={
-                              styles.actionButton
-                            }
-                            onClick={() =>
-                              setSelectedId(
-                                sponsorship.id
-                              )
-                            }
-                          >
-                            View
-                          </button>
-                        )}
-                      </td>
+  <button
+    type="button"
+    className={
+      styles.actionButton
+    }
+    onClick={() =>
+      setSelectedId(
+        sponsorship.id
+      )
+    }
+  >
+    View
+  </button>
+</td>
                     </tr>
                   );
                 }
@@ -1183,7 +1151,7 @@ export default function DirectSponsorshipManager() {
                   )
                 }
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -1526,7 +1494,7 @@ export default function DirectSponsorshipManager() {
                             {
                               entry.actor
                             }
-                            {" · "}
+                            {" Â· "}
                             {
                               entry.timestamp
                             }
@@ -1670,7 +1638,7 @@ export default function DirectSponsorshipManager() {
                   endTarget.id
                 }
               </strong>
-              {" · "}
+              {" Â· "}
               {
                 endTarget.name
               }

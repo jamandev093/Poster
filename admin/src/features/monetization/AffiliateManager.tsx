@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -99,7 +99,7 @@ const INITIAL_AFFILIATES: AffiliateRecord[] = [
           "System",
 
         timestamp:
-          "20 Jul 2026 · 09:10",
+          "20 Jul 2026 Â· 09:10",
       },
 
       {
@@ -113,7 +113,7 @@ const INITIAL_AFFILIATES: AffiliateRecord[] = [
           "Admin",
 
         timestamp:
-          "16 Jul 2026 · 10:30",
+          "16 Jul 2026 Â· 10:30",
       },
     ],
   },
@@ -166,7 +166,7 @@ const INITIAL_AFFILIATES: AffiliateRecord[] = [
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 15:20",
+          "19 Jul 2026 Â· 15:20",
       },
 
       {
@@ -180,7 +180,7 @@ const INITIAL_AFFILIATES: AffiliateRecord[] = [
           "Admin",
 
         timestamp:
-          "12 Jul 2026 · 11:00",
+          "12 Jul 2026 Â· 11:00",
       },
     ],
   },
@@ -233,7 +233,7 @@ const INITIAL_AFFILIATES: AffiliateRecord[] = [
           "Admin",
 
         timestamp:
-          "20 Jul 2026 · 11:45",
+          "20 Jul 2026 Â· 11:45",
       },
     ],
   },
@@ -1039,52 +1039,20 @@ export default function AffiliateManager() {
                     </td>
 
                     <td>
-                      {affiliate.status ===
-                      "active" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            pauseCampaign(
-                              affiliate
-                            )
-                          }
-                        >
-                          Pause
-                        </button>
-                      ) : affiliate.status ===
-                        "paused" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            resumeCampaign(
-                              affiliate
-                            )
-                          }
-                        >
-                          Resume
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            setSelectedId(
-                              affiliate.id
-                            )
-                          }
-                        >
-                          View
-                        </button>
-                      )}
-                    </td>
+  <button
+    type="button"
+    className={
+      styles.actionButton
+    }
+    onClick={() =>
+      setSelectedId(
+        affiliate.id
+      )
+    }
+  >
+    View
+  </button>
+</td>
                   </tr>
                 )
               )}
@@ -1178,7 +1146,7 @@ export default function AffiliateManager() {
                   )
                 }
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -1231,7 +1199,7 @@ export default function AffiliateManager() {
                     </dt>
 
                     <dd>
-                      Affiliate · Poster may earn a commission
+                      Affiliate Â· Poster may earn a commission
                     </dd>
                   </div>
 
@@ -1469,7 +1437,7 @@ export default function AffiliateManager() {
                             {
                               entry.actor
                             }
-                            {" · "}
+                            {" Â· "}
                             {
                               entry.timestamp
                             }
@@ -1613,7 +1581,7 @@ export default function AffiliateManager() {
                   endTarget.id
                 }
               </strong>
-              {" · "}
+              {" Â· "}
               {
                 endTarget.name
               }

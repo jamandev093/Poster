@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -91,7 +91,7 @@ const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 08:40",
+          "19 Jul 2026 Â· 08:40",
       },
 
       {
@@ -105,7 +105,7 @@ const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
           "Admin",
 
         timestamp:
-          "15 Jul 2026 · 09:00",
+          "15 Jul 2026 Â· 09:00",
       },
     ],
   },
@@ -155,7 +155,7 @@ const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
           "Admin",
 
         timestamp:
-          "19 Jul 2026 · 14:10",
+          "19 Jul 2026 Â· 14:10",
       },
     ],
   },
@@ -895,7 +895,7 @@ export default function PosterPromotionManager() {
                         {
                           promotion.id
                         }
-                        {" · Promoted by Poster"}
+                        {" Â· Promoted by Poster"}
                       </span>
                     </td>
 
@@ -911,7 +911,7 @@ export default function PosterPromotionManager() {
                       }
 
                       {promotion.endAt
-                        ? ` → ${promotion.endAt}`
+                        ? ` â†’ ${promotion.endAt}`
                         : ""}
                     </td>
 
@@ -962,52 +962,20 @@ export default function PosterPromotionManager() {
                     </td>
 
                     <td>
-                      {promotion.status ===
-                      "active" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            pausePromotion(
-                              promotion
-                            )
-                          }
-                        >
-                          Pause
-                        </button>
-                      ) : promotion.status ===
-                        "paused" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            resumePromotion(
-                              promotion
-                            )
-                          }
-                        >
-                          Resume
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            setSelectedId(
-                              promotion.id
-                            )
-                          }
-                        >
-                          View
-                        </button>
-                      )}
-                    </td>
+  <button
+    type="button"
+    className={
+      styles.actionButton
+    }
+    onClick={() =>
+      setSelectedId(
+        promotion.id
+      )
+    }
+  >
+    View
+  </button>
+</td>
                   </tr>
                 )
               )}
@@ -1039,7 +1007,7 @@ export default function PosterPromotionManager() {
 
           <p>
             These campaigns use the disclosure
-            “Promoted by Poster”. They remain
+            â€œPromoted by Posterâ€. They remain
             separate from organic ranking and
             should not be disguised as ordinary
             recommendations.
@@ -1102,7 +1070,7 @@ export default function PosterPromotionManager() {
                   )
                 }
               >
-                ×
+                Ã—
               </button>
             </div>
 
@@ -1370,7 +1338,7 @@ export default function PosterPromotionManager() {
                             {
                               entry.actor
                             }
-                            {" · "}
+                            {" Â· "}
                             {
                               entry.timestamp
                             }
@@ -1533,7 +1501,7 @@ export default function PosterPromotionManager() {
                   endTarget.id
                 }
               </strong>
-              {" · "}
+              {" Â· "}
               {
                 endTarget.name
               }
