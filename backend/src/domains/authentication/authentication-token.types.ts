@@ -37,6 +37,8 @@ export interface PasswordResetTokenRecord {
 
   tokenDigest: string;
 
+  attemptCount: number;
+
   requestedIpAddress:
     | string
     | null;
@@ -120,10 +122,25 @@ export interface CreatePasswordResetTokenInput {
   expiresAt: Date;
 }
 
+export interface FindPendingPasswordResetTokenInput {
+  userId: string;
+}
+
+export interface RecordPasswordResetAttemptInput {
+  tokenDigest: string;
+
+  attemptedAt: Date;
+
+  maximumAttempts: number;
+}
+
 export interface ConsumePasswordResetTokenInput {
   tokenDigest: string;
 
   consumedAt: Date;
+
+  maximumAttempts?:
+    number;
 }
 
 export interface InvalidatePasswordResetTokensInput {

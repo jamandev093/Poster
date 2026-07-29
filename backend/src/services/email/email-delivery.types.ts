@@ -1,5 +1,6 @@
 export const EMAIL_DELIVERY_CATEGORIES = [
   "signup_verification",
+  "password_reset",
 ] as const;
 
 export type EmailDeliveryCategory =

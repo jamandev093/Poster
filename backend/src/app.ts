@@ -27,6 +27,11 @@ import {
 } from "./application/authentication/login-session.service.js";
 
 import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+import {
   createSessionLifecycleService,
   type SessionLifecycleService,
 } from "./application/authentication/session-lifecycle.service.js";
@@ -96,6 +101,9 @@ export interface BuildAppOptions {
 
   sessionLifecycleService?:
     SessionLifecycleService;
+
+  passwordResetService?:
+    PasswordResetService;
 }
 
 export async function buildApp(
@@ -231,17 +239,26 @@ export async function buildApp(
     }
   );
 
+  const emailDeliveryProvider =
+    options
+      .emailDeliveryProvider ??
+    createDevelopmentEmailDeliveryProvider({
+      nodeEnvironment:
+        environment.NODE_ENV,
+    });
+
   const signupRegistrationService =
     options
       .signupRegistrationService ??
     createSignupRegistrationService({
-      emailDeliveryProvider:
-        options
-          .emailDeliveryProvider ??
-        createDevelopmentEmailDeliveryProvider({
-          nodeEnvironment:
-            environment.NODE_ENV,
-        }),
+      emailDeliveryProvider,
+    });
+
+  const passwordResetService =
+    options
+      .passwordResetService ??
+    createPasswordResetService({
+      emailDeliveryProvider,
     });
 
   await app.register(
@@ -268,6 +285,8 @@ export async function buildApp(
         options
           .sessionLifecycleService ??
         createSessionLifecycleService(),
+
+      passwordResetService,
 
       isProduction:
         environment.NODE_ENV ===

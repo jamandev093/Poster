@@ -12,6 +12,10 @@ import type {
 } from "../application/authentication/login-session.service.js";
 
 import type {
+  PasswordResetService,
+} from "../application/authentication/password-reset.service.js";
+
+import type {
   AuthenticationSessionSummary,
 } from "../application/authentication/login-session.types.js";
 
@@ -171,6 +175,69 @@ const VerifySignupEmailRequestSchema =
     })
     .strict();
 
+const PasswordResetRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+    })
+    .strict();
+
+const PasswordResetConfirmSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      code:
+        z
+          .string()
+          .trim()
+          .regex(
+            /^\d{6}$/,
+            "Password-reset code must contain exactly six digits."
+          ),
+
+      password:
+        z
+          .string()
+          .min(
+            PASSWORD_MINIMUM_LENGTH,
+            `Password must contain at least ${PASSWORD_MINIMUM_LENGTH} characters.`
+          )
+          .max(
+            PASSWORD_MAXIMUM_LENGTH,
+            "Password is too long."
+          ),
+    })
+    .strict();
+
 interface AuthenticationAccountResponse {
   id: string;
 
@@ -261,6 +328,9 @@ export interface AuthenticationRoutesOptions {
 
   sessionLifecycleService:
     SessionLifecycleService;
+
+  passwordResetService:
+    PasswordResetService;
 
   isProduction: boolean;
 }
@@ -602,6 +672,86 @@ export const authenticationRoutes:
             204
           )
           .send();
+      }
+    );
+
+    app.post(
+      "/password-reset/request",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            PasswordResetRequestSchema,
+            request.body
+          );
+
+        await options
+          .passwordResetService
+          .request({
+            email:
+              input.email,
+
+            ipAddress:
+              request.ip,
+
+            userAgent:
+              request.headers[
+                "user-agent"
+              ] ??
+              null,
+          });
+
+        return reply
+          .status(
+            202
+          )
+          .send({
+            status:
+              "accepted",
+          });
+      }
+    );
+
+    app.post(
+      "/password-reset/confirm",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            PasswordResetConfirmSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .passwordResetService
+            .confirm({
+              email:
+                input.email,
+
+              code:
+                input.code,
+
+              password:
+                input.password,
+            });
+
+        clearAuthenticationRefreshCookie(
+          reply,
+          options.isProduction
+        );
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            result
+          );
       }
     );
 

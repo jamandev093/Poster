@@ -13,6 +13,7 @@ import {
   type CreateUserInput,
   type MarkUserEmailVerifiedInput,
   type RecordSuccessfulUserLoginInput,
+  type UpdateUserPasswordInput,
   type UpdateUserStatusInput,
   type UserIdentityRecord,
   type UserStatus,
@@ -330,6 +331,55 @@ export async function recordSuccessfulUserLogin(
         input.userId,
         input.expectedRowVersion,
         input.loggedInAt,
+      ],
+      executor
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Replaces one user's password hash using optimistic
+ * concurrency control and clears any failed-login lock state.
+ *
+ * Only a PHC-formatted password hash may reach this repository.
+ * Raw passwords must never be persisted.
+ */
+export async function updateUserPassword(
+  input:
+    UpdateUserPasswordInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  UserIdentityRecord |
+  null
+> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          password_hash = $3,
+          failed_login_attempts = 0,
+          locked_until = NULL
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+
+        normalizeRequiredIdentityText(
+          input.passwordHash
+        ),
       ],
       executor
     );

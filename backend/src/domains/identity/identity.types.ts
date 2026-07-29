@@ -218,6 +218,14 @@ export interface RecordSuccessfulUserLoginInput {
   loggedInAt: Date;
 }
 
+export interface UpdateUserPasswordInput {
+  userId: string;
+
+  expectedRowVersion: string;
+
+  passwordHash: string;
+}
+
 export interface UpdateUserStatusInput {
   userId: string;
 

@@ -9,6 +9,7 @@ import {
 
 import {
   assertAuthenticationTokenLifetime,
+  assertMaximumVerificationAttempts,
   assertValidAuthenticationDate,
   normalizeAuthenticationTokenDigest,
   normalizeOptionalAuthenticationRequestText,
@@ -18,8 +19,10 @@ import {
 import type {
   ConsumePasswordResetTokenInput,
   CreatePasswordResetTokenInput,
+  FindPendingPasswordResetTokenInput,
   InvalidatePasswordResetTokensInput,
   PasswordResetTokenRecord,
+  RecordPasswordResetAttemptInput,
 } from "./authentication-token.types.js";
 
 interface PasswordResetTokenDatabaseRow
@@ -29,6 +32,8 @@ interface PasswordResetTokenDatabaseRow
   user_id: string;
 
   token_digest: string;
+
+  attempt_count: number;
 
   requested_ip_address:
     | string
@@ -51,10 +56,14 @@ interface PasswordResetTokenDatabaseRow
     | null;
 }
 
+const PASSWORD_RESET_DEFAULT_MAXIMUM_ATTEMPTS =
+  5;
+
 const PASSWORD_RESET_RETURNING_COLUMNS = `
   id,
   user_id,
   token_digest,
+  attempt_count,
   host(requested_ip_address)
     AS requested_ip_address,
   requested_user_agent,
@@ -65,7 +74,8 @@ const PASSWORD_RESET_RETURNING_COLUMNS = `
 `;
 
 function mapPasswordResetTokenDatabaseRow(
-  row: PasswordResetTokenDatabaseRow
+  row:
+    PasswordResetTokenDatabaseRow
 ): PasswordResetTokenRecord {
   return {
     id:
@@ -76,6 +86,9 @@ function mapPasswordResetTokenDatabaseRow(
 
     tokenDigest:
       row.token_digest,
+
+    attemptCount:
+      row.attempt_count,
 
     requestedIpAddress:
       row.requested_ip_address,
@@ -116,9 +129,13 @@ function mapOptionalPasswordResetTokenRow(
  * password-reset token is invalidated before insertion.
  */
 export async function createPasswordResetToken(
-  input: CreatePasswordResetTokenInput,
-  executor?: DatabaseQueryExecutor
-): Promise<PasswordResetTokenRecord> {
+  input:
+    CreatePasswordResetTokenInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  PasswordResetTokenRecord
+> {
   assertAuthenticationTokenLifetime(
     input.createdAt,
     input.expiresAt
@@ -181,6 +198,7 @@ export async function createPasswordResetToken(
             INSERT INTO app.password_reset_tokens (
               user_id,
               token_digest,
+              attempt_count,
               requested_ip_address,
               requested_user_agent,
               created_at,
@@ -189,6 +207,7 @@ export async function createPasswordResetToken(
             VALUES (
               $1::uuid,
               $2,
+              0,
               $3::inet,
               $4,
               $5,
@@ -212,7 +231,9 @@ export async function createPasswordResetToken(
           result.rows[0]
         );
 
-      if (!createdToken) {
+      if (
+        !createdToken
+      ) {
         throw new Error(
           "PostgreSQL did not return the created password-reset token."
         );
@@ -225,15 +246,141 @@ export async function createPasswordResetToken(
 }
 
 /**
+ * Finds the newest pending password-reset token for one user.
+ *
+ * Expired tokens remain visible so the application service can
+ * return the correct domain error. FOR UPDATE serializes
+ * confirmation attempts inside the service transaction.
+ */
+export async function findPendingPasswordResetToken(
+  input:
+    FindPendingPasswordResetTokenInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  PasswordResetTokenRecord |
+  null
+> {
+  const result =
+    await executeDatabaseQuery<
+      PasswordResetTokenDatabaseRow
+    >(
+      `
+        SELECT
+          ${PASSWORD_RESET_RETURNING_COLUMNS}
+        FROM app.password_reset_tokens
+        WHERE
+          user_id = $1::uuid
+          AND consumed_at IS NULL
+          AND invalidated_at IS NULL
+        ORDER BY
+          created_at DESC,
+          id DESC
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [
+        input.userId,
+      ],
+      executor
+    );
+
+  return mapOptionalPasswordResetTokenRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Atomically records one failed password-reset attempt.
+ *
+ * The token is invalidated when the new attempt count reaches
+ * the configured maximum.
+ */
+export async function recordPasswordResetAttempt(
+  input:
+    RecordPasswordResetAttemptInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  PasswordResetTokenRecord |
+  null
+> {
+  assertMaximumVerificationAttempts(
+    input.maximumAttempts
+  );
+
+  assertValidAuthenticationDate(
+    input.attemptedAt,
+    "Password-reset attempt time"
+  );
+
+  const tokenDigest =
+    normalizeAuthenticationTokenDigest(
+      input.tokenDigest
+    );
+
+  const result =
+    await executeDatabaseQuery<
+      PasswordResetTokenDatabaseRow
+    >(
+      `
+        UPDATE app.password_reset_tokens
+        SET
+          attempt_count =
+            attempt_count + 1,
+
+          invalidated_at =
+            CASE
+              WHEN
+                attempt_count + 1 >= $3::integer
+                THEN $2
+              ELSE invalidated_at
+            END
+        WHERE
+          token_digest = $1
+          AND consumed_at IS NULL
+          AND invalidated_at IS NULL
+          AND expires_at > $2
+          AND attempt_count < $3::integer
+        RETURNING
+          ${PASSWORD_RESET_RETURNING_COLUMNS}
+      `,
+      [
+        tokenDigest,
+        input.attemptedAt,
+        input.maximumAttempts,
+      ],
+      executor
+    );
+
+  return mapOptionalPasswordResetTokenRow(
+    result.rows[0]
+  );
+}
+
+/**
  * Consumes one usable password-reset token atomically.
  */
 export async function consumePasswordResetToken(
-  input: ConsumePasswordResetTokenInput,
-  executor?: DatabaseQueryExecutor
-): Promise<PasswordResetTokenRecord | null> {
+  input:
+    ConsumePasswordResetTokenInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  PasswordResetTokenRecord |
+  null
+> {
   assertValidAuthenticationDate(
     input.consumedAt,
     "Password-reset consumption time"
+  );
+
+  const maximumAttempts =
+    input.maximumAttempts ??
+    PASSWORD_RESET_DEFAULT_MAXIMUM_ATTEMPTS;
+
+  assertMaximumVerificationAttempts(
+    maximumAttempts
   );
 
   const tokenDigest =
@@ -254,12 +401,14 @@ export async function consumePasswordResetToken(
           AND consumed_at IS NULL
           AND invalidated_at IS NULL
           AND expires_at > $2
+          AND attempt_count < $3::integer
         RETURNING
           ${PASSWORD_RESET_RETURNING_COLUMNS}
       `,
       [
         tokenDigest,
         input.consumedAt,
+        maximumAttempts,
       ],
       executor
     );
@@ -273,9 +422,13 @@ export async function consumePasswordResetToken(
  * Invalidates all active password-reset tokens for a user.
  */
 export async function invalidatePasswordResetTokens(
-  input: InvalidatePasswordResetTokensInput,
-  executor?: DatabaseQueryExecutor
-): Promise<number> {
+  input:
+    InvalidatePasswordResetTokensInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<
+  number
+> {
   assertValidAuthenticationDate(
     input.invalidatedAt,
     "Password-reset invalidation time"
@@ -299,5 +452,6 @@ export async function invalidatePasswordResetTokens(
       executor
     );
 
-  return result.rowCount ?? 0;
+  return result.rowCount ??
+    0;
 }

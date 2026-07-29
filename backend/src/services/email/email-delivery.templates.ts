@@ -257,3 +257,150 @@ export function createSignupVerificationEmailMessage(
     idempotencyKey,
   };
 }
+
+export interface CreatePasswordResetEmailInput {
+  recipientEmail:
+    string;
+
+  recipientName?:
+    | string
+    | null;
+
+  resetCode:
+    string;
+
+  expiresAt:
+    Date;
+
+  /**
+   * Use the password-reset token record UUID.
+   *
+   * The raw reset code must never be used as an idempotency
+   * key.
+   */
+  idempotencyKey:
+    string;
+}
+
+function normalizePasswordResetCode(
+  value: string
+): string {
+  const normalizedValue =
+    value.trim();
+
+  if (
+    !/^\d{6}$/.test(
+      normalizedValue
+    )
+  ) {
+    throw new TypeError(
+      "Password-reset code must contain exactly six digits."
+    );
+  }
+
+  return normalizedValue;
+}
+
+/**
+ * Creates the provider-neutral Poster password-reset message.
+ *
+ * This function does not persist or log the raw reset code.
+ */
+export function createPasswordResetEmailMessage(
+  input:
+    CreatePasswordResetEmailInput
+): EmailDeliveryMessage {
+  const recipientEmail =
+    normalizeRecipientEmail(
+      input.recipientEmail
+    );
+
+  const recipientName =
+    normalizeRecipientName(
+      input.recipientName
+    );
+
+  const resetCode =
+    normalizePasswordResetCode(
+      input.resetCode
+    );
+
+  const idempotencyKey =
+    normalizeIdempotencyKey(
+      input.idempotencyKey
+    );
+
+  assertValidExpiryDate(
+    input.expiresAt
+  );
+
+  const expiryText =
+    input.expiresAt.toISOString();
+
+  const greeting =
+    recipientName
+      ? `Hi ${recipientName},`
+      : "Hello,";
+
+  const safeGreeting =
+    escapeHtml(
+      greeting
+    );
+
+  const safeResetCode =
+    escapeHtml(
+      resetCode
+    );
+
+  const safeExpiryText =
+    escapeHtml(
+      expiryText
+    );
+
+  return {
+    category:
+      "password_reset",
+
+    to:
+      recipientEmail,
+
+    subject:
+      "Reset your Poster password",
+
+    text: [
+      greeting,
+      "",
+      "Use this code to reset your Poster password:",
+      "",
+      resetCode,
+      "",
+      `This code expires at ${expiryText}.`,
+      "",
+      "Do not share this code with anyone.",
+      "Poster will never ask you to send this code by email or message.",
+      "",
+      "If you did not request a password reset, you can ignore this email.",
+    ].join(
+      "\n"
+    ),
+
+    html: [
+      "<!doctype html>",
+      '<html lang="en">',
+      "<body>",
+      `<p>${safeGreeting}</p>`,
+      "<p>Use this code to reset your Poster password:</p>",
+      `<p><strong>${safeResetCode}</strong></p>`,
+      `<p>This code expires at ${safeExpiryText}.</p>`,
+      "<p>Do not share this code with anyone.</p>",
+      "<p>Poster will never ask you to send this code by email or message.</p>",
+      "<p>If you did not request a password reset, you can ignore this email.</p>",
+      "</body>",
+      "</html>",
+    ].join(
+      ""
+    ),
+
+    idempotencyKey,
+  };
+}

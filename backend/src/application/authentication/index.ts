@@ -9,3 +9,7 @@ export * from "./login-session.service.js";
 export * from "./session-lifecycle.types.js";
 
 export * from "./session-lifecycle.service.js";
+
+export * from "./password-reset.types.js";
+
+export * from "./password-reset.service.js";
