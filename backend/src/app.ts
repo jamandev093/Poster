@@ -11,6 +11,11 @@ import Fastify, {
 } from "fastify";
 
 import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
   createLoginSessionService,
   type LoginSessionService,
 } from "./application/authentication/login-session.service.js";
@@ -25,14 +30,24 @@ import {
 } from "./config/environment.js";
 
 import {
+  createAuthenticationAccessTokenService,
+  type AuthenticationAccessTokenService,
+} from "./domains/authentication/access-token.service.js";
+
+import {
   verifySignupEmail,
 } from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
 
 import {
   registerErrorHandler,
 } from "./plugins/error-handler.js";
 
 import {
+  adminAccessRoutes,
   authenticationRoutes,
   healthRoutes,
   type AuthenticationRoutesOptions,
@@ -44,6 +59,12 @@ import {
 } from "./services/email/index.js";
 
 export interface BuildAppOptions {
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
   emailDeliveryProvider?:
     EmailDeliveryProvider;
 
@@ -68,6 +89,23 @@ export async function buildApp(
 > {
   const environment =
     getEnvironment();
+
+  const sessionSecret =
+    environment.SESSION_SECRET ??
+    (
+      environment.NODE_ENV ===
+        "test"
+        ? "poster-test-access-token-secret-2026-never-use-in-production"
+        : undefined
+    );
+
+  if (
+    !sessionSecret
+  ) {
+    throw new Error(
+      "SESSION_SECRET is required to issue authentication access tokens."
+    );
+  }
 
   const app =
     Fastify({
@@ -111,6 +149,11 @@ export async function buildApp(
       credentials:
         true,
 
+      exposedHeaders: [
+        "x-poster-access-token",
+        "x-poster-access-token-expires-at",
+      ],
+
       origin: (
         origin,
         callback
@@ -131,6 +174,28 @@ export async function buildApp(
           )
         );
       },
+    }
+  );
+
+  const accessTokenService =
+    options
+      .accessTokenService ??
+    createAuthenticationAccessTokenService({
+      secret:
+        sessionSecret,
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
     }
   );
 
@@ -165,6 +230,8 @@ export async function buildApp(
       prefix:
         "/api/v1/auth",
 
+      accessTokenService,
+
       signupRegistrationService,
 
       verifySignupEmail:
@@ -180,6 +247,14 @@ export async function buildApp(
       isProduction:
         environment.NODE_ENV ===
         "production",
+    }
+  );
+
+  await app.register(
+    adminAccessRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
     }
   );
 

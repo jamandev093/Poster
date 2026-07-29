@@ -7,6 +7,10 @@ import {
 } from "zod";
 
 import type {
+  AuthenticationAccessTokenService,
+} from "../domains/authentication/access-token.service.js";
+
+import type {
   LoginSessionService,
 } from "../application/authentication/login-session.service.js";
 
@@ -23,6 +27,11 @@ import type {
   VerifySignupEmailInput,
   VerifySignupEmailResult,
 } from "../domains/authentication/authentication.service.types.js";
+
+import {
+  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+  AUTHENTICATION_ACCESS_TOKEN_HEADER,
+} from "../domains/authentication/access-token.service.js";
 
 import {
   setAuthenticationRefreshCookie,
@@ -229,6 +238,9 @@ export type VerifySignupEmailOperation =
   >;
 
 export interface AuthenticationRoutesOptions {
+  accessTokenService:
+    AuthenticationAccessTokenService;
+
   signupRegistrationService:
     SignupRegistrationService;
 
@@ -361,6 +373,33 @@ export const authenticationRoutes:
                 ] ??
                 null,
             });
+
+        const accessToken =
+          options
+            .accessTokenService
+            .issue({
+              userId:
+                result.account.id,
+
+              sessionId:
+                result.session.id,
+            });
+
+        reply
+          .header(
+            "cache-control",
+            "no-store"
+          )
+          .header(
+            AUTHENTICATION_ACCESS_TOKEN_HEADER,
+            accessToken.token
+          )
+          .header(
+            AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+            accessToken
+              .expiresAt
+              .toISOString()
+          );
 
         setAuthenticationRefreshCookie(
           reply,

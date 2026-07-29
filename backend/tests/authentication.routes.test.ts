@@ -29,6 +29,11 @@ import {
 } from "../src/domains/authentication/authentication.errors.js";
 
 import {
+  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+  AUTHENTICATION_ACCESS_TOKEN_HEADER,
+} from "../src/domains/authentication/access-token.service.js";
+
+import {
   AUTHENTICATION_REFRESH_COOKIE_NAME,
   AUTHENTICATION_REFRESH_COOKIE_PATH,
 } from "../src/http/authentication-cookie.js";
@@ -296,6 +301,34 @@ describe(
           response.body
         ).not.toContain(
           "refreshToken"
+        );
+
+        expect(
+          response.headers[
+            AUTHENTICATION_ACCESS_TOKEN_HEADER
+          ]
+        ).toEqual(
+          expect.any(
+            String
+          )
+        );
+
+        expect(
+          response.headers[
+            AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER
+          ]
+        ).toEqual(
+          expect.any(
+            String
+          )
+        );
+
+        expect(
+          response.headers[
+            "cache-control"
+          ]
+        ).toBe(
+          "no-store"
         );
 
         const setCookieHeaderValue =

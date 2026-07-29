@@ -3,6 +3,9 @@ export const AUTHENTICATION_ERROR_CODES = [
   "AUTH_PASSWORD_POLICY",
   "AUTH_TOKEN_INVALID",
   "AUTH_TOKEN_EXPIRED",
+  "AUTH_REQUIRED",
+  "AUTH_ACCESS_TOKEN_INVALID",
+  "AUTH_ACCESS_TOKEN_EXPIRED",
   "AUTH_FORBIDDEN",
   "AUTH_CONFLICT",
   "AUTH_CONCURRENCY_CONFLICT",
@@ -154,6 +157,72 @@ export class AuthenticationTokenExpiredError
 
     this.name =
       "AuthenticationTokenExpiredError";
+  }
+}
+
+export class AuthenticationRequiredError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_REQUIRED",
+
+      message:
+        "The requested operation requires an authenticated identity.",
+
+      publicMessage:
+        "Authentication is required.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationRequiredError";
+  }
+}
+
+export class AuthenticationAccessTokenInvalidError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_ACCESS_TOKEN_INVALID",
+
+      message:
+        "The supplied access token was invalid.",
+
+      publicMessage:
+        "The authentication session is invalid.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationAccessTokenInvalidError";
+  }
+}
+
+export class AuthenticationAccessTokenExpiredError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_ACCESS_TOKEN_EXPIRED",
+
+      message:
+        "The supplied access token has expired.",
+
+      publicMessage:
+        "The authentication session has expired.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationAccessTokenExpiredError";
   }
 }
 

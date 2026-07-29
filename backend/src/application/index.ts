@@ -6,3 +6,5 @@
  * calls inside authoritative database transactions.
  */
 export * from "./authentication/index.js";
+
+export * from "./authorization/index.js";
