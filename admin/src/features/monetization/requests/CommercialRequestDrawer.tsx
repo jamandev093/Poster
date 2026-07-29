@@ -642,7 +642,13 @@ export default function CommercialRequestDrawer(
                 styles.closedMessage
               }
             >
-              This request has already been reviewed.
+              {request.status ===
+              "changes_requested"
+                ? "Waiting for the Client to revise and resubmit this request. Admin actions will return when its status becomes Pending review."
+                : request.status ===
+                  "approved"
+                ? "This request was approved and its draft campaign was created."
+                : "This request was rejected and remains available as a historical record."}
             </span>
           )}
         </footer>
@@ -650,3 +656,4 @@ export default function CommercialRequestDrawer(
     </div>
   );
 }
+
