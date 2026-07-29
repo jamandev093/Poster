@@ -11,6 +11,11 @@ import Fastify, {
 } from "fastify";
 
 import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
   createSignupRegistrationService,
   type SignupRegistrationService,
 } from "./application/authentication/signup-registration.service.js";
@@ -49,6 +54,9 @@ export interface BuildAppOptions {
     AuthenticationRoutesOptions[
       "verifySignupEmail"
     ];
+
+  loginSessionService?:
+    LoginSessionService;
 }
 
 export async function buildApp(
@@ -163,6 +171,15 @@ export async function buildApp(
         options
           .verifySignupEmail ??
         verifySignupEmail,
+
+      loginSessionService:
+        options
+          .loginSessionService ??
+        createLoginSessionService(),
+
+      isProduction:
+        environment.NODE_ENV ===
+        "production",
     }
   );
 

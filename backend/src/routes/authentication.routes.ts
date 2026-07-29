@@ -7,6 +7,14 @@ import {
 } from "zod";
 
 import type {
+  LoginSessionService,
+} from "../application/authentication/login-session.service.js";
+
+import type {
+  AuthenticationSessionSummary,
+} from "../application/authentication/login-session.types.js";
+
+import type {
   SignupRegistrationService,
 } from "../application/authentication/signup-registration.service.js";
 
@@ -15,6 +23,10 @@ import type {
   VerifySignupEmailInput,
   VerifySignupEmailResult,
 } from "../domains/authentication/authentication.service.types.js";
+
+import {
+  setAuthenticationRefreshCookie,
+} from "../http/authentication-cookie.js";
 
 import {
   parseHttpRequestBody,
@@ -78,6 +90,39 @@ const SignupRequestSchema =
     })
     .strict();
 
+const LoginRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      password:
+        z
+          .string()
+          .min(
+            1,
+            "Password is required."
+          )
+          .max(
+            PASSWORD_MAXIMUM_LENGTH,
+            "Password is too long."
+          ),
+    })
+    .strict();
+
 const VerifySignupEmailRequestSchema =
   z
     .object({
@@ -127,6 +172,28 @@ interface AuthenticationAccountResponse {
   createdAt: string;
 }
 
+interface AuthenticationSessionResponse {
+  id: string;
+
+  userId: string;
+
+  organizationId:
+    | string
+    | null;
+
+  createdAt: string;
+
+  expiresAt: string;
+}
+
+interface LoginHttpResponse {
+  account:
+    AuthenticationAccountResponse;
+
+  session:
+    AuthenticationSessionResponse;
+}
+
 interface SignupHttpResponse {
   account:
     AuthenticationAccountResponse;
@@ -167,6 +234,11 @@ export interface AuthenticationRoutesOptions {
 
   verifySignupEmail:
     VerifySignupEmailOperation;
+
+  loginSessionService:
+    LoginSessionService;
+
+  isProduction: boolean;
 }
 
 function mapAuthenticationAccount(
@@ -196,6 +268,32 @@ function mapAuthenticationAccount(
     createdAt:
       account
         .createdAt
+        .toISOString(),
+  };
+}
+
+function mapAuthenticationSession(
+  session:
+    AuthenticationSessionSummary
+): AuthenticationSessionResponse {
+  return {
+    id:
+      session.id,
+
+    userId:
+      session.userId,
+
+    organizationId:
+      session.organizationId,
+
+    createdAt:
+      session
+        .createdAt
+        .toISOString(),
+
+    expiresAt:
+      session
+        .expiresAt
         .toISOString(),
   };
 }
@@ -232,6 +330,75 @@ export const authenticationRoutes:
     app,
     options
   ) => {
+    app.post(
+      "/login",
+      async (
+        request,
+        reply
+      ) => {
+        const credentials =
+          parseHttpRequestBody(
+            LoginRequestSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .loginSessionService
+            .login({
+              email:
+                credentials.email,
+
+              password:
+                credentials.password,
+
+              ipAddress:
+                request.ip,
+
+              userAgent:
+                request.headers[
+                  "user-agent"
+                ] ??
+                null,
+            });
+
+        setAuthenticationRefreshCookie(
+          reply,
+          result.refreshToken,
+          {
+            expiresAt:
+              result
+                .session
+                .expiresAt,
+
+            isProduction:
+              options.isProduction,
+          }
+        );
+
+        const response:
+          LoginHttpResponse = {
+            account:
+              mapAuthenticationAccount(
+                result.account
+              ),
+
+            session:
+              mapAuthenticationSession(
+                result.session
+              ),
+          };
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
+
     app.post(
       "/signup",
       async (
