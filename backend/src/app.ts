@@ -11,6 +11,11 @@ import Fastify, {
 } from "fastify";
 
 import {
+  createAdminUserMetricsService,
+  type AdminUserMetricsService,
+} from "./application/admin-metrics/admin-user-metrics.service.js";
+
+import {
   createAuthorizationContextService,
   type AuthorizationContextService,
 } from "./application/authorization/authorization-context.service.js";
@@ -48,6 +53,7 @@ import {
 
 import {
   adminAccessRoutes,
+  adminMetricsRoutes,
   authenticationRoutes,
   healthRoutes,
   type AuthenticationRoutesOptions,
@@ -59,6 +65,9 @@ import {
 } from "./services/email/index.js";
 
 export interface BuildAppOptions {
+  adminUserMetricsService?:
+    AdminUserMetricsService;
+
   accessTokenService?:
     AuthenticationAccessTokenService;
 
@@ -255,6 +264,19 @@ export async function buildApp(
     {
       prefix:
         "/api/v1/admin",
+    }
+  );
+
+  await app.register(
+    adminMetricsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      userMetricsService:
+        options
+          .adminUserMetricsService ??
+        createAdminUserMetricsService(),
     }
   );
 
