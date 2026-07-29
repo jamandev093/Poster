@@ -1,14 +1,11 @@
 import type {
   FastifyPluginAsync,
+  FastifyReply,
 } from "fastify";
 
 import {
   z,
 } from "zod";
-
-import type {
-  AuthenticationAccessTokenService,
-} from "../domains/authentication/access-token.service.js";
 
 import type {
   LoginSessionService,
@@ -19,8 +16,23 @@ import type {
 } from "../application/authentication/login-session.types.js";
 
 import type {
+  SessionLifecycleService,
+} from "../application/authentication/session-lifecycle.service.js";
+
+import type {
   SignupRegistrationService,
 } from "../application/authentication/signup-registration.service.js";
+
+import {
+  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+  AUTHENTICATION_ACCESS_TOKEN_HEADER,
+  type AuthenticationAccessTokenService,
+  type IssuedAuthenticationAccessToken,
+} from "../domains/authentication/access-token.service.js";
+
+import {
+  AuthenticationSessionInvalidError,
+} from "../domains/authentication/authentication.errors.js";
 
 import type {
   AuthenticationAccountSummary,
@@ -29,11 +41,8 @@ import type {
 } from "../domains/authentication/authentication.service.types.js";
 
 import {
-  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
-  AUTHENTICATION_ACCESS_TOKEN_HEADER,
-} from "../domains/authentication/access-token.service.js";
-
-import {
+  clearAuthenticationRefreshCookie,
+  readAuthenticationRefreshToken,
   setAuthenticationRefreshCookie,
 } from "../http/authentication-cookie.js";
 
@@ -175,8 +184,8 @@ interface AuthenticationAccountResponse {
     ];
 
   emailVerifiedAt:
-    string |
-    null;
+    | string
+    | null;
 
   createdAt: string;
 }
@@ -249,6 +258,9 @@ export interface AuthenticationRoutesOptions {
 
   loginSessionService:
     LoginSessionService;
+
+  sessionLifecycleService:
+    SessionLifecycleService;
 
   isProduction: boolean;
 }
@@ -327,12 +339,35 @@ function mapVerificationResult(
   };
 }
 
+function writeAccessTokenHeaders(
+  reply:
+    FastifyReply,
+  accessToken:
+    IssuedAuthenticationAccessToken
+): void {
+  reply
+    .header(
+      "cache-control",
+      "no-store"
+    )
+    .header(
+      AUTHENTICATION_ACCESS_TOKEN_HEADER,
+      accessToken.token
+    )
+    .header(
+      AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+      accessToken
+        .expiresAt
+        .toISOString()
+    );
+}
+
 /**
  * Poster authentication HTTP routes.
  *
  * Route handlers validate and serialize HTTP data while
- * delegating all authoritative business behavior to the
- * application and domain service layers.
+ * delegating authoritative session behavior to application
+ * services and PostgreSQL repositories.
  */
 export const authenticationRoutes:
   FastifyPluginAsync<
@@ -385,21 +420,10 @@ export const authenticationRoutes:
                 result.session.id,
             });
 
-        reply
-          .header(
-            "cache-control",
-            "no-store"
-          )
-          .header(
-            AUTHENTICATION_ACCESS_TOKEN_HEADER,
-            accessToken.token
-          )
-          .header(
-            AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
-            accessToken
-              .expiresAt
-              .toISOString()
-          );
+        writeAccessTokenHeaders(
+          reply,
+          accessToken
+        );
 
         setAuthenticationRefreshCookie(
           reply,
@@ -435,6 +459,149 @@ export const authenticationRoutes:
           .send(
             response
           );
+      }
+    );
+
+    app.post(
+      "/refresh",
+      async (
+        request,
+        reply
+      ) => {
+        const refreshToken =
+          readAuthenticationRefreshToken(
+            request
+          );
+
+        if (
+          !refreshToken
+        ) {
+          clearAuthenticationRefreshCookie(
+            reply,
+            options.isProduction
+          );
+
+          throw new AuthenticationSessionInvalidError(
+            "The refresh-token cookie was missing or blank."
+          );
+        }
+
+        try {
+          const result =
+            await options
+              .sessionLifecycleService
+              .refresh({
+                refreshToken,
+
+                ipAddress:
+                  request.ip,
+
+                userAgent:
+                  request.headers[
+                    "user-agent"
+                  ] ??
+                  null,
+              });
+
+          const accessToken =
+            options
+              .accessTokenService
+              .issue({
+                userId:
+                  result.account.id,
+
+                sessionId:
+                  result.session.id,
+              });
+
+          writeAccessTokenHeaders(
+            reply,
+            accessToken
+          );
+
+          setAuthenticationRefreshCookie(
+            reply,
+            result.refreshToken,
+            {
+              expiresAt:
+                result
+                  .session
+                  .expiresAt,
+
+              isProduction:
+                options.isProduction,
+            }
+          );
+
+          const response:
+            LoginHttpResponse = {
+              account:
+                mapAuthenticationAccount(
+                  result.account
+                ),
+
+              session:
+                mapAuthenticationSession(
+                  result.session
+                ),
+            };
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              response
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+            AuthenticationSessionInvalidError
+          ) {
+            clearAuthenticationRefreshCookie(
+              reply,
+              options.isProduction
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post(
+      "/logout",
+      async (
+        request,
+        reply
+      ) => {
+        const refreshToken =
+          readAuthenticationRefreshToken(
+            request
+          );
+
+        clearAuthenticationRefreshCookie(
+          reply,
+          options.isProduction
+        );
+
+        if (
+          refreshToken
+        ) {
+          await options
+            .sessionLifecycleService
+            .logout({
+              refreshToken,
+            });
+        }
+
+        return reply
+          .status(
+            204
+          )
+          .send();
       }
     );
 

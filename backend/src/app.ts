@@ -1,5 +1,6 @@
 import cookie
   from "@fastify/cookie";
+
 import cors
   from "@fastify/cors";
 
@@ -24,6 +25,11 @@ import {
   createLoginSessionService,
   type LoginSessionService,
 } from "./application/authentication/login-session.service.js";
+
+import {
+  createSessionLifecycleService,
+  type SessionLifecycleService,
+} from "./application/authentication/session-lifecycle.service.js";
 
 import {
   createSignupRegistrationService,
@@ -87,6 +93,9 @@ export interface BuildAppOptions {
 
   loginSessionService?:
     LoginSessionService;
+
+  sessionLifecycleService?:
+    SessionLifecycleService;
 }
 
 export async function buildApp(
@@ -167,7 +176,9 @@ export async function buildApp(
         origin,
         callback
       ) => {
-        if (!origin) {
+        if (
+          !origin
+        ) {
           callback(
             null,
             true
@@ -252,6 +263,11 @@ export async function buildApp(
         options
           .loginSessionService ??
         createLoginSessionService(),
+
+      sessionLifecycleService:
+        options
+          .sessionLifecycleService ??
+        createSessionLifecycleService(),
 
       isProduction:
         environment.NODE_ENV ===

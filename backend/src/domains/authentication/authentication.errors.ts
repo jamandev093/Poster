@@ -6,6 +6,7 @@ export const AUTHENTICATION_ERROR_CODES = [
   "AUTH_REQUIRED",
   "AUTH_ACCESS_TOKEN_INVALID",
   "AUTH_ACCESS_TOKEN_EXPIRED",
+  "AUTH_SESSION_INVALID",
   "AUTH_FORBIDDEN",
   "AUTH_CONFLICT",
   "AUTH_CONCURRENCY_CONFLICT",
@@ -223,6 +224,31 @@ export class AuthenticationAccessTokenExpiredError
 
     this.name =
       "AuthenticationAccessTokenExpiredError";
+  }
+}
+
+export class AuthenticationSessionInvalidError
+  extends AuthenticationDomainError {
+  public constructor(
+    message:
+      string =
+        "The authentication session or refresh token is invalid."
+  ) {
+    super({
+      code:
+        "AUTH_SESSION_INVALID",
+
+      message,
+
+      publicMessage:
+        "The authentication session is invalid or has expired.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationSessionInvalidError";
   }
 }
 

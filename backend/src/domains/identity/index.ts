@@ -7,3 +7,5 @@ export * from "./organization.repository.js";
 export * from "./membership.repository.js";
 
 export * from "./session.repository.js";
+
+export * from "./session-lifecycle.repository.js";
