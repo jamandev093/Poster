@@ -21,6 +21,7 @@
         "db:migrate:status": "tsx src/database/migrate.ts --status"
     },
     "dependencies": {
+        "@fastify/cookie": "11.1.2",
         "@fastify/cors": "11.3.0",
         "@fastify/helmet": "13.1.0",
         "argon2": "0.45.1",

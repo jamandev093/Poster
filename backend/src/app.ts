@@ -1,3 +1,5 @@
+import cookie
+  from "@fastify/cookie";
 import cors
   from "@fastify/cors";
 
@@ -76,6 +78,10 @@ export async function buildApp(
       requestIdHeader:
         "x-request-id",
     });
+
+  await app.register(
+    cookie
+  );
 
   await app.register(
     helmet,
