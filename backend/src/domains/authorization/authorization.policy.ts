@@ -27,6 +27,10 @@ const PLATFORM_ROLE_PERMISSION_MAP:
       "copyright.read",
       "copyright.manage",
       "audit.read",
+      "monetization.requests.read",
+      "monetization.requests.manage",
+      "monetization.campaigns.read",
+      "monetization.campaigns.manage",
     ],
 
     content_moderator: [
@@ -63,6 +67,8 @@ const PLATFORM_ROLE_PERMISSION_MAP:
       "sources.read",
       "reports.read",
       "copyright.read",
+      "monetization.requests.read",
+      "monetization.campaigns.read",
     ],
   };
 

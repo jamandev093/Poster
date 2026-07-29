@@ -17,6 +17,16 @@ import {
 } from "./application/admin-metrics/admin-user-metrics.service.js";
 
 import {
+  createAdminCommercialRequestService,
+  type AdminCommercialRequestService,
+} from "./application/monetization/admin-commercial-request.service.js";
+
+import {
+  createClientCommercialRequestService,
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
   createAuthorizationContextService,
   type AuthorizationContextService,
 } from "./application/authorization/authorization-context.service.js";
@@ -64,8 +74,10 @@ import {
 
 import {
   adminAccessRoutes,
+  adminCommercialRequestRoutes,
   adminMetricsRoutes,
   authenticationRoutes,
+  clientCommercialRequestRoutes,
   healthRoutes,
   type AuthenticationRoutesOptions,
 } from "./routes/index.js";
@@ -76,6 +88,12 @@ import {
 } from "./services/email/index.js";
 
 export interface BuildAppOptions {
+  adminCommercialRequestService?:
+    AdminCommercialRequestService;
+
+  clientCommercialRequestService?:
+    ClientCommercialRequestService;
+
   adminUserMetricsService?:
     AdminUserMetricsService;
 
@@ -312,6 +330,32 @@ export async function buildApp(
         options
           .adminUserMetricsService ??
         createAdminUserMetricsService(),
+    }
+  );
+
+  await app.register(
+    clientCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/client",
+
+      service:
+        options
+          .clientCommercialRequestService ??
+        createClientCommercialRequestService(),
+    }
+  );
+
+  await app.register(
+    adminCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCommercialRequestService ??
+        createAdminCommercialRequestService(),
     }
   );
 

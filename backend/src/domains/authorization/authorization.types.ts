@@ -35,6 +35,10 @@ export const PLATFORM_PERMISSIONS = [
   "reports.manage",
   "copyright.read",
   "copyright.manage",
+  "monetization.requests.read",
+  "monetization.requests.manage",
+  "monetization.campaigns.read",
+  "monetization.campaigns.manage",
   "audit.read",
 ] as const;
 
