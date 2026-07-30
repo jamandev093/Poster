@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -41,6 +41,25 @@ const monetizationItems = [
   ],
 ] as const;
 
+const operationsItems = [
+  [
+    "/operations/business-identity",
+    "Business Identity",
+  ],
+  [
+    "/operations/external-promotions/programs",
+    "Programs",
+  ],
+  [
+    "/operations/external-promotions/promotions",
+    "Promotions",
+  ],
+  [
+    "/operations/external-promotions/earnings",
+    "Earnings",
+  ],
+] as const;
+
 const utilityItems = [
   ["/reports", "Reports"],
   ["/users", "Users"],
@@ -53,6 +72,7 @@ const utilityItems = [
 const titleItems = [
   ...primaryItems,
   ...monetizationItems,
+  ...operationsItems,
   ...utilityItems,
 ] as const;
 
@@ -238,7 +258,52 @@ export default function AdminShell({
             )}
           </div>
 
-          {utilityItems.map(
+          <div className="nav-group">
+          <div className="nav-group-title">
+            Operations
+          </div>
+
+          {operationsItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link nav-sub-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+        </div>
+
+        {utilityItems.map(
             ([
               href,
               label,
