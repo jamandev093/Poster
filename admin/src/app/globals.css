@@ -2257,3 +2257,14 @@ dd {
 }
 
 
+
+/* Admin shell width safeguard */
+:root {
+  --sidebar-width: 232px;
+}
+
+@media (max-width: 1180px) {
+  :root {
+    --sidebar-width: 216px;
+  }
+}
