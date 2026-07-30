@@ -1,12 +1,5 @@
-﻿import OperationsFoundation from "@/features/operations/OperationsFoundation";
+﻿import ExternalPromotionsManager from "@/features/operations/external-promotions/ExternalPromotionsManager";
 
 export default function ExternalPromotionsPage() {
-  return (
-    <OperationsFoundation
-      eyebrow="External Promotions"
-      title="Promotions"
-      description="Manage products and services selected by Poster Admin for external affiliate or referral promotion."
-      activeArea="promotions"
-    />
-  );
+  return <ExternalPromotionsManager />;
 }
