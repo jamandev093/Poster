@@ -6,9 +6,17 @@ import {
   useState,
 } from "react";
 
+import PosterPromotionCreateAction from "./poster-promotion/PosterPromotionCreateAction";
+import PosterPromotionEditAction from "./poster-promotion/PosterPromotionEditAction";
+
+import type {
+  PosterPromotionDraft,
+} from "./poster-promotion/poster-promotion.types";
+
 import styles from "./PosterPromotionManager.module.css";
 
 type PromotionStatus =
+  | "draft"
   | "scheduled"
   | "active"
   | "paused"
@@ -34,7 +42,10 @@ interface PosterPromotionRecord {
 
   destinationUrl: string;
 
-  placement: Placement;
+  creative?:
+    PosterPromotionDraft["creative"];
+
+  placements: Placement[];
 
   status: PromotionStatus;
 
@@ -61,8 +72,11 @@ const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
     destinationUrl:
       "https://poster.example/premium-discovery",
 
-    placement:
+    placements: [
+
       "Home",
+
+    ],
 
     status:
       "paused",
@@ -122,8 +136,11 @@ const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
     destinationUrl:
       "https://poster.example/career-growth",
 
-    placement:
+    placements: [
+
       "Home",
+
+    ],
 
     status:
       "scheduled",
@@ -165,6 +182,9 @@ function statusLabel(
   status: PromotionStatus
 ): string {
   switch (status) {
+    case "draft":
+      return "Draft";
+
     case "scheduled":
       return "Scheduled";
 
@@ -315,7 +335,9 @@ export default function PosterPromotionManager() {
             promotion.id,
             promotion.name,
             promotion.purpose,
-            promotion.placement,
+            promotion.placements.join(
+              " "
+            ),
           ].some(
             (
               value
@@ -373,6 +395,15 @@ export default function PosterPromotionManager() {
       () => ({
         all:
           promotions.length,
+
+        draft:
+          promotions.filter(
+            (
+              promotion
+            ) =>
+              promotion.status ===
+              "draft"
+          ).length,
 
         scheduled:
           promotions.filter(
@@ -469,6 +500,259 @@ export default function PosterPromotionManager() {
         promotions,
       ]
     );
+  const createPromotion = (
+    draft:
+      PosterPromotionDraft,
+
+    status:
+      "draft" | "scheduled"
+  ) => {
+    const timestamp =
+      Date.now();
+
+    const nextId =
+      `CMP-${timestamp
+        .toString()
+        .slice(
+          -6
+        )}`;
+
+    const action =
+      status ===
+      "draft"
+        ? "Poster promotion draft created"
+        : "Poster promotion scheduled";
+
+    const promotion:
+      PosterPromotionRecord = {
+      id:
+        nextId,
+
+      name:
+        draft.name.trim(),
+
+      purpose:
+        draft.purpose.trim(),
+
+      destinationUrl:
+        draft.creative.destinationUrl.trim(),
+
+      creative: {
+        ...draft.creative,
+
+        headline:
+          draft.creative.headline.trim(),
+
+        body:
+          draft.creative.body.trim(),
+
+        callToAction:
+          draft.creative.callToAction.trim(),
+
+        destinationUrl:
+          draft.creative.destinationUrl.trim(),
+
+        media:
+          draft.creative.media
+            ? {
+                ...draft.creative.media,
+              }
+            : null,
+      },
+
+      placements: [
+        ...draft.placements,
+      ],
+
+      status,
+
+      startAt:
+        draft.startAt,
+
+      endAt:
+        draft.endAt ||
+        undefined,
+
+      impressions:
+        0,
+
+      clicks:
+        0,
+
+      conversions:
+        0,
+
+      audit: [
+        {
+          id:
+            `${nextId}-${timestamp}`,
+
+          action,
+
+          actor:
+            "Admin",
+
+          timestamp:
+            nowLabel(),
+        },
+      ],
+    };
+
+    setPromotions(
+      (
+        current
+      ) => [
+        promotion,
+        ...current,
+      ]
+    );
+
+    setSelectedId(
+      promotion.id
+    );
+  };
+
+  const promotionToDraft = (
+    promotion:
+      PosterPromotionRecord
+  ): PosterPromotionDraft => {
+    return {
+      name:
+        promotion.name,
+
+      purpose:
+        promotion.purpose,
+
+      placements: [
+        ...promotion.placements,
+      ],
+
+      startAt:
+        promotion.startAt,
+
+      endAt:
+        promotion.endAt ??
+        "",
+
+      creative:
+        promotion.creative
+          ? {
+              ...promotion.creative,
+
+              media:
+                promotion.creative.media
+                  ? {
+                      ...promotion.creative.media,
+                    }
+                  : null,
+            }
+          : {
+              headline:
+                promotion.name,
+
+              body:
+                promotion.purpose,
+
+              callToAction:
+                "Explore",
+
+              destinationUrl:
+                promotion.destinationUrl,
+
+              media:
+                null,
+            },
+    };
+  };
+
+  const updatePromotion = (
+    promotionId:
+      string,
+
+    draft:
+      PosterPromotionDraft
+  ) => {
+    const timestamp =
+      Date.now();
+
+    setPromotions(
+      (
+        current
+      ) =>
+        current.map(
+          (
+            promotion
+          ) =>
+            promotion.id ===
+            promotionId
+              ? {
+                  ...promotion,
+
+                  name:
+                    draft.name.trim(),
+
+                  purpose:
+                    draft.purpose.trim(),
+
+                  destinationUrl:
+                    draft.creative.destinationUrl.trim(),
+
+                  placements: [
+                    ...draft.placements,
+                  ],
+
+                  startAt:
+                    draft.startAt,
+
+                  endAt:
+                    draft.endAt ||
+                    undefined,
+
+                  creative: {
+                    ...draft.creative,
+
+                    headline:
+                      draft.creative.headline.trim(),
+
+                    body:
+                      draft.creative.body.trim(),
+
+                    callToAction:
+                      draft.creative.callToAction.trim(),
+
+                    destinationUrl:
+                      draft.creative.destinationUrl.trim(),
+
+                    media:
+                      draft.creative.media
+                        ? {
+                            ...draft.creative.media,
+                          }
+                        : null,
+                  },
+
+                  audit: [
+                    {
+                      id:
+                        `${promotion.id}-${timestamp}`,
+
+                      action:
+                        "Poster promotion details updated",
+
+                      actor:
+                        "Admin",
+
+                      timestamp:
+                        nowLabel(),
+                    },
+
+                    ...promotion.audit,
+                  ],
+                }
+              : promotion
+        )
+    );
+  };
 
   const updateStatus = (
     id: string,
@@ -600,6 +884,7 @@ export default function PosterPromotionManager() {
         }
       >
         <div>
+
           <div
             className={
               styles.eyebrow
@@ -620,7 +905,14 @@ export default function PosterPromotionManager() {
             strategic discovery
             promotions.
           </p>
+        
         </div>
+
+        <PosterPromotionCreateAction
+          onCreate={
+            createPromotion
+          }
+        />
       </header>
 
       <section
@@ -749,6 +1041,11 @@ export default function PosterPromotionManager() {
                 [
                   "all",
                   "All",
+                ],
+
+                [
+                  "draft",
+                  "Draft",
                 ],
 
                 [
@@ -901,7 +1198,9 @@ export default function PosterPromotionManager() {
 
                     <td>
                       {
-                        promotion.placement
+                        promotion.placements.join(
+                          ", "
+                        )
                       }
                     </td>
 
@@ -952,6 +1251,9 @@ export default function PosterPromotionManager() {
                             : promotion.status ===
                               "scheduled"
                             ? styles.statusScheduled
+                            : promotion.status ===
+                              "draft"
+                            ? styles.statusDraft
                             : styles.statusEnded
                         }`}
                       >
@@ -1134,7 +1436,9 @@ export default function PosterPromotionManager() {
 
                     <dd>
                       {
-                        selectedPromotion.placement
+                        selectedPromotion.placements.join(
+                          ", "
+                        )
                       }
                     </dd>
                   </div>
@@ -1189,6 +1493,73 @@ export default function PosterPromotionManager() {
                       {
                         selectedPromotion.destinationUrl
                       }
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Creative
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Headline
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedPromotion.creative?.headline ??
+                        selectedPromotion.name
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Body
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedPromotion.creative?.body ??
+                        selectedPromotion.purpose
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Call to action
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedPromotion.creative?.callToAction ??
+                        "Explore"
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Media
+                    </dt>
+
+                    <dd>
+                      {selectedPromotion.creative?.media
+                        ? `${selectedPromotion.creative.media.fileName} · ${selectedPromotion.creative.media.type}`
+                        : "No uploaded media"}
                     </dd>
                   </div>
                 </dl>
@@ -1356,6 +1727,26 @@ export default function PosterPromotionManager() {
                 styles.drawerFooter
               }
             >
+              <PosterPromotionEditAction
+                initialDraft={
+                  promotionToDraft(
+                    selectedPromotion
+                  )
+                }
+                disabled={
+                  selectedPromotion.status ===
+                  "ended"
+                }
+                onSave={(
+                  draft
+                ) =>
+                  updatePromotion(
+                    selectedPromotion.id,
+                    draft
+                  )
+                }
+              />
+
               <Link
                 href={`/monetization/campaigns?record=${encodeURIComponent(
                   selectedPromotion.id
@@ -1439,6 +1830,16 @@ export default function PosterPromotionManager() {
                   Scheduled campaigns begin according
                   to their configured start date.
                 </span>
+              ) : selectedPromotion.status ===
+                "draft" ? (
+                <span
+                  className={
+                    styles.footerNote
+                  }
+                >
+                  Draft promotions can be edited before
+                  they are scheduled.
+                </span>
               ) : (
                 <span
                   className={
@@ -1446,7 +1847,7 @@ export default function PosterPromotionManager() {
                   }
                 >
                   Ended campaigns remain historical
-                  records.
+                  records and cannot be edited.
                 </span>
               )}
             </div>
@@ -1554,3 +1955,16 @@ export default function PosterPromotionManager() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

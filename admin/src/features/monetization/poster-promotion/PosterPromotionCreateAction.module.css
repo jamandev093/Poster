@@ -1,0 +1,42 @@
+﻿.createButton {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  padding: 0 15px;
+
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+
+  color: #ffffff;
+
+  background: var(--primary);
+
+  appearance: none;
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+
+  box-shadow:
+    0 1px 2px
+    rgb(15 23 42 / 0.08);
+
+  cursor: pointer;
+}
+
+.createButton:hover {
+  filter: brightness(0.97);
+}
+
+.createButton:focus-visible {
+  outline: 3px solid
+    rgb(91 134 229 / 0.2);
+
+  outline-offset: 2px;
+}
