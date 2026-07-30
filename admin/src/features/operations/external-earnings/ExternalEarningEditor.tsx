@@ -228,7 +228,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="External order ID"
+            label="External order ID (optional)"
             value={draft.externalOrderId}
             placeholder="Optional"
             onChange={(value) => {
@@ -240,7 +240,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="External payout ID"
+            label="External payout ID (required when paid)"
             value={
               draft.externalPayoutId
             }
@@ -254,7 +254,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="Statement reference"
+            label="Statement reference (optional)"
             value={
               draft.statementReference
             }
@@ -268,7 +268,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="Evidence URL"
+            label="Evidence URL (optional)"
             type="url"
             value={draft.evidenceUrl}
             error={errors.evidenceUrl}
@@ -332,7 +332,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="Confirmation date"
+            label="Confirmation date (required from confirmed status)"
             type="date"
             value={
               draft.confirmationDate
@@ -349,7 +349,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="Customer country"
+            label="Customer country (optional)"
             value={
               draft.customerCountry
             }
@@ -384,7 +384,7 @@ export default function ExternalEarningEditor({
           />
 
           <NumberField
-            label="Gross amount"
+            label="Gross amount (optional)"
             value={draft.grossAmount}
             error={errors.grossAmount}
             onChange={(value) => {
@@ -396,7 +396,7 @@ export default function ExternalEarningEditor({
           />
 
           <NumberField
-            label="Commission amount"
+            label="Commission amount (required from approved status)"
             value={
               draft.commissionAmount
             }
@@ -412,7 +412,7 @@ export default function ExternalEarningEditor({
           />
 
           <NumberField
-            label="Tax withheld"
+            label="Tax withheld (optional)"
             value={draft.taxWithheld}
             error={errors.taxWithheld}
             onChange={(value) => {
@@ -424,7 +424,7 @@ export default function ExternalEarningEditor({
           />
 
           <NumberField
-            label="Fees"
+            label="Fees (optional)"
             value={draft.fees}
             error={errors.fees}
             onChange={(value) => {
@@ -482,7 +482,7 @@ export default function ExternalEarningEditor({
           />
 
           <Field
-            label="Payout date"
+            label="Payout date (required when paid)"
             type="date"
             value={draft.payoutDate}
             error={errors.payoutDate}
@@ -766,3 +766,4 @@ function ErrorMessage({
     </small>
   ) : null;
 }
+

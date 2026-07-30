@@ -191,6 +191,22 @@ function formatAmount(
   }
 }
 
+function formatCurrencyTotals(
+  inrAmount: number,
+  usdAmount: number
+) {
+  return [
+    formatAmount(
+      inrAmount,
+      "INR"
+    ),
+    formatAmount(
+      usdAmount,
+      "USD"
+    ),
+  ].join(" · ");
+}
+
 function auditMessageForStatus(
   status: ExternalEarningStatus
 ) {
@@ -447,16 +463,18 @@ export default function ExternalEarningsManager() {
               "rejected"
         );
 
-      const approvedNet =
+      const sumNetByCurrency = (
+        statuses: ExternalEarningStatus[],
+        currency: string
+      ) =>
         activeRecords
           .filter(
             (earning) =>
-              earning.status ===
-                "approved" ||
-              earning.status ===
-                "payable" ||
-              earning.status ===
-                "paid"
+              statuses.includes(
+                earning.status
+              ) &&
+              earning.amount.currency ===
+                currency
           )
           .reduce(
             (total, earning) =>
@@ -465,33 +483,49 @@ export default function ExternalEarningsManager() {
             0
           );
 
-      const payableNet =
-        activeRecords
-          .filter(
-            (earning) =>
-              earning.status ===
-                "payable"
-          )
-          .reduce(
-            (total, earning) =>
-              total +
-              earning.amount.netAmount,
-            0
-          );
+      const approvedInr =
+        sumNetByCurrency(
+          [
+            "approved",
+            "payable",
+            "paid",
+          ],
+          "INR"
+        );
 
-      const paidNet =
-        activeRecords
-          .filter(
-            (earning) =>
-              earning.status ===
-                "paid"
-          )
-          .reduce(
-            (total, earning) =>
-              total +
-              earning.amount.netAmount,
-            0
-          );
+      const approvedUsd =
+        sumNetByCurrency(
+          [
+            "approved",
+            "payable",
+            "paid",
+          ],
+          "USD"
+        );
+
+      const payableInr =
+        sumNetByCurrency(
+          ["payable"],
+          "INR"
+        );
+
+      const payableUsd =
+        sumNetByCurrency(
+          ["payable"],
+          "USD"
+        );
+
+      const paidInr =
+        sumNetByCurrency(
+          ["paid"],
+          "INR"
+        );
+
+      const paidUsd =
+        sumNetByCurrency(
+          ["paid"],
+          "USD"
+        );
 
       return {
         total:
@@ -506,11 +540,17 @@ export default function ExternalEarningsManager() {
                 "confirmed"
           ).length,
 
-        approvedNet,
+        approvedInr,
 
-        payableNet,
+        approvedUsd,
 
-        paidNet,
+        payableInr,
+
+        payableUsd,
+
+        paidInr,
+
+        paidUsd,
 
         reversed:
           earnings.filter(
@@ -1100,29 +1140,29 @@ export default function ExternalEarningsManager() {
 
         <SummaryCard
           label="Approved net"
-          value={formatAmount(
-            summary.approvedNet,
-            "INR"
+          value={formatCurrencyTotals(
+            summary.approvedInr,
+            summary.approvedUsd
           )}
-          description="Approved, payable and paid INR earnings"
+          description="Approved, payable and paid earnings by currency"
         />
 
         <SummaryCard
           label="Payable net"
-          value={formatAmount(
-            summary.payableNet,
-            "INR"
+          value={formatCurrencyTotals(
+            summary.payableInr,
+            summary.payableUsd
           )}
-          description="INR earnings ready for payout"
+          description="Earnings ready for payout by currency"
         />
 
         <SummaryCard
           label="Paid net"
-          value={formatAmount(
-            summary.paidNet,
-            "INR"
+          value={formatCurrencyTotals(
+            summary.paidInr,
+            summary.paidUsd
           )}
-          description="Recorded INR payouts"
+          description="Recorded payouts by currency"
         />
 
         <SummaryCard
@@ -1559,3 +1599,7 @@ function SummaryCard({
     </article>
   );
 }
+
+
+
+

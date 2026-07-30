@@ -25,11 +25,11 @@ export const EMPTY_EXTERNAL_EARNING_DRAFT:
   currency: "INR",
   grossAmount: "",
   commissionAmount: "",
-  taxWithheld: "0",
-  fees: "0",
-  netAmount: "",
+  taxWithheld: "",
+  fees: "",
+  netAmount: "0.00",
 
-  customerCountry: "India",
+  customerCountry: "",
 
   statementReference: "",
   evidenceUrl: "",
@@ -59,11 +59,11 @@ function isValidOptionalUrl(
   }
 }
 
-function isNonNegativeNumber(
+function isValidOptionalAmount(
   value: string
 ) {
   if (!value.trim()) {
-    return false;
+    return true;
   }
 
   const number = Number(value);
@@ -72,6 +72,37 @@ function isNonNegativeNumber(
     Number.isFinite(number) &&
     number >= 0
   );
+}
+
+function isValidRequiredAmount(
+  value: string
+) {
+  if (!value.trim()) {
+    return false;
+  }
+
+  return isValidOptionalAmount(value);
+}
+
+function requiresConfirmationDate(
+  status: ExternalEarningDraft["status"]
+) {
+  return [
+    "confirmed",
+    "approved",
+    "payable",
+    "paid",
+  ].includes(status);
+}
+
+function requiresCommissionAmount(
+  status: ExternalEarningDraft["status"]
+) {
+  return [
+    "approved",
+    "payable",
+    "paid",
+  ].includes(status);
 }
 
 export function calculateNetAmount(
@@ -130,52 +161,64 @@ export function validateExternalEarning(
   }
 
   if (
-    !isNonNegativeNumber(
+    !isValidOptionalAmount(
       draft.grossAmount
     )
   ) {
     errors.grossAmount =
-      "Enter a valid gross amount.";
+      "Enter a valid non-negative gross amount.";
   }
 
   if (
-    !isNonNegativeNumber(
+    requiresCommissionAmount(
+      draft.status
+    ) &&
+    !isValidRequiredAmount(
       draft.commissionAmount
     )
   ) {
     errors.commissionAmount =
-      "Enter a valid commission amount.";
+      "Commission amount is required for approved, payable or paid earnings.";
+  } else if (
+    !isValidOptionalAmount(
+      draft.commissionAmount
+    )
+  ) {
+    errors.commissionAmount =
+      "Enter a valid non-negative commission amount.";
   }
 
   if (
-    !isNonNegativeNumber(
+    !isValidOptionalAmount(
       draft.taxWithheld
     )
   ) {
     errors.taxWithheld =
-      "Enter a valid tax amount.";
+      "Enter a valid non-negative tax amount.";
   }
 
   if (
-    !isNonNegativeNumber(
+    !isValidOptionalAmount(
       draft.fees
     )
   ) {
     errors.fees =
-      "Enter a valid fee amount.";
+      "Enter a valid non-negative fee amount.";
   }
 
   if (
-    !isNonNegativeNumber(
-      draft.netAmount
-    )
+    requiresConfirmationDate(
+      draft.status
+    ) &&
+    !draft.confirmationDate
   ) {
-    errors.netAmount =
-      "Enter a valid net amount.";
+    errors.confirmationDate =
+      "Confirmation date is required for this earning status.";
   }
 
   if (
     draft.confirmationDate &&
+    draft.conversionDate &&
     draft.confirmationDate <
       draft.conversionDate
   ) {
@@ -194,11 +237,26 @@ export function validateExternalEarning(
   }
 
   if (
-    draft.status === "paid" &&
-    draft.payoutStatus !== "paid"
+    draft.status === "paid"
   ) {
-    errors.payoutStatus =
-      "Paid earnings require Paid payout status.";
+    if (
+      !draft.externalPayoutId.trim()
+    ) {
+      errors.externalPayoutId =
+        "External payout ID is required when the earning is paid.";
+    }
+
+    if (!draft.payoutDate) {
+      errors.payoutDate =
+        "Payout date is required when the earning is paid.";
+    }
+
+    if (
+      draft.payoutStatus !== "paid"
+    ) {
+      errors.payoutStatus =
+        "Paid earnings require Paid payout status.";
+    }
   }
 
   if (
