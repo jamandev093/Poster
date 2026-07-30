@@ -1,12 +1,5 @@
-﻿import OperationsFoundation from "@/features/operations/OperationsFoundation";
+﻿import ExternalProgramsManager from "@/features/operations/external-programs/ExternalProgramsManager";
 
 export default function ExternalProgramsPage() {
-  return (
-    <OperationsFoundation
-      eyebrow="External Promotions"
-      title="Programs"
-      description="Manage external affiliate program applications, Poster-owned account references, tracking identifiers and payout arrangements."
-      activeArea="programs"
-    />
-  );
+  return <ExternalProgramsManager />;
 }
