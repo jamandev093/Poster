@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   /* =======================================================
      POSTER DESIGN TOKENS
      Exact light-theme values aligned with Poster mobile
@@ -609,7 +609,7 @@ select:focus-visible {
 
   top: 0;
 
-  z-index: 30;
+  z-index: 40;
 
   min-height: 68px;
 
@@ -633,19 +633,9 @@ select:focus-visible {
     var(--border);
 
   background:
-    rgb(
-      248
-      250
-      252
-      /
-      0.94
-    );
+    rgb(248 250 252);
 
-  backdrop-filter:
-    blur(12px);
-
-  -webkit-backdrop-filter:
-    blur(12px);
+  isolation: isolate;
 }
 
 .topbar-left {
@@ -2051,7 +2041,7 @@ dd {
 }
 
 /* =========================================================
-   RESPONSIVE — LARGE TABLET / SMALL DESKTOP
+   RESPONSIVE â€” LARGE TABLET / SMALL DESKTOP
    ========================================================= */
 
 @media (
@@ -2115,7 +2105,7 @@ dd {
 }
 
 /* =========================================================
-   RESPONSIVE — TABLET / MOBILE NAVIGATION
+   RESPONSIVE â€” TABLET / MOBILE NAVIGATION
    ========================================================= */
 
 @media (
@@ -2179,7 +2169,7 @@ dd {
 }
 
 /* =========================================================
-   RESPONSIVE — PHONE FALLBACK
+   RESPONSIVE â€” PHONE FALLBACK
    ========================================================= */
 
 @media (
@@ -2265,3 +2255,5 @@ dd {
     width: 100%;
   }
 }
+
+
