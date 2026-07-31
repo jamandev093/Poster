@@ -5,6 +5,9 @@
 
 import AdminShell from "@/components/admin/AdminShell";
 
+import AdminApplicationBoundary from "@/features/auth/components/AdminApplicationBoundary";
+import AdminAuthProvider from "@/features/auth/context/AdminAuthProvider";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,7 +51,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AdminShell>{children}</AdminShell>
+        <AdminAuthProvider>
+          <AdminApplicationBoundary>
+            <AdminShell>
+              {children}
+            </AdminShell>
+          </AdminApplicationBoundary>
+        </AdminAuthProvider>
       </body>
     </html>
   );

@@ -2268,3 +2268,54 @@ dd {
     --sidebar-width: 216px;
   }
 }
+
+/* =========================================================
+   ADMIN AUTHENTICATION BOUNDARY
+   ========================================================= */
+
+.auth-boundary-state {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--background);
+}
+
+.auth-boundary-state section {
+  text-align: center;
+}
+
+.auth-boundary-state h1 {
+  margin: 14px 0 0;
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.auth-boundary-state p {
+  margin: 7px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.auth-boundary-spinner {
+  width: 34px;
+  height: 34px;
+  display: block;
+  margin: 0 auto;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 999px;
+  animation: admin-auth-spin 700ms linear infinite;
+}
+
+@keyframes admin-auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-boundary-spinner {
+    animation: none;
+  }
+}
