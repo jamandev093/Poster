@@ -1,4 +1,4 @@
-import cookie
+﻿import cookie
   from "@fastify/cookie";
 
 import cors
@@ -15,6 +15,11 @@ import {
   createAdminUserMetricsService,
   type AdminUserMetricsService,
 } from "./application/admin-metrics/admin-user-metrics.service.js";
+
+import {
+  createAdminProfileService,
+  type AdminProfileService,
+} from "./application/admin-profile/admin-profile.service.js";
 
 import {
   createAdminCommercialRequestService,
@@ -76,6 +81,7 @@ import {
   adminAccessRoutes,
   adminCommercialRequestRoutes,
   adminMetricsRoutes,
+  adminProfileRoutes,
   authenticationRoutes,
   clientCommercialRequestRoutes,
   healthRoutes,
@@ -96,6 +102,9 @@ export interface BuildAppOptions {
 
   adminUserMetricsService?:
     AdminUserMetricsService;
+
+  adminProfileService?:
+    AdminProfileService;
 
   accessTokenService?:
     AuthenticationAccessTokenService;
@@ -321,6 +330,19 @@ export async function buildApp(
   );
 
   await app.register(
+    adminProfileRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminProfileService ??
+        createAdminProfileService(),
+    }
+  );
+
+  await app.register(
     adminMetricsRoutes,
     {
       prefix:
@@ -375,3 +397,4 @@ export async function buildApp(
 
   return app;
 }
+
