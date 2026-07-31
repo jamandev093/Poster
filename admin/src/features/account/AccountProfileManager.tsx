@@ -1,10 +1,15 @@
 ﻿"use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
+
+import {
+  AdminApiError,
+} from "@/features/auth/services/auth-api.service";
 
 import useAdminAuth from "@/features/auth/hooks/useAdminAuth";
 
@@ -17,9 +22,9 @@ import type {
 } from "./contracts/account-profile.types";
 
 import {
-  createInitialAdminProfile,
-  loadStoredAdminProfile,
-  saveStoredAdminProfile,
+  loadAdminProfile,
+  profileToDraft,
+  updateAdminProfile,
 } from "./services/account-profile.service";
 
 import {
@@ -29,31 +34,16 @@ import {
 
 import styles from "./AccountProfileManager.module.css";
 
-function profileToDraft(
-  profile: AdminAccountProfile
-): AdminAccountProfileDraft {
-  return {
-    fullName: profile.fullName,
-    displayName:
-      profile.displayName,
-    jobTitle: profile.jobTitle,
-    businessEmail:
-      profile.businessEmail,
-    primaryPhone:
-      profile.primaryPhone,
-    alternatePhone:
-      profile.alternatePhone,
-    signalAccount:
-      profile.signalAccount,
-    telegramUsername:
-      profile.telegramUsername,
-    preferredLanguage:
-      profile.preferredLanguage,
-    timeZone: profile.timeZone,
-  };
-}
+type ProfileState =
+  | "loading"
+  | "ready"
+  | "saving"
+  | "error"
+  | "conflict";
 
-function initials(value: string) {
+function initials(
+  value: string
+) {
   return value
     .split(/\s+/)
     .filter(Boolean)
@@ -68,6 +58,8 @@ export default function AccountProfileManager() {
   const {
     identity,
     logout,
+    restore,
+    updateAccountName,
   } = useAdminAuth();
 
   const [
@@ -95,49 +87,95 @@ export default function AccountProfileManager() {
     >({});
 
   const [
-    saved,
-    setSaved,
-  ] = useState(false);
+    state,
+    setState,
+  ] =
+    useState<ProfileState>(
+      "loading"
+    );
+
+  const [
+    message,
+    setMessage,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const loadProfile =
+    useCallback(async () => {
+      if (!identity) {
+        return;
+      }
+
+      setState("loading");
+      setMessage(null);
+
+      try {
+        const loadedProfile =
+          await loadAdminProfile(
+            identity.accessToken
+          );
+
+        setProfile(
+          loadedProfile
+        );
+
+        setDraft(
+          profileToDraft(
+            loadedProfile
+          )
+        );
+
+        setErrors({});
+        setState("ready");
+      } catch (error) {
+        if (
+          error instanceof
+            AdminApiError
+        ) {
+          if (error.status === 401) {
+            await restore();
+
+            setMessage(
+              "The Admin session was refreshed. Retry loading the profile."
+            );
+          } else if (
+            error.status === 403
+          ) {
+            setMessage(
+              "This account is not permitted to access the Admin profile."
+            );
+          } else {
+            setMessage(
+              error.message
+            );
+          }
+        } else {
+          setMessage(
+            "The Admin profile could not be loaded."
+          );
+        }
+
+        setState("error");
+      }
+    }, [
+      identity,
+      restore,
+    ]);
 
   useEffect(() => {
-    if (!identity) {
-      return;
-    }
-
     const timer =
       window.setTimeout(() => {
-        const stored =
-          loadStoredAdminProfile();
-
-        const nextProfile =
-          stored?.userId ===
-          identity.account.id
-            ? stored
-            : createInitialAdminProfile({
-                userId:
-                  identity.account.id,
-                loginEmail:
-                  identity.account.email,
-                fullName:
-                  identity.account.fullName,
-                emailVerifiedAt:
-                  identity.account
-                    .emailVerifiedAt,
-                createdAt:
-                  identity.account
-                    .createdAt,
-              });
-
-        setProfile(nextProfile);
-        setDraft(
-          profileToDraft(nextProfile)
-        );
+        void loadProfile();
       }, 0);
 
     return () => {
-      window.clearTimeout(timer);
+      window.clearTimeout(
+        timer
+      );
     };
-  }, [identity]);
+  }, [loadProfile]);
 
   const roles =
     identity?.access.access
@@ -153,52 +191,164 @@ export default function AccountProfileManager() {
         initials(
           profile?.displayName ||
             profile?.fullName ||
+            identity?.account
+              .fullName ||
             "Admin"
         ),
-      [profile]
+      [
+        identity,
+        profile,
+      ]
     );
 
+  const save =
+    async () => {
+      if (
+        !identity ||
+        !profile ||
+        !draft
+      ) {
+        return;
+      }
+
+      const nextErrors =
+        validateAdminAccountProfile(
+          draft
+        );
+
+      setErrors(nextErrors);
+      setMessage(null);
+
+      if (
+        hasAdminAccountProfileErrors(
+          nextErrors
+        )
+      ) {
+        return;
+      }
+
+      setState("saving");
+
+      try {
+        const updatedProfile =
+          await updateAdminProfile(
+            identity.accessToken,
+            profile,
+            draft
+          );
+
+        setProfile(
+          updatedProfile
+        );
+
+        setDraft(
+          profileToDraft(
+            updatedProfile
+          )
+        );
+
+        updateAccountName(
+          updatedProfile.fullName
+        );
+
+        setState("ready");
+
+        setMessage(
+          "Account profile saved."
+        );
+      } catch (error) {
+        if (
+          error instanceof
+            AdminApiError &&
+          error.status === 409
+        ) {
+          setState("conflict");
+
+          setMessage(
+            "This profile changed after it was loaded. Reload the latest version before saving again."
+          );
+
+          return;
+        }
+
+        if (
+          error instanceof
+            AdminApiError &&
+          error.status === 401
+        ) {
+          await restore();
+
+          setMessage(
+            "The session expired and was refreshed. Retry saving the profile."
+          );
+        } else if (
+          error instanceof
+            AdminApiError &&
+          error.status === 403
+        ) {
+          setMessage(
+            "This account is not permitted to update the Admin profile."
+          );
+        } else if (
+          error instanceof
+            AdminApiError
+        ) {
+          setMessage(
+            error.message
+          );
+        } else {
+          setMessage(
+            "The account profile could not be saved."
+          );
+        }
+
+        setState("error");
+      }
+    };
+
   if (
-    !identity ||
-    !profile ||
-    !draft
+    state === "loading" ||
+    !identity
   ) {
     return (
-      <div className={styles.loading}>
+      <div
+        className={styles.loading}
+        aria-live="polite"
+      >
         Loading account profile…
       </div>
     );
   }
 
-  const save = () => {
-    const nextErrors =
-      validateAdminAccountProfile(
-        draft
-      );
+  if (
+    !profile ||
+    !draft
+  ) {
+    return (
+      <section
+        className={styles.errorState}
+        role="alert"
+      >
+        <h1>
+          Account profile unavailable
+        </h1>
 
-    setErrors(nextErrors);
-    setSaved(false);
+        <p>
+          {message ??
+            "The profile could not be loaded."}
+        </p>
 
-    if (
-      hasAdminAccountProfileErrors(
-        nextErrors
-      )
-    ) {
-      return;
-    }
-
-    const nextProfile =
-      saveStoredAdminProfile(
-        profile,
-        draft
-      );
-
-    setProfile(nextProfile);
-    setDraft(
-      profileToDraft(nextProfile)
+        <button
+          type="button"
+          onClick={() => {
+            void loadProfile();
+          }}
+        >
+          Retry
+        </button>
+      </section>
     );
-    setSaved(true);
-  };
+  }
 
   return (
     <div className={styles.page}>
@@ -233,23 +383,45 @@ export default function AccountProfileManager() {
         </button>
       </header>
 
-      {saved ? (
+      {message ? (
         <div
-          className={styles.success}
-          role="status"
+          className={
+            state === "conflict" ||
+            state === "error"
+              ? styles.warning
+              : styles.success
+          }
+          role={
+            state === "conflict" ||
+            state === "error"
+              ? "alert"
+              : "status"
+          }
         >
-          Account profile saved locally.
-          Backend persistence will replace
-          this temporary adapter.
+          <span>{message}</span>
+
+          {state === "conflict" ||
+          state === "error" ? (
+            <button
+              type="button"
+              onClick={() => {
+                void loadProfile();
+              }}
+            >
+              Reload profile
+            </button>
+          ) : null}
         </div>
       ) : null}
 
       <section className={styles.summary}>
         <article>
           <span>Login email</span>
+
           <strong>
             {profile.loginEmail}
           </strong>
+
           <small>
             Managed through secure
             authentication workflows
@@ -258,9 +430,11 @@ export default function AccountProfileManager() {
 
         <article>
           <span>Account status</span>
+
           <strong>
             {identity.account.status}
           </strong>
+
           <small>
             Email{" "}
             {profile.emailVerifiedAt
@@ -271,9 +445,9 @@ export default function AccountProfileManager() {
 
         <article>
           <span>Current session</span>
-          <strong>
-            Active
-          </strong>
+
+          <strong>Active</strong>
+
           <small>
             Expires{" "}
             {new Date(
@@ -287,10 +461,12 @@ export default function AccountProfileManager() {
         <AccountProfileForm
           draft={draft}
           errors={errors}
-          saving={false}
+          saving={
+            state === "saving"
+          }
           onChange={(nextDraft) => {
             setDraft(nextDraft);
-            setSaved(false);
+            setMessage(null);
 
             if (
               Object.keys(errors)
@@ -299,7 +475,9 @@ export default function AccountProfileManager() {
               setErrors({});
             }
           }}
-          onSubmit={save}
+          onSubmit={() => {
+            void save();
+          }}
         />
 
         <aside className={styles.accessPanel}>
@@ -347,10 +525,13 @@ export default function AccountProfileManager() {
 
             <dl>
               <div>
-                <dt>Created</dt>
+                <dt>
+                  Account created
+                </dt>
+
                 <dd>
                   {new Date(
-                    profile.createdAt
+                    profile.accountCreatedAt
                   ).toLocaleDateString(
                     "en-IN"
                   )}
@@ -358,7 +539,22 @@ export default function AccountProfileManager() {
               </div>
 
               <div>
+                <dt>
+                  Profile updated
+                </dt>
+
+                <dd>
+                  {new Date(
+                    profile.updatedAt
+                  ).toLocaleString(
+                    "en-IN"
+                  )}
+                </dd>
+              </div>
+
+              <div>
                 <dt>Last login</dt>
+
                 <dd>
                   {profile.lastLoginAt
                     ? new Date(

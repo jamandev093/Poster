@@ -200,6 +200,13 @@ export default function AccountProfileForm({
               },
             ]}
             onChange={(value) => {
+              if (
+                value !== "en" &&
+                value !== "hi"
+              ) {
+                return;
+              }
+
               update(
                 "preferredLanguage",
                 value
@@ -340,3 +347,4 @@ function SelectField({
     </label>
   );
 }
+

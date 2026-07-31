@@ -202,6 +202,23 @@ export async function buildApp(
       credentials:
         true,
 
+      methods: [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+      ],
+
+      allowedHeaders: [
+        "accept",
+        "authorization",
+        "content-type",
+        "x-request-id",
+      ],
+
       exposedHeaders: [
         "x-poster-access-token",
         "x-poster-access-token-expires-at",
@@ -397,4 +414,5 @@ export async function buildApp(
 
   return app;
 }
+
 

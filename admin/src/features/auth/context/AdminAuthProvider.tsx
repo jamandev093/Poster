@@ -28,6 +28,10 @@ export interface AdminAuthContextValue {
   identity:
     AdminAuthenticatedIdentity | null;
   errorMessage: string | null;
+
+  updateAccountName:
+    (fullName: string) => void;
+
   login:
     (
       input: AdminLoginInput
@@ -87,9 +91,18 @@ export default function AdminAuthProvider({
         setIdentity({
           account:
             authentication.data.account,
+
           session:
             authentication.data.session,
+
           access,
+
+          accessToken:
+            authentication.accessToken,
+
+          accessTokenExpiresAt:
+            authentication
+              .accessTokenExpiresAt,
         });
 
         setStatus("authenticated");
@@ -186,6 +199,40 @@ export default function AdminAuthProvider({
       [establishIdentity]
     );
 
+  const updateAccountName =
+    useCallback(
+      (
+        fullName: string
+      ) => {
+        setIdentity(
+          (current) => {
+            if (!current) {
+              return current;
+            }
+
+            return {
+              ...current,
+
+              account: {
+                ...current.account,
+                fullName,
+              },
+
+              access: {
+                ...current.access,
+
+                account: {
+                  ...current.access.account,
+                  fullName,
+                },
+              },
+            };
+          }
+        );
+      },
+      []
+    );
+
   const logout =
     useCallback(async () => {
       try {
@@ -205,6 +252,7 @@ export default function AdminAuthProvider({
         status,
         identity,
         errorMessage,
+        updateAccountName,
         login,
         logout,
         restore,
@@ -213,6 +261,7 @@ export default function AdminAuthProvider({
         status,
         identity,
         errorMessage,
+        updateAccountName,
         login,
         logout,
         restore,
@@ -227,4 +276,5 @@ export default function AdminAuthProvider({
     </AdminAuthContext.Provider>
   );
 }
+
 

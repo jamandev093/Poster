@@ -1,6 +1,7 @@
 ﻿export type AdminAccountStatus =
   | "pending_verification"
   | "active"
+  | "suspended"
   | "disabled"
   | "deleted";
 
@@ -83,6 +84,9 @@ export interface AdminAuthenticatedIdentity {
   account: AuthenticationAccount;
   session: AuthenticationSession;
   access: AdminAccessResponse;
+
+  accessToken: string;
+  accessTokenExpiresAt: string;
 }
 
 export interface ApiValidationIssue {
@@ -110,3 +114,4 @@ export type AdminAuthStatus =
   | "authenticated"
   | "unauthenticated"
   | "forbidden";
+

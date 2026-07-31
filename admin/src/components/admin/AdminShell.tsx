@@ -4,8 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ReactNode,
+  useMemo,
   useState,
 } from "react";
+
+import useAdminAuth from "@/features/auth/hooks/useAdminAuth";
 
 interface AdminShellProps {
   children: ReactNode;
@@ -94,13 +97,15 @@ function isPublicRoute(
   pathname: string
 ) {
   return (
-    pathname ===
-      "/copyright-request" ||
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/forbidden" ||
+    pathname.startsWith("/forbidden/") ||
+    pathname === "/copyright-request" ||
     pathname.startsWith(
       "/copyright-request/"
     ) ||
-    pathname ===
-      "/advertise" ||
+    pathname === "/advertise" ||
     pathname.startsWith(
       "/advertise/"
     )
@@ -112,6 +117,30 @@ export default function AdminShell({
 }: AdminShellProps) {
   const pathname =
     usePathname();
+
+  const {
+    identity,
+  } = useAdminAuth();
+
+  const operatorName =
+    identity?.account.fullName ??
+    "Admin";
+
+  const operatorInitials =
+    useMemo(
+      () =>
+        operatorName
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) =>
+            part
+              .charAt(0)
+              .toUpperCase()
+          )
+          .join(""),
+      [operatorName]
+    );
 
   const [
     open,
@@ -415,12 +444,12 @@ export default function AdminShell({
             aria-label="Open Admin account profile"
           >
             <div className="operator-mark">
-              A
+              {operatorInitials || "A"}
             </div>
 
             <div>
               <strong>
-                Admin
+                {operatorName}
               </strong>
 
               <span>
@@ -437,4 +466,6 @@ export default function AdminShell({
     </div>
   );
 }
+
+
 

@@ -45,7 +45,7 @@ interface AuthenticatedResponse {
   accessTokenExpiresAt: string;
 }
 
-async function readError(
+export async function readAdminApiError(
   response: Response
 ): Promise<AdminApiError> {
   let payload:
@@ -126,7 +126,7 @@ async function authenticationRequest(
   );
 
   if (!response.ok) {
-    throw await readError(response);
+    throw await readAdminApiError(response);
   }
 
   const data =
@@ -183,7 +183,7 @@ export async function logoutAdmin():
     !response.ok &&
     response.status !== 401
   ) {
-    throw await readError(response);
+    throw await readAdminApiError(response);
   }
 }
 
@@ -205,9 +205,49 @@ export async function loadAdminAccess(
   );
 
   if (!response.ok) {
-    throw await readError(response);
+    throw await readAdminApiError(response);
   }
 
   return await response.json() as
     AdminAccessResponse;
 }
+
+export async function adminAuthenticatedRequest<
+  ResponseBody
+>(
+  path: string,
+  accessToken: string,
+  init: RequestInit = {}
+): Promise<ResponseBody> {
+  const response = await fetch(
+    `${API_BASE_URL}${path}`,
+    {
+      ...init,
+      credentials: "include",
+      cache: "no-store",
+
+      headers: {
+        accept: "application/json",
+        authorization:
+          `Bearer ${accessToken}`,
+        ...(init.body
+          ? {
+              "content-type":
+                "application/json",
+            }
+          : {}),
+        ...(init.headers ?? {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw await readAdminApiError(
+      response
+    );
+  }
+
+  return await response.json() as
+    ResponseBody;
+}
+

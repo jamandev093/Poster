@@ -1,85 +1,168 @@
-﻿import type {
+﻿import {
+  adminAuthenticatedRequest,
+} from "@/features/auth/services/auth-api.service";
+
+import type {
   AdminAccountProfile,
   AdminAccountProfileDraft,
+  UpdateAdminAccountProfileInput,
 } from "../contracts/account-profile.types";
 
-const STORAGE_KEY =
-  "poster-admin-account-profile";
+interface AdminAccountProfileApiResponse {
+  userId: string;
+  loginEmail: string;
+  fullName: string;
+  displayName: string;
 
-function storageAvailable() {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.localStorage !==
-      "undefined"
-  );
+  jobTitle:
+    | string
+    | null;
+
+  businessEmail:
+    | string
+    | null;
+
+  primaryPhone:
+    | string
+    | null;
+
+  alternatePhone:
+    | string
+    | null;
+
+  signalAccount:
+    | string
+    | null;
+
+  telegramUsername:
+    | string
+    | null;
+
+  preferredLanguage:
+    | "en"
+    | "hi";
+
+  timeZone: string;
+
+  emailVerifiedAt:
+    | string
+    | null;
+
+  lastLoginAt:
+    | string
+    | null;
+
+  accountCreatedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  rowVersion: string;
 }
 
-export function createInitialAdminProfile(
-  input: {
-    userId: string;
-    loginEmail: string;
-    fullName: string;
-    emailVerifiedAt:
-      | string
-      | null;
-    createdAt: string;
-  }
+function mapProfileResponse(
+  response:
+    AdminAccountProfileApiResponse
 ): AdminAccountProfile {
   return {
-    userId: input.userId,
-    loginEmail: input.loginEmail,
-    fullName: input.fullName,
-    displayName: input.fullName,
-    jobTitle: "Administrator",
+    ...response,
+
+    jobTitle:
+      response.jobTitle ?? "",
+
     businessEmail:
-      input.loginEmail,
-    primaryPhone: "",
-    alternatePhone: "",
-    signalAccount: "",
-    telegramUsername: "",
-    preferredLanguage: "en",
-    timeZone:
-      "Asia/Kolkata",
-    emailVerifiedAt:
-      input.emailVerifiedAt,
-    createdAt:
-      input.createdAt,
-    lastLoginAt:
-      new Date().toISOString(),
+      response.businessEmail ?? "",
+
+    primaryPhone:
+      response.primaryPhone ?? "",
+
+    alternatePhone:
+      response.alternatePhone ?? "",
+
+    signalAccount:
+      response.signalAccount ?? "",
+
+    telegramUsername:
+      response.telegramUsername ?? "",
   };
 }
 
-export function loadStoredAdminProfile():
-  AdminAccountProfile | null {
-  if (!storageAvailable()) {
-    return null;
-  }
+function optionalText(
+  value: string
+): string | null {
+  const normalized =
+    value.trim();
 
-  const stored =
-    window.localStorage.getItem(
-      STORAGE_KEY
-    );
-
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(
-      stored
-    ) as AdminAccountProfile;
-  } catch {
-    return null;
-  }
+  return normalized.length > 0
+    ? normalized
+    : null;
 }
 
-export function saveStoredAdminProfile(
-  current: AdminAccountProfile,
-  draft: AdminAccountProfileDraft
-): AdminAccountProfile {
-  const nextProfile:
-    AdminAccountProfile = {
-    ...current,
+export function profileToDraft(
+  profile:
+    AdminAccountProfile
+): AdminAccountProfileDraft {
+  return {
+    fullName:
+      profile.fullName,
+
+    displayName:
+      profile.displayName,
+
+    jobTitle:
+      profile.jobTitle,
+
+    businessEmail:
+      profile.businessEmail,
+
+    primaryPhone:
+      profile.primaryPhone,
+
+    alternatePhone:
+      profile.alternatePhone,
+
+    signalAccount:
+      profile.signalAccount,
+
+    telegramUsername:
+      profile.telegramUsername,
+
+    preferredLanguage:
+      profile.preferredLanguage,
+
+    timeZone:
+      profile.timeZone,
+  };
+}
+
+export async function loadAdminProfile(
+  accessToken: string
+): Promise<AdminAccountProfile> {
+  const response =
+    await adminAuthenticatedRequest<
+      AdminAccountProfileApiResponse
+    >(
+      "/admin/profile",
+      accessToken,
+      {
+        method: "GET",
+      }
+    );
+
+  return mapProfileResponse(
+    response
+  );
+}
+
+export async function updateAdminProfile(
+  accessToken: string,
+  current:
+    AdminAccountProfile,
+  draft:
+    AdminAccountProfileDraft
+): Promise<AdminAccountProfile> {
+  const input:
+    UpdateAdminAccountProfileInput = {
+    expectedRowVersion:
+      current.rowVersion,
 
     fullName:
       draft.fullName.trim(),
@@ -88,38 +171,57 @@ export function saveStoredAdminProfile(
       draft.displayName.trim(),
 
     jobTitle:
-      draft.jobTitle.trim(),
+      optionalText(
+        draft.jobTitle
+      ),
 
     businessEmail:
-      draft.businessEmail
-        .trim()
-        .toLowerCase(),
+      optionalText(
+        draft.businessEmail
+      )?.toLowerCase() ??
+      null,
 
     primaryPhone:
-      draft.primaryPhone.trim(),
+      optionalText(
+        draft.primaryPhone
+      ),
 
     alternatePhone:
-      draft.alternatePhone.trim(),
+      optionalText(
+        draft.alternatePhone
+      ),
 
     signalAccount:
-      draft.signalAccount.trim(),
+      optionalText(
+        draft.signalAccount
+      ),
 
     telegramUsername:
-      draft.telegramUsername.trim(),
+      optionalText(
+        draft.telegramUsername
+      ),
 
     preferredLanguage:
       draft.preferredLanguage,
 
     timeZone:
-      draft.timeZone,
+      draft.timeZone.trim(),
   };
 
-  if (storageAvailable()) {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(nextProfile)
+  const response =
+    await adminAuthenticatedRequest<
+      AdminAccountProfileApiResponse
+    >(
+      "/admin/profile",
+      accessToken,
+      {
+        method: "PATCH",
+        body:
+          JSON.stringify(input),
+      }
     );
-  }
 
-  return nextProfile;
+  return mapProfileResponse(
+    response
+  );
 }

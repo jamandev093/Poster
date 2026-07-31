@@ -1,4 +1,8 @@
-﻿export interface AdminAccountProfile {
+﻿export type AdminPreferredLanguage =
+  | "en"
+  | "hi";
+
+export interface AdminAccountProfile {
   userId: string;
 
   loginEmail: string;
@@ -19,7 +23,8 @@
 
   telegramUsername: string;
 
-  preferredLanguage: string;
+  preferredLanguage:
+    AdminPreferredLanguage;
 
   timeZone: string;
 
@@ -27,11 +32,17 @@
     | string
     | null;
 
-  createdAt: string;
-
   lastLoginAt:
     | string
     | null;
+
+  accountCreatedAt: string;
+
+  createdAt: string;
+
+  updatedAt: string;
+
+  rowVersion: string;
 }
 
 export interface AdminAccountProfileDraft {
@@ -43,7 +54,44 @@ export interface AdminAccountProfileDraft {
   alternatePhone: string;
   signalAccount: string;
   telegramUsername: string;
-  preferredLanguage: string;
+  preferredLanguage:
+    AdminPreferredLanguage;
+  timeZone: string;
+}
+
+export interface UpdateAdminAccountProfileInput {
+  expectedRowVersion: string;
+
+  fullName: string;
+  displayName: string;
+
+  jobTitle:
+    | string
+    | null;
+
+  businessEmail:
+    | string
+    | null;
+
+  primaryPhone:
+    | string
+    | null;
+
+  alternatePhone:
+    | string
+    | null;
+
+  signalAccount:
+    | string
+    | null;
+
+  telegramUsername:
+    | string
+    | null;
+
+  preferredLanguage:
+    AdminPreferredLanguage;
+
   timeZone: string;
 }
 

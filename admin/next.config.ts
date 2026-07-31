@@ -2,6 +2,10 @@
   NextConfig,
 } from "next";
 
+const isDevelopment =
+  process.env.NODE_ENV ===
+  "development";
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
@@ -11,11 +15,29 @@ const securityHeaders = [
       "form-action 'self'",
       "frame-ancestors 'none'",
       "object-src 'none'",
-      "script-src 'self' 'unsafe-inline'",
+      [
+        "script-src",
+        "'self'",
+        "'unsafe-inline'",
+        isDevelopment
+          ? "'unsafe-eval'"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https:",
+      [
+        "connect-src",
+        "'self'",
+        "https:",
+        isDevelopment
+          ? "http://localhost:4000 http://127.0.0.1:4000"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
       "media-src 'self' blob: https:",
       "worker-src 'self' blob:",
       "manifest-src 'self'",
@@ -74,3 +96,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+
