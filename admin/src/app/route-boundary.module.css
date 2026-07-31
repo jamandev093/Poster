@@ -1,0 +1,121 @@
+﻿.boundary {
+  min-height: calc(100vh - 116px);
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+
+.card {
+  width: min(560px, 100%);
+  padding: 28px;
+  text-align: center;
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-sm);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--primary, #5b86e5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card h1,
+.card h2 {
+  margin: 0;
+  color: var(--text, #0f172a);
+  font-size: 1.35rem;
+  line-height: 1.35;
+}
+
+.card p {
+  max-width: 480px;
+  margin: 10px auto 0;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: var(--primary, #5b86e5);
+  border: 1px solid var(--primary, #5b86e5);
+}
+
+.secondaryButton {
+  color: var(--text, #0f172a);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.loader {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 18px;
+  border: 3px solid var(--border, #e2e8f0);
+  border-top-color: var(--primary, #5b86e5);
+  border-radius: 999px;
+  animation: boundary-spin 700ms linear infinite;
+}
+
+.errorCode {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+@keyframes boundary-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 22px 18px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

@@ -28,6 +28,7 @@ interface AdminDrawerProps {
   closeLabel?: string;
   width?: "standard" | "wide";
   showHeader?: boolean;
+  contentPadding?: "default" | "none";
   onClose: () => void;
 }
 
@@ -40,6 +41,7 @@ export default function AdminDrawer({
   closeLabel = "Close drawer",
   width = "standard",
   showHeader = true,
+  contentPadding = "default",
   onClose,
 }: AdminDrawerProps) {
   const titleId = useId();
@@ -239,9 +241,11 @@ export default function AdminDrawer({
 
         <div
           className={
-            showHeader
-              ? styles.body
-              : styles.bodyFlush
+            contentPadding === "none"
+              ? styles.bodyNoPadding
+              : showHeader
+                ? styles.body
+                : styles.bodyFlush
           }
         >
           {children}
@@ -256,3 +260,4 @@ export default function AdminDrawer({
     </div>
   );
 }
+

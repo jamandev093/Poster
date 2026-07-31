@@ -5,6 +5,9 @@ import {
   useState,
 } from "react";
 
+import AdminDrawer from "@/components/admin/AdminDrawer";
+import ConfirmationDialog from "@/components/admin/ConfirmationDialog";
+
 import {
   earningEventLabel,
   earningStatusLabel,
@@ -313,6 +316,13 @@ export default function ExternalEarningsManager() {
     "all"
   );
 
+  const [
+    pendingStatus,
+    setPendingStatus,
+  ] = useState<
+    ExternalEarningStatus | null
+  >(null);
+
   const approvedPrograms =
     useMemo(
       () =>
@@ -360,6 +370,18 @@ export default function ExternalEarningsManager() {
         selectedEarningId,
       ]
     );
+
+  const drawerOpen =
+    workspaceMode !== "closed";
+
+  const drawerTitle =
+    workspaceMode === "create"
+      ? "Add external earning"
+      : workspaceMode === "edit"
+        ? "Edit external earning"
+        : selectedEarning
+          ? `${selectedEarning.externalConversionId} details`
+          : "External earning";
 
   const programNames =
     useMemo(
@@ -573,6 +595,7 @@ export default function ExternalEarningsManager() {
     );
 
     setErrors({});
+    setPendingStatus(null);
   };
 
   const openCreate = () => {
@@ -947,7 +970,7 @@ export default function ExternalEarningsManager() {
     }
   };
 
-  const changeStatus = (
+  const applyStatus = (
     status: ExternalEarningStatus
   ) => {
     if (!selectedEarning) {
@@ -1090,6 +1113,70 @@ export default function ExternalEarningsManager() {
         )
     );
   };
+
+  const requestStatusChange = (
+    status: ExternalEarningStatus
+  ) => {
+    if (!selectedEarning) {
+      return;
+    }
+
+    const missingPaidDetails =
+      status === "paid" &&
+      (!selectedEarning.externalPayoutId ||
+        !selectedEarning.payoutDate);
+
+    const missingReversalReason =
+      status === "reversed" &&
+      !selectedEarning.reversalReason;
+
+    const missingRejectionReason =
+      status === "rejected" &&
+      !selectedEarning.rejectionReason;
+
+    if (
+      missingPaidDetails ||
+      missingReversalReason ||
+      missingRejectionReason
+    ) {
+      applyStatus(status);
+      return;
+    }
+
+    setPendingStatus(status);
+  };
+
+  const confirmStatusChange = () => {
+    if (!pendingStatus) {
+      return;
+    }
+
+    const nextStatus = pendingStatus;
+
+    setPendingStatus(null);
+    applyStatus(nextStatus);
+  };
+
+  const confirmationTone =
+    pendingStatus === "reversed" ||
+    pendingStatus === "rejected"
+      ? "danger"
+      : "primary";
+
+  const confirmationLabel =
+    pendingStatus === "confirmed"
+      ? "Confirm earning"
+      : pendingStatus === "approved"
+        ? "Approve earning"
+        : pendingStatus === "payable"
+          ? "Mark payable"
+          : pendingStatus === "paid"
+            ? "Mark paid"
+            : pendingStatus === "reversed"
+              ? "Reverse earning"
+              : pendingStatus === "rejected"
+                ? "Reject earning"
+                : "Continue";
 
   return (
     <main className={styles.page}>
@@ -1251,14 +1338,14 @@ export default function ExternalEarningsManager() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Conversion</th>
-                <th>Program / promotion</th>
-                <th>Outcome</th>
-                <th>Status</th>
-                <th>Commission</th>
-                <th>Net earning</th>
-                <th>Payout</th>
-                <th aria-label="Actions" />
+                <th scope="col">Conversion</th>
+                <th scope="col">Program / promotion</th>
+                <th scope="col">Outcome</th>
+                <th scope="col">Status</th>
+                <th scope="col">Commission</th>
+                <th scope="col">Net earning</th>
+                <th scope="col">Payout</th>
+                <th scope="col" aria-label="Actions" />
               </tr>
             </thead>
 
@@ -1425,153 +1512,167 @@ export default function ExternalEarningsManager() {
         </div>
       </section>
 
-      {workspaceMode !==
-      "closed" ? (
-        <div
-          className={styles.overlay}
-          role="presentation"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              closeWorkspace();
+      <AdminDrawer
+        open={drawerOpen}
+        title={drawerTitle}
+        width="wide"
+        showHeader={false}
+        contentPadding="none"
+        onClose={closeWorkspace}
+      >
+        {workspaceMode === "details" &&
+        selectedEarning ? (
+          <ExternalEarningDetails
+            earning={selectedEarning}
+            programName={
+              programNames.get(
+                selectedEarning.programId
+              ) ?? "Unknown program"
             }
-          }}
-        >
-          <aside
-            className={styles.drawer}
-            aria-label="External earning workspace"
-          >
-            {workspaceMode ===
-              "details" &&
-            selectedEarning ? (
-              <ExternalEarningDetails
-                earning={
-                  selectedEarning
-                }
-                programName={
-                  programNames.get(
-                    selectedEarning
-                      .programId
-                  ) ??
-                  "Unknown program"
-                }
-                promotionName={
-                  promotionNames.get(
-                    selectedEarning
-                      .promotionId
-                  ) ??
-                  "Unknown promotion"
-                }
-                onEdit={() => {
-                  openEdit(
-                    selectedEarning
-                  );
-                }}
-                onClose={
-                  closeWorkspace
-                }
-                onStatusChange={
-                  changeStatus
-                }
-              />
-            ) : null}
+            promotionName={
+              promotionNames.get(
+                selectedEarning.promotionId
+              ) ?? "Unknown promotion"
+            }
+            onEdit={() => {
+              openEdit(selectedEarning);
+            }}
+            onClose={closeWorkspace}
+            onStatusChange={
+              requestStatusChange
+            }
+          />
+        ) : null}
 
-            {workspaceMode ===
-              "create" ||
-            workspaceMode ===
-              "edit" ? (
-              <div
-                className={
-                  styles.editorPanel
-                }
-              >
-                <header
-                  className={
-                    styles.editorHeader
-                  }
-                >
-                  <div>
-                    <p>
-                      External earning
-                    </p>
+        {workspaceMode === "create" ||
+        workspaceMode === "edit" ? (
+          <div className={styles.editorPanel}>
+            <header className={styles.editorHeader}>
+              <div>
+                <p>External earning</p>
 
-                    <h2>
-                      {workspaceMode ===
-                      "create"
-                        ? "Add earning"
-                        : "Edit earning"}
-                    </h2>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={
-                      closeWorkspace
-                    }
-                    aria-label="Close earning editor"
-                  >
-                    ×
-                  </button>
-                </header>
-
-                <div
-                  className={
-                    styles.editorBody
-                  }
-                >
-                  <ExternalEarningEditor
-                    draft={draft}
-                    errors={errors}
-                    programs={
-                      approvedPrograms
-                    }
-                    promotions={
-                      promotionOptions
-                    }
-                    submitLabel={
-                      workspaceMode ===
-                      "create"
-                        ? "Create earning"
-                        : "Save changes"
-                    }
-                    onChange={(
-                      nextDraft
-                    ) => {
-                      setDraft(
-                        nextDraft
-                      );
-
-                      if (
-                        Object.keys(
-                          errors
-                        ).length > 0
-                      ) {
-                        setErrors({});
-                      }
-                    }}
-                    onSubmit={
-                      saveDraft
-                    }
-                    onCancel={() => {
-                      if (
-                        selectedEarning
-                      ) {
-                        setWorkspaceMode(
-                          "details"
-                        );
-                      } else {
-                        closeWorkspace();
-                      }
-                    }}
-                  />
-                </div>
+                <h2>
+                  {workspaceMode === "create"
+                    ? "Add earning"
+                    : "Edit earning"}
+                </h2>
               </div>
-            ) : null}
-          </aside>
-        </div>
-      ) : null}
+
+              <button
+                type="button"
+                onClick={closeWorkspace}
+                aria-label="Close earning editor"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className={styles.editorBody}>
+              <ExternalEarningEditor
+                draft={draft}
+                errors={errors}
+                programs={approvedPrograms}
+                promotions={promotionOptions}
+                submitLabel={
+                  workspaceMode === "create"
+                    ? "Create earning"
+                    : "Save changes"
+                }
+                onChange={(nextDraft) => {
+                  setDraft(nextDraft);
+
+                  if (
+                    Object.keys(errors).length >
+                    0
+                  ) {
+                    setErrors({});
+                  }
+                }}
+                onSubmit={saveDraft}
+                onCancel={() => {
+                  if (selectedEarning) {
+                    setWorkspaceMode(
+                      "details"
+                    );
+                  } else {
+                    closeWorkspace();
+                  }
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
+      </AdminDrawer>
+
+      <ConfirmationDialog
+        open={
+          pendingStatus !== null &&
+          selectedEarning !== null
+        }
+        title={
+          pendingStatus
+            ? `${earningStatusLabel(
+                pendingStatus
+              )} external earning`
+            : "Confirm earning action"
+        }
+        description="Review the earning and financial amount before applying this lifecycle change."
+        confirmLabel={confirmationLabel}
+        tone={confirmationTone}
+        details={
+          selectedEarning
+            ? [
+                {
+                  label: "Conversion",
+                  value:
+                    selectedEarning
+                      .externalConversionId,
+                },
+                {
+                  label: "Current status",
+                  value: earningStatusLabel(
+                    selectedEarning.status
+                  ),
+                },
+                {
+                  label: "Next status",
+                  value: pendingStatus
+                    ? earningStatusLabel(
+                        pendingStatus
+                      )
+                    : "",
+                },
+                {
+                  label: "Net earning",
+                  value: formatAmount(
+                    selectedEarning.amount
+                      .netAmount,
+                    selectedEarning.amount
+                      .currency
+                  ),
+                },
+                {
+                  label: "Payout ID",
+                  value:
+                    selectedEarning
+                      .externalPayoutId ||
+                    "Not issued",
+                },
+                {
+                  label: "Payout date",
+                  value:
+                    selectedEarning
+                      .payoutDate ||
+                    "Not recorded",
+                },
+              ]
+            : []
+        }
+        onConfirm={confirmStatusChange}
+        onCancel={() => {
+          setPendingStatus(null);
+        }}
+      />
     </main>
   );
 }
@@ -1599,6 +1700,7 @@ function SummaryCard({
     </article>
   );
 }
+
 
 
 
