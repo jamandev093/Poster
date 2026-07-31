@@ -63,6 +63,7 @@ const operationsItems = [
 const utilityItems = [
   ["/reports", "Reports"],
   ["/users", "Users"],
+  ["/account", "Account"],
   [
     "/system-status",
     "System Status",
@@ -353,7 +354,7 @@ export default function AdminShell({
               </strong>
 
               <span>
-                Platform services pending
+                Authentication connected
               </span>
             </div>
           </div>
@@ -408,7 +409,11 @@ export default function AdminShell({
             </div>
           </div>
 
-          <div className="operator">
+          <Link
+            href="/account"
+            className="operator operator-link"
+            aria-label="Open Admin account profile"
+          >
             <div className="operator-mark">
               A
             </div>
@@ -419,10 +424,10 @@ export default function AdminShell({
               </strong>
 
               <span>
-                Single operator
+                Account profile
               </span>
             </div>
-          </div>
+          </Link>
         </header>
 
         <main className="main">
@@ -432,3 +437,4 @@ export default function AdminShell({
     </div>
   );
 }
+

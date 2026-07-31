@@ -2319,3 +2319,14 @@ dd {
     animation: none;
   }
 }
+
+.operator-link {
+  padding: 5px 8px;
+  border-radius: 9px;
+  transition:
+    background 150ms ease;
+}
+
+.operator-link:hover {
+  background: var(--surface);
+}

@@ -1,0 +1,51 @@
+﻿.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.card {
+  width: min(520px, 100%);
+  padding: 28px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.card p {
+  margin: 0 0 8px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.3rem;
+}
+
+.card span {
+  display: block;
+  margin-top: 12px;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.card button {
+  min-height: 40px;
+  margin-top: 20px;
+  padding: 0 15px;
+  color: #ffffff;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
