@@ -261,6 +261,18 @@ export default function ExternalProgramDetails({
           </button>
         ) : null}
 
+        {program.status === "closed" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("approved");
+            }}
+          >
+            Reopen program
+          </button>
+        ) : null}
+
         {program.status !== "closed" ? (
           <button
             type="button"

@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import AdminDrawer from "@/components/admin/AdminDrawer";
+
 import ExternalProgramDetails from "./ExternalProgramDetails";
 import ExternalProgramEditor from "./ExternalProgramEditor";
 
@@ -196,6 +198,18 @@ export default function ExternalProgramsManager() {
           "under_review" ||
         program.status === "applied"
     ).length;
+
+  const drawerOpen = Boolean(
+    selectedProgram || editorMode
+  );
+
+  const drawerTitle = editorMode
+    ? editorMode === "create"
+      ? "Add external program"
+      : "Edit external program"
+    : selectedProgram
+      ? `${selectedProgram.programName} details`
+      : "External program";
 
   const openCreate = () => {
     setDraft({
@@ -501,13 +515,20 @@ export default function ExternalProgramsManager() {
             <table>
               <thead>
                 <tr>
-                  <th>Program</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Account reference</th>
-                  <th>Currency</th>
-                  <th>Next review</th>
-                  <th aria-label="Actions" />
+                  <th scope="col">Program</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">
+                    Account reference
+                  </th>
+                  <th scope="col">Currency</th>
+                  <th scope="col">
+                    Next review
+                  </th>
+                  <th
+                    scope="col"
+                    aria-label="Actions"
+                  />
                 </tr>
               </thead>
 
@@ -595,82 +616,69 @@ export default function ExternalProgramsManager() {
         )}
       </section>
 
-      {selectedProgram ||
-      editorMode ? (
-        <>
-          <button
-            type="button"
-            className={styles.backdrop}
-            aria-label="Close program panel"
-            onClick={closeOverlay}
-          />
+      <AdminDrawer
+        open={drawerOpen}
+        title={drawerTitle}
+        width="wide"
+        showHeader={false}
+        onClose={closeOverlay}
+      >
+        {editorMode ? (
+          <div className={styles.editor}>
+            <header
+              className={
+                styles.editorHeader
+              }
+            >
+              <div>
+                <p>
+                  External Promotions
+                </p>
 
-          <aside
-            className={styles.drawer}
-            aria-label={
-              editorMode
-                ? "Program editor"
-                : "Program details"
-            }
-          >
-            {editorMode ? (
-              <div className={styles.editor}>
-                <header
-                  className={
-                    styles.editorHeader
-                  }
-                >
-                  <div>
-                    <p>
-                      External Promotions
-                    </p>
-
-                    <h2>
-                      {editorMode === "create"
-                        ? "Add program"
-                        : "Edit program"}
-                    </h2>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={closeOverlay}
-                    aria-label="Close editor"
-                  >
-                    ×
-                  </button>
-                </header>
-
-                <ExternalProgramEditor
-                  draft={draft}
-                  errors={errors}
-                  submitLabel={
-                    editorMode === "create"
-                      ? "Create program"
-                      : "Save changes"
-                  }
-                  onChange={setDraft}
-                  onSubmit={submitProgram}
-                  onCancel={closeOverlay}
-                />
+                <h2>
+                  {editorMode === "create"
+                    ? "Add program"
+                    : "Edit program"}
+                </h2>
               </div>
-            ) : selectedProgram ? (
-              <ExternalProgramDetails
-                program={selectedProgram}
-                onClose={closeOverlay}
-                onEdit={() => {
-                  openEdit(
-                    selectedProgram
-                  );
-                }}
-                onStatusChange={
-                  changeStatus
-                }
-              />
-            ) : null}
-          </aside>
-        </>
-      ) : null}
+
+              <button
+                type="button"
+                onClick={closeOverlay}
+                aria-label="Close editor"
+              >
+                ×
+              </button>
+            </header>
+
+            <ExternalProgramEditor
+              draft={draft}
+              errors={errors}
+              submitLabel={
+                editorMode === "create"
+                  ? "Create program"
+                  : "Save changes"
+              }
+              onChange={setDraft}
+              onSubmit={submitProgram}
+              onCancel={closeOverlay}
+            />
+          </div>
+        ) : selectedProgram ? (
+          <ExternalProgramDetails
+            program={selectedProgram}
+            onClose={closeOverlay}
+            onEdit={() => {
+              openEdit(
+                selectedProgram
+              );
+            }}
+            onStatusChange={
+              changeStatus
+            }
+          />
+        ) : null}
+      </AdminDrawer>
     </main>
   );
 }
