@@ -352,6 +352,18 @@ export default function ExternalPromotionDetails({
           </button>
         ) : null}
 
+        {promotion.status === "ended" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("active");
+            }}
+          >
+            Restart promotion
+          </button>
+        ) : null}
+
         {promotion.status !== "ended" ? (
           <button
             type="button"
@@ -401,3 +413,4 @@ function Metric({
     </div>
   );
 }
+

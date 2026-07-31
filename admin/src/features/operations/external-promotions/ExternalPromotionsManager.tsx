@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import AdminDrawer from "@/components/admin/AdminDrawer";
+
 import {
   INITIAL_EXTERNAL_PROGRAMS,
 } from "../external-programs/external-program.mock";
@@ -230,6 +232,18 @@ export default function ExternalPromotionsManager() {
         promotion.id ===
         selectedPromotionId
     ) ?? null;
+
+  const drawerOpen = Boolean(
+    selectedPromotion || editorMode
+  );
+
+  const drawerTitle = editorMode
+    ? editorMode === "create"
+      ? "Add external promotion"
+      : "Edit external promotion"
+    : selectedPromotion
+      ? `${selectedPromotion.name} details`
+      : "External promotion";
 
   const programNameById =
     useMemo(
@@ -750,15 +764,15 @@ export default function ExternalPromotionsManager() {
             <table>
               <thead>
                 <tr>
-                  <th>Promotion</th>
-                  <th>Program</th>
-                  <th>Offer</th>
-                  <th>Placements</th>
-                  <th>Status</th>
-                  <th>Impressions</th>
-                  <th>Valid clicks</th>
-                  <th>Conversions</th>
-                  <th aria-label="Actions" />
+                  <th scope="col">Promotion</th>
+                  <th scope="col">Program</th>
+                  <th scope="col">Offer</th>
+                  <th scope="col">Placements</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Impressions</th>
+                  <th scope="col">Valid clicks</th>
+                  <th scope="col">Conversions</th>
+                  <th scope="col" aria-label="Actions" />
                 </tr>
               </thead>
 
@@ -881,111 +895,65 @@ export default function ExternalPromotionsManager() {
         )}
       </section>
 
-      {selectedPromotion ||
-      editorMode ? (
-        <>
-          <button
-            type="button"
-            className={
-              styles.backdrop
-            }
-            aria-label="Close promotion panel"
-            onClick={closeOverlay}
-          />
+      <AdminDrawer
+        open={drawerOpen}
+        title={drawerTitle}
+        width="wide"
+        showHeader={false}
+        onClose={closeOverlay}
+      >
+        {editorMode ? (
+          <div className={styles.editor}>
+            <header className={styles.editorHeader}>
+              <div>
+                <p>External Promotions</p>
 
-          <aside
-            className={
-              styles.drawer
-            }
-            aria-label={
-              editorMode
-                ? "Promotion editor"
-                : "Promotion details"
-            }
-          >
-            {editorMode ? (
-              <div
-                className={
-                  styles.editor
-                }
-              >
-                <header
-                  className={
-                    styles.editorHeader
-                  }
-                >
-                  <div>
-                    <p>
-                      External Promotions
-                    </p>
-
-                    <h2>
-                      {editorMode ===
-                      "create"
-                        ? "Add promotion"
-                        : "Edit promotion"}
-                    </h2>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={
-                      closeOverlay
-                    }
-                    aria-label="Close editor"
-                  >
-                    ×
-                  </button>
-                </header>
-
-                <ExternalPromotionEditor
-                  draft={draft}
-                  errors={errors}
-                  approvedPrograms={
-                    approvedPrograms
-                  }
-                  submitLabel={
-                    editorMode ===
-                    "create"
-                      ? "Create promotion"
-                      : "Save changes"
-                  }
-                  onChange={setDraft}
-                  onSubmit={
-                    submitPromotion
-                  }
-                  onCancel={
-                    closeOverlay
-                  }
-                />
+                <h2>
+                  {editorMode === "create"
+                    ? "Add promotion"
+                    : "Edit promotion"}
+                </h2>
               </div>
-            ) : selectedPromotion ? (
-              <ExternalPromotionDetails
-                promotion={
-                  selectedPromotion
-                }
-                programName={
-                  programNameById.get(
-                    selectedPromotion.programId
-                  ) ??
-                  "Unknown program"
-                }
-                onClose={
-                  closeOverlay
-                }
-                onEdit={() => {
-                  openEdit(
-                    selectedPromotion
-                  );
-                }}
-                onStatusChange={
-                  changeStatus
-                }
-              />
-            ) : null}
-          </aside>
-        </>
-      ) : null}
+
+              <button
+                type="button"
+                onClick={closeOverlay}
+                aria-label="Close editor"
+              >
+                ×
+              </button>
+            </header>
+
+            <ExternalPromotionEditor
+              draft={draft}
+              errors={errors}
+              approvedPrograms={approvedPrograms}
+              submitLabel={
+                editorMode === "create"
+                  ? "Create promotion"
+                  : "Save changes"
+              }
+              onChange={setDraft}
+              onSubmit={submitPromotion}
+              onCancel={closeOverlay}
+            />
+          </div>
+        ) : selectedPromotion ? (
+          <ExternalPromotionDetails
+            promotion={selectedPromotion}
+            programName={
+              programNameById.get(
+                selectedPromotion.programId
+              ) ?? "Unknown program"
+            }
+            onClose={closeOverlay}
+            onEdit={() => {
+              openEdit(selectedPromotion);
+            }}
+            onStatusChange={changeStatus}
+          />
+        ) : null}
+      </AdminDrawer>
     </main>
   );
 }
@@ -1015,3 +983,7 @@ function Metric({
     </div>
   );
 }
+
+
+
+
