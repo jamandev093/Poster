@@ -1,0 +1,111 @@
+﻿POSTER BACKEND REPORTS INSPECTION
+Generated: 2026-08-01 16:22:55
+Root: F:\Project\Poster\backend
+
+============================================================
+1. REPORT-RELATED FILES
+============================================================
+No report-named files found under src.
+
+============================================================
+2. REPORT-RELATED CODE REFERENCES
+============================================================
+src\application\content-sources\admin-content.service.ts:41: copyrightCaseId?:
+src\application\content-sources\admin-content.service.ts:266: copyrightCaseId:
+src\application\content-sources\admin-content.service.ts:267: input.copyrightCaseId ??
+src\application\content-sources\admin-content.service.ts:321: copyrightCaseId:
+src\application\content-sources\admin-content.service.ts:322: updated.copyrightCaseId,
+src\application\copyright\admin-copyright.service.ts:440: copyrightCaseId:
+src\application\copyright\admin-copyright.service.ts:521: copyrightCaseId:
+src\application\copyright\admin-copyright.service.ts:878: copyrightCaseId:
+src\domains\authorization\authorization.policy.ts:26: "reports.read",
+src\domains\authorization\authorization.policy.ts:27: "reports.manage",
+src\domains\authorization\authorization.policy.ts:43: "reports.read",
+src\domains\authorization\authorization.policy.ts:44: "reports.manage",
+src\domains\authorization\authorization.policy.ts:50: "reports.read",
+src\domains\authorization\authorization.policy.ts:61: "reports.read",
+src\domains\authorization\authorization.policy.ts:71: "reports.read",
+src\domains\authorization\authorization.types.ts:35: "reports.read",
+src\domains\authorization\authorization.types.ts:36: "reports.manage",
+src\domains\content-sources\discovery-content.repository.ts:64: copyright_case_id:
+src\domains\content-sources\discovery-content.repository.ts:95: copyright_case_id,
+src\domains\content-sources\discovery-content.repository.ts:148: copyrightCaseId:
+src\domains\content-sources\discovery-content.repository.ts:149: row.copyright_case_id,
+src\domains\content-sources\discovery-content.repository.ts:372: const copyrightCaseId =
+src\domains\content-sources\discovery-content.repository.ts:376: input.copyrightCaseId
+src\domains\content-sources\discovery-content.repository.ts:399: copyright_case_id = $6,
+src\domains\content-sources\discovery-content.repository.ts:420: copyrightCaseId,
+src\domains\content-sources\discovery-content.repository.ts:449: copyright_case_id = NULL,
+src\domains\content-sources\discovery-content.types.ts:61: copyrightCaseId:
+src\domains\content-sources\discovery-content.types.ts:109: copyrightCaseId?:
+src\routes\admin-content.routes.ts:36: copyrightCaseId?: unknown;
+src\routes\admin-content.routes.ts:186: copyrightCaseId:
+src\routes\admin-content.routes.ts:187: record.copyrightCaseId,
+src\routes\admin-content.routes.ts:395: const copyrightCaseId =
+src\routes\admin-content.routes.ts:398: ?.copyrightCaseId,
+src\routes\admin-content.routes.ts:399: "copyrightCaseId"
+src\routes\admin-content.routes.ts:412: !copyrightCaseId ||
+src\routes\admin-content.routes.ts:417: "Copyright removal requires copyrightCaseId and copyrightClaimant."
+src\routes\admin-content.routes.ts:457: copyrightCaseId,
+src\routes\admin-copyright.routes.ts:167: copyrightCaseId:
+src\routes\admin-copyright.routes.ts:168: record.copyrightCaseId,
+
+============================================================
+3. DATABASE MIGRATIONS
+============================================================
+0001_platform_metadata.sql | 923 bytes
+0002_identity_and_organizations.sql | 11027 bytes
+0003_application_role_permissions.sql | 2578 bytes
+0004_platform_access_control.sql | 3486 bytes
+0005_admin_user_metrics_indexes.sql | 1664 bytes
+0006_session_refresh_token_history.sql | 2632 bytes
+0007_password_reset_attempts.sql | 1256 bytes
+0008_commercial_request_workflow.sql | 12496 bytes
+0009_admin_profiles.sql | 3832 bytes
+0010_taxonomy_and_declared_interests.sql | 9545 bytes
+0011_content_and_sources.sql | 13821 bytes
+0012_copyright_cases.sql | 16041 bytes
+
+============================================================
+4. APP AND ROUTE REGISTRATION
+============================================================
+
+--- src\app.ts ---
+15: createAdminCopyrightService,
+16: type AdminCopyrightService,
+17: } from "./application/copyright/index.js";
+99: adminCopyrightRoutes,
+100: adminContentRoutes,
+103: adminSourceRoutes,
+141: adminCopyrightService?:
+142: AdminCopyrightService;
+424: adminContentRoutes,
+437: adminSourceRoutes,
+450: adminCopyrightRoutes,
+457: .adminCopyrightService ??
+458: createAdminCopyrightService(),
+
+--- src\routes\index.ts ---
+19: export * from "./admin-copyright.routes.js";
+
+============================================================
+5. REPORT TEST FILES
+============================================================
+No Reports test files found.
+
+============================================================
+6. CURRENT MIGRATION STATUS
+============================================================
+
+> poster-backend@0.1.0 db:migrate:status
+> tsx src/database/migrate.ts --status
+
+Poster database migration status
+{
+  "available": 12,
+  "applied": 12,
+  "pending": 0,
+  "pendingMigrations": []
+}
+
+END OF REPORTS INSPECTION

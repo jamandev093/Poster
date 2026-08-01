@@ -1,0 +1,222 @@
+﻿POSTER REPORTS DATABASE DIAGNOSTIC
+Generated: 2026-08-01 16:39:44 +05:30
+
+=== MIGRATION STATUS ===
+
+> poster-backend@0.1.0 db:migrate:status
+> tsx src/database/migrate.ts --status
+
+Poster database migration status
+{
+  "available": 13,
+  "applied": 13,
+  "pending": 0,
+  "pendingMigrations": []
+}
+
+=== DATABASE STRUCTURE ===
+
+============================================================
+1. CURRENT SCHEMA AND SEARCH PATH
+============================================================
+[
+  {
+    "current_schema": "app",
+    "search_path": "app, public"
+  }
+]
+
+============================================================
+2. REPORT TABLES IN ALL SCHEMAS
+============================================================
+[]
+
+============================================================
+3. REPORT TABLES IN APP SCHEMA
+============================================================
+[]
+
+============================================================
+4. REPORT TRIGGERS
+============================================================
+[]
+
+============================================================
+5. ADMIN REPORT CONSTRAINTS
+============================================================
+[]
+
+============================================================
+6. POSTGRES CHECK CONSTRAINT DEFINITIONS
+============================================================
+[
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_affected_kind_check",
+    "definition": "CHECK ((affected_kind = ANY (ARRAY['content'::text, 'source'::text, 'campaign'::text])))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_affected_record_id_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM affected_record_id)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_affected_title_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM affected_title)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_copyright_routing_consistency",
+    "definition": "CHECK ((((routed_to_copyright = false) AND (copyright_case_id IS NULL)) OR ((routed_to_copyright = true) AND (report_type = 'copyright'::text) AND (copyright_case_id IS NOT NULL))))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_public_id_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM public_id)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_reason_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM reason)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_report_type_check",
+    "definition": "CHECK ((report_type = ANY (ARRAY['misleading_content'::text, 'broken_link'::text, 'inappropriate_content'::text, 'publisher_issue'::text, 'commercial_report'::text, 'copyright'::text])))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_reporter_name_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM reporter_name)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_reporter_reference_nonempty",
+    "definition": "CHECK ((length(TRIM(BOTH FROM reporter_reference)) > 0))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_resolution_consistency",
+    "definition": "CHECK ((((status = 'needs_action'::text) AND (resolved_at IS NULL) AND (resolved_by_user_id IS NULL)) OR ((status = ANY (ARRAY['resolved'::text, 'dismissed'::text])) AND (resolved_at IS NOT NULL) AND (resolved_by_user_id IS NOT NULL))))"
+  },
+  {
+    "schema_name": "app",
+    "table_name": "admin_reports",
+    "constraint_name": "admin_reports_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['needs_action'::text, 'resolved'::text, 'dismissed'::text])))"
+  }
+]
+
+============================================================
+7. REPORT INDEXES
+============================================================
+[
+  {
+    "schemaname": "app",
+    "tablename": "admin_report_audit_events",
+    "indexname": "admin_report_audit_actor_idx",
+    "indexdef": "CREATE INDEX admin_report_audit_actor_idx ON app.admin_report_audit_events USING btree (actor_user_id, occurred_at DESC) WHERE (actor_user_id IS NOT NULL)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_report_audit_events",
+    "indexname": "admin_report_audit_events_pkey",
+    "indexdef": "CREATE UNIQUE INDEX admin_report_audit_events_pkey ON app.admin_report_audit_events USING btree (id)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_report_audit_events",
+    "indexname": "admin_report_audit_report_time_idx",
+    "indexdef": "CREATE INDEX admin_report_audit_report_time_idx ON app.admin_report_audit_events USING btree (report_id, occurred_at DESC)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_actionable_idx",
+    "indexdef": "CREATE INDEX admin_reports_actionable_idx ON app.admin_reports USING btree (received_at DESC) WHERE (status = 'needs_action'::text)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_affected_record_idx",
+    "indexdef": "CREATE INDEX admin_reports_affected_record_idx ON app.admin_reports USING btree (affected_kind, affected_record_id)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_copyright_case_idx",
+    "indexdef": "CREATE INDEX admin_reports_copyright_case_idx ON app.admin_reports USING btree (copyright_case_id) WHERE (copyright_case_id IS NOT NULL)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_pkey",
+    "indexdef": "CREATE UNIQUE INDEX admin_reports_pkey ON app.admin_reports USING btree (id)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_public_id_key",
+    "indexdef": "CREATE UNIQUE INDEX admin_reports_public_id_key ON app.admin_reports USING btree (public_id)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_status_received_idx",
+    "indexdef": "CREATE INDEX admin_reports_status_received_idx ON app.admin_reports USING btree (status, received_at DESC)"
+  },
+  {
+    "schemaname": "app",
+    "tablename": "admin_reports",
+    "indexname": "admin_reports_type_status_idx",
+    "indexdef": "CREATE INDEX admin_reports_type_status_idx ON app.admin_reports USING btree (report_type, status)"
+  }
+]
+
+============================================================
+8. MIGRATION RECORD
+============================================================
+node.exe : QUERY FAILED
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\jaman\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (QUERY FAILED:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+error: column "migration_name" does not exist
+    at F:\Project\Poster\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeDatabaseQuery (F:\Project\Poster\backend\src\database\database.pool.ts:134:10)
+    at async query (F:\Project\Poster\backend\verify-reports-diagnostic.ts:27:7)
+    at async main (F:\Project\Poster\backend\verify-reports-diagnostic.ts:197:3) {
+  length: 114,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '62',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3827',
+  routine: 'errorMissingColumn'
+}
+
+Diagnostic command exit code: 0

@@ -1,0 +1,3487 @@
+﻿POSTER ADMIN
+FAST AUTHENTICATION INTEGRATION INSPECTION
+
+Generated: 2026-07-31 12:47:08
+
+============================================================
+FILE: admin\src\components\admin\AdminShell.tsx
+============================================================
+
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ReactNode,
+  useState,
+} from "react";
+
+interface AdminShellProps {
+  children: ReactNode;
+}
+
+const primaryItems = [
+  ["/", "Dashboard"],
+  ["/content", "Content"],
+  ["/sources", "Sources"],
+  ["/copyright", "Copyright"],
+] as const;
+
+const monetizationItems = [
+  [
+    "/monetization/campaigns",
+    "Campaigns",
+  ],
+  [
+    "/monetization/analytics",
+    "Analytics",
+  ],
+  [
+    "/monetization/sponsorships",
+    "Direct Sponsorship",
+  ],
+  [
+    "/monetization/affiliate",
+    "Affiliate",
+  ],
+  [
+    "/monetization/poster-promotion",
+    "Poster Promotion",
+  ],
+] as const;
+
+const operationsItems = [
+  [
+    "/operations/business-identity",
+    "Business Identity",
+  ],
+  [
+    "/operations/external-promotions/programs",
+    "Programs",
+  ],
+  [
+    "/operations/external-promotions/promotions",
+    "Promotions",
+  ],
+  [
+    "/operations/external-promotions/earnings",
+    "Earnings",
+  ],
+] as const;
+
+const utilityItems = [
+  ["/reports", "Reports"],
+  ["/users", "Users"],
+  [
+    "/system-status",
+    "System Status",
+  ],
+] as const;
+
+const titleItems = [
+  ...primaryItems,
+  ...monetizationItems,
+  ...operationsItems,
+  ...utilityItems,
+] as const;
+
+function active(
+  pathname: string,
+  href: string
+) {
+  return href === "/"
+    ? pathname === "/"
+    : pathname === href ||
+        pathname.startsWith(
+          `${href}/`
+        );
+}
+
+
+function isPublicRoute(
+  pathname: string
+) {
+  return (
+    pathname ===
+      "/copyright-request" ||
+    pathname.startsWith(
+      "/copyright-request/"
+    ) ||
+    pathname ===
+      "/advertise" ||
+    pathname.startsWith(
+      "/advertise/"
+    )
+  );
+}
+
+export default function AdminShell({
+  children,
+}: AdminShellProps) {
+  const pathname =
+    usePathname();
+
+  const [
+    open,
+    setOpen,
+  ] =
+    useState(false);
+
+  if (
+    isPublicRoute(
+      pathname
+    )
+  ) {
+    return (
+      <>
+        {children}
+      </>
+    );
+  }
+
+  const title =
+    titleItems.find(
+      ([href]) =>
+        active(
+          pathname,
+          href
+        )
+    )?.[1] ??
+    "Poster Admin";
+
+  const closeNavigation =
+    () => {
+      setOpen(false);
+    };
+
+  return (
+    <div className="shell">
+      <aside
+        className={`sidebar ${
+          open
+            ? "sidebar-open"
+            : ""
+        }`}
+      >
+        <div className="brand">
+          <div className="brand-mark">
+            P
+          </div>
+
+          <div className="brand-copy">
+            <strong>
+              Poster
+            </strong>
+
+            <span>
+              Admin
+            </span>
+          </div>
+        </div>
+
+        <nav
+          className="nav"
+          aria-label="Admin navigation"
+        >
+          {primaryItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+
+          <div className="nav-group">
+            <div className="nav-group-title">
+              Monetization
+            </div>
+
+            {monetizationItems.map(
+              ([
+                href,
+                label,
+              ]) => {
+                const isActive =
+                  active(
+                    pathname,
+                    href
+                  );
+
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={
+                      isActive
+                        ? "page"
+                        : undefined
+                    }
+                    className={`nav-link nav-sub-link ${
+                      isActive
+                        ? "nav-active"
+                        : ""
+                    }`}
+                    onClick={
+                      closeNavigation
+                    }
+                  >
+                    <span className="nav-dot" />
+
+                    <span>
+                      {label}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+
+          <div className="nav-group">
+          <div className="nav-group-title">
+            Operations
+          </div>
+
+          {operationsItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link nav-sub-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+        </div>
+
+        {utilityItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+        </nav>
+
+        <div className="sidebar-foot">
+          <div className="health">
+            <i />
+
+            <div>
+              <strong>
+                Admin healthy
+              </strong>
+
+              <span>
+                Platform services pending
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {open ? (
+        <button
+          type="button"
+          className="backdrop"
+          aria-label="Close navigation"
+          onClick={
+            closeNavigation
+          }
+        />
+      ) : null}
+
+      <div className="workspace">
+        <header className="topbar">
+          <div className="topbar-left">
+            <button
+              type="button"
+              className="menu"
+              aria-label={
+                open
+                  ? "Close navigation"
+                  : "Open navigation"
+              }
+              aria-expanded={
+                open
+              }
+              onClick={() =>
+                setOpen(
+                  (value) =>
+                    !value
+                )
+              }
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+
+            <div className="topbar-copy">
+              <small>
+                Poster operations
+              </small>
+
+              <h1>
+                {title}
+              </h1>
+            </div>
+          </div>
+
+          <div className="operator">
+            <div className="operator-mark">
+              A
+            </div>
+
+            <div>
+              <strong>
+                Admin
+              </strong>
+
+              <span>
+                Single operator
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <main className="main">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+============================================================
+FILE: admin\src\app\layout.tsx
+============================================================
+
+import type {
+  Metadata,
+  Viewport,
+} from "next";
+
+import AdminShell from "@/components/admin/AdminShell";
+
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Poster Admin",
+    template: "%s | Poster Admin",
+  },
+
+  description:
+    "Operational control panel for Poster.",
+
+  applicationName: "Poster Admin",
+
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+
+  referrer: "no-referrer",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light",
+  themeColor: "#f8fafc",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>
+        <AdminShell>{children}</AdminShell>
+      </body>
+    </html>
+  );
+}
+
+============================================================
+FILE: admin\package.json
+============================================================
+
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "typescript": "^5"
+  }
+}
+
+============================================================
+FILE: backend\src\routes\auth.routes.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\routes\admin.routes.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.routes.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.controller.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.service.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.types.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.schemas.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\auth.cookies.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\auth\session.service.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\admin\admin.routes.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\modules\admin\admin-access.service.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\middleware\auth.middleware.ts
+============================================================
+
+MISSING
+
+============================================================
+FILE: backend\src\middleware\authorization.middleware.ts
+============================================================
+
+MISSING
+
+============================================================
+AUTHENTICATION AND ADMIN API SEARCH
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authentication\index.ts
+LINE: 5
+TEXT: export * from "./login-session.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\index.ts
+LINE: 7
+TEXT: export * from "./login-session.service.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\index.ts
+LINE: 9
+TEXT: export * from "./session-lifecycle.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\index.ts
+LINE: 11
+TEXT: export * from "./session-lifecycle.service.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 25
+TEXT: type CreateUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 27
+TEXT: type UserSessionRecord,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 31
+TEXT: createUserSession,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 32
+TEXT: } from "../../domains/identity/session.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 36
+TEXT: recordSuccessfulUserLogin,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 44
+TEXT: AuthenticationSessionSummary,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 45
+TEXT: LoginAuthenticationSessionInput,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 46
+TEXT: LoginAuthenticationSessionResult,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 47
+TEXT: } from "./login-session.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 49
+TEXT: export const LOGIN_SESSION_POLICY = {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 50
+TEXT: refreshTokenLifetimeMilliseconds:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 54
+TEXT: export type LoginSessionTransactionRunner =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 63
+TEXT: export interface LoginSessionServiceDependencies {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 65
+TEXT: LoginSessionTransactionRunner;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 76
+TEXT: recordSuccessfulUserLogin:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 77
+TEXT: typeof recordSuccessfulUserLogin;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 79
+TEXT: createUserSession:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 80
+TEXT: typeof createUserSession;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 86
+TEXT: export interface LoginSessionService {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 87
+TEXT: login:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 90
+TEXT: LoginAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 92
+TEXT: LoginAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 96
+TEXT: const DEFAULT_LOGIN_SESSION_DEPENDENCIES:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 97
+TEXT: LoginSessionServiceDependencies = {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 113
+TEXT: recordSuccessfulUserLogin,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 115
+TEXT: createUserSession,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 121
+TEXT: function assertValidLoginDate(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 130
+TEXT: "Login time must be a valid date."
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 135
+TEXT: function normalizeLoginEmail(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 164
+TEXT: function assertAccountMayLogin(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 189
+TEXT: "The account must complete email verification before login."
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 198
+TEXT: "The account is not active and cannot create a session."
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 228
+TEXT: function mapAuthenticationSessionSummary(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 229
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 230
+TEXT: UserSessionRecord
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 231
+TEXT: ): AuthenticationSessionSummary {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 234
+TEXT: session.id,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 237
+TEXT: session.userId,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 240
+TEXT: session.organizationId,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 243
+TEXT: session.createdAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 246
+TEXT: session.expiresAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 250
+TEXT: function createSessionInput(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 252
+TEXT: LoginAuthenticationSessionInput,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 255
+TEXT: refreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 259
+TEXT: ): CreateUserSessionInput {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 266
+TEXT: refreshTokenDigest,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 281
+TEXT: * Creates the Poster login and revocable-session service.
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 286
+TEXT: * The successful-login write and session insertion then occur
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 289
+TEXT: export function createLoginSessionService(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 292
+TEXT: LoginSessionServiceDependencies
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 295
+TEXT: ): LoginSessionService {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 297
+TEXT: LoginSessionServiceDependencies = {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 298
+TEXT: ...DEFAULT_LOGIN_SESSION_DEPENDENCIES,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 303
+TEXT: async login(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 307
+TEXT: normalizeLoginEmail(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 318
+TEXT: assertValidLoginDate(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 352
+TEXT: assertAccountMayLogin(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 357
+TEXT: const refreshTokenPair =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 364
+TEXT: LOGIN_SESSION_POLICY
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 365
+TEXT: .refreshTokenLifetimeMilliseconds
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 379
+TEXT: const currentUser =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 387
+TEXT: !currentUser ||
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 388
+TEXT: currentUser.id !==
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 390
+TEXT: currentUser.passwordHash !==
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 396
+TEXT: assertAccountMayLogin(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 397
+TEXT: currentUser,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 403
+TEXT: .recordSuccessfulUserLogin(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 406
+TEXT: currentUser.id,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 409
+TEXT: currentUser.rowVersion,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 422
+TEXT: const session =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 424
+TEXT: .createUserSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 425
+TEXT: createSessionInput(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 428
+TEXT: refreshTokenPair.digest,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 438
+TEXT: session,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 449
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 450
+TEXT: mapAuthenticationSessionSummary(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 451
+TEXT: result.session
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 454
+TEXT: refreshToken:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 455
+TEXT: refreshTokenPair.token,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 461
+TEXT: const defaultLoginSessionService =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 462
+TEXT: createLoginSessionService();
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 465
+TEXT: * Creates a revocable Poster login session using the default
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 468
+TEXT: export async function loginAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 470
+TEXT: LoginAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 472
+TEXT: LoginAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 474
+TEXT: return await defaultLoginSessionService
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 475
+TEXT: .login(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 5
+TEXT: export interface LoginAuthenticationSessionInput {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 23
+TEXT: * Safe session metadata.
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 25
+TEXT: * Refresh-token digests and other internal authentication
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 28
+TEXT: export interface AuthenticationSessionSummary {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 43
+TEXT: * Successful login result.
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 45
+TEXT: * refreshToken is returned exactly once so the transport
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 49
+TEXT: export interface LoginAuthenticationSessionResult {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 53
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 54
+TEXT: AuthenticationSessionSummary;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 56
+TEXT: refreshToken: string;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 35
+TEXT: revokeAllUserSessions,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 36
+TEXT: } from "../../domains/identity/session.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 97
+TEXT: revokeAllUserSessions?:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 98
+TEXT: typeof revokeAllUserSessions;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 223
+TEXT: * Password replacement, token consumption, and global session
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 262
+TEXT: const revokeSessions =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 263
+TEXT: options.revokeAllUserSessions ??
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 264
+TEXT: revokeAllUserSessions;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\password-reset.service.ts
+LINE: 575
+TEXT: await revokeSessions(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 10
+TEXT: AuthenticationSessionInvalidError,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 24
+TEXT: UserSessionRecord,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 28
+TEXT: revokeUserSession,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 29
+TEXT: } from "../../domains/identity/session.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 32
+TEXT: revokeUserSessionByRefreshTokenDigest,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 33
+TEXT: rotateUserSessionRefreshToken,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 34
+TEXT: } from "../../domains/identity/session-lifecycle.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 41
+TEXT: AuthenticationSessionSummary,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 42
+TEXT: } from "./login-session.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 45
+TEXT: LogoutAuthenticationSessionInput,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 46
+TEXT: LogoutAuthenticationSessionResult,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 47
+TEXT: RefreshAuthenticationSessionInput,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 48
+TEXT: RefreshAuthenticationSessionResult,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 49
+TEXT: } from "./session-lifecycle.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 51
+TEXT: const MAXIMUM_REFRESH_TOKEN_LENGTH =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 54
+TEXT: export type SessionLifecycleTransactionRunner =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 63
+TEXT: export interface SessionLifecycleServiceDependencies {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 65
+TEXT: SessionLifecycleTransactionRunner;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 73
+TEXT: rotateUserSessionRefreshToken:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 74
+TEXT: typeof rotateUserSessionRefreshToken;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 76
+TEXT: revokeUserSessionByRefreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 77
+TEXT: typeof revokeUserSessionByRefreshTokenDigest;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 79
+TEXT: revokeUserSession:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 80
+TEXT: typeof revokeUserSession;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 89
+TEXT: export interface SessionLifecycleService {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 90
+TEXT: refresh:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 93
+TEXT: RefreshAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 95
+TEXT: RefreshAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 98
+TEXT: logout:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 101
+TEXT: LogoutAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 103
+TEXT: LogoutAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 108
+TEXT: SessionLifecycleServiceDependencies = {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 122
+TEXT: rotateUserSessionRefreshToken,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 124
+TEXT: revokeUserSessionByRefreshTokenDigest,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 126
+TEXT: revokeUserSession,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 134
+TEXT: function normalizeRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 135
+TEXT: refreshToken: string
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 137
+TEXT: const normalizedRefreshToken =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 138
+TEXT: refreshToken.trim();
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 141
+TEXT: normalizedRefreshToken.length ===
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 143
+TEXT: normalizedRefreshToken.length >
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 144
+TEXT: MAXIMUM_REFRESH_TOKEN_LENGTH
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 146
+TEXT: throw new AuthenticationSessionInvalidError(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 147
+TEXT: "The supplied refresh token was empty or exceeded the accepted length."
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 151
+TEXT: return normalizedRefreshToken;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 163
+TEXT: "Authentication session lifecycle time must be a valid date."
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 168
+TEXT: function accountMayRetainSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 207
+TEXT: function mapSessionSummary(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 208
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 209
+TEXT: UserSessionRecord
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 210
+TEXT: ): AuthenticationSessionSummary {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 213
+TEXT: session.id,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 216
+TEXT: session.userId,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 219
+TEXT: session.organizationId,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 222
+TEXT: session.createdAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 225
+TEXT: session.expiresAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 229
+TEXT: type RefreshTransactionResult =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 231
+TEXT: status: "refreshed";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 236
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 237
+TEXT: UserSessionRecord;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 246
+TEXT: * Creates the authoritative refresh and logout service.
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 248
+TEXT: * Refresh-token replacement and replay detection occur inside
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 250
+TEXT: * before the public session-invalid error is thrown.
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 252
+TEXT: export function createSessionLifecycleService(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 255
+TEXT: SessionLifecycleServiceDependencies
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 258
+TEXT: ): SessionLifecycleService {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 260
+TEXT: SessionLifecycleServiceDependencies = {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 266
+TEXT: async refresh(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 269
+TEXT: const refreshToken =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 270
+TEXT: normalizeRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 271
+TEXT: input.refreshToken
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 274
+TEXT: const refreshedAt =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 278
+TEXT: refreshedAt
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 284
+TEXT: refreshToken
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 297
+TEXT: RefreshTransactionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 301
+TEXT: .rotateUserSessionRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 303
+TEXT: currentRefreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 306
+TEXT: replacementRefreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 310
+TEXT: refreshedAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 324
+TEXT: "A rotated refresh token was replayed and the session was revoked.",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 337
+TEXT: "The supplied refresh token did not identify an active session.",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 345
+TEXT: .session
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 352
+TEXT: !accountMayRetainSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 357
+TEXT: .revokeUserSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 359
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 361
+TEXT: .session
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 365
+TEXT: refreshedAt,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 368
+TEXT: "account_not_eligible_for_session_refresh",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 378
+TEXT: "The account is not eligible to retain an authenticated session.",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 384
+TEXT: "refreshed",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 388
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 390
+TEXT: .session,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 399
+TEXT: throw new AuthenticationSessionInvalidError(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 410
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 411
+TEXT: mapSessionSummary(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 412
+TEXT: transactionResult.session
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 415
+TEXT: refreshToken:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 420
+TEXT: async logout(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 423
+TEXT: const refreshToken =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 424
+TEXT: normalizeRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 425
+TEXT: input.refreshToken
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 435
+TEXT: const refreshTokenDigest =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 438
+TEXT: refreshToken
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 441
+TEXT: const revokedSession =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 443
+TEXT: .revokeUserSessionByRefreshTokenDigest({
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 444
+TEXT: refreshTokenDigest,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 450
+TEXT: "user_logout",
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 455
+TEXT: revokedSession !==
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 462
+TEXT: const defaultSessionLifecycleService =
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 463
+TEXT: createSessionLifecycleService();
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 465
+TEXT: export async function refreshAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 467
+TEXT: RefreshAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 469
+TEXT: RefreshAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 471
+TEXT: return await defaultSessionLifecycleService
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 472
+TEXT: .refresh(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 477
+TEXT: export async function logoutAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 479
+TEXT: LogoutAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 481
+TEXT: LogoutAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 483
+TEXT: return await defaultSessionLifecycleService
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 484
+TEXT: .logout(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 6
+TEXT: AuthenticationSessionSummary,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 7
+TEXT: } from "./login-session.types.js";
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 9
+TEXT: export interface RefreshAuthenticationSessionInput {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 10
+TEXT: refreshToken: string;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 21
+TEXT: export interface RefreshAuthenticationSessionResult {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 25
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 26
+TEXT: AuthenticationSessionSummary;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 32
+TEXT: refreshToken: string;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 35
+TEXT: export interface LogoutAuthenticationSessionInput {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 36
+TEXT: refreshToken: string;
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 39
+TEXT: export interface LogoutAuthenticationSessionResult {
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 10
+TEXT: listPlatformPermissionsForRoles,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 24
+TEXT: } from "../../domains/identity/membership.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 27
+TEXT: findUserSessionById,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 28
+TEXT: } from "../../domains/identity/session.repository.js";
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 48
+TEXT: findUserSessionById:
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 49
+TEXT: typeof findUserSessionById;
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 79
+TEXT: findUserSessionById,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 105
+TEXT: session,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 116
+TEXT: .findUserSessionById(
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 117
+TEXT: claims.sessionId
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 141
+TEXT: !session ||
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 142
+TEXT: session.userId !==
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 144
+TEXT: session.revokedAt !==
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 146
+TEXT: session.expiresAt <=
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 166
+TEXT: const platformPermissions =
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 167
+TEXT: listPlatformPermissionsForRoles(
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 175
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 176
+TEXT: session.id,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 189
+TEXT: platformPermissions,
+
+FILE: F:\Project\Poster\backend\src\config\environment.ts
+LINE: 67
+TEXT: SESSION_SECRET: z
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 67
+TEXT: *   whose session is still unrevoked and unexpired.
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 90
+TEXT: DISTINCT sessions.user_id
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 93
+TEXT: sessions.last_seen_at >= $1
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 94
+TEXT: AND sessions.last_seen_at <= $4
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 99
+TEXT: DISTINCT sessions.user_id
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 102
+TEXT: sessions.last_seen_at >= $2
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 103
+TEXT: AND sessions.last_seen_at <= $4
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 108
+TEXT: DISTINCT sessions.user_id
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 111
+TEXT: sessions.last_seen_at >= $3
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 112
+TEXT: AND sessions.last_seen_at <= $4
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 113
+TEXT: AND sessions.revoked_at IS NULL
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 114
+TEXT: AND sessions.expires_at > $4
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 117
+TEXT: FROM app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 118
+TEXT: AS sessions
+
+FILE: F:\Project\Poster\backend\src\domains\admin-metrics\admin-user-metrics.repository.ts
+LINE: 121
+TEXT: ON users.id = sessions.user_id
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 25
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 37
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 43
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 148
+TEXT: typeof payload.sessionId !==
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 169
+TEXT: payload.sessionId
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 231
+TEXT: input.sessionId
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 255
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 256
+TEXT: input.sessionId,
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 400
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\access-token.service.ts
+LINE: 401
+TEXT: payload.sessionId,
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 9
+TEXT: "AUTH_SESSION_INVALID",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 197
+TEXT: "The authentication session is invalid.",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 219
+TEXT: "The authentication session has expired.",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 230
+TEXT: export class AuthenticationSessionInvalidError
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 235
+TEXT: "The authentication session or refresh token is invalid."
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 239
+TEXT: "AUTH_SESSION_INVALID",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 244
+TEXT: "The authentication session is invalid or has expired.",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 251
+TEXT: "AuthenticationSessionInvalidError";
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+LINE: 269
+TEXT: "You do not have permission to perform this action.",
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\password.security.ts
+LINE: 163
+TEXT: * replaced after a successful login because its cost
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 2
+TEXT: PLATFORM_PERMISSIONS,
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 3
+TEXT: type PlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 7
+TEXT: const PLATFORM_ROLE_PERMISSION_MAP:
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 11
+TEXT: readonly PlatformPermission[]
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 15
+TEXT: PLATFORM_PERMISSIONS,
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 75
+TEXT: export function listPlatformPermissionsForRoles(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 78
+TEXT: ): PlatformPermission[] {
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 79
+TEXT: const permissionSet =
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 81
+TEXT: PlatformPermission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 89
+TEXT: const permission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 90
+TEXT: of PLATFORM_ROLE_PERMISSION_MAP[
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 94
+TEXT: permissionSet.add(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 95
+TEXT: permission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 100
+TEXT: return PLATFORM_PERMISSIONS.filter(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 102
+TEXT: permission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 104
+TEXT: permissionSet.has(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 105
+TEXT: permission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 110
+TEXT: export function hasPlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 111
+TEXT: permissions:
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 112
+TEXT: readonly PlatformPermission[],
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 113
+TEXT: requiredPermission:
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 114
+TEXT: PlatformPermission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 116
+TEXT: return permissions.includes(
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 117
+TEXT: requiredPermission
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 26
+TEXT: export const PLATFORM_PERMISSIONS = [
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 45
+TEXT: export type PlatformPermission =
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 46
+TEXT: (typeof PLATFORM_PERMISSIONS)[number];
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 112
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 124
+TEXT: platformPermissions:
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 125
+TEXT: readonly PlatformPermission[];
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 64
+TEXT: lastLoginAt:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 68
+TEXT: failedLoginAttempts: number;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 163
+TEXT: export interface UserSessionRecord {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 172
+TEXT: refreshTokenDigest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 213
+TEXT: export interface RecordSuccessfulUserLoginInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 325
+TEXT: export interface CreateUserSessionInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 332
+TEXT: refreshTokenDigest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 345
+TEXT: export interface TouchUserSessionInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 346
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 351
+TEXT: export interface RevokeUserSessionInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 352
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 361
+TEXT: export interface RevokeAllUserSessionsInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\index.ts
+LINE: 7
+TEXT: export * from "./membership.repository.js";
+
+FILE: F:\Project\Poster\backend\src\domains\identity\index.ts
+LINE: 9
+TEXT: export * from "./session.repository.js";
+
+FILE: F:\Project\Poster\backend\src\domains\identity\index.ts
+LINE: 11
+TEXT: export * from "./session-lifecycle.repository.js";
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 15
+TEXT: UserSessionRecord,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 18
+TEXT: interface UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 28
+TEXT: refresh_token_digest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 53
+TEXT: const SESSION_RETURNING_COLUMNS = `
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 57
+TEXT: refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 68
+TEXT: const QUALIFIED_SESSION_SELECT_COLUMNS = `
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 69
+TEXT: sessions.id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 70
+TEXT: sessions.user_id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 71
+TEXT: sessions.organization_id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 72
+TEXT: sessions.refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 73
+TEXT: sessions.ip_address::text
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 75
+TEXT: sessions.user_agent,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 76
+TEXT: sessions.created_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 77
+TEXT: sessions.last_seen_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 78
+TEXT: sessions.expires_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 79
+TEXT: sessions.revoked_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 80
+TEXT: sessions.revocation_reason
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 83
+TEXT: const REFRESH_TOKEN_DIGEST_PATTERN =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 86
+TEXT: export interface RotateUserSessionRefreshTokenInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 87
+TEXT: currentRefreshTokenDigest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 89
+TEXT: replacementRefreshTokenDigest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 94
+TEXT: export type RotateUserSessionRefreshTokenResult =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 98
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 99
+TEXT: UserSessionRecord;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 104
+TEXT: sessionId: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 112
+TEXT: export interface RevokeUserSessionByRefreshTokenDigestInput {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 113
+TEXT: refreshTokenDigest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 135
+TEXT: function normalizeRefreshTokenDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 144
+TEXT: !REFRESH_TOKEN_DIGEST_PATTERN.test(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 149
+TEXT: "Refresh-token digest must be a lowercase SHA-256 digest."
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 167
+TEXT: "Session revocation reason must contain between 1 and 200 characters."
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 174
+TEXT: function mapUserSessionDatabaseRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 176
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 177
+TEXT: ): UserSessionRecord {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 188
+TEXT: refreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 189
+TEXT: row.refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 214
+TEXT: async function executeRefreshTokenRotation(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 216
+TEXT: RotateUserSessionRefreshTokenInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 220
+TEXT: RotateUserSessionRefreshTokenResult
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 224
+TEXT: "Refresh-token rotation time"
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 228
+TEXT: normalizeRefreshTokenDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 229
+TEXT: input.currentRefreshTokenDigest
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 233
+TEXT: normalizeRefreshTokenDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 234
+TEXT: input.replacementRefreshTokenDigest
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 242
+TEXT: "Replacement refresh-token digest must differ from the current digest."
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 246
+TEXT: const currentSessionResult =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 248
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 252
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 253
+TEXT: FROM app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 255
+TEXT: refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 265
+TEXT: const currentSession =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 266
+TEXT: currentSessionResult
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 270
+TEXT: currentSession
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 273
+TEXT: currentSession.revoked_at !==
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 275
+TEXT: currentSession
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 290
+TEXT: INSERT INTO app.user_session_refresh_token_history (
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 291
+TEXT: session_id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 292
+TEXT: refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 302
+TEXT: currentSession.id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 309
+TEXT: const updatedSessionResult =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 311
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 314
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 316
+TEXT: refresh_token_digest = $2,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 320
+TEXT: AND refresh_token_digest = $4
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 324
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 327
+TEXT: currentSession.id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 335
+TEXT: const updatedSession =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 336
+TEXT: updatedSessionResult
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 340
+TEXT: !updatedSession
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 343
+TEXT: "PostgreSQL did not return the rotated user session."
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 351
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 352
+TEXT: mapUserSessionDatabaseRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 353
+TEXT: updatedSession
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 360
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 364
+TEXT: ${QUALIFIED_SESSION_SELECT_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 365
+TEXT: FROM app.user_session_refresh_token_history
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 367
+TEXT: INNER JOIN app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 368
+TEXT: AS sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 369
+TEXT: ON sessions.id =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 370
+TEXT: history.session_id
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 372
+TEXT: history.refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 376
+TEXT: sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 384
+TEXT: const replayedSession =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 389
+TEXT: !replayedSession
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 399
+TEXT: UPDATE app.user_session_refresh_token_history
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 407
+TEXT: refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 418
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 429
+TEXT: 'refresh_token_replay_detected'
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 435
+TEXT: replayedSession.id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 445
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 446
+TEXT: replayedSession.id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 449
+TEXT: replayedSession.user_id,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 454
+TEXT: * Atomically replaces the active refresh-token digest.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 457
+TEXT: * Replay detection revokes the corresponding session before
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 460
+TEXT: export async function rotateUserSessionRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 462
+TEXT: RotateUserSessionRefreshTokenInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 466
+TEXT: RotateUserSessionRefreshTokenResult
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 471
+TEXT: return await executeRefreshTokenRotation(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 481
+TEXT: return await executeRefreshTokenRotation(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 490
+TEXT: * Revokes the session represented by either its current
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 491
+TEXT: * refresh-token digest or any rotated digest in its history.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 493
+TEXT: * Unknown tokens remain an idempotent no-op for logout.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 495
+TEXT: export async function revokeUserSessionByRefreshTokenDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 497
+TEXT: RevokeUserSessionByRefreshTokenDigestInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 501
+TEXT: UserSessionRecord |
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 506
+TEXT: "Session revocation time"
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 509
+TEXT: const refreshTokenDigest =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 510
+TEXT: normalizeRefreshTokenDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 511
+TEXT: input.refreshTokenDigest
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 521
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 524
+TEXT: WITH target_session AS (
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 526
+TEXT: sessions.id
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 527
+TEXT: FROM app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 528
+TEXT: AS sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 530
+TEXT: sessions.refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 535
+TEXT: history.session_id
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 536
+TEXT: FROM app.user_session_refresh_token_history
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 539
+TEXT: history.refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 543
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 560
+TEXT: FROM target_session
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 563
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 566
+TEXT: refreshTokenDigest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 573
+TEXT: const session =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 576
+TEXT: return session
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 577
+TEXT: ? mapUserSessionDatabaseRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session-lifecycle.repository.ts
+LINE: 578
+TEXT: session
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 13
+TEXT: type CreateUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 14
+TEXT: type RevokeAllUserSessionsInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 15
+TEXT: type RevokeUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 16
+TEXT: type TouchUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 17
+TEXT: type UserSessionRecord,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 20
+TEXT: interface UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 30
+TEXT: refresh_token_digest: string;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 55
+TEXT: const SESSION_RETURNING_COLUMNS = `
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 59
+TEXT: refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 70
+TEXT: function mapUserSessionDatabaseRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 71
+TEXT: row: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 72
+TEXT: ): UserSessionRecord {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 83
+TEXT: refreshTokenDigest:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 84
+TEXT: row.refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 109
+TEXT: function mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 111
+TEXT: UserSessionDatabaseRow |
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 113
+TEXT: ): UserSessionRecord | null {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 115
+TEXT: ? mapUserSessionDatabaseRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 122
+TEXT: * Creates a revocable authenticated session.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 124
+TEXT: * Only a cryptographic refresh-token digest may be supplied.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 125
+TEXT: * Raw refresh tokens must never be stored in PostgreSQL.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 127
+TEXT: export async function createUserSession(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 128
+TEXT: input: CreateUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 130
+TEXT: ): Promise<UserSessionRecord> {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 133
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 136
+TEXT: INSERT INTO app.user_sessions (
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 139
+TEXT: refresh_token_digest,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 153
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 160
+TEXT: input.refreshTokenDigest
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 176
+TEXT: const session =
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 177
+TEXT: mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 181
+TEXT: if (!session) {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 183
+TEXT: "PostgreSQL did not return the created user session."
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 187
+TEXT: return session;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 191
+TEXT: * Finds an unexpired and unrevoked session using its
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 192
+TEXT: * refresh-token digest.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 194
+TEXT: export async function findActiveUserSessionByDigest(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 195
+TEXT: refreshTokenDigest: string,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 197
+TEXT: ): Promise<UserSessionRecord | null> {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 200
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 204
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 205
+TEXT: FROM app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 207
+TEXT: refresh_token_digest = $1
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 214
+TEXT: refreshTokenDigest
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 220
+TEXT: return mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 226
+TEXT: * Retrieves one session by immutable UUID.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 228
+TEXT: export async function findUserSessionById(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 229
+TEXT: sessionId: string,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 231
+TEXT: ): Promise<UserSessionRecord | null> {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 234
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 238
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 239
+TEXT: FROM app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 244
+TEXT: sessionId,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 249
+TEXT: return mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 255
+TEXT: * Updates session activity only while the session remains
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 258
+TEXT: export async function touchUserSession(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 259
+TEXT: input: TouchUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 261
+TEXT: ): Promise<UserSessionRecord | null> {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 264
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 267
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 274
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 277
+TEXT: input.sessionId,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 283
+TEXT: return mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 289
+TEXT: * Revokes one session. Repeated revocation requests do not
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 292
+TEXT: export async function revokeUserSession(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 293
+TEXT: input: RevokeUserSessionInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 295
+TEXT: ): Promise<UserSessionRecord | null> {
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 298
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 301
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 309
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 312
+TEXT: input.sessionId,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 322
+TEXT: return mapOptionalSessionRow(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 328
+TEXT: * Revokes every active session for a user.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 331
+TEXT: * events, suspensions, and explicit global logout.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 333
+TEXT: export async function revokeAllUserSessions(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 334
+TEXT: input: RevokeAllUserSessionsInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 339
+TEXT: UserSessionDatabaseRow
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 342
+TEXT: UPDATE app.user_sessions
+
+FILE: F:\Project\Poster\backend\src\domains\identity\session.repository.ts
+LINE: 350
+TEXT: ${SESSION_RETURNING_COLUMNS}
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 15
+TEXT: type RecordSuccessfulUserLoginInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 38
+TEXT: last_login_at:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 42
+TEXT: failed_login_attempts: number;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 66
+TEXT: last_login_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 67
+TEXT: failed_login_attempts,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 98
+TEXT: lastLoginAt:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 99
+TEXT: row.last_login_at,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 101
+TEXT: failedLoginAttempts:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 102
+TEXT: row.failed_login_attempts,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 307
+TEXT: * previous failed-login lock state.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 309
+TEXT: export async function recordSuccessfulUserLogin(
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 310
+TEXT: input: RecordSuccessfulUserLoginInput,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 320
+TEXT: last_login_at = $3,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 321
+TEXT: failed_login_attempts = 0,
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 345
+TEXT: * concurrency control and clears any failed-login lock state.
+
+FILE: F:\Project\Poster\backend\src\domains\identity\user.repository.ts
+LINE: 367
+TEXT: failed_login_attempts = 0,
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 7
+TEXT: * Host-only refresh-token cookie.
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 12
+TEXT: export const AUTHENTICATION_REFRESH_COOKIE_NAME =
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 13
+TEXT: "poster_refresh";
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 16
+TEXT: * Restricts the refresh token to authentication endpoints.
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 21
+TEXT: export const AUTHENTICATION_REFRESH_COOKIE_PATH =
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 24
+TEXT: export interface SetAuthenticationRefreshCookieOptions {
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 35
+TEXT: function createAuthenticationRefreshCookieOptions(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 49
+TEXT: AUTHENTICATION_REFRESH_COOKIE_PATH,
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 54
+TEXT: * Places one opaque refresh token into a protected browser
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 59
+TEXT: * login and session service.
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 61
+TEXT: export function setAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 64
+TEXT: refreshToken:
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 67
+TEXT: SetAuthenticationRefreshCookieOptions
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 69
+TEXT: const normalizedRefreshToken =
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 70
+TEXT: refreshToken.trim();
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 73
+TEXT: normalizedRefreshToken.length ===
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 77
+TEXT: "Authentication refresh token must not be empty."
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 92
+TEXT: "Authentication refresh-cookie expiry must be a valid future date."
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 96
+TEXT: reply.setCookie(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 97
+TEXT: AUTHENTICATION_REFRESH_COOKIE_NAME,
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 98
+TEXT: normalizedRefreshToken,
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 100
+TEXT: ...createAuthenticationRefreshCookieOptions(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 113
+TEXT: * Removes the browser refresh-token cookie.
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 118
+TEXT: export function clearAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 124
+TEXT: reply.clearCookie(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 125
+TEXT: AUTHENTICATION_REFRESH_COOKIE_NAME,
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 126
+TEXT: createAuthenticationRefreshCookieOptions(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 133
+TEXT: * Reads the opaque refresh token parsed by @fastify/cookie.
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 136
+TEXT: * null. No verification is performed here; the session
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 139
+TEXT: export function readAuthenticationRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 143
+TEXT: const refreshToken =
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 145
+TEXT: AUTHENTICATION_REFRESH_COOKIE_NAME
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 149
+TEXT: typeof refreshToken !==
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 155
+TEXT: const normalizedRefreshToken =
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 156
+TEXT: refreshToken.trim();
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 158
+TEXT: return normalizedRefreshToken.length >
+
+FILE: F:\Project\Poster\backend\src\http\authentication-cookie.ts
+LINE: 160
+TEXT: ? normalizedRefreshToken
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 13
+TEXT: hasPlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 18
+TEXT: PlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 108
+TEXT: export function requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 111
+TEXT: permission:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 112
+TEXT: PlatformPermission
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 120
+TEXT: !hasPlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 121
+TEXT: context.platformPermissions,
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 122
+TEXT: permission
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 126
+TEXT: `The authenticated identity lacks platform permission "${permission}".`
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 6
+TEXT: requirePlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 27
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 52
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 53
+TEXT: context.sessionId,
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 58
+TEXT: platformPermissions:
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 59
+TEXT: context.platformPermissions,
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 23
+TEXT: requirePlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 286
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 326
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 384
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 458
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+LINE: 532
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+LINE: 10
+TEXT: requirePlatformPermission,
+
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+LINE: 57
+TEXT: * screen and the compact dashboard summary. Permission checks
+
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+LINE: 69
+TEXT: "/users/metrics",
+
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+LINE: 74
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+LINE: 102
+TEXT: requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 11
+TEXT: LoginSessionService,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 12
+TEXT: } from "../application/authentication/login-session.service.js";
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 19
+TEXT: AuthenticationSessionSummary,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 20
+TEXT: } from "../application/authentication/login-session.types.js";
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 23
+TEXT: SessionLifecycleService,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 24
+TEXT: } from "../application/authentication/session-lifecycle.service.js";
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 38
+TEXT: AuthenticationSessionInvalidError,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 48
+TEXT: clearAuthenticationRefreshCookie,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 49
+TEXT: readAuthenticationRefreshToken,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 50
+TEXT: setAuthenticationRefreshCookie,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 115
+TEXT: const LoginRequestSchema =
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 260
+TEXT: interface AuthenticationSessionResponse {
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 274
+TEXT: interface LoginHttpResponse {
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 278
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 279
+TEXT: AuthenticationSessionResponse;
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 326
+TEXT: loginSessionService:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 327
+TEXT: LoginSessionService;
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 329
+TEXT: sessionLifecycleService:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 330
+TEXT: SessionLifecycleService;
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 369
+TEXT: function mapAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 370
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 371
+TEXT: AuthenticationSessionSummary
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 372
+TEXT: ): AuthenticationSessionResponse {
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 375
+TEXT: session.id,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 378
+TEXT: session.userId,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 381
+TEXT: session.organizationId,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 384
+TEXT: session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 389
+TEXT: session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 439
+TEXT: * delegating authoritative session behavior to application
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 451
+TEXT: "/login",
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 458
+TEXT: LoginRequestSchema,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 464
+TEXT: .loginSessionService
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 465
+TEXT: .login({
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 489
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 490
+TEXT: result.session.id,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 498
+TEXT: setAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 500
+TEXT: result.refreshToken,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 504
+TEXT: .session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 513
+TEXT: LoginHttpResponse = {
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 519
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 520
+TEXT: mapAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 521
+TEXT: result.session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 536
+TEXT: "/refresh",
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 541
+TEXT: const refreshToken =
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 542
+TEXT: readAuthenticationRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 547
+TEXT: !refreshToken
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 549
+TEXT: clearAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 554
+TEXT: throw new AuthenticationSessionInvalidError(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 555
+TEXT: "The refresh-token cookie was missing or blank."
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 562
+TEXT: .sessionLifecycleService
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 563
+TEXT: .refresh({
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 564
+TEXT: refreshToken,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 583
+TEXT: sessionId:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 584
+TEXT: result.session.id,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 592
+TEXT: setAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 594
+TEXT: result.refreshToken,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 598
+TEXT: .session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 607
+TEXT: LoginHttpResponse = {
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 613
+TEXT: session:
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 614
+TEXT: mapAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 615
+TEXT: result.session
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 631
+TEXT: AuthenticationSessionInvalidError
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 633
+TEXT: clearAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 645
+TEXT: "/logout",
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 650
+TEXT: const refreshToken =
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 651
+TEXT: readAuthenticationRefreshToken(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 655
+TEXT: clearAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 661
+TEXT: refreshToken
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 664
+TEXT: .sessionLifecycleService
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 665
+TEXT: .logout({
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 666
+TEXT: refreshToken,
+
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+LINE: 743
+TEXT: clearAuthenticationRefreshCookie(
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 35
+TEXT: createLoginSessionService,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 36
+TEXT: type LoginSessionService,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 37
+TEXT: } from "./application/authentication/login-session.service.js";
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 45
+TEXT: createSessionLifecycleService,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 46
+TEXT: type SessionLifecycleService,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 47
+TEXT: } from "./application/authentication/session-lifecycle.service.js";
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 117
+TEXT: loginSessionService?:
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 118
+TEXT: LoginSessionService;
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 120
+TEXT: sessionLifecycleService?:
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 121
+TEXT: SessionLifecycleService;
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 137
+TEXT: const sessionSecret =
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 138
+TEXT: environment.SESSION_SECRET ??
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 147
+TEXT: !sessionSecret
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 150
+TEXT: "SESSION_SECRET is required to issue authentication access tokens."
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 231
+TEXT: sessionSecret,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 297
+TEXT: loginSessionService:
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 299
+TEXT: .loginSessionService ??
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 300
+TEXT: createLoginSessionService(),
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 302
+TEXT: sessionLifecycleService:
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 304
+TEXT: .sessionLifecycleService ??
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 305
+TEXT: createSessionLifecycleService(),
+

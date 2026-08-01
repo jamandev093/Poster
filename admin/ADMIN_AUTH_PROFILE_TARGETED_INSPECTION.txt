@@ -1,0 +1,2489 @@
+﻿POSTER ADMIN
+AUTHENTICATION AND ADMIN PROFILE TARGETED INSPECTION
+
+Generated: 2026-07-31 12:59:14
+
+============================================================
+SEARCH: loginAuthenticationSession
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 45
+} from "../../domains/authentication/authentication.service.types.js";
+
+import type {
+  AuthenticationSessionSummary,
+  LoginAuthenticationSessionInput,
+  LoginAuthenticationSessionResult,
+} from "./login-session.types.js";
+
+export const LOGIN_SESSION_POLICY = {
+  refreshTokenLifetimeMilliseconds:
+    30 * 24 * 60 * 60 * 1000,
+} as const;
+
+export type LoginSessionTransactionRunner =
+  <T>(
+    operation:
+      (
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 46
+
+import type {
+  AuthenticationSessionSummary,
+  LoginAuthenticationSessionInput,
+  LoginAuthenticationSessionResult,
+} from "./login-session.types.js";
+
+export const LOGIN_SESSION_POLICY = {
+  refreshTokenLifetimeMilliseconds:
+    30 * 24 * 60 * 60 * 1000,
+} as const;
+
+export type LoginSessionTransactionRunner =
+  <T>(
+    operation:
+      (
+        executor:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 90
+export interface LoginSessionService {
+  login:
+    (
+      input:
+        LoginAuthenticationSessionInput
+    ) => Promise<
+      LoginAuthenticationSessionResult
+    >;
+}
+
+const DEFAULT_LOGIN_SESSION_DEPENDENCIES:
+  LoginSessionServiceDependencies = {
+    runDatabaseTransaction:
+      async (
+        operation
+      ) => {
+        return await runDatabaseTransaction(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 92
+    (
+      input:
+        LoginAuthenticationSessionInput
+    ) => Promise<
+      LoginAuthenticationSessionResult
+    >;
+}
+
+const DEFAULT_LOGIN_SESSION_DEPENDENCIES:
+  LoginSessionServiceDependencies = {
+    runDatabaseTransaction:
+      async (
+        operation
+      ) => {
+        return await runDatabaseTransaction(
+          operation
+        );
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 252
+}
+
+function createSessionInput(
+  input:
+    LoginAuthenticationSessionInput,
+  userId:
+    string,
+  refreshTokenDigest:
+    string,
+  expiresAt:
+    Date
+): CreateUserSessionInput {
+  return {
+    userId,
+
+    organizationId:
+      null,
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 468
+/**
+ * Creates a revocable Poster login session using the default
+ * production repositories and security implementations.
+ */
+export async function loginAuthenticationSession(
+  input:
+    LoginAuthenticationSessionInput
+): Promise<
+  LoginAuthenticationSessionResult
+> {
+  return await defaultLoginSessionService
+    .login(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 470
+ * production repositories and security implementations.
+ */
+export async function loginAuthenticationSession(
+  input:
+    LoginAuthenticationSessionInput
+): Promise<
+  LoginAuthenticationSessionResult
+> {
+  return await defaultLoginSessionService
+    .login(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 472
+export async function loginAuthenticationSession(
+  input:
+    LoginAuthenticationSessionInput
+): Promise<
+  LoginAuthenticationSessionResult
+> {
+  return await defaultLoginSessionService
+    .login(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 5
+import type {
+  AuthenticationAccountSummary,
+} from "../../domains/authentication/authentication.service.types.js";
+
+export interface LoginAuthenticationSessionInput {
+  email: string;
+
+  /**
+   * Passwords must never be trimmed or normalized.
+   */
+  password: string;
+
+  ipAddress?:
+    | string
+    | null;
+
+  userAgent?:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.types.ts
+LINE: 49
+ * refreshToken is returned exactly once so the transport
+ * boundary can deliver it securely. It must never be logged
+ * or persisted in raw form.
+ */
+export interface LoginAuthenticationSessionResult {
+  account:
+    AuthenticationAccountSummary;
+
+  session:
+    AuthenticationSessionSummary;
+
+  refreshToken: string;
+}
+
+
+============================================================
+SEARCH: refreshAuthenticationSession
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 47
+
+import type {
+  LogoutAuthenticationSessionInput,
+  LogoutAuthenticationSessionResult,
+  RefreshAuthenticationSessionInput,
+  RefreshAuthenticationSessionResult,
+} from "./session-lifecycle.types.js";
+
+const MAXIMUM_REFRESH_TOKEN_LENGTH =
+  4096;
+
+export type SessionLifecycleTransactionRunner =
+  <T>(
+    operation:
+      (
+        executor:
+          DatabaseQueryExecutor
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 48
+import type {
+  LogoutAuthenticationSessionInput,
+  LogoutAuthenticationSessionResult,
+  RefreshAuthenticationSessionInput,
+  RefreshAuthenticationSessionResult,
+} from "./session-lifecycle.types.js";
+
+const MAXIMUM_REFRESH_TOKEN_LENGTH =
+  4096;
+
+export type SessionLifecycleTransactionRunner =
+  <T>(
+    operation:
+      (
+        executor:
+          DatabaseQueryExecutor
+      ) => Promise<T>
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 93
+export interface SessionLifecycleService {
+  refresh:
+    (
+      input:
+        RefreshAuthenticationSessionInput
+    ) => Promise<
+      RefreshAuthenticationSessionResult
+    >;
+
+  logout:
+    (
+      input:
+        LogoutAuthenticationSessionInput
+    ) => Promise<
+      LogoutAuthenticationSessionResult
+    >;
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 95
+    (
+      input:
+        RefreshAuthenticationSessionInput
+    ) => Promise<
+      RefreshAuthenticationSessionResult
+    >;
+
+  logout:
+    (
+      input:
+        LogoutAuthenticationSessionInput
+    ) => Promise<
+      LogoutAuthenticationSessionResult
+    >;
+}
+
+const DEFAULT_DEPENDENCIES:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 465
+
+const defaultSessionLifecycleService =
+  createSessionLifecycleService();
+
+export async function refreshAuthenticationSession(
+  input:
+    RefreshAuthenticationSessionInput
+): Promise<
+  RefreshAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .refresh(
+      input
+    );
+}
+
+export async function logoutAuthenticationSession(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 467
+  createSessionLifecycleService();
+
+export async function refreshAuthenticationSession(
+  input:
+    RefreshAuthenticationSessionInput
+): Promise<
+  RefreshAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .refresh(
+      input
+    );
+}
+
+export async function logoutAuthenticationSession(
+  input:
+    LogoutAuthenticationSessionInput
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 469
+export async function refreshAuthenticationSession(
+  input:
+    RefreshAuthenticationSessionInput
+): Promise<
+  RefreshAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .refresh(
+      input
+    );
+}
+
+export async function logoutAuthenticationSession(
+  input:
+    LogoutAuthenticationSessionInput
+): Promise<
+  LogoutAuthenticationSessionResult
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 9
+import type {
+  AuthenticationSessionSummary,
+} from "./login-session.types.js";
+
+export interface RefreshAuthenticationSessionInput {
+  refreshToken: string;
+
+  ipAddress?:
+    | string
+    | null;
+
+  userAgent?:
+    | string
+    | null;
+}
+
+export interface RefreshAuthenticationSessionResult {
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 21
+    | string
+    | null;
+}
+
+export interface RefreshAuthenticationSessionResult {
+  account:
+    AuthenticationAccountSummary;
+
+  session:
+    AuthenticationSessionSummary;
+
+  /**
+   * Returned once for immediate protected-cookie replacement.
+   * It must never be logged or serialized in a response body.
+   */
+  refreshToken: string;
+}
+
+
+============================================================
+SEARCH: logoutAuthenticationSession
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 45
+  AuthenticationSessionSummary,
+} from "./login-session.types.js";
+
+import type {
+  LogoutAuthenticationSessionInput,
+  LogoutAuthenticationSessionResult,
+  RefreshAuthenticationSessionInput,
+  RefreshAuthenticationSessionResult,
+} from "./session-lifecycle.types.js";
+
+const MAXIMUM_REFRESH_TOKEN_LENGTH =
+  4096;
+
+export type SessionLifecycleTransactionRunner =
+  <T>(
+    operation:
+      (
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 46
+} from "./login-session.types.js";
+
+import type {
+  LogoutAuthenticationSessionInput,
+  LogoutAuthenticationSessionResult,
+  RefreshAuthenticationSessionInput,
+  RefreshAuthenticationSessionResult,
+} from "./session-lifecycle.types.js";
+
+const MAXIMUM_REFRESH_TOKEN_LENGTH =
+  4096;
+
+export type SessionLifecycleTransactionRunner =
+  <T>(
+    operation:
+      (
+        executor:
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 101
+
+  logout:
+    (
+      input:
+        LogoutAuthenticationSessionInput
+    ) => Promise<
+      LogoutAuthenticationSessionResult
+    >;
+}
+
+const DEFAULT_DEPENDENCIES:
+  SessionLifecycleServiceDependencies = {
+    runDatabaseTransaction:
+      async (
+        operation
+      ) => {
+        return await runDatabaseTransaction(
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 103
+    (
+      input:
+        LogoutAuthenticationSessionInput
+    ) => Promise<
+      LogoutAuthenticationSessionResult
+    >;
+}
+
+const DEFAULT_DEPENDENCIES:
+  SessionLifecycleServiceDependencies = {
+    runDatabaseTransaction:
+      async (
+        operation
+      ) => {
+        return await runDatabaseTransaction(
+          operation
+        );
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 477
+      input
+    );
+}
+
+export async function logoutAuthenticationSession(
+  input:
+    LogoutAuthenticationSessionInput
+): Promise<
+  LogoutAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .logout(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 479
+}
+
+export async function logoutAuthenticationSession(
+  input:
+    LogoutAuthenticationSessionInput
+): Promise<
+  LogoutAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .logout(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.service.ts
+LINE: 481
+export async function logoutAuthenticationSession(
+  input:
+    LogoutAuthenticationSessionInput
+): Promise<
+  LogoutAuthenticationSessionResult
+> {
+  return await defaultSessionLifecycleService
+    .logout(
+      input
+    );
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 35
+   */
+  refreshToken: string;
+}
+
+export interface LogoutAuthenticationSessionInput {
+  refreshToken: string;
+}
+
+export interface LogoutAuthenticationSessionResult {
+  revoked: boolean;
+}
+
+FILE: F:\Project\Poster\backend\src\application\authentication\session-lifecycle.types.ts
+LINE: 39
+export interface LogoutAuthenticationSessionInput {
+  refreshToken: string;
+}
+
+export interface LogoutAuthenticationSessionResult {
+  revoked: boolean;
+}
+
+
+============================================================
+SEARCH: createLoginSessionService
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 289
+ *
+ * The successful-login write and session insertion then occur
+ * atomically using one transaction-scoped executor.
+ */
+export function createLoginSessionService(
+  overrides:
+    Partial<
+      LoginSessionServiceDependencies
+    > =
+    {}
+): LoginSessionService {
+  const dependencies:
+    LoginSessionServiceDependencies = {
+      ...DEFAULT_LOGIN_SESSION_DEPENDENCIES,
+      ...overrides,
+    };
+
+
+FILE: F:\Project\Poster\backend\src\application\authentication\login-session.service.ts
+LINE: 462
+  };
+}
+
+const defaultLoginSessionService =
+  createLoginSessionService();
+
+/**
+ * Creates a revocable Poster login session using the default
+ * production repositories and security implementations.
+ */
+export async function loginAuthenticationSession(
+  input:
+    LoginAuthenticationSessionInput
+): Promise<
+  LoginAuthenticationSessionResult
+> {
+  return await defaultLoginSessionService
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 35
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+import {
+  createSessionLifecycleService,
+  type SessionLifecycleService,
+} from "./application/authentication/session-lifecycle.service.js";
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 300
+
+      loginSessionService:
+        options
+          .loginSessionService ??
+        createLoginSessionService(),
+
+      sessionLifecycleService:
+        options
+          .sessionLifecycleService ??
+        createSessionLifecycleService(),
+
+      passwordResetService,
+
+      isProduction:
+        environment.NODE_ENV ===
+        "production",
+    }
+
+
+============================================================
+SEARCH: authorizationContext
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 18
+  listActivePlatformRoleAssignmentsForUser,
+} from "../../domains/authorization/platform-role.repository.js";
+
+import type {
+  AuthorizationContext,
+  PlatformRole,
+} from "../../domains/authorization/authorization.types.js";
+
+import {
+  listActiveMembershipsForUser,
+} from "../../domains/identity/membership.repository.js";
+
+import {
+  findUserSessionById,
+} from "../../domains/identity/session.repository.js";
+
+import {
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 34
+import {
+  findUserById,
+} from "../../domains/identity/user.repository.js";
+
+export interface AuthorizationContextService {
+  resolve:
+    (
+      accessToken:
+        string
+    ) => Promise<
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 40
+    (
+      accessToken:
+        string
+    ) => Promise<
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+  findUserSessionById:
+    typeof findUserSessionById;
+
+  listActiveMembershipsForUser:
+    typeof listActiveMembershipsForUser;
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 44
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+  findUserSessionById:
+    typeof findUserSessionById;
+
+  listActiveMembershipsForUser:
+    typeof listActiveMembershipsForUser;
+
+  listActivePlatformRoleAssignmentsForUser:
+    typeof listActivePlatformRoleAssignmentsForUser;
+
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 61
+  now:
+    () => Date;
+}
+
+export interface CreateAuthorizationContextServiceOptions {
+  accessTokenService:
+    AuthenticationAccessTokenService;
+
+  dependencies?:
+    Partial<
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 67
+    AuthenticationAccessTokenService;
+
+  dependencies?:
+    Partial<
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 71
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 73
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 74
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+      () => new Date(),
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 76
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+      () => new Date(),
+
+    ...options.dependencies,
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 109
+  isPrimaryContact:
+    boolean;
+}
+
+export interface AuthorizationContext {
+  userId: string;
+
+  sessionId: string;
+
+  email: string;
+
+  fullName: string;
+
+  accountStatus:
+    UserStatus;
+
+  platformRoles:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 17
+  hasPlatformPermission,
+} from "../domains/authorization/authorization.policy.js";
+
+import type {
+  AuthorizationContext,
+  PlatformPermission,
+} from "../domains/authorization/authorization.types.js";
+
+import type {
+  AuthorizationContextService,
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 22
+  PlatformPermission,
+} from "../domains/authorization/authorization.types.js";
+
+import type {
+  AuthorizationContextService,
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 27
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 28
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 33
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 34
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 35
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 41
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 45
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+    async (
+      request
+    ) => {
+      const authorizationHeader =
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 48
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+    async (
+      request
+    ) => {
+      const authorizationHeader =
+        request
+          .headers
+          .authorization;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 83
+      ) {
+        throw new AuthenticationAccessTokenInvalidError();
+      }
+
+      request.authorizationContext =
+        await options
+          .authorizationContextService
+          .resolve(
+            accessToken
+          );
+    }
+  );
+}
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 85
+      }
+
+      request.authorizationContext =
+        await options
+          .authorizationContextService
+          .resolve(
+            accessToken
+          );
+    }
+  );
+}
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+): AuthorizationContext {
+  if (
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 96
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+): AuthorizationContext {
+  if (
+    !request
+      .authorizationContext
+  ) {
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 99
+    FastifyRequest
+): AuthorizationContext {
+  if (
+    !request
+      .authorizationContext
+  ) {
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+  request:
+    FastifyRequest,
+  permission:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 105
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+  request:
+    FastifyRequest,
+  permission:
+    PlatformPermission
+): AuthorizationContext {
+  const context =
+    requireAuthenticatedRequest(
+      request
+    );
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 113
+  request:
+    FastifyRequest,
+  permission:
+    PlatformPermission
+): AuthorizationContext {
+  const context =
+    requireAuthenticatedRequest(
+      request
+    );
+
+  if (
+    !hasPlatformPermission(
+      context.platformPermissions,
+      permission
+    )
+  ) {
+    throw new AuthenticationForbiddenError(
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 30
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 31
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 68
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
+
+import {
+  registerErrorHandler,
+} from "./plugins/error-handler.js";
+
+import {
+  adminAccessRoutes,
+  adminCommercialRequestRoutes,
+  adminMetricsRoutes,
+  authenticationRoutes,
+  clientCommercialRequestRoutes,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 103
+
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 104
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 234
+      secret:
+        sessionSecret,
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 236
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 237
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 241
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 244
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+    {
+      prefix:
+        "/api/v1",
+
+
+============================================================
+SEARCH: AuthorizationContext
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 18
+  listActivePlatformRoleAssignmentsForUser,
+} from "../../domains/authorization/platform-role.repository.js";
+
+import type {
+  AuthorizationContext,
+  PlatformRole,
+} from "../../domains/authorization/authorization.types.js";
+
+import {
+  listActiveMembershipsForUser,
+} from "../../domains/identity/membership.repository.js";
+
+import {
+  findUserSessionById,
+} from "../../domains/identity/session.repository.js";
+
+import {
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 34
+import {
+  findUserById,
+} from "../../domains/identity/user.repository.js";
+
+export interface AuthorizationContextService {
+  resolve:
+    (
+      accessToken:
+        string
+    ) => Promise<
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 40
+    (
+      accessToken:
+        string
+    ) => Promise<
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+  findUserSessionById:
+    typeof findUserSessionById;
+
+  listActiveMembershipsForUser:
+    typeof listActiveMembershipsForUser;
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 44
+      AuthorizationContext
+    >;
+}
+
+export interface AuthorizationContextServiceDependencies {
+  findUserById:
+    typeof findUserById;
+
+  findUserSessionById:
+    typeof findUserSessionById;
+
+  listActiveMembershipsForUser:
+    typeof listActiveMembershipsForUser;
+
+  listActivePlatformRoleAssignmentsForUser:
+    typeof listActivePlatformRoleAssignmentsForUser;
+
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 61
+  now:
+    () => Date;
+}
+
+export interface CreateAuthorizationContextServiceOptions {
+  accessTokenService:
+    AuthenticationAccessTokenService;
+
+  dependencies?:
+    Partial<
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 67
+    AuthenticationAccessTokenService;
+
+  dependencies?:
+    Partial<
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 71
+      AuthorizationContextServiceDependencies
+    >;
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 73
+}
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 74
+
+export function createAuthorizationContextService(
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+      () => new Date(),
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 76
+  options:
+    CreateAuthorizationContextServiceOptions
+): AuthorizationContextService {
+  const dependencies:
+    AuthorizationContextServiceDependencies = {
+    findUserById,
+
+    findUserSessionById,
+
+    listActiveMembershipsForUser,
+
+    listActivePlatformRoleAssignmentsForUser,
+
+    now:
+      () => new Date(),
+
+    ...options.dependencies,
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 109
+  isPrimaryContact:
+    boolean;
+}
+
+export interface AuthorizationContext {
+  userId: string;
+
+  sessionId: string;
+
+  email: string;
+
+  fullName: string;
+
+  accountStatus:
+    UserStatus;
+
+  platformRoles:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 17
+  hasPlatformPermission,
+} from "../domains/authorization/authorization.policy.js";
+
+import type {
+  AuthorizationContext,
+  PlatformPermission,
+} from "../domains/authorization/authorization.types.js";
+
+import type {
+  AuthorizationContextService,
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 22
+  PlatformPermission,
+} from "../domains/authorization/authorization.types.js";
+
+import type {
+  AuthorizationContextService,
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 27
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 28
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 33
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 34
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 35
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 41
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 45
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+    async (
+      request
+    ) => {
+      const authorizationHeader =
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 48
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+    async (
+      request
+    ) => {
+      const authorizationHeader =
+        request
+          .headers
+          .authorization;
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 83
+      ) {
+        throw new AuthenticationAccessTokenInvalidError();
+      }
+
+      request.authorizationContext =
+        await options
+          .authorizationContextService
+          .resolve(
+            accessToken
+          );
+    }
+  );
+}
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 85
+      }
+
+      request.authorizationContext =
+        await options
+          .authorizationContextService
+          .resolve(
+            accessToken
+          );
+    }
+  );
+}
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+): AuthorizationContext {
+  if (
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 96
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+): AuthorizationContext {
+  if (
+    !request
+      .authorizationContext
+  ) {
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 99
+    FastifyRequest
+): AuthorizationContext {
+  if (
+    !request
+      .authorizationContext
+  ) {
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+  request:
+    FastifyRequest,
+  permission:
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 105
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+  request:
+    FastifyRequest,
+  permission:
+    PlatformPermission
+): AuthorizationContext {
+  const context =
+    requireAuthenticatedRequest(
+      request
+    );
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 113
+  request:
+    FastifyRequest,
+  permission:
+    PlatformPermission
+): AuthorizationContext {
+  const context =
+    requireAuthenticatedRequest(
+      request
+    );
+
+  if (
+    !hasPlatformPermission(
+      context.platformPermissions,
+      permission
+    )
+  ) {
+    throw new AuthenticationForbiddenError(
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 30
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 31
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 68
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
+
+import {
+  registerErrorHandler,
+} from "./plugins/error-handler.js";
+
+import {
+  adminAccessRoutes,
+  adminCommercialRequestRoutes,
+  adminMetricsRoutes,
+  authenticationRoutes,
+  clientCommercialRequestRoutes,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 103
+
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 104
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 234
+      secret:
+        sessionSecret,
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 236
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 237
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 241
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+
+FILE: F:\Project\Poster\backend\src\app.ts
+LINE: 244
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+    {
+      prefix:
+        "/api/v1",
+
+
+============================================================
+SEARCH: platformPermissions
+============================================================
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 10
+  AuthenticationAccessTokenService,
+} from "../../domains/authentication/access-token.service.js";
+
+import {
+  listPlatformPermissionsForRoles,
+} from "../../domains/authorization/authorization.policy.js";
+
+import {
+  listActivePlatformRoleAssignmentsForUser,
+} from "../../domains/authorization/platform-role.repository.js";
+
+import type {
+  AuthorizationContext,
+  PlatformRole,
+} from "../../domains/authorization/authorization.types.js";
+
+import {
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 166
+              )
+            )
+          );
+
+        const platformPermissions =
+          listPlatformPermissionsForRoles(
+            platformRoles
+          );
+
+        return {
+          userId:
+            user.id,
+
+          sessionId:
+            session.id,
+
+          email:
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 167
+            )
+          );
+
+        const platformPermissions =
+          listPlatformPermissionsForRoles(
+            platformRoles
+          );
+
+        return {
+          userId:
+            user.id,
+
+          sessionId:
+            session.id,
+
+          email:
+            user.email,
+
+FILE: F:\Project\Poster\backend\src\application\authorization\authorization-context.service.ts
+LINE: 189
+            user.status,
+
+          platformRoles,
+
+          platformPermissions,
+
+          organizationMemberships:
+            memberships.map(
+              (
+                membership
+              ) => ({
+                membershipId:
+                  membership.id,
+
+                organizationId:
+                  membership.organizationId,
+
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.policy.ts
+LINE: 75
+      "monetization.campaigns.read",
+    ],
+  };
+
+export function listPlatformPermissionsForRoles(
+  roles:
+    readonly PlatformRole[]
+): PlatformPermission[] {
+  const permissionSet =
+    new Set<
+      PlatformPermission
+    >();
+
+  for (
+    const role
+    of roles
+  ) {
+
+FILE: F:\Project\Poster\backend\src\domains\authorization\authorization.types.ts
+LINE: 124
+
+  platformRoles:
+    readonly PlatformRole[];
+
+  platformPermissions:
+    readonly PlatformPermission[];
+
+  organizationMemberships:
+    readonly AuthorizationOrganizationMembership[];
+}
+
+FILE: F:\Project\Poster\backend\src\http\authorization-context.ts
+LINE: 121
+    );
+
+  if (
+    !hasPlatformPermission(
+      context.platformPermissions,
+      permission
+    )
+  ) {
+    throw new AuthenticationForbiddenError(
+      `The authenticated identity lacks platform permission "${permission}".`
+    );
+  }
+
+  return context;
+}
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 58
+
+              platformRoles:
+                context.platformRoles,
+
+              platformPermissions:
+                context.platformPermissions,
+            },
+
+            organizations:
+              context
+                .organizationMemberships,
+          });
+      }
+    );
+  };
+
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+LINE: 59
+              platformRoles:
+                context.platformRoles,
+
+              platformPermissions:
+                context.platformPermissions,
+            },
+
+            organizations:
+              context
+                .organizationMemberships,
+          });
+      }
+    );
+  };
+
+
+============================================================
+SEARCH: businessEmail
+============================================================
+
+
+============================================================
+SEARCH: phone
+============================================================
+
+
+============================================================
+SEARCH: displayName
+============================================================
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 94
+  id: string;
+
+  legalName: string;
+
+  displayName: string;
+
+  websiteUrl:
+    string |
+    null;
+
+  billingEmail:
+    string |
+    null;
+
+  countryCode: string;
+
+  status: OrganizationStatus;
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 240
+
+export interface CreateOrganizationInput {
+  legalName: string;
+
+  displayName: string;
+
+  websiteUrl?:
+    string |
+    null;
+
+  billingEmail?:
+    string |
+    null;
+
+  countryCode: string;
+}
+
+
+FILE: F:\Project\Poster\backend\src\domains\identity\identity.types.ts
+LINE: 260
+  expectedRowVersion: string;
+
+  legalName: string;
+
+  displayName: string;
+
+  websiteUrl?:
+    string |
+    null;
+
+  billingEmail?:
+    string |
+    null;
+
+  countryCode: string;
+}
+
+
+FILE: F:\Project\Poster\backend\src\domains\identity\organization.repository.ts
+LINE: 83
+
+    legalName:
+      row.legal_name,
+
+    displayName:
+      row.display_name,
+
+    websiteUrl:
+      row.website_url,
+
+    billingEmail:
+      row.billing_email,
+
+    countryCode:
+      row.country_code,
+
+    status:
+
+FILE: F:\Project\Poster\backend\src\domains\identity\organization.repository.ts
+LINE: 170
+          input.legalName
+        ),
+
+        normalizeRequiredIdentityText(
+          input.displayName
+        ),
+
+        normalizeOptionalIdentityText(
+          input.websiteUrl
+        ),
+
+        normalizedBillingEmail
+          ? normalizeIdentityEmail(
+              normalizedBillingEmail
+            )
+          : null,
+
+
+FILE: F:\Project\Poster\backend\src\domains\identity\organization.repository.ts
+LINE: 273
+          input.legalName
+        ),
+
+        normalizeRequiredIdentityText(
+          input.displayName
+        ),
+
+        normalizeOptionalIdentityText(
+          input.websiteUrl
+        ),
+
+        normalizedBillingEmail
+          ? normalizeIdentityEmail(
+              normalizedBillingEmail
+            )
+          : null,
+
+
+
+============================================================
+SEARCH: firstName
+============================================================
+
+
+============================================================
+SEARCH: lastName
+============================================================
+
+
+============================================================
+SEARCH: username
+============================================================
+
+
+============================================================
+SEARCH: signal
+============================================================
+
+FILE: F:\Project\Poster\backend\src\server.ts
+LINE: 19
+let shuttingDown =
+  false;
+
+async function shutdown(
+  signal: string
+): Promise<void> {
+  if (shuttingDown) {
+    return;
+  }
+
+  shuttingDown =
+    true;
+
+  app.log.info(
+    {
+      signal
+    },
+
+FILE: F:\Project\Poster\backend\src\server.ts
+LINE: 30
+    true;
+
+  app.log.info(
+    {
+      signal
+    },
+    "Poster Backend is shutting down."
+  );
+
+  try {
+    await app.close();
+
+    process.exitCode =
+      0;
+  } catch (error) {
+    app.log.error(
+      {
+
+
+============================================================
+HTTP TRANSPORT FILE INVENTORY
+============================================================
+
+FILE: F:\Project\Poster\backend\src\app.ts
+FILE: F:\Project\Poster\backend\src\routes\admin-access.routes.ts
+FILE: F:\Project\Poster\backend\src\routes\admin-commercial-request.routes.ts
+FILE: F:\Project\Poster\backend\src\routes\admin-metrics.routes.ts
+FILE: F:\Project\Poster\backend\src\routes\authentication.routes.ts
+FILE: F:\Project\Poster\backend\src\routes\client-commercial-request.routes.ts
+FILE: F:\Project\Poster\backend\src\routes\health.routes.ts
+FILE: F:\Project\Poster\backend\src\server.ts

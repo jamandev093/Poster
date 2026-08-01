@@ -210,3 +210,146 @@ export async function createDraftCampaignFromCommercialRequest(
 
   return existing;
 }
+export interface ListMonetizationCampaignsInput {
+  organizationId?:
+    string |
+    null;
+
+  status?:
+    CampaignStatus |
+    null;
+
+  campaignType?:
+    CampaignType |
+    null;
+
+  limit: number;
+
+  offset: number;
+}
+
+export interface MonetizationCampaignListResult {
+  items:
+    MonetizationCampaignRecord[];
+
+  total: number;
+
+  limit: number;
+
+  offset: number;
+}
+
+export async function findMonetizationCampaignById(
+  campaignId: string,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<MonetizationCampaignRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      MonetizationCampaignDatabaseRow
+    >(
+      `
+        SELECT
+          ${CAMPAIGN_COLUMNS}
+        FROM app.monetization_campaigns
+        WHERE id = $1::uuid
+        LIMIT 1
+      `,
+      [
+        campaignId,
+      ],
+      executor
+    );
+
+  return mapOptionalCampaignRow(
+    result.rows[0]
+  );
+}
+
+export async function listMonetizationCampaigns(
+  input:
+    ListMonetizationCampaignsInput,
+  executor?:
+    DatabaseQueryExecutor
+): Promise<MonetizationCampaignListResult> {
+  const result =
+    await executeDatabaseQuery<
+      MonetizationCampaignDatabaseRow & {
+        total_count: string;
+      }
+    >(
+      `
+        SELECT
+          ${CAMPAIGN_COLUMNS},
+          COUNT(*) OVER()::text
+            AS total_count
+        FROM app.monetization_campaigns
+        WHERE
+          (
+            $1::uuid IS NULL
+            OR organization_id =
+              $1::uuid
+          )
+          AND (
+            $2::text IS NULL
+            OR status = $2
+          )
+          AND (
+            $3::text IS NULL
+            OR campaign_type = $3
+          )
+        ORDER BY
+          CASE status
+            WHEN 'active'
+              THEN 0
+            WHEN 'scheduled'
+              THEN 1
+            WHEN 'draft'
+              THEN 2
+            WHEN 'paused'
+              THEN 3
+            WHEN 'ended'
+              THEN 4
+            ELSE 5
+          END,
+          created_at DESC,
+          id DESC
+        LIMIT $4
+        OFFSET $5
+      `,
+      [
+        input.organizationId ??
+        null,
+
+        input.status ??
+        null,
+
+        input.campaignType ??
+        null,
+
+        input.limit,
+        input.offset,
+      ],
+      executor
+    );
+
+  return {
+    items:
+      result.rows.map(
+        mapCampaignDatabaseRow
+      ),
+
+    total:
+      Number(
+        result.rows[0]
+          ?.total_count ??
+        0
+      ),
+
+    limit:
+      input.limit,
+
+    offset:
+      input.offset,
+  };
+}

@@ -1,16 +1,32 @@
 "use client";
 
 import {
+  useCallback,
   useMemo,
   useState,
 } from "react";
 
+import {
+  formatAcquisitionMethod,
+  formatCopyrightCaseStatus,
+  formatCopyrightRequestType,
+  formatCopyrightTimestamp,
+  formatVerificationCheckStatus,
+  formatVerificationStatus,
+  useCopyrightActions,
+  useCopyrightCaseDetails,
+  useCopyrightCases,
+  type AdminCopyrightCaseDetails,
+  type AdminCopyrightCaseSummary,
+  type CopyrightCaseStatus,
+  type DiscoveryContentAcquisitionMethod,
+} from "./copyright-api";
+
 import styles from "./CopyrightManager.module.css";
 
-type CopyrightStatus =
-  | "needs_action"
-  | "removed"
-  | "resolved";
+type CopyrightFilter =
+  | "all"
+  | CopyrightCaseStatus;
 
 type CopyrightAction =
   | "remove"
@@ -18,670 +34,226 @@ type CopyrightAction =
   | "dismiss"
   | "restore";
 
-type CopyrightRequestType =
-  | "copyright_strike"
-  | "copyright_request"
-  | "publisher_removal";
-
-type AcquisitionMethod =
-  | "API"
-  | "RSS"
-  | "Embed"
-  | "Agreement"
-  | "Link-only";
-
-type VerificationCheckStatus =
-  | "passed"
-  | "review"
-  | "failed";
-
-type VerificationStatus =
-  | "pending"
-  | "verified"
-  | "needs_review";
-
-interface VerificationCheck {
-  id: string;
-  label: string;
-  status: VerificationCheckStatus;
-  detail: string;
-}
-
-interface AuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface CopyrightCase {
-  id: string;
-
-  requestType:
-    CopyrightRequestType;
-
-  claimant: string;
-  claimantType: string;
-
-  claimantContact?: string;
-  claimantWebsite?: string;
-
-  reference?: string;
-
-  contentId: string;
-  contentTitle: string;
-
-  publisher: string;
-  originalUrl: string;
-
-  acquisitionMethod:
-    AcquisitionMethod;
-
-  reason: string;
-  receivedAt: string;
-
-  status:
-    CopyrightStatus;
-
-  preventReimport:
-    boolean;
-
-  actionTaken?: string;
-
-  verificationChecks:
-    VerificationCheck[];
-
-  audit:
-    AuditEntry[];
-}
-
-const INITIAL_CASES: CopyrightCase[] = [
-  {
-    id:
-      "CR-1001",
-
-    requestType:
-      "copyright_strike",
-
-    claimant:
-      "BBC",
-
-    claimantType:
-      "Publisher / rights holder",
-
-    claimantContact:
-      "rights@bbc.test",
-
-    claimantWebsite:
-      "https://www.bbc.com",
-
-    reference:
-      "BBC-RIGHTS-2026-0719",
-
-    contentId:
-      "CNT-2001",
-
-    contentTitle:
-      "AI regulation story",
-
-    publisher:
-      "BBC",
-
-    originalUrl:
-      "https://example.com/bbc/ai-regulation",
-
-    acquisitionMethod:
-      "RSS",
-
-    reason:
-      "Rights holder requested that this specific content record no longer be displayed by Poster.",
-
-    receivedAt:
-      "19 Jul 2026",
-
-    status:
-      "needs_action",
-
-    preventReimport:
-      false,
-
-    verificationChecks: [
-      {
-        id:
-          "verify-1001-content",
-
-        label:
-          "Poster content matched",
-
-        status:
-          "passed",
-
-        detail:
-          "CNT-2001 resolves to the affected Poster content record.",
-      },
-
-      {
-        id:
-          "verify-1001-work",
-
-        label:
-          "Original work matched",
-
-        status:
-          "passed",
-
-        detail:
-          "The submitted original-work information matches the publisher and affected content context.",
-      },
-
-      {
-        id:
-          "verify-1001-claimant",
-
-        label:
-          "Claimant identity matched",
-
-        status:
-          "passed",
-
-        detail:
-          "The claimant organization matches the publisher / rights-holder identity associated with the request.",
-      },
-
-      {
-        id:
-          "verify-1001-contact",
-
-        label:
-          "Business contact reviewed",
-
-        status:
-          "passed",
-
-        detail:
-          "The submitted business contact and organization information are consistent with the claimant identity.",
-      },
-
-      {
-        id:
-          "verify-1001-source",
-
-        label:
-          "Source context matched",
-
-        status:
-          "passed",
-
-        detail:
-          "Poster source metadata and acquisition context match the affected publisher record.",
-      },
-
-      {
-        id:
-          "verify-1001-reference",
-
-        label:
-          "Supporting reference reviewed",
-
-        status:
-          "passed",
-
-        detail:
-          "The claimant supplied a rights reference that is associated with this request.",
-      },
-    ],
-
-    audit: [
-      {
-        id:
-          "audit-1001-2",
-
-        action:
-          "Cross-verification completed",
-
-        actor:
-          "System",
-
-        timestamp:
-          "19 Jul 2026 · 09:22",
-      },
-
-      {
-        id:
-          "audit-1001-1",
-
-        action:
-          "Copyright strike received from BBC",
-
-        actor:
-          "System",
-
-        timestamp:
-          "19 Jul 2026 · 09:20",
-      },
-    ],
-  },
-
-  {
-    id:
-      "CR-1000",
-
-    requestType:
-      "publisher_removal",
-
-    claimant:
-      "Example Media",
-
-    claimantType:
-      "Publisher",
-
-    claimantContact:
-      "legal@example-media.test",
-
-    claimantWebsite:
-      "https://example.com",
-
-    reference:
-      "EM-4471",
-
-    contentId:
-      "CNT-2000",
-
-    contentTitle:
-      "Market analysis article",
-
-    publisher:
-      "Example Media",
-
-    originalUrl:
-      "https://example.com/market-analysis",
-
-    acquisitionMethod:
-      "API",
-
-    reason:
-      "Publisher requested removal and exclusion from future ingestion.",
-
-    receivedAt:
-      "18 Jul 2026",
-
-    status:
-      "removed",
-
-    preventReimport:
-      true,
-
-    actionTaken:
-      "Removed from Poster + prevent re-import",
-
-    verificationChecks: [
-      {
-        id:
-          "verify-1000-content",
-
-        label:
-          "Poster content matched",
-
-        status:
-          "passed",
-
-        detail:
-          "CNT-2000 resolves to the affected Poster content record.",
-      },
-
-      {
-        id:
-          "verify-1000-work",
-
-        label:
-          "Original work matched",
-
-        status:
-          "passed",
-
-        detail:
-          "Original work and publisher information match the affected record.",
-      },
-
-      {
-        id:
-          "verify-1000-claimant",
-
-        label:
-          "Claimant identity matched",
-
-        status:
-          "passed",
-
-        detail:
-          "Claimant information is consistent with the recorded publisher.",
-      },
-
-      {
-        id:
-          "verify-1000-contact",
-
-        label:
-          "Business contact reviewed",
-
-        status:
-          "passed",
-
-        detail:
-          "Business contact information was consistent with the organization identity.",
-      },
-
-      {
-        id:
-          "verify-1000-source",
-
-        label:
-          "Source context matched",
-
-        status:
-          "passed",
-
-        detail:
-          "Poster acquisition metadata is consistent with the publisher record.",
-      },
-
-      {
-        id:
-          "verify-1000-reference",
-
-        label:
-          "Supporting reference reviewed",
-
-        status:
-          "passed",
-
-        detail:
-          "Publisher reference EM-4471 was included with the request.",
-      },
-    ],
-
-    audit: [
-      {
-        id:
-          "audit-1000-3",
-
-        action:
-          "Removed from Poster + prevent re-import",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "18 Jul 2026 · 16:42",
-      },
-
-      {
-        id:
-          "audit-1000-2",
-
-        action:
-          "Cross-verification completed",
-
-        actor:
-          "System",
-
-        timestamp:
-          "18 Jul 2026 · 16:35",
-      },
-
-      {
-        id:
-          "audit-1000-1",
-
-        action:
-          "Publisher removal request received from Example Media",
-
-        actor:
-          "System",
-
-        timestamp:
-          "18 Jul 2026 · 16:31",
-      },
-    ],
-  },
-];
-
-function statusLabel(
-  status: CopyrightStatus
-): string {
-  switch (status) {
-    case "needs_action":
-      return "Needs action";
-
-    case "removed":
-      return "Removed";
-
-    case "resolved":
-      return "Resolved";
-  }
-}
-
-function requestTypeLabel(
-  type: CopyrightRequestType
-): string {
-  switch (type) {
-    case "copyright_strike":
-      return "Copyright strike";
-
-    case "copyright_request":
-      return "Copyright request";
-
-    case "publisher_removal":
-      return "Publisher removal request";
-  }
-}
-
 function requestHeadline(
-  item: CopyrightCase
+  item:
+    AdminCopyrightCaseSummary
 ): string {
-  switch (item.requestType) {
+  switch (
+    item.case.requestType
+  ) {
     case "copyright_strike":
-      return `Copyright strike by ${item.claimant}`;
+      return `Copyright strike by ${item.case.claimantName}`;
 
     case "copyright_request":
-      return `Copyright request by ${item.claimant}`;
+      return `Copyright request by ${item.case.claimantName}`;
 
     case "publisher_removal":
-      return `Publisher removal request by ${item.claimant}`;
+      return `Publisher removal request by ${item.case.claimantName}`;
   }
 }
 
-function acquisitionMethodLabel(
-  method: AcquisitionMethod
+function detailsHeadline(
+  details:
+    AdminCopyrightCaseDetails
 ): string {
-  switch (method) {
-    case "API":
-      return "Official API";
-
-    case "RSS":
-      return "Authorized RSS";
-
-    case "Embed":
-      return "Official Embed/oEmbed";
-
-    case "Agreement":
-      return "Publisher Agreement";
-
-    case "Link-only":
-      return "Link-only";
-  }
+  return requestHeadline(
+    details
+  );
 }
 
 function displayPolicyLabel(
-  method: AcquisitionMethod
+  method:
+    DiscoveryContentAcquisitionMethod
 ): string {
-  switch (method) {
-    case "API":
+  switch (
+    method
+  ) {
+    case "api":
       return "Provider-permitted API fields and preview data only.";
 
-    case "RSS":
+    case "rss":
       return "Fields permitted by the authorized publisher feed only.";
 
-    case "Embed":
+    case "embed":
       return "Provider-controlled official embed or oEmbed.";
 
-    case "Agreement":
+    case "agreement":
       return "Display rights defined by the publisher agreement.";
 
-    case "Link-only":
+    case "link_only":
       return "Minimal link-only discovery with no extracted preview or media.";
   }
 }
 
-function verificationStatus(
-  checks: VerificationCheck[]
-): VerificationStatus {
-  if (
-    checks.length ===
-    0
-  ) {
-    return "pending";
-  }
-
-  if (
-    checks.some(
-      (check) =>
-        check.status ===
-          "failed" ||
-        check.status ===
-          "review"
-    )
-  ) {
-    return "needs_review";
-  }
-
-  if (
-    checks.every(
-      (check) =>
-        check.status ===
-        "passed"
-    )
-  ) {
-    return "verified";
-  }
-
-  return "pending";
-}
-
-function verificationLabel(
-  status: VerificationStatus
+function formatActionTaken(
+  details:
+    AdminCopyrightCaseDetails
 ): string {
-  switch (status) {
-    case "verified":
-      return "Verified";
+  switch (
+    details.case.actionTaken
+  ) {
+    case "removed":
+      return "Removed from Poster";
 
-    case "needs_review":
-      return "Needs review";
+    case "removed_prevent_reimport":
+      return "Removed from Poster + prevent re-import";
 
-    case "pending":
-      return "Pending";
+    case "dismissed":
+      return "Dismissed / no action";
+
+    case "restored":
+      return "Content restored";
+
+    case null:
+      return "No action taken yet";
   }
 }
 
-function verificationCheckLabel(
-  status: VerificationCheckStatus
-): string {
-  switch (status) {
-    case "passed":
-      return "Passed";
+function selectSummaryFromDetails(
+  details:
+    AdminCopyrightCaseDetails
+): AdminCopyrightCaseSummary {
+  return {
+    case:
+      details.case,
 
-    case "review":
-      return "Review";
-
-    case "failed":
-      return "Failed";
-  }
-}
-
-function nowLabel(): string {
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      dateStyle:
-        "medium",
-
-      timeStyle:
-        "short",
-    }
-  ).format(
-    new Date()
-  );
+    content:
+      details.content,
+  };
 }
 
 export default function CopyrightManager() {
-  const [
-    cases,
-    setCases,
-  ] = useState<
-    CopyrightCase[]
-  >(
-    INITIAL_CASES
-  );
+  const {
+    data:
+      caseList,
+    error:
+      listError,
+    isLoading:
+      isListLoading,
+    isRefreshing:
+      isListRefreshing,
+    refresh:
+      refreshList,
+    replaceCase,
+  } =
+    useCopyrightCases();
 
   const [
     activeFilter,
     setActiveFilter,
-  ] = useState<
-    "all" |
-      CopyrightStatus
-  >(
-    "needs_action"
-  );
+  ] =
+    useState<
+      CopyrightFilter
+    >(
+      "needs_action"
+    );
 
   const [
     selectedCaseId,
     setSelectedCaseId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
+  ] =
+    useState<
+      string |
+      null
+    >(
+      null
+    );
 
   const [
     pendingAction,
     setPendingAction,
-  ] = useState<
-    CopyrightAction | null
-  >(
-    null
-  );
+  ] =
+    useState<
+      CopyrightAction |
+      null
+    >(
+      null
+    );
+
+  const {
+    data:
+      selectedDetails,
+    error:
+      detailsError,
+    isLoading:
+      isDetailsLoading,
+    isRefreshing:
+      isDetailsRefreshing,
+    refresh:
+      refreshDetails,
+    replace:
+      replaceDetails,
+  } =
+    useCopyrightCaseDetails(
+      selectedCaseId
+    );
+
+  const handleCompleted =
+    useCallback(
+      (
+        details:
+          AdminCopyrightCaseDetails
+      ) => {
+        replaceDetails(
+          details
+        );
+
+        replaceCase(
+          selectSummaryFromDetails(
+            details
+          )
+        );
+
+        setPendingAction(
+          null
+        );
+      },
+      [
+        replaceCase,
+        replaceDetails,
+      ]
+    );
+
+  const {
+    action:
+      runningAction,
+    error:
+      actionError,
+    isRunning:
+      isActionRunning,
+    remove,
+    dismiss,
+    restore,
+    clearError,
+  } =
+    useCopyrightActions({
+      onCompleted:
+        handleCompleted,
+    });
+
+  const cases =
+    caseList?.cases ??
+    [];
 
   const visibleCases =
-    useMemo(() => {
-      if (
-        activeFilter ===
-        "all"
-      ) {
-        return cases;
-      }
-
-      return cases.filter(
-        (item) =>
-          item.status ===
-          activeFilter
-      );
-    }, [
-      activeFilter,
-      cases,
-    ]);
-
-  const selectedCase =
     useMemo(
-      () =>
-        cases.find(
-          (item) =>
-            item.id ===
-            selectedCaseId
-        ) ?? null,
+      () => {
+        if (
+          activeFilter ===
+          "all"
+        ) {
+          return cases;
+        }
 
+        return cases.filter(
+          item =>
+            item.case.status ===
+            activeFilter
+        );
+      },
       [
+        activeFilter,
         cases,
-        selectedCaseId,
       ]
     );
 
@@ -693,209 +265,301 @@ export default function CopyrightManager() {
 
         needs_action:
           cases.filter(
-            (item) =>
-              item.status ===
+            item =>
+              item.case.status ===
               "needs_action"
           ).length,
 
         removed:
           cases.filter(
-            (item) =>
-              item.status ===
+            item =>
+              item.case.status ===
               "removed"
           ).length,
 
         resolved:
           cases.filter(
-            (item) =>
-              item.status ===
+            item =>
+              item.case.status ===
               "resolved"
           ).length,
       }),
-
       [
         cases,
       ]
     );
 
-  const updateCase = (
-    caseId: string,
-
-    updater: (
-      item:
-        CopyrightCase
-    ) => CopyrightCase
-  ) => {
-    setCases(
-      (current) =>
-        current.map(
-          (item) =>
-            item.id ===
-            caseId
-              ? updater(
-                  item
-                )
-              : item
-        )
+  const selectedSummary =
+    useMemo(
+      () =>
+        cases.find(
+          item =>
+            item.case.id ===
+            selectedCaseId
+        ) ??
+        null,
+      [
+        cases,
+        selectedCaseId,
+      ]
     );
-  };
+
+  const closeDetails =
+    useCallback(
+      () => {
+        if (
+          isActionRunning
+        ) {
+          return;
+        }
+
+        setSelectedCaseId(
+          null
+        );
+
+        setPendingAction(
+          null
+        );
+
+        clearError();
+      },
+      [
+        clearError,
+        isActionRunning,
+      ]
+    );
+
+  const openDetails =
+    useCallback(
+      (
+        caseId: string
+      ) => {
+        clearError();
+
+        setPendingAction(
+          null
+        );
+
+        setSelectedCaseId(
+          caseId
+        );
+      },
+      [
+        clearError,
+      ]
+    );
+
+  const beginAction =
+    useCallback(
+      (
+        caseId: string,
+        action:
+          CopyrightAction
+      ) => {
+        clearError();
+
+        setSelectedCaseId(
+          caseId
+        );
+
+        setPendingAction(
+          action
+        );
+      },
+      [
+        clearError,
+      ]
+    );
+
+  const cancelAction =
+    useCallback(
+      () => {
+        if (
+          isActionRunning
+        ) {
+          return;
+        }
+
+        clearError();
+
+        setPendingAction(
+          null
+        );
+      },
+      [
+        clearError,
+        isActionRunning,
+      ]
+    );
 
   const executeAction =
-    () => {
-      if (
-        !selectedCase ||
-        !pendingAction
-      ) {
-        return;
-      }
+    useCallback(
+      async () => {
+        if (
+          !selectedDetails ||
+          !pendingAction ||
+          isActionRunning
+        ) {
+          return;
+        }
 
-      const action =
-        pendingAction;
+        const caseId =
+          selectedDetails.case.id;
 
-      updateCase(
-        selectedCase.id,
-
-        (current) => {
-          const auditBase =
+        if (
+          pendingAction ===
+          "remove"
+        ) {
+          await remove(
+            caseId,
             {
-              id:
-                `${current.id}-${Date.now()}`,
+              expectedRowVersion:
+                selectedDetails
+                  .case
+                  .rowVersion,
 
-              actor:
-                "Admin",
+              contentExpectedRowVersion:
+                selectedDetails
+                  .content
+                  .rowVersion,
 
-              timestamp:
-                nowLabel(),
-            };
-
-          if (
-            action ===
-            "remove"
-          ) {
-            return {
-              ...current,
-
-              status:
-                "removed",
+              internalNote:
+                null,
 
               preventReimport:
                 false,
+            }
+          );
 
-              actionTaken:
-                "Removed from Poster",
+          return;
+        }
 
-              audit: [
-                {
-                  ...auditBase,
+        if (
+          pendingAction ===
+          "remove_prevent_reimport"
+        ) {
+          await remove(
+            caseId,
+            {
+              expectedRowVersion:
+                selectedDetails
+                  .case
+                  .rowVersion,
 
-                  action:
-                    "Removed from Poster",
-                },
+              contentExpectedRowVersion:
+                selectedDetails
+                  .content
+                  .rowVersion,
 
-                ...current.audit,
-              ],
-            };
-          }
-
-          if (
-            action ===
-            "remove_prevent_reimport"
-          ) {
-            return {
-              ...current,
-
-              status:
-                "removed",
+              internalNote:
+                null,
 
               preventReimport:
                 true,
+            }
+          );
 
-              actionTaken:
-                "Removed from Poster + prevent re-import",
-
-              audit: [
-                {
-                  ...auditBase,
-
-                  action:
-                    "Removed from Poster + prevent re-import",
-                },
-
-                ...current.audit,
-              ],
-            };
-          }
-
-          if (
-            action ===
-            "dismiss"
-          ) {
-            return {
-              ...current,
-
-              status:
-                "resolved",
-
-              preventReimport:
-                false,
-
-              actionTaken:
-                "Dismissed / no action",
-
-              audit: [
-                {
-                  ...auditBase,
-
-                  action:
-                    "Case dismissed with no takedown action",
-                },
-
-                ...current.audit,
-              ],
-            };
-          }
-
-          return {
-            ...current,
-
-            status:
-              "resolved",
-
-            preventReimport:
-              false,
-
-            actionTaken:
-              "Content restored",
-
-            audit: [
-              {
-                ...auditBase,
-
-                action:
-                  "Content restored to Poster",
-              },
-
-              ...current.audit,
-            ],
-          };
+          return;
         }
-      );
 
-      setPendingAction(
-        null
-      );
-    };
+        if (
+          pendingAction ===
+          "dismiss"
+        ) {
+          await dismiss(
+            caseId,
+            {
+              expectedRowVersion:
+                selectedDetails
+                  .case
+                  .rowVersion,
+            }
+          );
 
-  const closeDetails =
-    () => {
-      setSelectedCaseId(
-        null
-      );
+          return;
+        }
 
-      setPendingAction(
-        null
-      );
-    };
+        await restore(
+          caseId,
+          {
+            expectedRowVersion:
+              selectedDetails
+                .case
+                .rowVersion,
+
+            contentExpectedRowVersion:
+              selectedDetails
+                .content
+                .rowVersion,
+          }
+        );
+      },
+      [
+        dismiss,
+        isActionRunning,
+        pendingAction,
+        remove,
+        restore,
+        selectedDetails,
+      ]
+    );
+
+  const listStatus =
+    isListLoading
+      ? "Loading Copyright cases"
+      : isListRefreshing
+        ? "Refreshing Copyright cases"
+        : listError
+          ? "Copyright case refresh failed"
+          : "Copyright cases are current";
+
+  const drawerHeadline =
+    selectedDetails
+      ? detailsHeadline(
+          selectedDetails
+        )
+      : selectedSummary
+        ? requestHeadline(
+            selectedSummary
+          )
+        : "Copyright case";
+
+  const drawerPublicId =
+    selectedDetails
+      ?.case
+      .publicId ??
+    selectedSummary
+      ?.case
+      .publicId ??
+    "";
+
+  const drawerContentPublicId =
+    selectedDetails
+      ?.content
+      .publicId ??
+    selectedSummary
+      ?.content
+      .publicId ??
+    "";
+
+  const canRestore =
+    selectedDetails
+      ?.case.status ===
+        "removed" &&
+    selectedDetails
+      .case
+      .actionTaken ===
+        "removed" &&
+    !selectedDetails
+      .case
+      .preventReimport &&
+    selectedDetails
+      .content
+      .status ===
+        "removed" &&
+    !selectedDetails
+      .content
+      .preventReimport;
 
   return (
     <div
@@ -903,6 +567,16 @@ export default function CopyrightManager() {
         styles.page
       }
     >
+      <p
+        className={
+          styles.screenReaderStatus
+        }
+        role="status"
+        aria-live="polite"
+      >
+        {listStatus}
+      </p>
+
       <header
         className={
           styles.header
@@ -948,72 +622,155 @@ export default function CopyrightManager() {
         </div>
       </header>
 
+      {listError ? (
+        <section
+          className={
+            styles.errorPanel
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Copyright cases could not be refreshed
+            </strong>
+
+            <p>
+              {listError}
+
+              {caseList
+                ? " The last successful snapshot remains visible."
+                : ""}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              refreshList
+            }
+            disabled={
+              isListLoading ||
+              isListRefreshing
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
+
       <section
         className={
           styles.panel
         }
+        aria-busy={
+          isListLoading ||
+          isListRefreshing
+        }
       >
         <div
           className={
-            styles.filters
+            styles.toolbar
           }
         >
-          {(
-            [
+          <div
+            className={
+              styles.filters
+            }
+          >
+            {(
               [
-                "needs_action",
-                "Needs action",
-              ],
+                [
+                  "needs_action",
+                  "Needs action",
+                ],
 
-              [
-                "removed",
-                "Removed",
-              ],
+                [
+                  "removed",
+                  "Removed",
+                ],
 
-              [
-                "resolved",
-                "Resolved",
-              ],
+                [
+                  "resolved",
+                  "Resolved",
+                ],
 
-              [
-                "all",
-                "All",
-              ],
-            ] as const
-          ).map(
-            ([
-              key,
-              label,
-            ]) => (
-              <button
-                key={key}
-                type="button"
-                className={
-                  activeFilter ===
-                  key
-                    ? styles.filterActive
-                    : styles.filter
-                }
-                onClick={() =>
-                  setActiveFilter(
+                [
+                  "all",
+                  "All",
+                ],
+              ] as const
+            ).map(
+              ([
+                key,
+                label,
+              ]) => (
+                <button
+                  key={
                     key
-                  )
-                }
-              >
-                {
-                  label
-                }
-
-                <span>
-                  {
-                    counts[
-                      key
-                    ]
                   }
-                </span>
-              </button>
-            )
-          )}
+                  type="button"
+                  className={
+                    activeFilter ===
+                    key
+                      ? styles.filterActive
+                      : styles.filter
+                  }
+                  onClick={() =>
+                    setActiveFilter(
+                      key
+                    )
+                  }
+                >
+                  {label}
+
+                  <span>
+                    {
+                      counts[
+                        key
+                      ]
+                    }
+                  </span>
+                </button>
+              )
+            )}
+          </div>
+
+          <div
+            className={
+              styles.refreshArea
+            }
+          >
+            <span>
+              {caseList
+                ? `Snapshot ${formatCopyrightTimestamp(
+                    caseList.generatedAt
+                  )}`
+                : isListLoading
+                  ? "Loading authoritative cases"
+                  : "No successful snapshot"}
+            </span>
+
+            <button
+              type="button"
+              className={
+                styles.secondaryButton
+              }
+              onClick={
+                refreshList
+              }
+              disabled={
+                isListLoading ||
+                isListRefreshing
+              }
+            >
+              {isListRefreshing
+                ? "Refreshing…"
+                : "Refresh"}
+            </button>
+          </div>
         </div>
 
         <div
@@ -1021,226 +778,229 @@ export default function CopyrightManager() {
             styles.caseList
           }
         >
-          {visibleCases.length ===
-          0 ? (
+          {isListLoading &&
+          !caseList ? (
+            <div
+              className={
+                styles.loadingState
+              }
+            >
+              Loading authoritative
+              Copyright cases…
+            </div>
+          ) : visibleCases.length ===
+            0 ? (
             <div
               className={
                 styles.empty
               }
             >
-              No copyright cases
-              in this view.
+              {listError &&
+              !caseList
+                ? "Copyright cases are unavailable."
+                : "No copyright cases in this view."}
             </div>
           ) : (
             visibleCases.map(
-              (
-                copyrightCase
-              ) => {
-                const verification =
-                  verificationStatus(
-                    copyrightCase.verificationChecks
-                  );
-
-                return (
-                  <article
-                    key={
-                      copyrightCase.id
-                    }
+              item => (
+                <article
+                  key={
+                    item.case.id
+                  }
+                  className={
+                    styles.caseCard
+                  }
+                >
+                  <div
                     className={
-                      styles.caseCard
+                      styles.caseTop
                     }
                   >
-                    <div
-                      className={
-                        styles.caseTop
-                      }
-                    >
-                      <div>
-                        <span
-                          className={
-                            styles.caseId
-                          }
-                        >
-                          {
-                            copyrightCase.id
-                          }
-                          {" · "}
-                          {
-                            copyrightCase.contentId
-                          }
-                        </span>
-
-                        <h3>
-                          {requestHeadline(
-                            copyrightCase
-                          )}
-                        </h3>
-
-                        <p>
-                          {
-                            copyrightCase.claimantType
-                          }
-                        </p>
-                      </div>
-
+                    <div>
                       <span
-                        className={`${styles.status} ${
-                          copyrightCase.status ===
-                          "needs_action"
-                            ? styles.statusAttention
-                            : copyrightCase.status ===
-                              "removed"
+                        className={
+                          styles.caseId
+                        }
+                      >
+                        {
+                          item.case
+                            .publicId
+                        }
+                        {" · "}
+                        {
+                          item.content
+                            .publicId
+                        }
+                      </span>
+
+                      <h3>
+                        {requestHeadline(
+                          item
+                        )}
+                      </h3>
+
+                      <p>
+                        {
+                          item.case
+                            .claimantType
+                        }
+                      </p>
+                    </div>
+
+                    <span
+                      className={`${styles.status} ${
+                        item.case.status ===
+                        "needs_action"
+                          ? styles.statusAttention
+                          : item.case.status ===
+                            "removed"
                             ? styles.statusRemoved
                             : styles.statusResolved
-                        }`}
-                      >
-                        {statusLabel(
-                          copyrightCase.status
-                        )}
+                      }`}
+                    >
+                      {formatCopyrightCaseStatus(
+                        item.case.status
+                      )}
+                    </span>
+                  </div>
+
+                  <div
+                    className={
+                      styles.metaGrid
+                    }
+                  >
+                    <div>
+                      <span>
+                        Affected
+                        content
                       </span>
+
+                      <strong>
+                        {
+                          item.content
+                            .title
+                        }
+                      </strong>
                     </div>
 
-                    <div
+                    <div>
+                      <span>
+                        Publisher
+                      </span>
+
+                      <strong>
+                        {
+                          item.content
+                            .publisherName
+                        }
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Verification
+                      </span>
+
+                      <strong>
+                        {formatVerificationStatus(
+                          item.case
+                            .verificationStatus
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Received
+                      </span>
+
+                      <strong>
+                        {formatCopyrightTimestamp(
+                          item.case
+                            .receivedAt
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Prevent
+                        re-import
+                      </span>
+
+                      <strong>
+                        {item.case
+                          .preventReimport
+                          ? "Yes"
+                          : "No"}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div
+                    className={
+                      styles.cardActions
+                    }
+                  >
+                    <button
+                      type="button"
                       className={
-                        styles.metaGrid
+                        styles.secondaryButton
+                      }
+                      onClick={() =>
+                        openDetails(
+                          item.case.id
+                        )
                       }
                     >
-                      <div>
-                        <span>
-                          Affected
-                          content
-                        </span>
+                      View details
+                    </button>
 
-                        <strong>
-                          {
-                            copyrightCase.contentTitle
+                    {item.case.status ===
+                    "needs_action" ? (
+                      <>
+                        <button
+                          type="button"
+                          className={
+                            styles.softDangerButton
                           }
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Publisher
-                        </span>
-
-                        <strong>
-                          {
-                            copyrightCase.publisher
+                          onClick={() =>
+                            beginAction(
+                              item.case.id,
+                              "remove"
+                            )
                           }
-                        </strong>
-                      </div>
+                        >
+                          Remove
+                        </button>
 
-                      <div>
-                        <span>
-                          Verification
-                        </span>
-
-                        <strong>
-                          {verificationLabel(
-                            verification
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Received
-                        </span>
-
-                        <strong>
-                          {
-                            copyrightCase.receivedAt
+                        <button
+                          type="button"
+                          className={
+                            styles.dangerButton
                           }
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Prevent
+                          onClick={() =>
+                            beginAction(
+                              item.case.id,
+                              "remove_prevent_reimport"
+                            )
+                          }
+                        >
+                          Remove +
+                          prevent
                           re-import
-                        </span>
-
-                        <strong>
-                          {
-                            copyrightCase.preventReimport
-                              ? "Yes"
-                              : "No"
-                          }
-                        </strong>
-                      </div>
-                    </div>
-
-                    <div
-                      className={
-                        styles.cardActions
-                      }
-                    >
-                      <button
-                        type="button"
-                        className={
-                          styles.secondaryButton
-                        }
-                        onClick={() =>
-                          setSelectedCaseId(
-                            copyrightCase.id
-                          )
-                        }
-                      >
-                        View details
-                      </button>
-
-                      {copyrightCase.status ===
-                      "needs_action" ? (
-                        <>
-                          <button
-                            type="button"
-                            className={
-                              styles.softDangerButton
-                            }
-                            onClick={() => {
-                              setSelectedCaseId(
-                                copyrightCase.id
-                              );
-
-                              setPendingAction(
-                                "remove"
-                              );
-                            }}
-                          >
-                            Remove
-                          </button>
-
-                          <button
-                            type="button"
-                            className={
-                              styles.dangerButton
-                            }
-                            onClick={() => {
-                              setSelectedCaseId(
-                                copyrightCase.id
-                              );
-
-                              setPendingAction(
-                                "remove_prevent_reimport"
-                              );
-                            }}
-                          >
-                            Remove +
-                            prevent
-                            re-import
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
-                  </article>
-                );
-              }
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </article>
+              )
             )
           )}
         </div>
       </section>
 
-      {selectedCase ? (
+      {selectedCaseId ? (
         <div
           className={
             styles.drawerLayer
@@ -1255,11 +1015,18 @@ export default function CopyrightManager() {
             onClick={
               closeDetails
             }
+            disabled={
+              isActionRunning
+            }
           />
 
           <aside
             className={
               styles.drawer
+            }
+            aria-busy={
+              isDetailsLoading ||
+              isDetailsRefreshing
             }
           >
             <div
@@ -1270,18 +1037,23 @@ export default function CopyrightManager() {
               <div>
                 <span>
                   {
-                    selectedCase.id
+                    drawerPublicId
                   }
-                  {" · "}
+
+                  {drawerPublicId &&
+                  drawerContentPublicId
+                    ? " · "
+                    : ""}
+
                   {
-                    selectedCase.contentId
+                    drawerContentPublicId
                   }
                 </span>
 
                 <h3>
-                  {requestHeadline(
-                    selectedCase
-                  )}
+                  {
+                    drawerHeadline
+                  }
                 </h3>
               </div>
 
@@ -1294,478 +1066,796 @@ export default function CopyrightManager() {
                 onClick={
                   closeDetails
                 }
+                disabled={
+                  isActionRunning
+                }
               >
                 ×
               </button>
             </div>
 
-            <div
-              className={
-                styles.drawerBody
-              }
-            >
-              <section
+            {detailsError ? (
+              <div
                 className={
-                  styles.detailSection
+                  styles.drawerError
                 }
+                role="alert"
               >
-                <h4>
-                  Claimant
-                </h4>
+                <strong>
+                  Copyright details
+                  could not be loaded
+                </strong>
 
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Issued by
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.claimant
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Request type
-                    </dt>
-
-                    <dd>
-                      {requestTypeLabel(
-                        selectedCase.requestType
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Claimant type
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.claimantType
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Business email
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.claimantContact ??
-                        "Not provided"
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Organization website
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedCase.claimantWebsite ??
-                        "Not provided"
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Reference
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.reference ??
-                        "Not provided"
-                      }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Cross-verification
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Verification
-                      status
-                    </dt>
-
-                    <dd>
-                      {verificationLabel(
-                        verificationStatus(
-                          selectedCase.verificationChecks
-                        )
-                      )}
-                    </dd>
-                  </div>
-
-                  {selectedCase.verificationChecks.map(
-                    (
-                      check
-                    ) => (
-                      <div
-                        key={
-                          check.id
-                        }
-                      >
-                        <dt>
-                          {
-                            check.label
-                          }
-                        </dt>
-
-                        <dd>
-                          {verificationCheckLabel(
-                            check.status
-                          )}
-                          {" · "}
-                          {
-                            check.detail
-                          }
-                        </dd>
-                      </div>
-                    )
-                  )}
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Affected
-                  content
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Poster
-                      Content ID
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.contentId
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Title
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.contentTitle
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Publisher
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCase.publisher
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Acquisition
-                      method
-                    </dt>
-
-                    <dd>
-                      {acquisitionMethodLabel(
-                        selectedCase.acquisitionMethod
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Display
-                      policy
-                    </dt>
-
-                    <dd>
-                      {displayPolicyLabel(
-                        selectedCase.acquisitionMethod
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Original URL
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedCase.originalUrl
-                      }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Request
-                </h4>
-
-                <p
-                  className={
-                    styles.reason
-                  }
-                >
+                <p>
                   {
-                    selectedCase.reason
+                    detailsError
                   }
                 </p>
 
-                <div
-                  className={
-                    styles.requestSummary
-                  }
-                >
-                  <div>
-                    <span>
-                      Status
-                    </span>
-
-                    <strong>
-                      {statusLabel(
-                        selectedCase.status
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Verification
-                    </span>
-
-                    <strong>
-                      {verificationLabel(
-                        verificationStatus(
-                          selectedCase.verificationChecks
-                        )
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Prevent
-                      re-import
-                    </span>
-
-                    <strong>
-                      {
-                        selectedCase.preventReimport
-                          ? "Yes"
-                          : "No"
-                      }
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Action taken
-                    </span>
-
-                    <strong>
-                      {
-                        selectedCase.actionTaken ??
-                        "No action taken yet"
-                      }
-                    </strong>
-                  </div>
-                </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
-
-                <div
-                  className={
-                    styles.auditList
-                  }
-                >
-                  {selectedCase.audit.map(
-                    (
-                      entry
-                    ) => (
-                      <div
-                        key={
-                          entry.id
-                        }
-                        className={
-                          styles.auditItem
-                        }
-                      >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
-
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
-
-                          <span>
-                            {
-                              entry.actor
-                            }{" "}
-                            ·{" "}
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-            </div>
-
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              {selectedCase.status ===
-              "needs_action" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.secondaryButton
-                    }
-                    onClick={() =>
-                      setPendingAction(
-                        "dismiss"
-                      )
-                    }
-                  >
-                    Dismiss /
-                    no action
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.softDangerButton
-                    }
-                    onClick={() =>
-                      setPendingAction(
-                        "remove"
-                      )
-                    }
-                  >
-                    Remove
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      setPendingAction(
-                        "remove_prevent_reimport"
-                      )
-                    }
-                  >
-                    Remove +
-                    prevent
-                    re-import
-                  </button>
-                </>
-              ) : selectedCase.status ===
-                "removed" ? (
                 <button
                   type="button"
                   className={
                     styles.secondaryButton
                   }
-                  onClick={() =>
-                    setPendingAction(
-                      "restore"
-                    )
+                  onClick={
+                    refreshDetails
+                  }
+                  disabled={
+                    isDetailsLoading ||
+                    isDetailsRefreshing
                   }
                 >
-                  Restore
-                  content
+                  Retry
                 </button>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
+
+            {actionError ? (
+              <div
+                className={
+                  styles.drawerError
+                }
+                role="alert"
+              >
+                <strong>
+                  Copyright action
+                  failed
+                </strong>
+
+                <p>
+                  {
+                    actionError
+                  }
+                </p>
+
+                <button
+                  type="button"
+                  className={
+                    styles.secondaryButton
+                  }
+                  onClick={
+                    clearError
+                  }
+                >
+                  Dismiss message
+                </button>
+              </div>
+            ) : null}
+
+            {isDetailsLoading &&
+            !selectedDetails ? (
+              <div
+                className={
+                  styles.drawerLoading
+                }
+              >
+                Loading authoritative
+                case details…
+              </div>
+            ) : selectedDetails ? (
+              <>
+                <div
+                  className={
+                    styles.drawerBody
+                  }
+                >
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Claimant
+                    </h4>
+
+                    <dl
+                      className={
+                        styles.detailList
+                      }
+                    >
+                      <div>
+                        <dt>
+                          Issued by
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedDetails
+                              .case
+                              .claimantName
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Request type
+                        </dt>
+
+                        <dd>
+                          {formatCopyrightRequestType(
+                            selectedDetails
+                              .case
+                              .requestType
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Claimant type
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedDetails
+                              .case
+                              .claimantType
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Business email
+                        </dt>
+
+                        <dd>
+                          {selectedDetails
+                            .case
+                            .claimantBusinessEmail ??
+                            "Not provided"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Organization
+                          website
+                        </dt>
+
+                        <dd
+                          className={
+                            styles.breakText
+                          }
+                        >
+                          {selectedDetails
+                            .case
+                            .claimantWebsiteUrl ??
+                            "Not provided"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Reference
+                        </dt>
+
+                        <dd>
+                          {selectedDetails
+                            .case
+                            .claimantReference ??
+                            "Not provided"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Cross-verification
+                    </h4>
+
+                    <dl
+                      className={
+                        styles.detailList
+                      }
+                    >
+                      <div>
+                        <dt>
+                          Verification
+                          status
+                        </dt>
+
+                        <dd>
+                          {formatVerificationStatus(
+                            selectedDetails
+                              .case
+                              .verificationStatus
+                          )}
+                        </dd>
+                      </div>
+
+                      {selectedDetails
+                        .verificationChecks
+                        .map(
+                          check => (
+                            <div
+                              key={
+                                check.id
+                              }
+                            >
+                              <dt>
+                                {
+                                  check.label
+                                }
+                              </dt>
+
+                              <dd>
+                                {formatVerificationCheckStatus(
+                                  check.status
+                                )}
+                                {" · "}
+                                {
+                                  check.detail
+                                }
+                              </dd>
+                            </div>
+                          )
+                        )}
+                    </dl>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Evidence
+                    </h4>
+
+                    {selectedDetails
+                      .evidence
+                      .length ===
+                    0 ? (
+                      <p
+                        className={
+                          styles.reason
+                        }
+                      >
+                        No evidence
+                        references were
+                        recorded.
+                      </p>
+                    ) : (
+                      <dl
+                        className={
+                          styles.detailList
+                        }
+                      >
+                        {selectedDetails
+                          .evidence
+                          .map(
+                            evidence => (
+                              <div
+                                key={
+                                  evidence.id
+                                }
+                              >
+                                <dt>
+                                  {
+                                    evidence.label
+                                  }
+                                </dt>
+
+                                <dd
+                                  className={
+                                    styles.breakText
+                                  }
+                                >
+                                  {
+                                    evidence.referenceValue
+                                  }
+                                </dd>
+                              </div>
+                            )
+                          )}
+                      </dl>
+                    )}
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Affected
+                      content
+                    </h4>
+
+                    <dl
+                      className={
+                        styles.detailList
+                      }
+                    >
+                      <div>
+                        <dt>
+                          Poster
+                          Content ID
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedDetails
+                              .content
+                              .publicId
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Title
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedDetails
+                              .content
+                              .title
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Publisher
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedDetails
+                              .content
+                              .publisherName
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Acquisition
+                          method
+                        </dt>
+
+                        <dd>
+                          {formatAcquisitionMethod(
+                            selectedDetails
+                              .content
+                              .acquisitionMethod
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Display
+                          policy
+                        </dt>
+
+                        <dd>
+                          {displayPolicyLabel(
+                            selectedDetails
+                              .content
+                              .acquisitionMethod
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Original URL
+                        </dt>
+
+                        <dd
+                          className={
+                            styles.breakText
+                          }
+                        >
+                          {
+                            selectedDetails
+                              .content
+                              .originalUrl
+                          }
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Request
+                    </h4>
+
+                    <p
+                      className={
+                        styles.reason
+                      }
+                    >
+                      {
+                        selectedDetails
+                          .case
+                          .requestReason
+                      }
+                    </p>
+
+                    {selectedDetails
+                      .case
+                      .supportingInformation ? (
+                      <p
+                        className={
+                          styles.supportingInformation
+                        }
+                      >
+                        {
+                          selectedDetails
+                            .case
+                            .supportingInformation
+                        }
+                      </p>
+                    ) : null}
+
+                    <div
+                      className={
+                        styles.requestSummary
+                      }
+                    >
+                      <div>
+                        <span>
+                          Status
+                        </span>
+
+                        <strong>
+                          {formatCopyrightCaseStatus(
+                            selectedDetails
+                              .case
+                              .status
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Verification
+                        </span>
+
+                        <strong>
+                          {formatVerificationStatus(
+                            selectedDetails
+                              .case
+                              .verificationStatus
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Prevent
+                          re-import
+                        </span>
+
+                        <strong>
+                          {selectedDetails
+                            .case
+                            .preventReimport
+                            ? "Yes"
+                            : "No"}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Action taken
+                        </span>
+
+                        <strong>
+                          {formatActionTaken(
+                            selectedDetails
+                          )}
+                        </strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Copyright case
+                      audit history
+                    </h4>
+
+                    <div
+                      className={
+                        styles.auditList
+                      }
+                    >
+                      {selectedDetails
+                        .audit
+                        .length ===
+                      0 ? (
+                        <p
+                          className={
+                            styles.reason
+                          }
+                        >
+                          No case audit
+                          events were
+                          recorded.
+                        </p>
+                      ) : (
+                        selectedDetails
+                          .audit
+                          .map(
+                            entry => (
+                              <div
+                                key={
+                                  entry.id
+                                }
+                                className={
+                                  styles.auditItem
+                                }
+                              >
+                                <span
+                                  className={
+                                    styles.auditDot
+                                  }
+                                  aria-hidden="true"
+                                />
+
+                                <div>
+                                  <strong>
+                                    {
+                                      entry.action
+                                    }
+                                  </strong>
+
+                                  <span>
+                                    {
+                                      entry.actorLabel
+                                    }
+                                    {" · "}
+                                    {formatCopyrightTimestamp(
+                                      entry.occurredAt
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            )
+                          )
+                      )}
+                    </div>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Content audit
+                      history
+                    </h4>
+
+                    <div
+                      className={
+                        styles.auditList
+                      }
+                    >
+                      {selectedDetails
+                        .contentAudit
+                        .length ===
+                      0 ? (
+                        <p
+                          className={
+                            styles.reason
+                          }
+                        >
+                          No linked
+                          content audit
+                          events were
+                          recorded.
+                        </p>
+                      ) : (
+                        selectedDetails
+                          .contentAudit
+                          .map(
+                            entry => (
+                              <div
+                                key={
+                                  entry.id
+                                }
+                                className={
+                                  styles.auditItem
+                                }
+                              >
+                                <span
+                                  className={
+                                    styles.auditDot
+                                  }
+                                  aria-hidden="true"
+                                />
+
+                                <div>
+                                  <strong>
+                                    {
+                                      entry.action
+                                    }
+                                  </strong>
+
+                                  <span>
+                                    {
+                                      entry.actorLabel
+                                    }
+                                    {" · "}
+                                    {formatCopyrightTimestamp(
+                                      entry.occurredAt
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            )
+                          )
+                      )}
+                    </div>
+                  </section>
+                </div>
+
+                <div
+                  className={
+                    styles.drawerFooter
+                  }
+                >
+                  <button
+                    type="button"
+                    className={
+                      styles.secondaryButton
+                    }
+                    onClick={
+                      refreshDetails
+                    }
+                    disabled={
+                      isActionRunning ||
+                      isDetailsRefreshing
+                    }
+                  >
+                    {isDetailsRefreshing
+                      ? "Refreshing…"
+                      : "Refresh details"}
+                  </button>
+
+                  {selectedDetails
+                    .case
+                    .status ===
+                  "needs_action" ? (
+                    <>
+                      <button
+                        type="button"
+                        className={
+                          styles.secondaryButton
+                        }
+                        onClick={() =>
+                          setPendingAction(
+                            "dismiss"
+                          )
+                        }
+                        disabled={
+                          isActionRunning
+                        }
+                      >
+                        Dismiss /
+                        no action
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          styles.softDangerButton
+                        }
+                        onClick={() =>
+                          setPendingAction(
+                            "remove"
+                          )
+                        }
+                        disabled={
+                          isActionRunning
+                        }
+                      >
+                        Remove
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          styles.dangerButton
+                        }
+                        onClick={() =>
+                          setPendingAction(
+                            "remove_prevent_reimport"
+                          )
+                        }
+                        disabled={
+                          isActionRunning
+                        }
+                      >
+                        Remove +
+                        prevent
+                        re-import
+                      </button>
+                    </>
+                  ) : canRestore ? (
+                    <button
+                      type="button"
+                      className={
+                        styles.secondaryButton
+                      }
+                      onClick={() =>
+                        setPendingAction(
+                          "restore"
+                        )
+                      }
+                      disabled={
+                        isActionRunning
+                      }
+                    >
+                      Restore
+                      content
+                    </button>
+                  ) : selectedDetails
+                      .case
+                      .status ===
+                    "removed" ? (
+                    <span
+                      className={
+                        styles.restoreBlocked
+                      }
+                    >
+                      Restoration is
+                      blocked because
+                      prevent re-import
+                      protection is
+                      active.
+                    </span>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
           </aside>
         </div>
       ) : null}
 
-      {selectedCase &&
+      {selectedDetails &&
       pendingAction ? (
         <div
           className={
@@ -1778,10 +1868,11 @@ export default function CopyrightManager() {
               styles.confirmBackdrop
             }
             aria-label="Cancel action"
-            onClick={() =>
-              setPendingAction(
-                null
-              )
+            onClick={
+              cancelAction
+            }
+            disabled={
+              isActionRunning
             }
           />
 
@@ -1810,21 +1901,25 @@ export default function CopyrightManager() {
                 ? "Remove and prevent re-import?"
                 : pendingAction ===
                   "remove"
-                ? "Remove this content from Poster?"
-                : pendingAction ===
-                  "restore"
-                ? "Restore this content?"
-                : "Dismiss this copyright case?"}
+                  ? "Remove this content from Poster?"
+                  : pendingAction ===
+                    "restore"
+                    ? "Restore this content?"
+                    : "Dismiss this copyright case?"}
             </h3>
 
             <p>
-              {requestTypeLabel(
-                selectedCase.requestType
+              {formatCopyrightRequestType(
+                selectedDetails
+                  .case
+                  .requestType
               )}
               {" by "}
               <strong>
                 {
-                  selectedCase.claimant
+                  selectedDetails
+                    .case
+                    .claimantName
                 }
               </strong>
               .
@@ -1834,7 +1929,9 @@ export default function CopyrightManager() {
               Poster Content ID:{" "}
               <strong>
                 {
-                  selectedCase.contentId
+                  selectedDetails
+                    .content
+                    .publicId
                 }
               </strong>
             </p>
@@ -1842,10 +1939,10 @@ export default function CopyrightManager() {
             <p>
               Verification:{" "}
               <strong>
-                {verificationLabel(
-                  verificationStatus(
-                    selectedCase.verificationChecks
-                  )
+                {formatVerificationStatus(
+                  selectedDetails
+                    .case
+                    .verificationStatus
                 )}
               </strong>
             </p>
@@ -1857,13 +1954,40 @@ export default function CopyrightManager() {
                   styles.confirmWarning
                 }
               >
-                This frontend
-                records the prevent
-                re-import decision
-                locally. Real
-                exclusion enforcement
-                will be implemented
-                in Backend later.
+                This authoritative
+                decision removes the
+                content and blocks
+                future re-import of
+                the linked discovery
+                URL.
+              </p>
+            ) : null}
+
+            {pendingAction ===
+            "restore" ? (
+              <p
+                className={
+                  styles.confirmWarning
+                }
+              >
+                Restoration is allowed
+                only for a removable
+                copyright decision
+                without prevent
+                re-import protection.
+              </p>
+            ) : null}
+
+            {actionError ? (
+              <p
+                className={
+                  styles.confirmError
+                }
+                role="alert"
+              >
+                {
+                  actionError
+                }
               </p>
             ) : null}
 
@@ -1877,10 +2001,11 @@ export default function CopyrightManager() {
                 className={
                   styles.secondaryButton
                 }
-                onClick={() =>
-                  setPendingAction(
-                    null
-                  )
+                onClick={
+                  cancelAction
+                }
+                disabled={
+                  isActionRunning
                 }
               >
                 Cancel
@@ -1899,8 +2024,19 @@ export default function CopyrightManager() {
                 onClick={
                   executeAction
                 }
+                disabled={
+                  isActionRunning
+                }
               >
-                Confirm
+                {isActionRunning
+                  ? runningAction ===
+                    "remove"
+                    ? "Removing…"
+                    : runningAction ===
+                      "dismiss"
+                      ? "Dismissing…"
+                      : "Restoring…"
+                  : "Confirm"}
               </button>
             </div>
           </div>

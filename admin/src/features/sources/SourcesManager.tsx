@@ -2,6 +2,7 @@
 
 import {
   Suspense,
+  useCallback,
   useMemo,
   useState,
 } from "react";
@@ -10,128 +11,33 @@ import {
   useSearchParams,
 } from "next/navigation";
 
+import {
+  useAdminSources,
+} from "./use-admin-sources";
+
+import {
+  useSourceActions,
+} from "./use-source-actions";
+
+import {
+  useSourceDetails,
+} from "./use-source-details";
+
+import type {
+  AdminSourceRecord,
+} from "./source-api.types";
+
 import styles from "./SourcesManager.module.css";
 
-type SourceStatus =
-  | "active"
-  | "paused"
-  | "blocked";
-
-type SourceHealth =
-  | "healthy"
-  | "issue"
-  | "offline";
-
-type SourceMethod =
-  | "API"
-  | "RSS"
-  | "Embed"
-  | "Agreement"
-  | "Link-only";
-
-interface SourceAuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface SourceRecord {
-  id: string;
-  name: string;
-  website: string;
-  method: SourceMethod;
-  status: SourceStatus;
-  health: SourceHealth;
-  lastSync: string;
-  activeContentCount: number;
-  note?: string;
-  audit: SourceAuditEntry[];
-}
-
-const INITIAL_SOURCES: SourceRecord[] = [
-  {
-    id: "SRC-1001",
-    name: "Reuters",
-    website: "https://www.reuters.com",
-    method: "API",
-    status: "active",
-    health: "healthy",
-    lastSync: "4 min ago",
-    activeContentCount: 3240,
-    audit: [
-      {
-        id: "audit-src-1001-1",
-        action:
-          "Source sync completed successfully",
-        actor: "System",
-        timestamp:
-          "19 Jul 2026 · 10:24",
-      },
-    ],
-  },
-
-  {
-    id: "SRC-1002",
-    name: "BBC",
-    website: "https://www.bbc.com",
-    method: "RSS",
-    status: "active",
-    health: "healthy",
-    lastSync: "8 min ago",
-    activeContentCount: 1284,
-    audit: [
-      {
-        id: "audit-src-1002-1",
-        action:
-          "Source sync completed successfully",
-        actor: "System",
-        timestamp:
-          "19 Jul 2026 · 10:20",
-      },
-    ],
-  },
-
-  {
-    id: "SRC-1003",
-    name: "Example News",
-    website: "https://example.com",
-    method: "RSS",
-    status: "paused",
-    health: "issue",
-    lastSync: "3 hrs ago",
-    activeContentCount: 416,
-    note:
-      "Feed returned repeated errors. Paused until checked.",
-    audit: [
-      {
-        id: "audit-src-1003-2",
-        action:
-          "Source paused",
-        actor:
-          "Admin",
-        timestamp:
-          "19 Jul 2026 · 08:02",
-      },
-
-      {
-        id:
-          "audit-src-1003-1",
-        action:
-          "Repeated RSS sync failures detected",
-        actor:
-          "System",
-        timestamp:
-          "19 Jul 2026 · 07:58",
-      },
-    ],
-  },
-];
-
 function statusLabel(
-  status: SourceStatus
+  status:
+    AdminSourceRecord[
+      "status"
+    ]
 ): string {
-  switch (status) {
+  switch (
+    status
+  ) {
     case "active":
       return "Active";
 
@@ -144,9 +50,14 @@ function statusLabel(
 }
 
 function healthLabel(
-  health: SourceHealth
+  health:
+    AdminSourceRecord[
+      "health"
+    ]
 ): string {
-  switch (health) {
+  switch (
+    health
+  ) {
     case "healthy":
       return "Healthy";
 
@@ -159,55 +70,56 @@ function healthLabel(
 }
 
 function methodLabel(
-  method: SourceMethod
+  method:
+    AdminSourceRecord[
+      "acquisitionMethod"
+    ]
 ): string {
-  switch (method) {
-    case "API":
+  switch (
+    method
+  ) {
+    case "api":
       return "Official API";
 
-    case "RSS":
+    case "rss":
       return "Authorized RSS";
 
-    case "Embed":
+    case "embed":
       return "Official Embed/oEmbed";
 
-    case "Agreement":
+    case "agreement":
       return "Publisher Agreement";
 
-    case "Link-only":
+    case "link_only":
       return "Link-only";
   }
 }
 
-function displayPolicyLabel(
-  method: SourceMethod
+function formatTimestamp(
+  value:
+    string |
+    null
 ): string {
-  switch (method) {
-    case "API":
-      return "Use only provider-permitted API fields and preview data.";
-
-    case "RSS":
-      return "Use only fields permitted by the authorized publisher feed.";
-
-    case "Embed":
-      return "Use the provider-controlled official embed or oEmbed.";
-
-    case "Agreement":
-      return "Use only the display rights defined by the publisher agreement.";
-
-    case "Link-only":
-      return "Minimal link-only discovery. No extracted preview or media.";
+  if (
+    !value
+  ) {
+    return "Not yet synced";
   }
-}
 
-function nowLabel(): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
     }
-  ).format(new Date());
+  ).format(
+    new Date(
+      value
+    )
+  );
 }
 
 export default function SourcesManager() {
@@ -227,58 +139,194 @@ function SourcesManagerContent() {
       "record"
     );
 
+  const sourceList =
+    useAdminSources();
+
+  const {
+    refresh:
+      refreshSources,
+  } =
+    sourceList;
+
   const [
-    sources,
-    setSources,
-  ] = useState<SourceRecord[]>(
-    INITIAL_SOURCES
-  );
+    updatedSources,
+    setUpdatedSources,
+  ] =
+    useState<
+      Record<
+        string,
+        AdminSourceRecord
+      >
+    >(
+      {}
+    );
 
   const [
     query,
     setQuery,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     filter,
     setFilter,
-  ] = useState<
-    "all" | SourceStatus
-  >("all");
+  ] =
+    useState<
+      | "all"
+      | AdminSourceRecord[
+          "status"
+        ]
+    >(
+      "all"
+    );
 
   const [
-    selectedId,
-    setSelectedId,
-  ] = useState<
-    string | null
-  >(
-    INITIAL_SOURCES.some(
-      (source) =>
-        source.id ===
-        requestedRecordId
-    )
-      ? requestedRecordId
-      : null
-  );
+    selectedKey,
+    setSelectedKey,
+  ] =
+    useState<
+      string |
+      null
+    >(
+      requestedRecordId
+    );
 
   const [
     blockTargetId,
     setBlockTargetId,
-  ] = useState<
-    string | null
-  >(null);
+  ] =
+    useState<
+      string |
+      null
+    >(
+      null
+    );
 
   const [
     unblockTargetId,
     setUnblockTargetId,
-  ] = useState<
-    string | null
-  >(null);
+  ] =
+    useState<
+      string |
+      null
+    >(
+      null
+    );
 
   const [
     removeExistingContent,
     setRemoveExistingContent,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
+  const sources =
+    useMemo(
+      () =>
+        (
+          sourceList
+            .data
+            ?.sources ??
+          []
+        ).map(
+          source =>
+            updatedSources[
+              source.id
+            ] ??
+            source
+        ),
+      [
+        sourceList.data,
+        updatedSources,
+      ]
+    );
+
+  const selectedListSource =
+    selectedKey
+      ? sources.find(
+          source =>
+            source.id ===
+              selectedKey ||
+            source.publicId ===
+              selectedKey
+        ) ??
+        null
+      : null;
+
+  const selectedDetails =
+    useSourceDetails(
+      selectedListSource
+        ?.id ??
+      null
+    );
+
+  const selectedSource =
+    selectedListSource
+      ? updatedSources[
+          selectedListSource.id
+        ] ??
+        selectedDetails
+          .data
+          ?.source ??
+        selectedListSource
+      : null;
+
+  const selectedAudit =
+    selectedDetails
+      .data
+      ?.audit ??
+    [];
+
+  const blockTarget =
+    blockTargetId
+      ? sources.find(
+          source =>
+            source.id ===
+            blockTargetId
+        ) ??
+        null
+      : null;
+
+  const unblockTarget =
+    unblockTargetId
+      ? sources.find(
+          source =>
+            source.id ===
+            unblockTargetId
+        ) ??
+        null
+      : null;
+
+  const handleActionCompleted =
+    useCallback(
+      (
+        source:
+          AdminSourceRecord
+      ) => {
+        setUpdatedSources(
+          current => ({
+            ...current,
+
+            [source.id]:
+              source,
+          })
+        );
+
+        refreshSources();
+      },
+      [
+        refreshSources,
+      ]
+    );
+
+  const sourceActions =
+    useSourceActions({
+      onCompleted:
+        handleActionCompleted,
+    });
 
   const normalizedQuery =
     query
@@ -286,86 +334,47 @@ function SourcesManagerContent() {
       .toLowerCase();
 
   const visibleSources =
-    useMemo(() => {
-      return sources.filter(
-        (source) => {
-          if (
-            filter !== "all" &&
-            source.status !==
-              filter
-          ) {
-            return false;
+    useMemo(
+      () =>
+        sources.filter(
+          source => {
+            if (
+              filter !==
+                "all" &&
+              source.status !==
+                filter
+            ) {
+              return false;
+            }
+
+            if (
+              !normalizedQuery
+            ) {
+              return true;
+            }
+
+            return [
+              source.publicId,
+              source.name,
+              source.websiteUrl,
+              source.acquisitionMethod,
+              methodLabel(
+                source.acquisitionMethod
+              ),
+            ].some(
+              value =>
+                value
+                  .toLowerCase()
+                  .includes(
+                    normalizedQuery
+                  )
+            );
           }
-
-          if (
-            !normalizedQuery
-          ) {
-            return true;
-          }
-
-          return [
-            source.id,
-            source.name,
-            source.website,
-            source.method,
-            methodLabel(
-              source.method
-            ),
-          ].some(
-            (value) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedQuery
-                )
-          );
-        }
-      );
-    }, [
-      filter,
-      normalizedQuery,
-      sources,
-    ]);
-
-  const selectedSource =
-    useMemo(
-      () =>
-        sources.find(
-          (source) =>
-            source.id ===
-            selectedId
-        ) ?? null,
+        ),
       [
-        selectedId,
+        filter,
+        normalizedQuery,
         sources,
-      ]
-    );
-
-  const blockTarget =
-    useMemo(
-      () =>
-        sources.find(
-          (source) =>
-            source.id ===
-            blockTargetId
-        ) ?? null,
-      [
-        blockTargetId,
-        sources,
-      ]
-    );
-
-  const unblockTarget =
-    useMemo(
-      () =>
-        sources.find(
-          (source) =>
-            source.id ===
-            unblockTargetId
-        ) ?? null,
-      [
-        sources,
-        unblockTargetId,
       ]
     );
 
@@ -377,21 +386,21 @@ function SourcesManagerContent() {
 
         active:
           sources.filter(
-            (source) =>
+            source =>
               source.status ===
               "active"
           ).length,
 
         paused:
           sources.filter(
-            (source) =>
+            source =>
               source.status ===
               "paused"
           ).length,
 
         blocked:
           sources.filter(
-            (source) =>
+            source =>
               source.status ===
               "blocked"
           ).length,
@@ -401,94 +410,101 @@ function SourcesManagerContent() {
       ]
     );
 
-  const updateSourceStatus = (
-    sourceId: string,
-    status: SourceStatus,
-    action: string
-  ) => {
-    setSources(
-      (current) =>
-        current.map(
-          (source) =>
-            source.id ===
-            sourceId
-              ? {
-                  ...source,
+  const refreshSelectedDetails =
+    async (
+      sourceId: string
+    ) => {
+      if (
+        selectedSource?.id ===
+        sourceId
+      ) {
+        await selectedDetails
+          .refresh();
+      }
+    };
 
-                  status,
+  const pauseSource =
+    async (
+      source:
+        AdminSourceRecord
+    ) => {
+      sourceActions.clearError();
 
-                  audit: [
-                    {
-                      id:
-                        `${source.id}-${Date.now()}`,
+      const result =
+        await sourceActions
+          .pause(
+            source
+          );
 
-                      action,
+      if (
+        result
+      ) {
+        await refreshSelectedDetails(
+          result.id
+        );
+      }
+    };
 
-                      actor:
-                        "Admin",
+  const enableSource =
+    async (
+      source:
+        AdminSourceRecord
+    ) => {
+      sourceActions.clearError();
 
-                      timestamp:
-                        nowLabel(),
-                    },
+      const result =
+        await sourceActions
+          .enable(
+            source
+          );
 
-                    ...source.audit,
-                  ],
-                }
-              : source
-        )
-    );
-  };
+      if (
+        result
+      ) {
+        await refreshSelectedDetails(
+          result.id
+        );
+      }
+    };
 
-  const pauseSource = (
-    source: SourceRecord
-  ) => {
-    updateSourceStatus(
-      source.id,
-      "paused",
-      "Source paused"
-    );
-  };
+  const requestEnable =
+    (
+      source:
+        AdminSourceRecord
+    ) => {
+      sourceActions.clearError();
 
-  const enablePausedSource = (
-    source: SourceRecord
-  ) => {
-    updateSourceStatus(
-      source.id,
-      "active",
-      "Source enabled"
-    );
-  };
+      if (
+        source.status ===
+        "blocked"
+      ) {
+        setUnblockTargetId(
+          source.id
+        );
 
-  const requestEnable = (
-    source: SourceRecord
-  ) => {
-    if (
-      source.status ===
-      "blocked"
-    ) {
-      setUnblockTargetId(
+        return;
+      }
+
+      void enableSource(
+        source
+      );
+    };
+
+  const beginBlock =
+    (
+      source:
+        AdminSourceRecord
+    ) => {
+      sourceActions.clearError();
+
+      setBlockTargetId(
         source.id
       );
 
-      return;
-    }
-
-    enablePausedSource(
-      source
-    );
-  };
-
-  const beginBlock = (
-    source: SourceRecord
-  ) => {
-    setBlockTargetId(
-      source.id
-    );
-
-    setRemoveExistingContent(
-      false
-    );
-  };
+      setRemoveExistingContent(
+        false
+      );
+    };
 
   const cancelBlock =
     () => {
@@ -499,55 +515,34 @@ function SourcesManagerContent() {
       setRemoveExistingContent(
         false
       );
+
+      sourceActions.clearError();
     };
 
   const confirmBlock =
-    () => {
+    async () => {
       if (
         !blockTarget
       ) {
         return;
       }
 
-      const action =
-        removeExistingContent
-          ? "Source blocked and existing content marked for removal"
-          : "Source blocked";
+      const result =
+        await sourceActions
+          .block(
+            blockTarget,
+            removeExistingContent
+          );
 
-      setSources(
-        (current) =>
-          current.map(
-            (source) =>
-              source.id ===
-              blockTarget.id
-                ? {
-                    ...source,
+      if (
+        result
+      ) {
+        cancelBlock();
 
-                    status:
-                      "blocked",
-
-                    audit: [
-                      {
-                        id:
-                          `${source.id}-${Date.now()}`,
-
-                        action,
-
-                        actor:
-                          "Admin",
-
-                        timestamp:
-                          nowLabel(),
-                      },
-
-                      ...source.audit,
-                    ],
-                  }
-                : source
-          )
-      );
-
-      cancelBlock();
+        await refreshSelectedDetails(
+          result.id
+        );
+      }
     };
 
   const cancelUnblock =
@@ -555,23 +550,33 @@ function SourcesManagerContent() {
       setUnblockTargetId(
         null
       );
+
+      sourceActions.clearError();
     };
 
   const confirmUnblock =
-    () => {
+    async () => {
       if (
         !unblockTarget
       ) {
         return;
       }
 
-      updateSourceStatus(
-        unblockTarget.id,
-        "active",
-        "Source unblocked and enabled"
-      );
+      const result =
+        await sourceActions
+          .unblock(
+            unblockTarget
+          );
 
-      cancelUnblock();
+      if (
+        result
+      ) {
+        cancelUnblock();
+
+        await refreshSelectedDetails(
+          result.id
+        );
+      }
     };
 
   return (
@@ -599,12 +604,9 @@ function SourcesManagerContent() {
           </h2>
 
           <p>
-            Keep source management
-            simple: see how content
-            arrives, whether syncing
-            is healthy, and pause,
-            enable or block only when
-            necessary.
+            Review authoritative publisher sources, ingestion
+            methods, health, active content and lifecycle
+            safeguards.
           </p>
         </div>
 
@@ -614,9 +616,9 @@ function SourcesManagerContent() {
           }
         >
           <strong>
-            {
-              counts.active
-            }
+            {sourceList.isLoading
+              ? "—"
+              : counts.active}
           </strong>
 
           <span>
@@ -625,9 +627,52 @@ function SourcesManagerContent() {
         </div>
       </header>
 
+      {sourceList.error ? (
+        <section
+          className={
+            styles.errorPanel
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Sources could not be refreshed
+            </strong>
+
+            <p>
+              {sourceList.error}
+
+              {sourceList.data
+                ? " The last successful snapshot remains visible."
+                : ""}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              refreshSources
+            }
+            disabled={
+              sourceList.isLoading ||
+              sourceList.isRefreshing
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
+
       <section
         className={
           styles.panel
+        }
+        aria-busy={
+          sourceList.isLoading ||
+          sourceList.isRefreshing
         }
       >
         <div
@@ -644,286 +689,342 @@ function SourcesManagerContent() {
             }
             placeholder="Search ID, source or website..."
             aria-label="Search sources"
-            onChange={(
-              event
-            ) =>
-              setQuery(
-                event.target
-                  .value
-              )
+            onChange={
+              event =>
+                setQuery(
+                  event.target
+                    .value
+                )
             }
           />
 
           <div
             className={
-              styles.filters
+              styles.toolbarActions
             }
           >
-            {(
-              [
-                [
-                  "all",
-                  "All",
-                ],
+            <button
+              type="button"
+              className={
+                styles.secondaryButton
+              }
+              onClick={
+                refreshSources
+              }
+              disabled={
+                sourceList.isLoading ||
+                sourceList.isRefreshing
+              }
+            >
+              {sourceList.isRefreshing
+                ? "Refreshing…"
+                : "Refresh"}
+            </button>
 
+            <div
+              className={
+                styles.filters
+              }
+            >
+              {(
                 [
-                  "active",
-                  "Active",
-                ],
+                  [
+                    "all",
+                    "All",
+                  ],
 
-                [
-                  "paused",
-                  "Paused",
-                ],
+                  [
+                    "active",
+                    "Active",
+                  ],
 
-                [
-                  "blocked",
-                  "Blocked",
-                ],
-              ] as const
-            ).map(
-              ([
-                key,
-                label,
-              ]) => (
-                <button
-                  key={
-                    key
-                  }
-                  type="button"
-                  className={
-                    filter ===
-                    key
-                      ? styles.filterActive
-                      : styles.filter
-                  }
-                  onClick={() =>
-                    setFilter(
+                  [
+                    "paused",
+                    "Paused",
+                  ],
+
+                  [
+                    "blocked",
+                    "Blocked",
+                  ],
+                ] as const
+              ).map(
+                ([
+                  key,
+                  label,
+                ]) => (
+                  <button
+                    key={
                       key
-                    )
-                  }
-                >
-                  {
-                    label
-                  }
-
-                  <span>
-                    {
-                      counts[
-                        key
-                      ]
                     }
-                  </span>
-                </button>
-              )
-            )}
+                    type="button"
+                    className={
+                      filter ===
+                      key
+                        ? styles.filterActive
+                        : styles.filter
+                    }
+                    onClick={() =>
+                      setFilter(
+                        key
+                      )
+                    }
+                  >
+                    {label}
+
+                    <span>
+                      {
+                        counts[
+                          key
+                        ]
+                      }
+                    </span>
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
 
-        <div
-          className={
-            styles.tableWrap
-          }
-        >
-          <table
+        {sourceList.isLoading &&
+        !sourceList.data ? (
+          <div
             className={
-              styles.table
+              styles.empty
             }
           >
-            <thead>
-              <tr>
-                <th>
-                  Source
-                </th>
-
-                <th>
-                  Method
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Health
-                </th>
-
-                <th>
-                  Last sync
-                </th>
-
-                <th>
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleSources.map(
-                (
-                  source
-                ) => (
-                  <tr
-                    key={
-                      source.id
-                    }
-                  >
-                    <td>
-                      <button
-                        type="button"
-                        className={
-                          styles.sourceButton
-                        }
-                        onClick={() =>
-                          setSelectedId(
-                            source.id
-                          )
-                        }
-                      >
-                        {
-                          source.name
-                        }
-                      </button>
-
-                      <span
-                        className={
-                          styles.website
-                        }
-                      >
-                        {
-                          source.website
-                        }
-                      </span>
-
-                      <span
-                        className={
-                          styles.website
-                        }
-                      >
-                        {
-                          source.id
-                        }
-                        {" · "}
-                        {source.activeContentCount.toLocaleString()}
-                        {" active content"}
-                      </span>
-                    </td>
-
-                    <td>
-                      {methodLabel(
-                        source.method
-                      )}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`${styles.status} ${
-                          source.status ===
-                          "active"
-                            ? styles.statusActive
-                            : source.status ===
-                              "paused"
-                            ? styles.statusPaused
-                            : styles.statusBlocked
-                        }`}
-                      >
-                        {statusLabel(
-                          source.status
-                        )}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`${styles.health} ${
-                          source.health ===
-                          "healthy"
-                            ? styles.healthHealthy
-                            : source.health ===
-                              "issue"
-                            ? styles.healthIssue
-                            : styles.healthOffline
-                        }`}
-                      >
-                        {healthLabel(
-                          source.health
-                        )}
-                      </span>
-                    </td>
-
-                    <td>
-                      {
-                        source.lastSync
-                      }
-                    </td>
-
-                    <td>
-                      {source.status ===
-                      "active" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            pauseSource(
-                              source
-                            )
-                          }
-                        >
-                          Pause
-                        </button>
-                      ) : source.status ===
-                        "paused" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            requestEnable(
-                              source
-                            )
-                          }
-                        >
-                          Enable
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            requestEnable(
-                              source
-                            )
-                          }
-                        >
-                          Unblock
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-
-          {visibleSources.length ===
-          0 ? (
-            <div
+            Loading authoritative sources…
+          </div>
+        ) : (
+          <div
+            className={
+              styles.tableWrap
+            }
+          >
+            <table
               className={
-                styles.empty
+                styles.table
               }
             >
-              No sources found.
-            </div>
-          ) : null}
-        </div>
+              <thead>
+                <tr>
+                  <th>
+                    Source
+                  </th>
+
+                  <th>
+                    Method
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Health
+                  </th>
+
+                  <th>
+                    Last sync
+                  </th>
+
+                  <th>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {visibleSources.map(
+                  source => (
+                    <tr
+                      key={
+                        source.id
+                      }
+                    >
+                      <td>
+                        <button
+                          type="button"
+                          className={
+                            styles.sourceButton
+                          }
+                          onClick={() =>
+                            setSelectedKey(
+                              source.id
+                            )
+                          }
+                        >
+                          {source.name}
+                        </button>
+
+                        <span
+                          className={
+                            styles.website
+                          }
+                        >
+                          {
+                            source.websiteUrl
+                          }
+                        </span>
+
+                        <span
+                          className={
+                            styles.website
+                          }
+                        >
+                          {source.publicId}
+                          {" · "}
+                          {source.activeContentCount.toLocaleString()}
+                          {" active content"}
+                        </span>
+                      </td>
+
+                      <td>
+                        {methodLabel(
+                          source.acquisitionMethod
+                        )}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`${styles.status} ${
+                            source.status ===
+                            "active"
+                              ? styles.statusActive
+                              : source.status ===
+                                  "paused"
+                                ? styles.statusPaused
+                                : styles.statusBlocked
+                          }`}
+                        >
+                          {statusLabel(
+                            source.status
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`${styles.health} ${
+                            source.health ===
+                            "healthy"
+                              ? styles.healthHealthy
+                              : source.health ===
+                                  "issue"
+                                ? styles.healthIssue
+                                : styles.healthOffline
+                          }`}
+                        >
+                          {healthLabel(
+                            source.health
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        {formatTimestamp(
+                          source.lastSyncAt
+                        )}
+                      </td>
+
+                      <td>
+                        {source.status ===
+                        "active" ? (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() => {
+                              void pauseSource(
+                                source
+                              );
+                            }}
+                            disabled={
+                              sourceActions.isRunning
+                            }
+                          >
+                            Pause
+                          </button>
+                        ) : source.status ===
+                          "paused" ? (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              requestEnable(
+                                source
+                              )
+                            }
+                            disabled={
+                              sourceActions.isRunning
+                            }
+                          >
+                            Enable
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              requestEnable(
+                                source
+                              )
+                            }
+                            disabled={
+                              sourceActions.isRunning
+                            }
+                          >
+                            Unblock
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+
+            {visibleSources.length ===
+            0 ? (
+              <div
+                className={
+                  styles.empty
+                }
+              >
+                No sources found.
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {sourceList.data ? (
+          <div
+            className={
+              styles.freshnessBar
+            }
+          >
+            <span>
+              Generated{" "}
+              {formatTimestamp(
+                sourceList
+                  .data
+                  .generatedAt
+              )}
+            </span>
+
+            <span>
+              Auto-refresh every 60 seconds
+            </span>
+          </div>
+        ) : null}
       </section>
 
-      {selectedSource ? (
+      {selectedKey ? (
         <div
           className={
             styles.drawerLayer
@@ -936,7 +1037,7 @@ function SourcesManagerContent() {
             }
             aria-label="Close source details"
             onClick={() =>
-              setSelectedId(
+              setSelectedKey(
                 null
               )
             }
@@ -954,15 +1055,15 @@ function SourcesManagerContent() {
             >
               <div>
                 <span>
-                  {
-                    selectedSource.id
-                  }
+                  {selectedSource
+                    ?.publicId ??
+                    selectedKey}
                 </span>
 
                 <h3>
-                  {
-                    selectedSource.name
-                  }
+                  {selectedSource
+                    ?.name ??
+                    "Source details"}
                 </h3>
               </div>
 
@@ -973,7 +1074,7 @@ function SourcesManagerContent() {
                 }
                 aria-label="Close"
                 onClick={() =>
-                  setSelectedId(
+                  setSelectedKey(
                     null
                   )
                 }
@@ -987,280 +1088,389 @@ function SourcesManagerContent() {
                 styles.drawerBody
               }
             >
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Source
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Source ID
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSource.id
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Website
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedSource.website
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Acquisition
-                      method
-                    </dt>
-
-                    <dd>
-                      {methodLabel(
-                        selectedSource.method
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Display
-                      policy
-                    </dt>
-
-                    <dd>
-                      {displayPolicyLabel(
-                        selectedSource.method
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Status
-                    </dt>
-
-                    <dd>
-                      {statusLabel(
-                        selectedSource.status
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Sync health
-                    </dt>
-
-                    <dd>
-                      {healthLabel(
-                        selectedSource.health
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Last sync
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSource.lastSync
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Active
-                      content
-                    </dt>
-
-                    <dd>
-                      {selectedSource.activeContentCount.toLocaleString()}
-                    </dd>
-                  </div>
-                </dl>
-
-                {selectedSource.note ? (
-                  <div
-                    className={
-                      styles.note
-                    }
-                  >
-                    {
-                      selectedSource.note
-                    }
-                  </div>
-                ) : null}
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
-
+              {selectedDetails.isLoading &&
+              !selectedSource ? (
                 <div
                   className={
-                    styles.auditList
+                    styles.detailState
                   }
                 >
-                  {selectedSource.audit.map(
-                    (
-                      entry
-                    ) => (
+                  Loading source details…
+                </div>
+              ) : selectedDetails.error &&
+                !selectedSource ? (
+                <div
+                  className={
+                    styles.detailState
+                  }
+                  role="alert"
+                >
+                  <strong>
+                    Source details could not be loaded
+                  </strong>
+
+                  <p>
+                    {
+                      selectedDetails.error
+                    }
+                  </p>
+
+                  <button
+                    type="button"
+                    className={
+                      styles.secondaryButton
+                    }
+                    onClick={() => {
+                      void selectedDetails
+                        .refresh();
+                    }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : selectedSource ? (
+                <>
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Source
+                    </h4>
+
+                    <dl
+                      className={
+                        styles.detailList
+                      }
+                    >
+                      <div>
+                        <dt>
+                          Source ID
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedSource.publicId
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Website
+                        </dt>
+
+                        <dd
+                          className={
+                            styles.breakText
+                          }
+                        >
+                          {
+                            selectedSource.websiteUrl
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Acquisition method
+                        </dt>
+
+                        <dd>
+                          {methodLabel(
+                            selectedSource.acquisitionMethod
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Display policy
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedSource.displayPolicy
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Status
+                        </dt>
+
+                        <dd>
+                          {statusLabel(
+                            selectedSource.status
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Sync health
+                        </dt>
+
+                        <dd>
+                          {healthLabel(
+                            selectedSource.health
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Last sync
+                        </dt>
+
+                        <dd>
+                          {formatTimestamp(
+                            selectedSource.lastSyncAt
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Active content
+                        </dt>
+
+                        <dd>
+                          {selectedSource.activeContentCount.toLocaleString()}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    {selectedSource.operationalNote ? (
                       <div
-                        key={
-                          entry.id
-                        }
                         className={
-                          styles.auditItem
+                          styles.note
                         }
                       >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
-
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
-
-                          <span>
-                            {
-                              entry.actor
-                            }{" "}
-                            ·{" "}
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
+                        {
+                          selectedSource.operationalNote
+                        }
                       </div>
-                    )
-                  )}
+                    ) : null}
+
+                    {selectedSource.lastSyncError ? (
+                      <div
+                        className={
+                          styles.warning
+                        }
+                      >
+                        Last sync error:{" "}
+                        {
+                          selectedSource.lastSyncError
+                        }
+                      </div>
+                    ) : null}
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Audit history
+                    </h4>
+
+                    <div
+                      className={
+                        styles.auditList
+                      }
+                    >
+                      {selectedDetails.isLoading &&
+                      selectedAudit.length ===
+                        0 ? (
+                        <div
+                          className={
+                            styles.detailState
+                          }
+                        >
+                          Loading immutable audit history…
+                        </div>
+                      ) : selectedDetails.error &&
+                        selectedAudit.length ===
+                          0 ? (
+                        <div
+                          className={
+                            styles.detailState
+                          }
+                          role="alert"
+                        >
+                          {
+                            selectedDetails.error
+                          }
+                        </div>
+                      ) : selectedAudit.length >
+                        0 ? (
+                        selectedAudit.map(
+                          entry => (
+                            <div
+                              key={
+                                entry.id
+                              }
+                              className={
+                                styles.auditItem
+                              }
+                            >
+                              <span
+                                className={
+                                  styles.auditDot
+                                }
+                              />
+
+                              <div>
+                                <strong>
+                                  {
+                                    entry.action
+                                  }
+                                </strong>
+
+                                <span>
+                                  {
+                                    entry.actorLabel
+                                  }{" "}
+                                  ·{" "}
+                                  {formatTimestamp(
+                                    entry.occurredAt
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <div
+                          className={
+                            styles.detailState
+                          }
+                        >
+                          No audit events yet.
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                </>
+              ) : (
+                <div
+                  className={
+                    styles.detailState
+                  }
+                >
+                  The requested source was not found in the
+                  current Backend snapshot.
                 </div>
-              </section>
+              )}
             </div>
 
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              <a
-                href={
-                  selectedSource.website
-                }
-                target="_blank"
-                rel="noreferrer"
+            {selectedSource ? (
+              <div
                 className={
-                  styles.secondaryButton
+                  styles.drawerFooter
                 }
               >
-                Open website
-              </a>
-
-              {selectedSource.status ===
-              "active" ? (
-                <button
-                  type="button"
+                <a
+                  href={
+                    selectedSource.websiteUrl
+                  }
+                  target="_blank"
+                  rel="noreferrer"
                   className={
                     styles.secondaryButton
                   }
-                  onClick={() =>
-                    pauseSource(
-                      selectedSource
-                    )
-                  }
                 >
-                  Pause
-                </button>
-              ) : selectedSource.status ===
-                "paused" ? (
-                <button
-                  type="button"
-                  className={
-                    styles.primaryButton
-                  }
-                  onClick={() =>
-                    enablePausedSource(
-                      selectedSource
-                    )
-                  }
-                >
-                  Enable
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={
-                    styles.primaryButton
-                  }
-                  onClick={() => {
-                    setUnblockTargetId(
-                      selectedSource.id
-                    );
+                  Open website
+                </a>
 
-                    setSelectedId(
-                      null
-                    );
-                  }}
-                >
-                  Unblock source
-                </button>
-              )}
+                {selectedSource.status ===
+                "active" ? (
+                  <button
+                    type="button"
+                    className={
+                      styles.secondaryButton
+                    }
+                    onClick={() => {
+                      void pauseSource(
+                        selectedSource
+                      );
+                    }}
+                    disabled={
+                      sourceActions.isRunning
+                    }
+                  >
+                    Pause
+                  </button>
+                ) : selectedSource.status ===
+                  "paused" ? (
+                  <button
+                    type="button"
+                    className={
+                      styles.primaryButton
+                    }
+                    onClick={() => {
+                      void enableSource(
+                        selectedSource
+                      );
+                    }}
+                    disabled={
+                      sourceActions.isRunning
+                    }
+                  >
+                    Enable
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={
+                      styles.primaryButton
+                    }
+                    onClick={() => {
+                      setUnblockTargetId(
+                        selectedSource.id
+                      );
 
-              {selectedSource.status !==
-              "blocked" ? (
-                <button
-                  type="button"
-                  className={
-                    styles.dangerButton
-                  }
-                  onClick={() => {
-                    beginBlock(
-                      selectedSource
-                    );
+                      setSelectedKey(
+                        null
+                      );
+                    }}
+                    disabled={
+                      sourceActions.isRunning
+                    }
+                  >
+                    Unblock source
+                  </button>
+                )}
 
-                    setSelectedId(
-                      null
-                    );
-                  }}
-                >
-                  Block source
-                </button>
-              ) : null}
-            </div>
+                {selectedSource.status !==
+                "blocked" ? (
+                  <button
+                    type="button"
+                    className={
+                      styles.dangerButton
+                    }
+                    onClick={() => {
+                      beginBlock(
+                        selectedSource
+                      );
+
+                      setSelectedKey(
+                        null
+                      );
+                    }}
+                    disabled={
+                      sourceActions.isRunning
+                    }
+                  >
+                    Block source
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </aside>
         </div>
       ) : null}
@@ -1302,17 +1512,13 @@ function SourcesManagerContent() {
               id="block-source-title"
             >
               Block{" "}
-              {
-                blockTarget.name
-              }
+              {blockTarget.name}
               ?
             </h3>
 
             <p>
-              Poster will stop
-              future ingestion from
-              this source until an
-              operator explicitly
+              Poster will stop future ingestion from this
+              source until an authorized operator explicitly
               unblocks it.
             </p>
 
@@ -1326,25 +1532,23 @@ function SourcesManagerContent() {
                 checked={
                   removeExistingContent
                 }
-                onChange={(
-                  event
-                ) =>
-                  setRemoveExistingContent(
-                    event.target
-                      .checked
-                  )
+                onChange={
+                  event =>
+                    setRemoveExistingContent(
+                      event.target
+                        .checked
+                    )
                 }
               />
 
               <span>
                 <strong>
-                  Also remove
-                  existing content
+                  Also remove existing content
                 </strong>
 
-                Mark current Poster
-                content from this
-                source for removal.
+                Remove active Poster content from this source
+                and prevent those original URLs from being
+                re-imported.
               </span>
             </label>
 
@@ -1353,15 +1557,24 @@ function SourcesManagerContent() {
                 styles.warning
               }
             >
-              Use Block for
-              publisher opt-out,
-              copyright restriction,
-              unauthorized sources,
-              or serious policy
-              issues. Use Pause for
-              temporary technical
+              Use Block for publisher opt-out, copyright
+              restriction, unauthorized sources, or serious
+              policy issues. Use Pause for temporary technical
               problems.
             </div>
+
+            {sourceActions.error ? (
+              <div
+                className={
+                  styles.actionError
+                }
+                role="alert"
+              >
+                {
+                  sourceActions.error
+                }
+              </div>
+            ) : null}
 
             <div
               className={
@@ -1376,6 +1589,9 @@ function SourcesManagerContent() {
                 onClick={
                   cancelBlock
                 }
+                disabled={
+                  sourceActions.isRunning
+                }
               >
                 Cancel
               </button>
@@ -1385,11 +1601,18 @@ function SourcesManagerContent() {
                 className={
                   styles.dangerButton
                 }
-                onClick={
-                  confirmBlock
+                onClick={() => {
+                  void confirmBlock();
+                }}
+                disabled={
+                  sourceActions.isRunning
                 }
               >
-                Block source
+                {sourceActions.isRunning
+                  ? "Blocking…"
+                  : removeExistingContent
+                    ? "Block + remove content"
+                    : "Block source"}
               </button>
             </div>
           </div>
@@ -1433,17 +1656,13 @@ function SourcesManagerContent() {
               id="unblock-source-title"
             >
               Unblock{" "}
-              {
-                unblockTarget.name
-              }
+              {unblockTarget.name}
               ?
             </h3>
 
             <p>
-              This will allow
-              Poster to resume
-              future ingestion from
-              this source.
+              This will allow Poster to resume future
+              ingestion from this source.
             </p>
 
             <div
@@ -1451,16 +1670,23 @@ function SourcesManagerContent() {
                 styles.warning
               }
             >
-              Only unblock a source
-              after the publisher
-              opt-out, copyright
-              restriction,
-              authorization issue,
-              or serious policy
-              reason that caused the
-              block has been
-              cleared.
+              Only unblock after the publisher opt-out,
+              copyright restriction, authorization issue, or
+              serious policy reason has been cleared.
             </div>
+
+            {sourceActions.error ? (
+              <div
+                className={
+                  styles.actionError
+                }
+                role="alert"
+              >
+                {
+                  sourceActions.error
+                }
+              </div>
+            ) : null}
 
             <div
               className={
@@ -1475,6 +1701,9 @@ function SourcesManagerContent() {
                 onClick={
                   cancelUnblock
                 }
+                disabled={
+                  sourceActions.isRunning
+                }
               >
                 Cancel
               </button>
@@ -1484,11 +1713,16 @@ function SourcesManagerContent() {
                 className={
                   styles.primaryButton
                 }
-                onClick={
-                  confirmUnblock
+                onClick={() => {
+                  void confirmUnblock();
+                }}
+                disabled={
+                  sourceActions.isRunning
                 }
               >
-                Unblock source
+                {sourceActions.isRunning
+                  ? "Unblocking…"
+                  : "Unblock source"}
               </button>
             </div>
           </div>

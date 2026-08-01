@@ -1,0 +1,153 @@
+﻿=== TYPESCRIPT ===
+
+=== LINT ===
+
+> admin@0.1.0 lint
+> eslint .
+
+
+F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+  234:9  warning  The 'cases' logical expression could make the dependencies of useMemo Hook (at line 254) change on every render. To fix this, wrap the initialization of 'cases' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  234:9  warning  The 'cases' logical expression could make the dependencies of useMemo Hook (at line 287) change on every render. To fix this, wrap the initialization of 'cases' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  234:9  warning  The 'cases' logical expression could make the dependencies of useMemo Hook (at line 301) change on every render. To fix this, wrap the initialization of 'cases' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+Γ£û 3 problems (0 errors, 3 warnings)
+
+
+=== USE REPORTS EFFECT ===
+            requestId
+          ) {
+            setIsLoading(
+              false
+            );
+
+            setIsRefreshing(
+              false
+            );
+          }
+        }
+      },
+      []
+    );
+
+  useEffect(
+    () => {
+      let isActive =
+        true;
+
+      queueMicrotask(
+        () => {
+          if (
+            isActive
+          ) {
+            void load(
+              "initial"
+            );
+          }
+        }
+      );
+
+      return () => {
+        isActive =
+          false;
+
+        requestIdRef.current +=
+          1;
+      };
+    },
+    [
+      load,
+    ]
+  );
+
+  const refresh =
+    useCallback(
+      () => {
+        void load(
+          "refresh"
+        );
+      },
+      [
+        load,
+      ]
+
+=== USE REPORT DETAILS EFFECT ===
+          if (
+            requestIdRef.current ===
+            requestId
+          ) {
+            setIsLoading(
+              false
+            );
+
+            setIsRefreshing(
+              false
+            );
+          }
+        }
+      },
+      [
+        reportId,
+      ]
+    );
+
+  useEffect(
+    () => {
+      let isActive =
+        true;
+
+      queueMicrotask(
+        () => {
+          if (
+            !isActive
+          ) {
+            return;
+          }
+
+          setData(
+            null
+          );
+
+          void load(
+            "initial"
+          );
+        }
+      );
+
+      return () => {
+        isActive =
+          false;
+
+        requestIdRef.current +=
+          1;
+      };
+    },
+    [
+      load,
+    ]
+  );
+
+  const refresh =
+    useCallback(
+      () => {
+        void load(
+          "refresh"
+        );
+      },
+      [
+        load,
+      ]
+
+=== VALIDATION RETURNS ===
+
+  src\features\reports\reports-api.validation.ts:308:
+> src\features\reports\reports-api.validation.ts:309:  return value as unknown as
+  src\features\reports\reports-api.validation.ts:310:    AdminReportsListResponse;
+  src\features\reports\reports-api.validation.ts:311:}
+  src\features\reports\reports-api.validation.ts:341:
+> src\features\reports\reports-api.validation.ts:342:  return value as unknown as
+  src\features\reports\reports-api.validation.ts:343:    AdminReportDetails;
+  src\features\reports\reports-api.validation.ts:344:}
+
+
+

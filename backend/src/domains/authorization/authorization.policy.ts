@@ -17,7 +17,9 @@ const PLATFORM_ROLE_PERMISSION_MAP:
     operations_admin: [
       "admin.access",
       "dashboard.read",
+      "system.status.read",
       "users.metrics.read",
+      "users.audience_insights.read",
       "content.read",
       "content.manage",
       "sources.read",
@@ -31,6 +33,7 @@ const PLATFORM_ROLE_PERMISSION_MAP:
       "monetization.requests.manage",
       "monetization.campaigns.read",
       "monetization.campaigns.manage",
+      "monetization.analytics.read",
     ],
 
     content_moderator: [
@@ -56,19 +59,23 @@ const PLATFORM_ROLE_PERMISSION_MAP:
       "admin.access",
       "dashboard.read",
       "users.metrics.read",
+      "users.audience_insights.read",
       "reports.read",
     ],
 
     analytics_viewer: [
       "admin.access",
       "dashboard.read",
+      "system.status.read",
       "users.metrics.read",
+      "users.audience_insights.read",
       "content.read",
       "sources.read",
       "reports.read",
       "copyright.read",
       "monetization.requests.read",
       "monetization.campaigns.read",
+      "monetization.analytics.read",
     ],
   };
 
@@ -98,9 +105,7 @@ export function listPlatformPermissionsForRoles(
   }
 
   return PLATFORM_PERMISSIONS.filter(
-    (
-      permission
-    ) =>
+    permission =>
       permissionSet.has(
         permission
       )

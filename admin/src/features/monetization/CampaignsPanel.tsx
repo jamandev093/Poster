@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import {
   Suspense,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -11,283 +12,26 @@ import {
 } from "next/navigation";
 
 import {
-  campaignRecords,
-} from "./monetization.mock";
+  formatCampaignTimestamp,
+  type AdminCampaign,
+  type CampaignPlacement,
+  type CampaignStatus,
+  type CampaignType,
+} from "./campaigns/campaign-api";
 
 import {
-  calculateCtr,
-  CampaignRecord as SharedCampaignRecord,
-  CampaignStatus,
-  CampaignType,
-  Placement,
-  TrackingStatus,
-} from "./monetization.types";
+  useCampaigns,
+} from "./campaigns/use-campaigns";
 
 import styles from "./MonetizationManager.module.css";
 
-interface CampaignAuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface CampaignRecord
-  extends SharedCampaignRecord {
-  audit: CampaignAuditEntry[];
-}
-
-const INITIAL_AUDIT_BY_CAMPAIGN:
-  Record<
-    string,
-    CampaignAuditEntry[]
-  > = {
-  "CMP-3001": [
-    {
-      id:
-        "audit-cmp-3001-1",
-
-      action:
-        "Direct sponsorship activated",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "17 Jul 2026 Â· 12:15",
-    },
-  ],
-
-  "CMP-3002": [
-    {
-      id:
-        "audit-cmp-3002-1",
-
-      action:
-        "Affiliate campaign activated",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "16 Jul 2026 Â· 10:30",
-    },
-  ],
-
-  "CMP-3003": [
-    {
-      id:
-        "audit-cmp-3003-2",
-
-      action:
-        "Campaign paused",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "19 Jul 2026 Â· 08:40",
-    },
-
-    {
-      id:
-        "audit-cmp-3003-1",
-
-      action:
-        "Poster promotion activated",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "15 Jul 2026 Â· 09:00",
-    },
-  ],
-
-  "CMP-3004": [
-    {
-      id:
-        "audit-cmp-3004-1",
-
-      action:
-        "Campaign scheduled",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "19 Jul 2026 Â· 14:10",
-    },
-  ],
-
-  "CMP-3005": [
-    {
-      id:
-        "audit-cmp-3005-1",
-
-      action:
-        "Programmatic advertising remains disabled for initial release",
-
-      actor:
-        "System",
-
-      timestamp:
-        "19 Jul 2026 Â· 00:00",
-    },
-  ],
-
-  "CMP-3010": [
-    {
-      id:
-        "audit-cmp-3010-1",
-
-      action:
-        "Campaign draft created from approved commercial request ADV-1003",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "20 Jul 2026 Â· 13:10",
-    },
-
-    {
-      id:
-        "audit-cmp-3010-0",
-
-      action:
-        "Direct sponsorship request approved",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "20 Jul 2026 Â· 13:08",
-    },
-  ],
-
-  "CMP-3011": [
-    {
-      id:
-        "audit-cmp-3011-2",
-
-      action:
-        "Campaign paused",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "19 Jul 2026 Â· 16:20",
-    },
-
-    {
-      id:
-        "audit-cmp-3011-1",
-
-      action:
-        "Direct sponsorship activated",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "15 Jun 2026 Â· 09:00",
-    },
-  ],
-
-  "CMP-3020": [
-    {
-      id:
-        "audit-cmp-3020-1",
-
-      action:
-        "Affiliate campaign activated",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "20 Jul 2026 Â· 11:45",
-    },
-
-    {
-      id:
-        "audit-cmp-3020-0",
-
-      action:
-        "Affiliate request ADV-1004 approved",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "20 Jul 2026 Â· 11:40",
-    },
-  ],
-
-  "CMP-3021": [
-    {
-      id:
-        "audit-cmp-3021-1",
-
-      action:
-        "Affiliate campaign scheduled",
-
-      actor:
-        "Admin",
-
-      timestamp:
-        "20 Jul 2026 Â· 15:30",
-    },
-  ],
-};
-
-const INITIAL_CAMPAIGNS:
-  CampaignRecord[] =
-  campaignRecords.map(
-    (
-      campaign
-    ) => ({
-      ...campaign,
-
-      placements: [
-        ...campaign.placements,
-      ],
-
-      performance: {
-        ...campaign.performance,
-      },
-
-      financials: {
-        ...campaign.financials,
-      },
-
-      audit:
-        INITIAL_AUDIT_BY_CAMPAIGN[
-          campaign.id
-        ] ?? [
-          {
-            id:
-              `audit-${campaign.id.toLowerCase()}-initial`,
-
-            action:
-              "Campaign record created",
-
-            actor:
-              "Admin",
-
-            timestamp:
-              "Current demonstration state",
-          },
-        ],
-    })
-  );
-
 function campaignTypeLabel(
-  type: CampaignType
+  type:
+    CampaignType
 ): string {
-  switch (type) {
+  switch (
+    type
+  ) {
     case "poster_promotion":
       return "Poster Promotion";
 
@@ -303,9 +47,12 @@ function campaignTypeLabel(
 }
 
 function statusLabel(
-  status: CampaignStatus
+  status:
+    CampaignStatus
 ): string {
-  switch (status) {
+  switch (
+    status
+  ) {
     case "draft":
       return "Draft";
 
@@ -327,9 +74,12 @@ function statusLabel(
 }
 
 function placementLabel(
-  placement: Placement
+  placement:
+    CampaignPlacement
 ): string {
-  switch (placement) {
+  switch (
+    placement
+  ) {
     case "home":
       return "Home";
 
@@ -342,46 +92,48 @@ function placementLabel(
 }
 
 function placementsLabel(
-  placements: Placement[]
+  placements:
+    CampaignPlacement[]
 ): string {
   return placements
     .map(
       placementLabel
     )
-    .join(", ");
+    .join(
+      ", "
+    );
 }
 
-function trackingStatusLabel(
-  status: TrackingStatus
+function titleCaseStatus(
+  value: string
 ): string {
-  switch (status) {
-    case "connected":
-      return "Connected";
-
-    case "not_configured":
-      return "Not configured";
-
-    case "unavailable":
-      return "Unavailable";
-  }
+  return value
+    .split(
+      "_"
+    )
+    .map(
+      part =>
+        part.length > 0
+          ? `${part[0]?.toUpperCase()}${part.slice(
+              1
+            )}`
+          : part
+    )
+    .join(
+      " "
+    );
 }
 
 function formatDate(
   value: string
 ): string {
-  if (
-    !value
-  ) {
-    return "Not configured";
-  }
-
   const date =
     new Date(
       `${value}T00:00:00Z`
     );
 
   if (
-    Number.isNaN(
+    !Number.isFinite(
       date.getTime()
     )
   ) {
@@ -408,55 +160,13 @@ function formatDate(
   );
 }
 
-function ctr(
-  campaign: CampaignRecord
-): string {
-  return `${calculateCtr(
-    campaign.performance
-      .impressions,
-    campaign.performance
-      .clicks
-  ).toFixed(
-    2
-  )}%`;
-}
-
-function conversionLabel(
-  campaign: CampaignRecord
-): string {
-  const conversions =
-    campaign.performance
-      .conversions;
-
-  if (
-    conversions ===
-    null
-  ) {
-    return "Not tracked";
-  }
-
-  return conversions.toLocaleString();
-}
-
-function nowLabel(): string {
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      dateStyle:
-        "medium",
-
-      timeStyle:
-        "short",
-    }
-  ).format(
-    new Date()
-  );
-}
-
 function statusClass(
-  status: CampaignStatus
+  status:
+    CampaignStatus
 ): string {
-  switch (status) {
+  switch (
+    status
+  ) {
     case "active":
       return styles.statusActive;
 
@@ -466,24 +176,14 @@ function statusClass(
     case "scheduled":
       return styles.statusScheduled;
 
-    /*
-     * Draft intentionally uses the existing
-     * neutral status style so we do not need
-     * to redesign or change the CSS in this
-     * migration step.
-     */
     case "draft":
-      return styles.statusDisabled;
-
     case "ended":
-      return styles.statusEnded;
-
     case "disabled":
       return styles.statusDisabled;
   }
 }
 
-export default function MonetizationManager() {
+export default function CampaignsPanel() {
   return (
     <Suspense
       fallback={
@@ -504,14 +204,23 @@ function CampaignsContent() {
       "record"
     );
 
-  const [
-    campaigns,
-    setCampaigns,
-  ] =
-    useState<
-      CampaignRecord[]
-    >(
-      INITIAL_CAMPAIGNS
+  const {
+    data,
+    error,
+    isLoading,
+    isRefreshing,
+    refresh,
+  } =
+    useCampaigns();
+
+  const campaigns =
+    useMemo(
+      () =>
+        data?.items ??
+        [],
+      [
+        data,
+      ]
     );
 
   const [
@@ -527,8 +236,8 @@ function CampaignsContent() {
     setFilter,
   ] =
     useState<
-      | "all"
-      | CampaignStatus
+      "all" |
+      CampaignStatus
     >(
       "all"
     );
@@ -538,28 +247,56 @@ function CampaignsContent() {
     setSelectedId,
   ] =
     useState<
-      string | null
-    >(
-      INITIAL_CAMPAIGNS.some(
-        (
-          campaign
-        ) =>
-          campaign.id ===
-          requestedRecordId
-      )
-        ? requestedRecordId
-        : null
-    );
-
-  const [
-    endTargetId,
-    setEndTargetId,
-  ] =
-    useState<
-      string | null
+      string |
+      null
     >(
       null
     );
+
+  useEffect(
+    () => {
+      if (
+        !requestedRecordId ||
+        selectedId
+      ) {
+        return;
+      }
+
+      const requestedCampaign =
+        campaigns.find(
+          campaign =>
+            campaign.id ===
+              requestedRecordId ||
+            campaign.campaignReference ===
+              requestedRecordId
+        );
+
+      if (
+        requestedCampaign
+      ) {
+        const timeoutId =
+          window.setTimeout(
+            () => {
+              setSelectedId(
+                requestedCampaign.id
+              );
+            },
+            0
+          );
+
+        return () => {
+          window.clearTimeout(
+            timeoutId
+          );
+        };
+      }
+    },
+    [
+      campaigns,
+      requestedRecordId,
+      selectedId,
+    ]
+  );
 
   const normalizedQuery =
     query
@@ -568,11 +305,9 @@ function CampaignsContent() {
 
   const visibleCampaigns =
     useMemo(
-      () => {
-        return campaigns.filter(
-          (
-            campaign
-          ) => {
+      () =>
+        campaigns.filter(
+          campaign => {
             if (
               filter !==
                 "all" &&
@@ -590,25 +325,19 @@ function CampaignsContent() {
 
             return [
               campaign.id,
-
-              campaign.requestId ??
+              campaign.campaignReference,
+              campaign.sourceRequestId ??
                 "",
-
               campaign.name,
-
-              campaign.organization,
-
+              campaign.organizationId,
               campaignTypeLabel(
-                campaign.type
+                campaign.campaignType
               ),
-
               placementsLabel(
                 campaign.placements
               ),
             ].some(
-              (
-                value
-              ) =>
+              value =>
                 value
                   .toLowerCase()
                   .includes(
@@ -616,8 +345,7 @@ function CampaignsContent() {
                   )
             );
           }
-        );
-      },
+        ),
       [
         campaigns,
         filter,
@@ -629,35 +357,14 @@ function CampaignsContent() {
     useMemo(
       () =>
         campaigns.find(
-          (
-            campaign
-          ) =>
+          campaign =>
             campaign.id ===
             selectedId
         ) ??
         null,
-
       [
         campaigns,
         selectedId,
-      ]
-    );
-
-  const endTarget =
-    useMemo(
-      () =>
-        campaigns.find(
-          (
-            campaign
-          ) =>
-            campaign.id ===
-            endTargetId
-        ) ??
-        null,
-
-      [
-        campaigns,
-        endTargetId,
       ]
     );
 
@@ -669,210 +376,50 @@ function CampaignsContent() {
 
         draft:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "draft"
           ).length,
 
         scheduled:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "scheduled"
           ).length,
 
         active:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "active"
           ).length,
 
         paused:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "paused"
           ).length,
 
         ended:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "ended"
           ).length,
 
         disabled:
           campaigns.filter(
-            (
-              campaign
-            ) =>
+            campaign =>
               campaign.status ===
               "disabled"
           ).length,
       }),
-
       [
         campaigns,
       ]
     );
-
-  const updateStatus = (
-    campaignId: string,
-
-    status:
-      CampaignStatus,
-
-    action: string
-  ) => {
-    setCampaigns(
-      (
-        current
-      ) =>
-        current.map(
-          (
-            campaign
-          ) =>
-            campaign.id ===
-            campaignId
-              ? {
-                  ...campaign,
-
-                  status,
-
-                  audit: [
-                    {
-                      id:
-                        `${campaign.id}-${Date.now()}`,
-
-                      action,
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...campaign.audit,
-                  ],
-                }
-              : campaign
-        )
-    );
-  };
-
-  const scheduleCampaign = (
-    campaign:
-      CampaignRecord
-  ) => {
-    if (
-      campaign.status !==
-        "draft" ||
-      campaign.type ===
-        "programmatic"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      campaign.id,
-      "scheduled",
-      "Campaign scheduled after final Admin review"
-    );
-  };
-
-  const pauseCampaign = (
-    campaign:
-      CampaignRecord
-  ) => {
-    if (
-      campaign.status !==
-      "active"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      campaign.id,
-      "paused",
-      "Campaign paused"
-    );
-  };
-
-  const resumeCampaign = (
-    campaign:
-      CampaignRecord
-  ) => {
-    if (
-      campaign.status !==
-        "paused" ||
-      campaign.type ===
-        "programmatic"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      campaign.id,
-      "active",
-      "Campaign resumed"
-    );
-  };
-
-  const requestEnd = (
-    campaign:
-      CampaignRecord
-  ) => {
-    if (
-      campaign.status !==
-        "active" &&
-      campaign.status !==
-        "paused"
-    ) {
-      return;
-    }
-
-    setEndTargetId(
-      campaign.id
-    );
-  };
-
-  const cancelEnd =
-    () => {
-      setEndTargetId(
-        null
-      );
-    };
-
-  const confirmEnd =
-    () => {
-      if (
-        !endTarget
-      ) {
-        return;
-      }
-
-      updateStatus(
-        endTarget.id,
-        "ended",
-        "Campaign ended"
-      );
-
-      setEndTargetId(
-        null
-      );
-    };
 
   return (
     <div
@@ -899,12 +446,14 @@ function CampaignsContent() {
           </h2>
 
           <p>
-            Control every Poster
-            commercial campaign from
-            one place. Commercial
-            placement stays separate
-            from organic discovery and
-            requires Poster approval.
+            Authoritative campaign
+            records created from
+            approved commercial
+            requests. Activation and
+            delivery controls remain
+            unavailable until readiness
+            and funding policies are
+            complete.
           </p>
         </div>
 
@@ -925,9 +474,53 @@ function CampaignsContent() {
         </div>
       </header>
 
+      {error ? (
+        <section
+          className={
+            styles.note
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Campaigns could not be
+              refreshed
+            </strong>
+
+            <p>
+              {error}
+
+              {data
+                ? " The last successful snapshot remains visible."
+                : ""}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              refresh
+            }
+            disabled={
+              isLoading ||
+              isRefreshing
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
+
       <section
         className={
           styles.panel
+        }
+        aria-busy={
+          isLoading ||
+          isRefreshing
         }
       >
         <div
@@ -942,14 +535,11 @@ function CampaignsContent() {
             value={
               query
             }
-            placeholder="Search campaign ID, request ID, name or partner..."
+            placeholder="Search campaign, request, organization or placement..."
             aria-label="Search campaigns"
-            onChange={(
-              event
-            ) =>
+            onChange={event =>
               setQuery(
-                event.target
-                  .value
+                event.target.value
               )
             }
           />
@@ -965,32 +555,26 @@ function CampaignsContent() {
                   "all",
                   "All",
                 ],
-
                 [
                   "draft",
                   "Draft",
                 ],
-
                 [
                   "scheduled",
                   "Scheduled",
                 ],
-
                 [
                   "active",
                   "Active",
                 ],
-
                 [
                   "paused",
                   "Paused",
                 ],
-
                 [
                   "ended",
                   "Ended",
                 ],
-
                 [
                   "disabled",
                   "Disabled",
@@ -1018,9 +602,7 @@ function CampaignsContent() {
                     )
                   }
                 >
-                  {
-                    label
-                  }
+                  {label}
 
                   <span>
                     {
@@ -1032,6 +614,24 @@ function CampaignsContent() {
                 </button>
               )
             )}
+
+            <button
+              type="button"
+              className={
+                styles.secondaryButton
+              }
+              onClick={
+                refresh
+              }
+              disabled={
+                isLoading ||
+                isRefreshing
+              }
+            >
+              {isRefreshing
+                ? "Refreshing..."
+                : "Refresh"}
+            </button>
           </div>
         </div>
 
@@ -1064,7 +664,7 @@ function CampaignsContent() {
                 </th>
 
                 <th>
-                  Performance
+                  Readiness
                 </th>
 
                 <th>
@@ -1079,9 +679,7 @@ function CampaignsContent() {
 
             <tbody>
               {visibleCampaigns.map(
-                (
-                  campaign
-                ) => (
+                campaign => (
                   <tr
                     key={
                       campaign.id
@@ -1110,20 +708,18 @@ function CampaignsContent() {
                         }
                       >
                         {
-                          campaign.id
+                          campaign.campaignReference
                         }
-
                         {" Â· "}
-
                         {
-                          campaign.organization
+                          campaign.organizationId
                         }
                       </span>
                     </td>
 
                     <td>
                       {campaignTypeLabel(
-                        campaign.type
+                        campaign.campaignType
                       )}
                     </td>
 
@@ -1135,13 +731,11 @@ function CampaignsContent() {
 
                     <td>
                       {formatDate(
-                        campaign.startDate
+                        campaign.scheduledStartDate
                       )}
-
                       {" â†’ "}
-
                       {formatDate(
-                        campaign.endDate
+                        campaign.scheduledEndDate
                       )}
                     </td>
 
@@ -1151,10 +745,9 @@ function CampaignsContent() {
                           styles.performanceMain
                         }
                       >
-                        {ctr(
-                          campaign
+                        {titleCaseStatus(
+                          campaign.readinessStatus
                         )}
-                        {" CTR"}
                       </strong>
 
                       <span
@@ -1162,10 +755,13 @@ function CampaignsContent() {
                           styles.performanceSub
                         }
                       >
-                        {campaign.performance.impressions.toLocaleString()}
-                        {" imp Â· "}
-                        {campaign.performance.clicks.toLocaleString()}
-                        {" clicks"}
+                        {titleCaseStatus(
+                          campaign.commercialStatus
+                        )}
+                        {" Â· "}
+                        {campaign.deliveryEligible
+                          ? "Delivery eligible"
+                          : "Delivery blocked"}
                       </span>
                     </td>
 
@@ -1182,28 +778,38 @@ function CampaignsContent() {
                     </td>
 
                     <td>
-  <button
-    type="button"
-    className={
-      styles.actionButton
-    }
-    onClick={() =>
-      setSelectedId(
-        campaign.id
-      )
-    }
-  >
-    View
-  </button>
-</td>
+                      <button
+                        type="button"
+                        className={
+                          styles.actionButton
+                        }
+                        onClick={() =>
+                          setSelectedId(
+                            campaign.id
+                          )
+                        }
+                      >
+                        View
+                      </button>
+                    </td>
                   </tr>
                 )
               )}
             </tbody>
           </table>
 
-          {visibleCampaigns.length ===
-          0 ? (
+          {isLoading &&
+          !data ? (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Loading authoritative
+              campaigns...
+            </div>
+          ) : visibleCampaigns.length ===
+            0 ? (
             <div
               className={
                 styles.empty
@@ -1222,16 +828,19 @@ function CampaignsContent() {
       >
         <div>
           <strong>
-            Programmatic advertising
+            Campaign controls remain
+            protected
           </strong>
 
           <p>
-            Programmatic advertising
-            remains structurally supported
-            but disabled until provider,
-            privacy, consent, SDK and
-            production requirements are
-            ready.
+            Scheduling, activation,
+            pausing, resuming and ending
+            require authoritative
+            readiness, funding, delivery
+            and audit policies. This
+            workspace is read-only until
+            those workflows are
+            implemented.
           </p>
         </div>
 
@@ -1240,607 +849,406 @@ function CampaignsContent() {
             styles.disabledBadge
           }
         >
-          Disabled
+          Read only
         </span>
       </section>
 
       {selectedCampaign ? (
+        <CampaignDrawer
+          campaign={
+            selectedCampaign
+          }
+          onClose={() =>
+            setSelectedId(
+              null
+            )
+          }
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function CampaignDrawer({
+  campaign,
+  onClose,
+}: {
+  campaign:
+    AdminCampaign;
+
+  onClose:
+    () => void;
+}) {
+  return (
+    <div
+      className={
+        styles.drawerLayer
+      }
+    >
+      <button
+        type="button"
+        className={
+          styles.backdrop
+        }
+        aria-label="Close campaign details"
+        onClick={
+          onClose
+        }
+      />
+
+      <aside
+        className={
+          styles.drawer
+        }
+      >
         <div
           className={
-            styles.drawerLayer
+            styles.drawerHeader
           }
         >
+          <div>
+            <span>
+              {
+                campaign.campaignReference
+              }
+            </span>
+
+            <h3>
+              {
+                campaign.name
+              }
+            </h3>
+          </div>
+
           <button
             type="button"
             className={
-              styles.backdrop
+              styles.closeButton
             }
-            aria-label="Close campaign details"
-            onClick={() =>
-              setSelectedId(
-                null
-              )
-            }
-          />
-
-          <aside
-            className={
-              styles.drawer
+            aria-label="Close"
+            onClick={
+              onClose
             }
           >
-            <div
+            Ã—
+          </button>
+        </div>
+
+        <div
+          className={
+            styles.drawerBody
+          }
+        >
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Campaign identity
+            </h4>
+
+            <dl
               className={
-                styles.drawerHeader
+                styles.detailList
               }
             >
               <div>
-                <span>
-                  {
-                    selectedCampaign.id
-                  }
-                </span>
+                <dt>
+                  Campaign reference
+                </dt>
 
-                <h3>
+                <dd>
                   {
-                    selectedCampaign.name
+                    campaign.campaignReference
                   }
-                </h3>
+                </dd>
               </div>
 
-              <button
-                type="button"
-                className={
-                  styles.closeButton
-                }
-                aria-label="Close"
-                onClick={() =>
-                  setSelectedId(
-                    null
-                  )
-                }
-              >
-                Ã—
-              </button>
-            </div>
+              <div>
+                <dt>
+                  Internal ID
+                </dt>
 
-            <div
-              className={
-                styles.drawerBody
-              }
-            >
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Campaign
-                </h4>
-
-                <dl
+                <dd
                   className={
-                    styles.detailList
+                    styles.breakText
                   }
                 >
-                  <div>
-                    <dt>
-                      Campaign ID
-                    </dt>
+                  {
+                    campaign.id
+                  }
+                </dd>
+              </div>
 
-                    <dd>
-                      {
-                        selectedCampaign.id
-                      }
-                    </dd>
-                  </div>
+              <div>
+                <dt>
+                  Source request
+                </dt>
 
-                  {selectedCampaign.requestId ? (
-                    <div>
-                      <dt>
-                        Source request
-                      </dt>
-
-                      <dd>
-                        {
-                          selectedCampaign.requestId
-                        }
-                      </dd>
-                    </div>
-                  ) : null}
-
-                  <div>
-                    <dt>
-                      Type
-                    </dt>
-
-                    <dd>
-                      {campaignTypeLabel(
-                        selectedCampaign.type
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Partner /
-                      advertiser
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedCampaign.organization
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Disclosure
-                    </dt>
-
-                    <dd>
-                      {selectedCampaign.type ===
-                      "direct_sponsorship"
-                        ? `Sponsored by ${selectedCampaign.organization}`
-                        : selectedCampaign.type ===
-                          "affiliate"
-                        ? "Affiliate Â· Poster may earn a commission"
-                        : selectedCampaign.type ===
-                          "poster_promotion"
-                        ? "Promoted by Poster"
-                        : "Programmatic disclosure managed by provider"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Placement
-                    </dt>
-
-                    <dd>
-                      {placementsLabel(
-                        selectedCampaign.placements
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Status
-                    </dt>
-
-                    <dd>
-                      {statusLabel(
-                        selectedCampaign.status
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Tracking
-                    </dt>
-
-                    <dd>
-                      {trackingStatusLabel(
-                        selectedCampaign.trackingStatus
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Start
-                    </dt>
-
-                    <dd>
-                      {formatDate(
-                        selectedCampaign.startDate
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      End
-                    </dt>
-
-                    <dd>
-                      {formatDate(
-                        selectedCampaign.endDate
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Destination
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedCampaign.destinationUrl ??
-                        "Not configured"
-                      }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Performance snapshot
-                </h4>
-
-                <div
+                <dd
                   className={
-                    styles.metrics
+                    styles.breakText
                   }
                 >
-                  <div>
-                    <span>
-                      Impressions
-                    </span>
+                  {
+                    campaign.sourceRequestId ??
+                    "Internal campaign"
+                  }
+                </dd>
+              </div>
 
-                    <strong>
-                      {selectedCampaign.performance.impressions.toLocaleString()}
-                    </strong>
-                  </div>
+              <div>
+                <dt>
+                  Organization
+                </dt>
 
-                  <div>
-                    <span>
-                      Clicks
-                    </span>
-
-                    <strong>
-                      {selectedCampaign.performance.clicks.toLocaleString()}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      CTR
-                    </span>
-
-                    <strong>
-                      {ctr(
-                        selectedCampaign
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversions
-                    </span>
-
-                    <strong>
-                      {conversionLabel(
-                        selectedCampaign
-                      )}
-                    </strong>
-                  </div>
-                </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Commercial integrity
-                </h4>
-
-                <p
+                <dd
                   className={
-                    styles.integrityNote
+                    styles.breakText
                   }
                 >
-                  This commercial campaign
-                  is separate from Poster&apos;s
-                  organic recommendation
-                  ranking. Sponsorship value,
-                  affiliate commission, or
-                  commercial payment must not
-                  influence organic knowledge
-                  ranking.
-                </p>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
-
-                <div
-                  className={
-                    styles.auditList
+                  {
+                    campaign.organizationId
                   }
-                >
-                  {selectedCampaign.audit.map(
-                    (
-                      entry
-                    ) => (
-                      <div
-                        key={
-                          entry.id
-                        }
-                        className={
-                          styles.auditItem
-                        }
-                      >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
+                </dd>
+              </div>
 
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
+              <div>
+                <dt>
+                  Type
+                </dt>
 
-                          <span>
-                            {
-                              entry.actor
-                            }
-
-                            {" Â· "}
-
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
+                <dd>
+                  {campaignTypeLabel(
+                    campaign.campaignType
                   )}
-                </div>
-              </section>
-            </div>
+                </dd>
+              </div>
 
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              {selectedCampaign.type ===
-              "programmatic" ? (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Programmatic advertising
-                  is intentionally disabled.
-                </span>
-              ) : selectedCampaign.status ===
-                "draft" ? (
-                <>
-                  <span
-                    className={
-                      styles.programmaticNote
-                    }
-                  >
-                    Draft campaigns require
-                    final Poster review before
-                    they can be scheduled.
-                  </span>
+              <div>
+                <dt>
+                  Origin
+                </dt>
 
-                  <button
-                    type="button"
-                    className={
-                      styles.primaryButton
-                    }
-                    onClick={() =>
-                      scheduleCampaign(
-                        selectedCampaign
-                      )
-                    }
-                  >
-                    Schedule campaign
-                  </button>
-                </>
-              ) : selectedCampaign.status ===
-                "active" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.secondaryButton
-                    }
-                    onClick={() =>
-                      pauseCampaign(
-                        selectedCampaign
-                      )
-                    }
-                  >
-                    Pause
-                  </button>
+                <dd>
+                  {titleCaseStatus(
+                    campaign.origin
+                  )}
+                </dd>
+              </div>
 
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedCampaign
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedCampaign.status ===
-                "paused" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.primaryButton
-                    }
-                    onClick={() =>
-                      resumeCampaign(
-                        selectedCampaign
-                      )
-                    }
-                  >
-                    Resume
-                  </button>
+              <div>
+                <dt>
+                  Status
+                </dt>
 
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedCampaign
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedCampaign.status ===
-                "scheduled" ? (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Campaign is scheduled and
-                  will begin according to its
-                  configured start date.
-                </span>
-              ) : (
-                <span
-                  className={
-                    styles.programmaticNote
-                  }
-                >
-                  Ended campaigns remain
-                  historical records and are
-                  not reactivated directly.
-                </span>
-              )}
-            </div>
-          </aside>
-        </div>
-      ) : null}
+                <dd>
+                  {statusLabel(
+                    campaign.status
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </section>
 
-      {endTarget ? (
-        <div
-          className={
-            styles.confirmLayer
-          }
-        >
-          <button
-            type="button"
+          <section
             className={
-              styles.confirmBackdrop
+              styles.detailSection
             }
-            aria-label="Cancel end campaign"
-            onClick={
-              cancelEnd
-            }
-          />
-
-          <div
-            className={
-              styles.confirmDialog
-            }
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="end-campaign-title"
           >
-            <span
+            <h4>
+              Delivery readiness
+            </h4>
+
+            <dl
               className={
-                styles.confirmEyebrow
+                styles.detailList
               }
             >
-              Campaign action
-            </span>
+              <div>
+                <dt>
+                  Placement
+                </dt>
 
-            <h3
-              id="end-campaign-title"
-            >
-              End this campaign?
-            </h3>
+                <dd>
+                  {placementsLabel(
+                    campaign.placements
+                  )}
+                </dd>
+              </div>
 
-            <p>
-              <strong>
-                {
-                  endTarget.id
-                }
-              </strong>
+              <div>
+                <dt>
+                  Start
+                </dt>
 
-              {" Â· "}
+                <dd>
+                  {formatDate(
+                    campaign.scheduledStartDate
+                  )}
+                </dd>
+              </div>
 
-              {
-                endTarget.name
+              <div>
+                <dt>
+                  End
+                </dt>
+
+                <dd>
+                  {formatDate(
+                    campaign.scheduledEndDate
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Readiness
+                </dt>
+
+                <dd>
+                  {titleCaseStatus(
+                    campaign.readinessStatus
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Commercial state
+                </dt>
+
+                <dd>
+                  {titleCaseStatus(
+                    campaign.commercialStatus
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Delivery eligibility
+                </dt>
+
+                <dd>
+                  {campaign.deliveryEligible
+                    ? "Eligible"
+                    : "Blocked"}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Record metadata
+            </h4>
+
+            <dl
+              className={
+                styles.detailList
               }
-            </p>
+            >
+              <div>
+                <dt>
+                  Created
+                </dt>
+
+                <dd>
+                  {formatCampaignTimestamp(
+                    campaign.createdAt
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Updated
+                </dt>
+
+                <dd>
+                  {formatCampaignTimestamp(
+                    campaign.updatedAt
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Created by
+                </dt>
+
+                <dd
+                  className={
+                    styles.breakText
+                  }
+                >
+                  {
+                    campaign.createdByUserId
+                  }
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Row version
+                </dt>
+
+                <dd>
+                  {
+                    campaign.rowVersion
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Commercial integrity
+            </h4>
 
             <p
               className={
-                styles.confirmWarning
+                styles.integrityNote
               }
             >
-              Ending preserves the
-              campaign as a historical
-              record. It should not be
-              resumed directly afterward.
+              Commercial status must not
+              influence Poster&apos;s
+              organic discovery ranking.
+              Delivery remains blocked
+              until campaign readiness and
+              commercial requirements are
+              authoritative and complete.
             </p>
-
-            <div
-              className={
-                styles.confirmActions
-              }
-            >
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={
-                  cancelEnd
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className={
-                  styles.dangerButton
-                }
-                onClick={
-                  confirmEnd
-                }
-              >
-                End campaign
-              </button>
-            </div>
-          </div>
+          </section>
         </div>
-      ) : null}
+
+        <div
+          className={
+            styles.drawerFooter
+          }
+        >
+          <span
+            className={
+              styles.programmaticNote
+            }
+          >
+            Campaign actions are not
+            available in this read-only
+            phase.
+          </span>
+        </div>
+      </aside>
     </div>
   );
 }

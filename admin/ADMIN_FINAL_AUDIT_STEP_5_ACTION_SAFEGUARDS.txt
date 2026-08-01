@@ -1,0 +1,5326 @@
+﻿POSTER ADMIN FINAL AUDIT - STEP 5
+
+Generated: 2026-07-31 00:39:33
+
+============================================================
+1. DESTRUCTIVE AND LIFECYCLE ACTIONS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 422
+TEXT: const removePrimaryImage =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 515
+TEXT: const removeBrandLogo =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1379
+TEXT: and approved directly by
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1458
+TEXT: remains disabled.
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1632
+TEXT: if the campaign is approved.
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1926
+TEXT: removePrimaryImage
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1929
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2027
+TEXT: removeBrandLogo
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2030
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2821
+TEXT: request and may approve,
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2822
+TEXT: reject, request changes, or
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2853
+TEXT: integration, approved
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 17
+TEXT: | "removed";
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 167
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 179
+TEXT: "Removed after rights-holder request.",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 196
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 373
+TEXT: removeTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 374
+TEXT: setRemoveTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 382
+TEXT: removeReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 383
+TEXT: setRemoveReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 391
+TEXT: removeNote,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 392
+TEXT: setRemoveNote,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 472
+TEXT: removeTargetId
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 477
+TEXT: removeTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 494
+TEXT: removed:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 498
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 507
+TEXT: const beginRemove = (
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 511
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 515
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 521
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 530
+TEXT: const cancelRemove =
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 532
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 536
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 543
+TEXT: const confirmRemove =
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 563
+TEXT: removeReason ===
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 570
+TEXT: ? "Removed from Poster + prevent re-import"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 571
+TEXT: : "Removed from Poster";
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 577
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 580
+TEXT: removeReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 583
+TEXT: removeNote
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 613
+TEXT: cancelRemove();
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 691
+TEXT: attribution, and remove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 761
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 762
+TEXT: "Removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 908
+TEXT: : styles.statusRemoved
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 915
+TEXT: : "Removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 926
+TEXT: styles.removeButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 929
+TEXT: beginRemove(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 934
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1141
+TEXT: : "Removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1163
+TEXT: "removed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1325
+TEXT: beginRemove(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1334
+TEXT: Remove from
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1370
+TEXT: cancelRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1380
+TEXT: aria-labelledby="remove-content-title"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1387
+TEXT: Remove content
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1391
+TEXT: id="remove-content-title"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1393
+TEXT: Remove from
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1469
+TEXT: removeReason ===
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1473
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1501
+TEXT: removeNote
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1508
+TEXT: setRemoveNote(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1561
+TEXT: cancelRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1573
+TEXT: confirmRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1577
+TEXT: ? "Remove + prevent re-import"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1578
+TEXT: : "Remove from Poster"}
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 12
+TEXT: | "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 13
+TEXT: | "resolved";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 16
+TEXT: | "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 17
+TEXT: | "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 18
+TEXT: | "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 160
+TEXT: "CNT-2001 resolves to the affected Poster content record.",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 309
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 315
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 329
+TEXT: "CNT-2000 resolves to the affected Poster content record.",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 409
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 456
+TEXT: case "removed":
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 457
+TEXT: return "Removed";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 459
+TEXT: case "resolved":
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 460
+TEXT: return "Resolved";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 701
+TEXT: removed:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 705
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 708
+TEXT: resolved:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 712
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 773
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 779
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 785
+TEXT: "Removed from Poster",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 792
+TEXT: "Removed from Poster",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 802
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 808
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 814
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 821
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 831
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 837
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 843
+TEXT: "Dismissed / no action",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 850
+TEXT: "Case dismissed with no takedown action",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 862
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 928
+TEXT: and remove or prevent
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 969
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 970
+TEXT: "Removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 974
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 975
+TEXT: "Resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1092
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1093
+TEXT: ? styles.statusRemoved
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1094
+TEXT: : styles.statusResolved
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1206
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1210
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1224
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1228
+TEXT: Remove +
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1708
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1712
+TEXT: Dismiss /
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1723
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1727
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1737
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1741
+TEXT: Remove +
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1747
+TEXT: "removed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1809
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1810
+TEXT: ? "Remove and prevent re-import?"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1812
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1813
+TEXT: ? "Remove this content from Poster?"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1817
+TEXT: : "Dismiss this copyright case?"}
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1854
+TEXT: "remove_prevent_reimport" ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1893
+TEXT: "remove" ||
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1895
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 306
+TEXT: delete next[field];
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 314
+TEXT: delete next.contentReference;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.types.ts
+LINE: 5
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 19
+TEXT: disabled?:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 61
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 62
+TEXT: props.disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 762
+TEXT: disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 143
+TEXT: const removeMedia =
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 185
+TEXT: styles.removeMediaButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 188
+TEXT: removeMedia
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 191
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 243
+TEXT: async reject(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 254
+TEXT: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 262
+TEXT: async approve(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 273
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.types.ts
+LINE: 75
+TEXT: reject:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.types.ts
+LINE: 83
+TEXT: approve:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 40
+TEXT: onReject:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 43
+TEXT: onApprove:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 540
+TEXT: placeholder="Required for changes or rejection."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 586
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 605
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 613
+TEXT: props.onReject
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 616
+TEXT: Reject
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 624
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 633
+TEXT: props.onApprove
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 636
+TEXT: Approve and create draft
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 649
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 650
+TEXT: ? "This request was approved and its draft campaign was created."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 651
+TEXT: : "This request was rejected and remains available as a historical record."}
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 326
+TEXT: | "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 327
+TEXT: | "approve"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 357
+TEXT: "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 360
+TEXT: .reject({
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 371
+TEXT: .approve({
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 514
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 515
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 518
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 519
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 763
+TEXT: onReject={() =>
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 765
+TEXT: "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 768
+TEXT: onApprove={() =>
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 770
+TEXT: "approve"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 14
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 137
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 163
+TEXT: "Affiliate campaign paused for offer review",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 252
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 253
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 503
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 509
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 608
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 621
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 622
+TEXT: "Affiliate campaign paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 632
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 652
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 706
+TEXT: Manage approved affiliate
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 738
+TEXT: Approved offers currently running
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 835
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 836
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1027
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1028
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1478
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1483
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1501
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 83
+TEXT: "Campaign paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 129
+TEXT: "Programmatic advertising remains disabled for initial release",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 145
+TEXT: "Campaign draft created from approved commercial request ADV-1003",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 159
+TEXT: "Direct sponsorship request approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 175
+TEXT: "Campaign paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 219
+TEXT: "Affiliate request ADV-1004 approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 318
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 319
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 324
+TEXT: case "disabled":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 325
+TEXT: return "Disabled";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 463
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 464
+TEXT: return styles.statusPaused;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 476
+TEXT: return styles.statusDisabled;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 481
+TEXT: case "disabled":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 482
+TEXT: return styles.statusDisabled;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 697
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 703
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 715
+TEXT: disabled:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 721
+TEXT: "disabled"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 795
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 808
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 809
+TEXT: "Campaign paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 819
+TEXT: "paused" ||
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 841
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 985
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 986
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 995
+TEXT: "disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 996
+TEXT: "Disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1231
+TEXT: but disabled until provider,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1240
+TEXT: styles.disabledBadge
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1243
+TEXT: Disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1630
+TEXT: is intentionally disabled.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1668
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1673
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1691
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 15
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 199
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 228
+TEXT: "Campaign paused for advertiser review",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 264
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 265
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 499
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 505
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 565
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 578
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 579
+TEXT: "Direct sponsorship paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 589
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 609
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 833
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 834
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1031
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1032
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1087
+TEXT: Poster manually approves every direct sponsorship.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1535
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1540
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1558
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 141
+TEXT: "Please provide the final approved campaign image and confirm the conversion tracking method.",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 151
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 218
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 452
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 556
+TEXT: "disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 607
+TEXT: * Approved request becomes Draft first.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 671
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 11
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 13
+TEXT: | "disabled";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 22
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 23
+TEXT: | "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 22
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 82
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 102
+TEXT: "Poster promotion paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 194
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 195
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 426
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 432
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 802
+TEXT: const pausePromotion = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 815
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 816
+TEXT: "Poster promotion paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 826
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 846
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1062
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1063
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1249
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1250
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1736
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1770
+TEXT: pausePromotion(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1775
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1793
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1949
+TEXT: End promotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.mock.ts
+LINE: 47
+TEXT: approvedForPromotion: true,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.mock.ts
+LINE: 55
+TEXT: approvedForPromotion: false,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.types.ts
+LINE: 51
+TEXT: approvedForPromotion: boolean;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 100
+TEXT: property.approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 198
+TEXT: .approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 200
+TEXT: } approved for promotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 618
+TEXT: .approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 635
+TEXT: approvedForPromotion:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 647
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1142
+TEXT: disabled={!value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 22
+TEXT: value: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 23
+TEXT: label: "Approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 34
+TEXT: value: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 35
+TEXT: label: "Reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 38
+TEXT: value: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 39
+TEXT: label: "Rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 159
+TEXT: value: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 160
+TEXT: label: "Reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 11
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 41
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 78
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 113
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 116
+TEXT: "Commission approved by the external platform.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 131
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 198
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 268
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 335
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 371
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 401
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 404
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 438
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 442
+TEXT: "Demonstration reversed commission retained for audit history.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 473
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 476
+TEXT: "Commission reversed after the external order was cancelled.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 4
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 7
+TEXT: | "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 8
+TEXT: | "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 39
+TEXT: | "reversed";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 57
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 60
+TEXT: | "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 61
+TEXT: | "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 97
+TEXT: rejectionReason: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 138
+TEXT: rejectionReason: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 38
+TEXT: rejectionReason: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 92
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 102
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 138
+TEXT: "Select an approved external program.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 181
+TEXT: "Commission amount is required for approved, payable or paid earnings.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 271
+TEXT: draft.status === "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 279
+TEXT: draft.status === "rejected" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 280
+TEXT: !draft.rejectionReason.trim()
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 282
+TEXT: errors.rejectionReason =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 283
+TEXT: "Enter the rejection reason.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 284
+TEXT: {earning.rejectionReason ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 286
+TEXT: <h3>Rejection reason</h3>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 289
+TEXT: {earning.rejectionReason}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 358
+TEXT: onStatusChange("approved");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 361
+TEXT: Approve
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 365
+TEXT: {earning.status === "approved" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 373
+TEXT: Mark payable
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 385
+TEXT: Mark paid
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 390
+TEXT: earning.status !== "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 391
+TEXT: earning.status !== "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 396
+TEXT: onStatusChange("reversed");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 399
+TEXT: Reverse
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 404
+TEXT: earning.status !== "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 409
+TEXT: onStatusChange("rejected");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 412
+TEXT: Reject
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 120
+TEXT: description="Connect this earning to the approved external program and promotion that produced the reported conversion."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 125
+TEXT: <span>Approved program</span>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 176
+TEXT: disabled={!draft.programId}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 399
+TEXT: label="Commission amount (required from approved status)"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 499
+TEXT: "reversed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 518
+TEXT: "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 520
+TEXT: label="Rejection reason"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 522
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 525
+TEXT: errors.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 529
+TEXT: "rejectionReason",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 158
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 159
+TEXT: earning.rejectionReason,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 217
+TEXT: case "approved":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 218
+TEXT: return "External earning approved.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 226
+TEXT: case "reversed":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 227
+TEXT: return "External earning reversed.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 229
+TEXT: case "rejected":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 230
+TEXT: return "External earning rejected.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 244
+TEXT: case "approved":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 245
+TEXT: return "approved";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 253
+TEXT: case "reversed":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 254
+TEXT: return "reversed";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 256
+TEXT: case "rejected":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 257
+TEXT: return "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 316
+TEXT: const approvedPrograms =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 323
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 368
+TEXT: approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 375
+TEXT: [approvedPrograms]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 461
+TEXT: "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 463
+TEXT: "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 486
+TEXT: const approvedInr =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 489
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 496
+TEXT: const approvedUsd =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 499
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 543
+TEXT: approvedInr,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 545
+TEXT: approvedUsd,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 555
+TEXT: reversed:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 559
+TEXT: "reversed" ||
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 561
+TEXT: "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 745
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 746
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 907
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 908
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 980
+TEXT: status === "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 993
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 995
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1007
+TEXT: status === "rejected" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1009
+TEXT: .rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1020
+TEXT: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1024
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1025
+TEXT: "Enter the rejection reason before rejecting this earning.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1054
+TEXT: "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1055
+TEXT: ? "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1142
+TEXT: label="Approved net"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1144
+TEXT: summary.approvedInr,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1145
+TEXT: summary.approvedUsd
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1147
+TEXT: description="Approved, payable and paid earnings by currency"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1171
+TEXT: summary.reversed
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1173
+TEXT: description="Reversed or rejected records"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1227
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1228
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1239
+TEXT: <option value="reversed">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1240
+TEXT: Reversed
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1243
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1244
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1528
+TEXT: approvedPrograms
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 26
+TEXT: value: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 27
+TEXT: label: "Approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 30
+TEXT: value: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 31
+TEXT: label: "Rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 34
+TEXT: value: "suspended",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 35
+TEXT: label: "Suspended",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 8
+TEXT: id: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 26
+TEXT: status: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 62
+TEXT: "Program status changed from Under review to Approved.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 5
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 6
+TEXT: | "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 7
+TEXT: | "suspended"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 92
+TEXT: draft.status === "approved" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 96
+TEXT: "Approved programs require an account or publisher reference.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 89
+TEXT: "Not approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 240
+TEXT: {program.status === "approved" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 245
+TEXT: onStatusChange("suspended");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 248
+TEXT: Suspend
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 252
+TEXT: {program.status === "suspended" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 257
+TEXT: onStatusChange("approved");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 186
+TEXT: const approvedCount =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 189
+TEXT: program.status === "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 406
+TEXT: label="Approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 407
+TEXT: value={approvedCount}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 466
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 467
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 470
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 471
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 474
+TEXT: <option value="suspended">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 475
+TEXT: Suspended
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.constants.ts
+LINE: 27
+TEXT: value: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.constants.ts
+LINE: 28
+TEXT: label: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 11
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 76
+TEXT: "Demonstration promotion. Replace with a real approved product or service.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 125
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 5
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 52
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 79
+TEXT: "Select an approved external program.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 336
+TEXT: onStatusChange("paused");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 339
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 343
+TEXT: {promotion.status === "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 363
+TEXT: End promotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 23
+TEXT: export interface ApprovedProgramOption {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 32
+TEXT: approvedPrograms:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 33
+TEXT: ReadonlyArray<ApprovedProgramOption>;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 45
+TEXT: approvedPrograms,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 96
+TEXT: description="Connect this promotion to an approved external program and identify the product, service or commercial offer."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 101
+TEXT: <span>Approved program</span>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 121
+TEXT: {approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 264
+TEXT: description="Record the approved image or video source used by the promotion."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 311
+TEXT: description="Poster records its own impressions and clicks. The external platform uses its approved destination, tracking link or referral code."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 132
+TEXT: previousStatus === "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 141
+TEXT: if (nextStatus === "paused") {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 142
+TEXT: return "paused";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 208
+TEXT: const approvedPrograms =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 215
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 708
+TEXT: <option value="paused">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 709
+TEXT: Paused
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 944
+TEXT: approvedPrograms={
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 945
+TEXT: approvedPrograms
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 43
+TEXT: "Track pending, approved, reversed and paid commissions.",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 13
+TEXT: | "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 14
+TEXT: | "dismissed";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 25
+TEXT: | "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 26
+TEXT: | "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 369
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 380
+TEXT: "Dismissed — legitimate educational context",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 436
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 447
+TEXT: "Resolved — destination available again",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 480
+TEXT: case "resolved":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 481
+TEXT: return "Resolved";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 483
+TEXT: case "dismissed":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 484
+TEXT: return "Dismissed";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 640
+TEXT: resolved:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 646
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 649
+TEXT: dismissed:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 655
+TEXT: "dismissed"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 761
+TEXT: case "resolve":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 766
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 773
+TEXT: "Report resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 780
+TEXT: case "dismiss":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 785
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 792
+TEXT: "Report dismissed — no further action",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 804
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 929
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 930
+TEXT: "Resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 934
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 935
+TEXT: "Dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1070
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1071
+TEXT: ? styles.statusResolved
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1072
+TEXT: : styles.statusDismissed
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1205
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1210
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1214
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1225
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1229
+TEXT: Resolve
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1617
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1621
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1625
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1648
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1652
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1656
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1666
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1670
+TEXT: Resolve
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1729
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1730
+TEXT: ? "Resolve this report?"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1732
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1733
+TEXT: ? "Dismiss this report?"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1754
+TEXT: "resolve" ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1764
+TEXT: "dismiss" ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1766
+TEXT: Use dismissal only
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1817
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1818
+TEXT: ? styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 17
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 100
+TEXT: status: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 105
+TEXT: "Feed returned repeated errors. Paused until checked.",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 110
+TEXT: "Source paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 138
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 139
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 279
+TEXT: removeExistingContent,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 280
+TEXT: setRemoveExistingContent,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 385
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 389
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 442
+TEXT: const pauseSource = (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 447
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 448
+TEXT: "Source paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 452
+TEXT: const enablePausedSource = (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 476
+TEXT: enablePausedSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 488
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 499
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 513
+TEXT: removeExistingContent
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 605
+TEXT: is healthy, and pause,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 675
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 676
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 825
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 826
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 869
+TEXT: pauseSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 874
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 877
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1201
+TEXT: pauseSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1206
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1209
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1216
+TEXT: enablePausedSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1327
+TEXT: removeExistingContent
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1332
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1341
+TEXT: Also remove
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1361
+TEXT: issues. Use Pause for
+
+
+============================================================
+2. CONFIRMATION MECHANISMS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2632
+TEXT: styles.confirmations
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2637
+TEXT: styles.confirmation
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2676
+TEXT: styles.confirmation
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2719
+TEXT: styles.confirmation
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2760
+TEXT: styles.confirmation
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2800
+TEXT: styles.confirmation
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 646
+TEXT: pendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 647
+TEXT: setPendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 747
+TEXT: !pendingAction
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 753
+TEXT: pendingAction;
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 884
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 895
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1205
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1223
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1707
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1722
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1736
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1754
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1769
+TEXT: pendingAction ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1782
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1808
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1811
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1814
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1853
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1872
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1881
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1892
+TEXT: pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1894
+TEXT: pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 470
+TEXT: email confirmation, evidence storage,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 390
+TEXT: : "Creative-rights confirmation is missing."}
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1602
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1814
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1660
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1923
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 34
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 154
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 291
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 339
+TEXT: "Demonstration subscription awaiting external confirmation.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 394
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 83
+TEXT: confirmationDate: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 119
+TEXT: confirmationDate: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 19
+TEXT: confirmationDate: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 87
+TEXT: function requiresConfirmationDate(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 210
+TEXT: requiresConfirmationDate(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 213
+TEXT: !draft.confirmationDate
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 215
+TEXT: errors.confirmationDate =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 216
+TEXT: "Confirmation date is required for this earning status.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 220
+TEXT: draft.confirmationDate &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 222
+TEXT: draft.confirmationDate <
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 225
+TEXT: errors.confirmationDate =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 226
+TEXT: "Confirmation date cannot be before the conversion date.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 231
+TEXT: draft.confirmationDate &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 233
+TEXT: draft.confirmationDate
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 236
+TEXT: "Payout date cannot be before the confirmation date.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 252
+TEXT: label="Confirmation date"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 254
+TEXT: earning.confirmationDate ||
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 335
+TEXT: label="Confirmation date (required from confirmed status)"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 338
+TEXT: draft.confirmationDate
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 341
+TEXT: errors.confirmationDate
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 345
+TEXT: "confirmationDate",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 105
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 106
+TEXT: earning.confirmationDate,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 685
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 686
+TEXT: draft.confirmationDate,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 845
+TEXT: confirmationDate:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 846
+TEXT: draft.confirmationDate,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 579
+TEXT: pendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 580
+TEXT: setPendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 697
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 712
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 723
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 732
+TEXT: !pendingAction
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 738
+TEXT: pendingAction;
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 824
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1620
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1634
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1651
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1665
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1690
+TEXT: pendingAction ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1703
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1728
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1731
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1753
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1763
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1773
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1796
+TEXT: styles.confirmActions
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1805
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1816
+TEXT: pendingAction ===
+
+
+============================================================
+3. DISABLED BUTTONS AND LIFECYCLE PREREQUISITES
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 61
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 586
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 605
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 624
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1736
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1142
+TEXT: disabled={!value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 176
+TEXT: disabled={!draft.programId}
+
+
+============================================================
+4. DIRECT LOCAL-STATE DELETION OR STATUS MUTATION
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 46
+TEXT: status: ContentStatus;
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 78
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 122
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 166
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 511
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 515
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 521
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 532
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 536
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 576
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 629
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1473
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1508
+TEXT: setRemoveNote(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 46
+TEXT: status: VerificationCheckStatus;
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 83
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 142
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 156
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 170
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 184
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 198
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 212
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 226
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 308
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 325
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 339
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 353
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 367
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 381
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 395
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 450
+TEXT: status: CopyrightStatus
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 572
+TEXT: status: VerificationStatus
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 587
+TEXT: status: VerificationCheckStatus
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 778
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 807
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 836
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 861
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 21
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 44
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 31
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 495
+TEXT: setStatus(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 39
+TEXT: status: AffiliateStatus;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 69
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 136
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 203
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 243
+TEXT: status: AffiliateStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 566
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 306
+TEXT: status: CampaignStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 355
+TEXT: status: TrackingStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 457
+TEXT: status: CampaignStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 733
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 40
+TEXT: status: SponsorshipStatus;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 72
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 142
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 198
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 255
+TEXT: status: SponsorshipStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 525
+TEXT: status: SponsorshipStatus,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 50
+TEXT: status: PromotionStatus;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 81
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 145
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 182
+TEXT: status: PromotionStatus
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 507
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 760
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 51
+TEXT: status: ReadinessStatus
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 813
+TEXT: legalEntityStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 831
+TEXT: taxIdentityStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 848
+TEXT: gstStatus: value,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 865
+TEXT: bankAccountStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 23
+TEXT: status: ExternalEarningRecord["status"]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 111
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 114
+TEXT: payoutStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 211
+TEXT: status: ExternalEarningStatus
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 238
+TEXT: status: ExternalEarningStatus
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 691
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 694
+TEXT: payoutStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 851
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 854
+TEXT: payoutStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 951
+TEXT: status: ExternalEarningStatus
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 992
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 994
+TEXT: payoutStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1019
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1050
+TEXT: payoutStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1209
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 21
+TEXT: status: ExternalProgramRecord["status"]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 71
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 329
+TEXT: status: ExternalProgramStatus
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 442
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 23
+TEXT: status: ExternalPromotionRecord["status"]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 113
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 122
+TEXT: previousStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 124
+TEXT: nextStatus:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 521
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 684
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 61
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 103
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 156
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 209
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 262
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 315
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 368
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 435
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 474
+TEXT: status: ReportStatus
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 765
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 784
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 803
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 44
+TEXT: status: SourceStatus;
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 58
+TEXT: status: "active",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 79
+TEXT: status: "active",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 100
+TEXT: status: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 132
+TEXT: status: SourceStatus
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 406
+TEXT: status: SourceStatus,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 488
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 499
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 526
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1332
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 10
+TEXT: status: HealthStatus;
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 33
+TEXT: status: "healthy",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 46
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 60
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 83
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 97
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 121
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 135
+TEXT: status:
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 149
+TEXT: status: HealthStatus
+
+
+============================================================
+5. FOCUSED FEATURE-AREA SCAN
+============================================================
+
+
+------------------------------------------------------------
+AREA: src\features\copyright
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 12
+TEXT: | "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 13
+TEXT: | "resolved";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 16
+TEXT: | "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 17
+TEXT: | "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 18
+TEXT: | "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 160
+TEXT: "CNT-2001 resolves to the affected Poster content record.",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 309
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 315
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 329
+TEXT: "CNT-2000 resolves to the affected Poster content record.",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 409
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 456
+TEXT: case "removed":
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 457
+TEXT: return "Removed";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 459
+TEXT: case "resolved":
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 460
+TEXT: return "Resolved";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 701
+TEXT: removed:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 705
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 708
+TEXT: resolved:
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 712
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 773
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 779
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 785
+TEXT: "Removed from Poster",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 792
+TEXT: "Removed from Poster",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 802
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 808
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 814
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 821
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 831
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 837
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 843
+TEXT: "Dismissed / no action",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 850
+TEXT: "Case dismissed with no takedown action",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 862
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 928
+TEXT: and remove or prevent
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 969
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 970
+TEXT: "Removed",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 974
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 975
+TEXT: "Resolved",
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1092
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1093
+TEXT: ? styles.statusRemoved
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1094
+TEXT: : styles.statusResolved
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1206
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1210
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1224
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1228
+TEXT: Remove +
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1708
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1712
+TEXT: Dismiss /
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1723
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1727
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1737
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1741
+TEXT: Remove +
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1747
+TEXT: "removed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1809
+TEXT: "remove_prevent_reimport"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1810
+TEXT: ? "Remove and prevent re-import?"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1812
+TEXT: "remove"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1813
+TEXT: ? "Remove this content from Poster?"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1817
+TEXT: : "Dismiss this copyright case?"}
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1854
+TEXT: "remove_prevent_reimport" ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1893
+TEXT: "remove" ||
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1895
+TEXT: "remove_prevent_reimport"
+
+
+------------------------------------------------------------
+AREA: src\features\reports
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 13
+TEXT: | "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 14
+TEXT: | "dismissed";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 25
+TEXT: | "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 26
+TEXT: | "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 369
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 380
+TEXT: "Dismissed — legitimate educational context",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 436
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 447
+TEXT: "Resolved — destination available again",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 480
+TEXT: case "resolved":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 481
+TEXT: return "Resolved";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 483
+TEXT: case "dismissed":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 484
+TEXT: return "Dismissed";
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 640
+TEXT: resolved:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 646
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 649
+TEXT: dismissed:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 655
+TEXT: "dismissed"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 761
+TEXT: case "resolve":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 766
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 773
+TEXT: "Report resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 780
+TEXT: case "dismiss":
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 785
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 792
+TEXT: "Report dismissed — no further action",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 804
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 929
+TEXT: "resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 930
+TEXT: "Resolved",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 934
+TEXT: "dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 935
+TEXT: "Dismissed",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1070
+TEXT: "resolved"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1071
+TEXT: ? styles.statusResolved
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1072
+TEXT: : styles.statusDismissed
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1205
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1210
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1214
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1225
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1229
+TEXT: Resolve
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1617
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1621
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1625
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1648
+TEXT: styles.dismissButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1652
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1656
+TEXT: Dismiss
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1666
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1670
+TEXT: Resolve
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1729
+TEXT: "resolve"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1730
+TEXT: ? "Resolve this report?"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1732
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1733
+TEXT: ? "Dismiss this report?"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1754
+TEXT: "resolve" ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1764
+TEXT: "dismiss" ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1766
+TEXT: Use dismissal only
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1817
+TEXT: "dismiss"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1818
+TEXT: ? styles.dismissButton
+
+
+------------------------------------------------------------
+AREA: src\features\content
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 17
+TEXT: | "removed";
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 167
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 179
+TEXT: "Removed after rights-holder request.",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 196
+TEXT: "Removed from Poster + prevent re-import",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 373
+TEXT: removeTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 374
+TEXT: setRemoveTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 382
+TEXT: removeReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 383
+TEXT: setRemoveReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 391
+TEXT: removeNote,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 392
+TEXT: setRemoveNote,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 472
+TEXT: removeTargetId
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 477
+TEXT: removeTargetId,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 494
+TEXT: removed:
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 498
+TEXT: "removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 507
+TEXT: const beginRemove = (
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 511
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 515
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 521
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 530
+TEXT: const cancelRemove =
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 532
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 536
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 543
+TEXT: const confirmRemove =
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 563
+TEXT: removeReason ===
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 570
+TEXT: ? "Removed from Poster + prevent re-import"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 571
+TEXT: : "Removed from Poster";
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 577
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 580
+TEXT: removeReason,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 583
+TEXT: removeNote
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 613
+TEXT: cancelRemove();
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 691
+TEXT: attribution, and remove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 761
+TEXT: "removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 762
+TEXT: "Removed",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 908
+TEXT: : styles.statusRemoved
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 915
+TEXT: : "Removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 926
+TEXT: styles.removeButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 929
+TEXT: beginRemove(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 934
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1141
+TEXT: : "Removed"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1163
+TEXT: "removed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1325
+TEXT: beginRemove(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1334
+TEXT: Remove from
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1370
+TEXT: cancelRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1380
+TEXT: aria-labelledby="remove-content-title"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1387
+TEXT: Remove content
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1391
+TEXT: id="remove-content-title"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1393
+TEXT: Remove from
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1469
+TEXT: removeReason ===
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1473
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1501
+TEXT: removeNote
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1508
+TEXT: setRemoveNote(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1561
+TEXT: cancelRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1573
+TEXT: confirmRemove
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1577
+TEXT: ? "Remove + prevent re-import"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1578
+TEXT: : "Remove from Poster"}
+
+
+------------------------------------------------------------
+AREA: src\features\sources
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 17
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 100
+TEXT: status: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 105
+TEXT: "Feed returned repeated errors. Paused until checked.",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 110
+TEXT: "Source paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 138
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 139
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 279
+TEXT: removeExistingContent,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 280
+TEXT: setRemoveExistingContent,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 385
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 389
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 442
+TEXT: const pauseSource = (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 447
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 448
+TEXT: "Source paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 452
+TEXT: const enablePausedSource = (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 476
+TEXT: enablePausedSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 488
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 499
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 513
+TEXT: removeExistingContent
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 605
+TEXT: is healthy, and pause,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 675
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 676
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 825
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 826
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 869
+TEXT: pauseSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 874
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 877
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1201
+TEXT: pauseSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1206
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1209
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1216
+TEXT: enablePausedSource(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1327
+TEXT: removeExistingContent
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1332
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1341
+TEXT: Also remove
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1361
+TEXT: issues. Use Pause for
+
+
+------------------------------------------------------------
+AREA: src\features\monetization
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.types.ts
+LINE: 5
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 19
+TEXT: disabled?:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 61
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 62
+TEXT: props.disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 762
+TEXT: disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 143
+TEXT: const removeMedia =
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 185
+TEXT: styles.removeMediaButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 188
+TEXT: removeMedia
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 191
+TEXT: Remove
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 243
+TEXT: async reject(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 254
+TEXT: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 262
+TEXT: async approve(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 273
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.types.ts
+LINE: 75
+TEXT: reject:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.types.ts
+LINE: 83
+TEXT: approve:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 40
+TEXT: onReject:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 43
+TEXT: onApprove:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 540
+TEXT: placeholder="Required for changes or rejection."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 586
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 605
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 613
+TEXT: props.onReject
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 616
+TEXT: Reject
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 624
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 633
+TEXT: props.onApprove
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 636
+TEXT: Approve and create draft
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 649
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 650
+TEXT: ? "This request was approved and its draft campaign was created."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 651
+TEXT: : "This request was rejected and remains available as a historical record."}
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 326
+TEXT: | "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 327
+TEXT: | "approve"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 357
+TEXT: "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 360
+TEXT: .reject({
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 371
+TEXT: .approve({
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 514
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 515
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 518
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 519
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 763
+TEXT: onReject={() =>
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 765
+TEXT: "reject"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 768
+TEXT: onApprove={() =>
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 770
+TEXT: "approve"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 14
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 137
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 163
+TEXT: "Affiliate campaign paused for offer review",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 252
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 253
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 503
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 509
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 608
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 621
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 622
+TEXT: "Affiliate campaign paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 632
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 652
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 706
+TEXT: Manage approved affiliate
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 738
+TEXT: Approved offers currently running
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 835
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 836
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1027
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1028
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1478
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1483
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1501
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 83
+TEXT: "Campaign paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 129
+TEXT: "Programmatic advertising remains disabled for initial release",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 145
+TEXT: "Campaign draft created from approved commercial request ADV-1003",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 159
+TEXT: "Direct sponsorship request approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 175
+TEXT: "Campaign paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 219
+TEXT: "Affiliate request ADV-1004 approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 318
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 319
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 324
+TEXT: case "disabled":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 325
+TEXT: return "Disabled";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 463
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 464
+TEXT: return styles.statusPaused;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 476
+TEXT: return styles.statusDisabled;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 481
+TEXT: case "disabled":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 482
+TEXT: return styles.statusDisabled;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 697
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 703
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 715
+TEXT: disabled:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 721
+TEXT: "disabled"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 795
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 808
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 809
+TEXT: "Campaign paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 819
+TEXT: "paused" ||
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 841
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 985
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 986
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 995
+TEXT: "disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 996
+TEXT: "Disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1231
+TEXT: but disabled until provider,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1240
+TEXT: styles.disabledBadge
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1243
+TEXT: Disabled
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1630
+TEXT: is intentionally disabled.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1668
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1673
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1691
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 15
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 199
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 228
+TEXT: "Campaign paused for advertiser review",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 264
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 265
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 499
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 505
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 565
+TEXT: const pauseCampaign = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 578
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 579
+TEXT: "Direct sponsorship paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 589
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 609
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 833
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 834
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1031
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1032
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1087
+TEXT: Poster manually approves every direct sponsorship.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1535
+TEXT: pauseCampaign(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1540
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1558
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 141
+TEXT: "Please provide the final approved campaign image and confirm the conversion tracking method.",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 151
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 218
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 452
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 556
+TEXT: "disabled",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 607
+TEXT: * Approved request becomes Draft first.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 671
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 11
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 13
+TEXT: | "disabled";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 22
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 23
+TEXT: | "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 22
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 82
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 102
+TEXT: "Poster promotion paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 194
+TEXT: case "paused":
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 195
+TEXT: return "Paused";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 426
+TEXT: paused:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 432
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 802
+TEXT: const pausePromotion = (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 815
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 816
+TEXT: "Poster promotion paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 826
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 846
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1062
+TEXT: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1063
+TEXT: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1249
+TEXT: "paused"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1250
+TEXT: ? styles.statusPaused
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1736
+TEXT: disabled={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1770
+TEXT: pausePromotion(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1775
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1793
+TEXT: "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1949
+TEXT: End promotion
+
+
+------------------------------------------------------------
+AREA: src\features\operations
+------------------------------------------------------------
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.mock.ts
+LINE: 47
+TEXT: approvedForPromotion: true,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.mock.ts
+LINE: 55
+TEXT: approvedForPromotion: false,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.types.ts
+LINE: 51
+TEXT: approvedForPromotion: boolean;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 100
+TEXT: property.approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 198
+TEXT: .approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 200
+TEXT: } approved for promotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 618
+TEXT: .approvedForPromotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 635
+TEXT: approvedForPromotion:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 647
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1142
+TEXT: disabled={!value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 22
+TEXT: value: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 23
+TEXT: label: "Approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 34
+TEXT: value: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 35
+TEXT: label: "Reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 38
+TEXT: value: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 39
+TEXT: label: "Rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 159
+TEXT: value: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 160
+TEXT: label: "Reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 11
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 41
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 78
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 113
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 116
+TEXT: "Commission approved by the external platform.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 131
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 198
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 268
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 335
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 371
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 401
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 404
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 438
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 442
+TEXT: "Demonstration reversed commission retained for audit history.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 473
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 476
+TEXT: "Commission reversed after the external order was cancelled.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 4
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 7
+TEXT: | "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 8
+TEXT: | "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 39
+TEXT: | "reversed";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 57
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 60
+TEXT: | "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 61
+TEXT: | "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 97
+TEXT: rejectionReason: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 138
+TEXT: rejectionReason: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 38
+TEXT: rejectionReason: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 92
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 102
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 138
+TEXT: "Select an approved external program.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 181
+TEXT: "Commission amount is required for approved, payable or paid earnings.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 271
+TEXT: draft.status === "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 279
+TEXT: draft.status === "rejected" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 280
+TEXT: !draft.rejectionReason.trim()
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 282
+TEXT: errors.rejectionReason =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 283
+TEXT: "Enter the rejection reason.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 284
+TEXT: {earning.rejectionReason ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 286
+TEXT: <h3>Rejection reason</h3>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 289
+TEXT: {earning.rejectionReason}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 358
+TEXT: onStatusChange("approved");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 361
+TEXT: Approve
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 365
+TEXT: {earning.status === "approved" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 373
+TEXT: Mark payable
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 385
+TEXT: Mark paid
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 390
+TEXT: earning.status !== "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 391
+TEXT: earning.status !== "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 396
+TEXT: onStatusChange("reversed");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 399
+TEXT: Reverse
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 404
+TEXT: earning.status !== "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 409
+TEXT: onStatusChange("rejected");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 412
+TEXT: Reject
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 120
+TEXT: description="Connect this earning to the approved external program and promotion that produced the reported conversion."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 125
+TEXT: <span>Approved program</span>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 176
+TEXT: disabled={!draft.programId}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 399
+TEXT: label="Commission amount (required from approved status)"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 499
+TEXT: "reversed" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 518
+TEXT: "rejected" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 520
+TEXT: label="Rejection reason"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 522
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 525
+TEXT: errors.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 529
+TEXT: "rejectionReason",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 158
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 159
+TEXT: earning.rejectionReason,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 217
+TEXT: case "approved":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 218
+TEXT: return "External earning approved.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 226
+TEXT: case "reversed":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 227
+TEXT: return "External earning reversed.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 229
+TEXT: case "rejected":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 230
+TEXT: return "External earning rejected.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 244
+TEXT: case "approved":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 245
+TEXT: return "approved";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 253
+TEXT: case "reversed":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 254
+TEXT: return "reversed";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 256
+TEXT: case "rejected":
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 257
+TEXT: return "rejected";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 316
+TEXT: const approvedPrograms =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 323
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 368
+TEXT: approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 375
+TEXT: [approvedPrograms]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 461
+TEXT: "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 463
+TEXT: "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 486
+TEXT: const approvedInr =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 489
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 496
+TEXT: const approvedUsd =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 499
+TEXT: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 543
+TEXT: approvedInr,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 545
+TEXT: approvedUsd,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 555
+TEXT: reversed:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 559
+TEXT: "reversed" ||
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 561
+TEXT: "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 745
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 746
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 907
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 908
+TEXT: draft.rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 980
+TEXT: status === "reversed" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 993
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 995
+TEXT: "reversed",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1007
+TEXT: status === "rejected" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1009
+TEXT: .rejectionReason
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1020
+TEXT: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1024
+TEXT: rejectionReason:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1025
+TEXT: "Enter the rejection reason before rejecting this earning.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1054
+TEXT: "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1055
+TEXT: ? "reversed"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1142
+TEXT: label="Approved net"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1144
+TEXT: summary.approvedInr,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1145
+TEXT: summary.approvedUsd
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1147
+TEXT: description="Approved, payable and paid earnings by currency"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1171
+TEXT: summary.reversed
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1173
+TEXT: description="Reversed or rejected records"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1227
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1228
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1239
+TEXT: <option value="reversed">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1240
+TEXT: Reversed
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1243
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1244
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1528
+TEXT: approvedPrograms
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 26
+TEXT: value: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 27
+TEXT: label: "Approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 30
+TEXT: value: "rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 31
+TEXT: label: "Rejected",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 34
+TEXT: value: "suspended",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.constants.ts
+LINE: 35
+TEXT: label: "Suspended",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 8
+TEXT: id: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 26
+TEXT: status: "approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 62
+TEXT: "Program status changed from Under review to Approved.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 5
+TEXT: | "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 6
+TEXT: | "rejected"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 7
+TEXT: | "suspended"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 92
+TEXT: draft.status === "approved" &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 96
+TEXT: "Approved programs require an account or publisher reference.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 89
+TEXT: "Not approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 240
+TEXT: {program.status === "approved" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 245
+TEXT: onStatusChange("suspended");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 248
+TEXT: Suspend
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 252
+TEXT: {program.status === "suspended" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 257
+TEXT: onStatusChange("approved");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 186
+TEXT: const approvedCount =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 189
+TEXT: program.status === "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 406
+TEXT: label="Approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 407
+TEXT: value={approvedCount}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 466
+TEXT: <option value="approved">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 467
+TEXT: Approved
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 470
+TEXT: <option value="rejected">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 471
+TEXT: Rejected
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 474
+TEXT: <option value="suspended">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 475
+TEXT: Suspended
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.constants.ts
+LINE: 27
+TEXT: value: "paused",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.constants.ts
+LINE: 28
+TEXT: label: "Paused",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 11
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 76
+TEXT: "Demonstration promotion. Replace with a real approved product or service.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 125
+TEXT: "program-example-approved",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 5
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 52
+TEXT: | "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 79
+TEXT: "Select an approved external program.";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 336
+TEXT: onStatusChange("paused");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 339
+TEXT: Pause
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 343
+TEXT: {promotion.status === "paused" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 363
+TEXT: End promotion
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 23
+TEXT: export interface ApprovedProgramOption {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 32
+TEXT: approvedPrograms:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 33
+TEXT: ReadonlyArray<ApprovedProgramOption>;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 45
+TEXT: approvedPrograms,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 96
+TEXT: description="Connect this promotion to an approved external program and identify the product, service or commercial offer."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 101
+TEXT: <span>Approved program</span>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 121
+TEXT: {approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 264
+TEXT: description="Record the approved image or video source used by the promotion."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 311
+TEXT: description="Poster records its own impressions and clicks. The external platform uses its approved destination, tracking link or referral code."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 132
+TEXT: previousStatus === "paused"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 141
+TEXT: if (nextStatus === "paused") {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 142
+TEXT: return "paused";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 208
+TEXT: const approvedPrograms =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 215
+TEXT: "approved"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 708
+TEXT: <option value="paused">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 709
+TEXT: Paused
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 944
+TEXT: approvedPrograms={
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 945
+TEXT: approvedPrograms
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 43
+TEXT: "Track pending, approved, reversed and paid commissions.",
+
+
+============================================================
+END OF STEP 5 AUDIT OUTPUT
+============================================================

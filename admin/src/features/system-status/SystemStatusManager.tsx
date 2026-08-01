@@ -1,152 +1,19 @@
+"use client";
+
+import {
+  formatSystemTimestamp,
+  type SystemServiceStatus,
+} from "./system-status-api";
+
+import {
+  useSystemStatus,
+} from "./use-system-status";
+
 import styles from "./SystemStatusManager.module.css";
 
-type HealthStatus =
-  | "healthy"
-  | "not_connected";
-
-interface SystemService {
-  name: string;
-  area: string;
-  status: HealthStatus;
-  statusLabel: string;
-  description: string;
-}
-
-interface ServiceGroup {
-  title: string;
-  description: string;
-  services: SystemService[];
-}
-
-const groups: ServiceGroup[] = [
-  {
-    title: "Core services",
-
-    description:
-      "Essential application and persistence services.",
-
-    services: [
-      {
-        name: "Admin UI",
-        area: "Operations",
-
-        status: "healthy",
-
-        statusLabel:
-          "Healthy",
-
-        description:
-          "Poster Admin is available and the current frontend build is operating normally.",
-      },
-
-      {
-        name: "Backend API",
-        area: "Application service",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Server-side APIs and shared business logic have not been connected yet.",
-      },
-
-      {
-        name: "PostgreSQL Database",
-        area: "Persistence",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Permanent platform data is not connected to PostgreSQL yet.",
-      },
-    ],
-  },
-
-  {
-    title: "Content ingestion",
-
-    description:
-      "Services responsible for receiving permitted external content.",
-
-    services: [
-      {
-        name: "Provider APIs",
-        area: "External integrations",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Official publisher and provider API integrations are not connected yet.",
-      },
-
-      {
-        name: "RSS Ingestion",
-        area: "Feed synchronization",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Authorized RSS scheduling, synchronization, retries, and live feed monitoring are not connected yet.",
-      },
-    ],
-  },
-
-  {
-    title:
-      "Intelligence & communication",
-
-    description:
-      "Essential intelligence and outbound communication services.",
-
-    services: [
-      {
-        name: "AI Services",
-        area: "Intelligence",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Classification, ranking, recommendation, and taxonomy intelligence services are not connected yet.",
-      },
-
-      {
-        name: "Email Notifications",
-        area: "Communication",
-
-        status:
-          "not_connected",
-
-        statusLabel:
-          "Not connected",
-
-        description:
-          "Automatic copyright, commercial, client, and operational email delivery is not connected yet.",
-      },
-    ],
-  },
-];
-
 function statusClass(
-  status: HealthStatus
+  status:
+    SystemServiceStatus
 ): string {
   return status ===
     "healthy"
@@ -155,25 +22,14 @@ function statusClass(
 }
 
 export default function SystemStatusManager() {
-  const services =
-    groups.flatMap(
-      (group) =>
-        group.services
-    );
-
-  const operationalCount =
-    services.filter(
-      (service) =>
-        service.status ===
-        "healthy"
-    ).length;
-
-  const pendingCount =
-    services.filter(
-      (service) =>
-        service.status ===
-        "not_connected"
-    ).length;
+  const {
+    data,
+    error,
+    isLoading,
+    isRefreshing,
+    refresh,
+  } =
+    useSystemStatus();
 
   return (
     <div
@@ -200,246 +56,362 @@ export default function SystemStatusManager() {
           </h2>
 
           <p>
-            Operational status of
-            Poster&apos;s essential
-            platform services.
+            Authoritative operational
+            status of Poster&apos;s
+            essential services.
           </p>
         </div>
+
+        <button
+          type="button"
+          className={
+            styles.refreshButton
+          }
+          onClick={
+            refresh
+          }
+          disabled={
+            isLoading ||
+            isRefreshing
+          }
+        >
+          {isRefreshing
+            ? "Refreshing..."
+            : "Refresh status"}
+        </button>
       </header>
 
-      <section
-        className={
-          styles.summaryGrid
-        }
-        aria-label="Platform status summary"
-      >
-        <article
+      {error ? (
+        <section
           className={
-            styles.summaryCard
+            styles.notice
           }
+          role="alert"
         >
-          <span>
-            Essential services
-          </span>
-
-          <strong>
-            {
-              services.length
+          <div
+            className={
+              styles.noticeMark
             }
-          </strong>
+          >
+            !
+          </div>
 
-          <small>
-            Core services monitored
-          </small>
-        </article>
+          <div>
+            <strong>
+              System Status could not
+              be refreshed
+            </strong>
 
-        <article
+            <p>
+              {error}
+
+              {data
+                ? " The last successful snapshot remains visible."
+                : ""}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {isLoading &&
+      !data ? (
+        <section
           className={
-            styles.summaryCard
+            styles.footerNote
           }
         >
-          <span>
-            Operational
-          </span>
-
           <strong>
-            {
-              operationalCount
-            }
-          </strong>
-
-          <small>
-            Currently available
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.summaryCard
-          }
-        >
-          <span>
-            Pending
-          </span>
-
-          <strong>
-            {
-              pendingCount
-            }
-          </strong>
-
-          <small>
-            Not connected yet
-          </small>
-        </article>
-      </section>
-
-      <section
-        className={
-          styles.notice
-        }
-      >
-        <div
-          className={
-            styles.noticeMark
-          }
-          aria-hidden="true"
-        >
-          i
-        </div>
-
-        <div>
-          <strong>
-            Status reflects the real
-            development state.
+            Loading System Status
           </strong>
 
           <p>
-            Services that are not yet
-            implemented or connected are
-            shown as Not connected rather
-            than being reported as healthy.
-            Live health checks will replace
-            these development states when
-            Backend services are available.
+            Checking the Backend API
+            and PostgreSQL connection.
           </p>
-        </div>
-      </section>
-
-      <div
-        className={
-          styles.groups
-        }
-      >
-        {groups.map(
-          (group) => (
-            <section
-              key={
-                group.title
-              }
+        </section>
+      ) : data ? (
+        <>
+          <section
+            className={
+              styles.summaryGrid
+            }
+            aria-label="Platform status summary"
+          >
+            <article
               className={
-                styles.panel
+                styles.summaryCard
               }
             >
-              <div
-                className={
-                  styles.panelHeader
+              <span>
+                Essential services
+              </span>
+
+              <strong>
+                {
+                  data.summary.total
                 }
-              >
-                <div>
-                  <h3>
-                    {
-                      group.title
-                    }
-                  </h3>
+              </strong>
 
-                  <p>
-                    {
-                      group.description
-                    }
-                  </p>
-                </div>
-              </div>
+              <small>
+                Services represented
+              </small>
+            </article>
 
-              <div
-                className={
-                  styles.serviceList
+            <article
+              className={
+                styles.summaryCard
+              }
+            >
+              <span>
+                Operational
+              </span>
+
+              <strong>
+                {
+                  data.summary
+                    .operational
                 }
-              >
-                {group.services.map(
-                  (
-                    service
-                  ) => (
-                    <article
-                      key={
-                        service.name
-                      }
-                      className={
-                        styles.serviceRow
-                      }
-                    >
-                      <div
-                        className={
-                          styles.serviceIdentity
-                        }
-                      >
-                        <span
-                          className={`${styles.statusDot} ${statusClass(
-                            service.status
-                          )}`}
-                          aria-hidden="true"
-                        />
+              </strong>
 
-                        <div>
-                          <strong>
-                            {
-                              service.name
-                            }
-                          </strong>
+              <small>
+                Healthy now
+              </small>
+            </article>
 
-                          <span>
-                            {
-                              service.area
-                            }
-                          </span>
-                        </div>
-                      </div>
+            <article
+              className={
+                styles.summaryCard
+              }
+            >
+              <span>
+                Needs attention
+              </span>
 
-                      <p
-                        className={
-                          styles.serviceDescription
-                        }
-                      >
+              <strong>
+                {
+                  data.summary
+                    .degraded +
+                  data.summary
+                    .unavailable
+                }
+              </strong>
+
+              <small>
+                Degraded or unavailable
+              </small>
+            </article>
+
+            <article
+              className={
+                styles.summaryCard
+              }
+            >
+              <span>
+                Not connected
+              </span>
+
+              <strong>
+                {
+                  data.summary
+                    .notConnected
+                }
+              </strong>
+
+              <small>
+                No authoritative probe
+              </small>
+            </article>
+          </section>
+
+          <section
+            className={
+              styles.notice
+            }
+          >
+            <div
+              className={
+                styles.noticeMark
+              }
+              aria-hidden="true"
+            >
+              i
+            </div>
+
+            <div>
+              <strong>
+                Live Backend health
+                snapshot
+              </strong>
+
+              <p>
+                Environment:{" "}
+                <strong>
+                  {
+                    data.environment
+                  }
+                </strong>
+                . Generated{" "}
+                {formatSystemTimestamp(
+                  data.generatedAt
+                )}.
+                Services without real
+                health probes remain
+                explicitly marked Not
+                connected.
+              </p>
+            </div>
+          </section>
+
+          <div
+            className={
+              styles.groups
+            }
+          >
+            {data.groups.map(
+              group => (
+                <section
+                  key={
+                    group.key
+                  }
+                  className={
+                    styles.panel
+                  }
+                >
+                  <div
+                    className={
+                      styles.panelHeader
+                    }
+                  >
+                    <div>
+                      <h3>
                         {
-                          service.description
+                          group.title
+                        }
+                      </h3>
+
+                      <p>
+                        {
+                          group.description
                         }
                       </p>
+                    </div>
+                  </div>
 
-                      <div
-                        className={
-                          styles.serviceMeta
-                        }
-                      >
-                        <span
-                          className={`${styles.statusBadge} ${statusClass(
-                            service.status
-                          )}`}
-                        >
-                          {
-                            service.statusLabel
+                  <div
+                    className={
+                      styles.serviceList
+                    }
+                  >
+                    {group.services.map(
+                      service => (
+                        <article
+                          key={
+                            service.key
                           }
-                        </span>
-                      </div>
-                    </article>
-                  )
-                )}
-              </div>
-            </section>
-          )
-        )}
-      </div>
+                          className={
+                            styles.serviceRow
+                          }
+                        >
+                          <div
+                            className={
+                              styles.serviceIdentity
+                            }
+                          >
+                            <span
+                              className={`${styles.statusDot} ${statusClass(
+                                service.status
+                              )}`}
+                              aria-hidden="true"
+                            />
 
-      <section
-        className={
-          styles.footerNote
-        }
-      >
-        <div>
-          <strong>
-            Live monitoring comes later.
-          </strong>
+                            <div>
+                              <strong>
+                                {
+                                  service.name
+                                }
+                              </strong>
 
-          <p>
-            Response time, uptime,
-            last-checked timestamps, API
-            health, worker failures, and
-            service alerts will be populated
-            from real monitoring only after
-            the corresponding services are
-            implemented.
-          </p>
-        </div>
-      </section>
+                              <span>
+                                {
+                                  service.area
+                                }
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p
+                              className={
+                                styles.serviceDescription
+                              }
+                            >
+                              {
+                                service.description
+                              }
+                            </p>
+
+                            <small
+                              className={
+                                styles.serviceCheck
+                              }
+                            >
+                              Checked:{" "}
+                              {formatSystemTimestamp(
+                                service.checkedAt
+                              )}
+
+                              {service.latencyMilliseconds !==
+                              null
+                                ? ` · ${service.latencyMilliseconds} ms`
+                                : ""}
+                            </small>
+                          </div>
+
+                          <div
+                            className={
+                              styles.serviceMeta
+                            }
+                          >
+                            <span
+                              className={`${styles.statusBadge} ${statusClass(
+                                service.status
+                              )}`}
+                            >
+                              {
+                                service.statusLabel
+                              }
+                            </span>
+                          </div>
+                        </article>
+                      )
+                    )}
+                  </div>
+                </section>
+              )
+            )}
+          </div>
+
+          <section
+            className={
+              styles.footerNote
+            }
+          >
+            <strong>
+              Safe operational metadata
+            </strong>
+
+            <p>
+              The endpoint exposes
+              service state, timestamps,
+              latency, environment, and
+              non-sensitive PostgreSQL
+              metadata. Credentials and
+              connection secrets are
+              never returned.
+            </p>
+          </section>
+        </>
+      ) : null}
     </div>
   );
 }

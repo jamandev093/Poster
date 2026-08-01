@@ -1,0 +1,1940 @@
+﻿POSTER ADMIN PROFILE
+FRONTEND API INTEGRATION INSPECTION
+
+Generated: 2026-07-31 23:58:35
+
+============================================================
+FILE: admin\src\features\auth\context\AdminAuthProvider.tsx
+============================================================
+
+"use client";
+
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import type {
+  AdminAuthenticatedIdentity,
+  AdminAuthStatus,
+  AdminLoginInput,
+} from "../contracts/auth.types";
+
+import {
+  AdminApiError,
+  loadAdminAccess,
+  loginAdmin,
+  logoutAdmin,
+  refreshAdminSession,
+} from "../services/auth-api.service";
+
+export interface AdminAuthContextValue {
+  status: AdminAuthStatus;
+  identity:
+    AdminAuthenticatedIdentity | null;
+  errorMessage: string | null;
+  login:
+    (
+      input: AdminLoginInput
+    ) => Promise<void>;
+  logout: () => Promise<void>;
+  restore: () => Promise<void>;
+}
+
+export const AdminAuthContext =
+  createContext<
+    AdminAuthContextValue | null
+  >(null);
+
+interface AdminAuthProviderProps {
+  children: ReactNode;
+}
+
+export default function AdminAuthProvider({
+  children,
+}: AdminAuthProviderProps) {
+  const [
+    status,
+    setStatus,
+  ] = useState<AdminAuthStatus>(
+    "restoring"
+  );
+
+  const [
+    identity,
+    setIdentity,
+  ] =
+    useState<
+      AdminAuthenticatedIdentity | null
+    >(null);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState<string | null>(null);
+
+  const establishIdentity =
+    useCallback(
+      async (
+        authentication:
+          Awaited<
+            ReturnType<
+              typeof refreshAdminSession
+            >
+          >
+      ) => {
+        const access =
+          await loadAdminAccess(
+            authentication.accessToken
+          );
+
+        setIdentity({
+          account:
+            authentication.data.account,
+          session:
+            authentication.data.session,
+          access,
+        });
+
+        setStatus("authenticated");
+        setErrorMessage(null);
+      },
+      []
+    );
+
+  const restore =
+    useCallback(async () => {
+      setStatus("restoring");
+      setErrorMessage(null);
+
+      try {
+        const authentication =
+          await refreshAdminSession();
+
+        await establishIdentity(
+          authentication
+        );
+      } catch (error) {
+        setIdentity(null);
+
+        if (
+          error instanceof
+            AdminApiError &&
+          error.status === 403
+        ) {
+          setStatus("forbidden");
+          return;
+        }
+
+        setStatus("unauthenticated");
+      }
+    }, [establishIdentity]);
+
+  useEffect(() => {
+    const restoreTimer =
+      window.setTimeout(() => {
+        void restore();
+      }, 0);
+
+    return () => {
+      window.clearTimeout(
+        restoreTimer
+      );
+    };
+  }, [restore]);
+
+  const login =
+    useCallback(
+      async (
+        input: AdminLoginInput
+      ) => {
+        setStatus("restoring");
+        setErrorMessage(null);
+
+        try {
+          const authentication =
+            await loginAdmin(input);
+
+          await establishIdentity(
+            authentication
+          );
+        } catch (error) {
+          setIdentity(null);
+
+          if (
+            error instanceof
+              AdminApiError
+          ) {
+            if (error.status === 403) {
+              setStatus("forbidden");
+            } else {
+              setStatus(
+                "unauthenticated"
+              );
+            }
+
+            setErrorMessage(
+              error.message
+            );
+
+            return;
+          }
+
+          setStatus("unauthenticated");
+
+          setErrorMessage(
+            "The Admin login request could not be completed."
+          );
+        }
+      },
+      [establishIdentity]
+    );
+
+  const logout =
+    useCallback(async () => {
+      try {
+        await logoutAdmin();
+      } finally {
+        setIdentity(null);
+        setStatus("unauthenticated");
+        setErrorMessage(null);
+      }
+    }, []);
+
+  const value =
+    useMemo<
+      AdminAuthContextValue
+    >(
+      () => ({
+        status,
+        identity,
+        errorMessage,
+        login,
+        logout,
+        restore,
+      }),
+      [
+        status,
+        identity,
+        errorMessage,
+        login,
+        logout,
+        restore,
+      ]
+    );
+
+  return (
+    <AdminAuthContext.Provider
+      value={value}
+    >
+      {children}
+    </AdminAuthContext.Provider>
+  );
+}
+
+
+============================================================
+FILE: admin\src\features\auth\contracts\auth.types.ts
+============================================================
+
+export type AdminAccountStatus =
+  | "pending_verification"
+  | "active"
+  | "disabled"
+  | "deleted";
+
+export type AdminPlatformRole =
+  | "super_admin"
+  | "operations_admin"
+  | "content_moderator"
+  | "copyright_admin"
+  | "support_analyst"
+  | "analytics_viewer";
+
+export type AdminPlatformPermission =
+  | "admin.access"
+  | "dashboard.read"
+  | "users.metrics.read"
+  | "content.read"
+  | "content.manage"
+  | "sources.read"
+  | "sources.manage"
+  | "reports.read"
+  | "reports.manage"
+  | "copyright.read"
+  | "copyright.manage"
+  | "monetization.requests.read"
+  | "monetization.requests.manage"
+  | "monetization.campaigns.read"
+  | "monetization.campaigns.manage"
+  | "audit.read";
+
+export interface AuthenticationAccount {
+  id: string;
+  email: string;
+  fullName: string;
+  status: AdminAccountStatus;
+  emailVerifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface AuthenticationSession {
+  id: string;
+  userId: string;
+  organizationId: string | null;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface AuthenticationResponse {
+  account: AuthenticationAccount;
+  session: AuthenticationSession;
+}
+
+export interface AdminOrganizationMembership {
+  membershipId: string;
+  organizationId: string;
+  role: string;
+  isPrimaryContact: boolean;
+}
+
+export interface AdminAccessResponse {
+  account: {
+    id: string;
+    email: string;
+    fullName: string;
+    status: AdminAccountStatus;
+  };
+
+  access: {
+    sessionId: string;
+    platformRoles:
+      readonly AdminPlatformRole[];
+    platformPermissions:
+      readonly AdminPlatformPermission[];
+  };
+
+  organizations:
+    readonly AdminOrganizationMembership[];
+}
+
+export interface AdminAuthenticatedIdentity {
+  account: AuthenticationAccount;
+  session: AuthenticationSession;
+  access: AdminAccessResponse;
+}
+
+export interface ApiValidationIssue {
+  path: string;
+  message: string;
+}
+
+export interface ApiErrorPayload {
+  error: {
+    code: string;
+    message: string;
+    requestId: string;
+    details?:
+      readonly ApiValidationIssue[];
+  };
+}
+
+export interface AdminLoginInput {
+  email: string;
+  password: string;
+}
+
+export type AdminAuthStatus =
+  | "restoring"
+  | "authenticated"
+  | "unauthenticated"
+  | "forbidden";
+
+============================================================
+FILE: admin\src\features\auth\services\auth-api.service.ts
+============================================================
+
+import type {
+  AdminAccessResponse,
+  AdminLoginInput,
+  ApiErrorPayload,
+  AuthenticationResponse,
+} from "../contracts/auth.types";
+
+const API_BASE_URL =
+  process.env
+    .NEXT_PUBLIC_POSTER_API_BASE_URL ??
+  "http://localhost:4000/api/v1";
+
+const ACCESS_TOKEN_HEADER =
+  "x-poster-access-token";
+
+const ACCESS_TOKEN_EXPIRES_HEADER =
+  "x-poster-access-token-expires-at";
+
+export class AdminApiError extends Error {
+  readonly status: number;
+  readonly code: string;
+  readonly requestId: string | null;
+
+  constructor(
+    message: string,
+    options: {
+      status: number;
+      code: string;
+      requestId?: string | null;
+    }
+  ) {
+    super(message);
+
+    this.name = "AdminApiError";
+    this.status = options.status;
+    this.code = options.code;
+    this.requestId =
+      options.requestId ?? null;
+  }
+}
+
+interface AuthenticatedResponse {
+  data: AuthenticationResponse;
+  accessToken: string;
+  accessTokenExpiresAt: string;
+}
+
+async function readError(
+  response: Response
+): Promise<AdminApiError> {
+  let payload:
+    | ApiErrorPayload
+    | null = null;
+
+  try {
+    payload =
+      (await response.json()) as
+        ApiErrorPayload;
+  } catch {
+    payload = null;
+  }
+
+  return new AdminApiError(
+    payload?.error.message ??
+      "The request could not be completed.",
+    {
+      status: response.status,
+      code:
+        payload?.error.code ??
+        "REQUEST_FAILED",
+      requestId:
+        payload?.error.requestId ??
+        null,
+    }
+  );
+}
+
+function readAccessToken(
+  response: Response
+) {
+  const accessToken =
+    response.headers.get(
+      ACCESS_TOKEN_HEADER
+    );
+
+  const accessTokenExpiresAt =
+    response.headers.get(
+      ACCESS_TOKEN_EXPIRES_HEADER
+    );
+
+  if (
+    !accessToken ||
+    !accessTokenExpiresAt
+  ) {
+    throw new AdminApiError(
+      "The authentication response did not contain an access token.",
+      {
+        status: 500,
+        code:
+          "ACCESS_TOKEN_MISSING",
+      }
+    );
+  }
+
+  return {
+    accessToken,
+    accessTokenExpiresAt,
+  };
+}
+
+async function authenticationRequest(
+  path: "/auth/login" | "/auth/refresh",
+  init: RequestInit
+): Promise<AuthenticatedResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}${path}`,
+    {
+      ...init,
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        accept: "application/json",
+        ...(init.headers ?? {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw await readError(response);
+  }
+
+  const data =
+    (await response.json()) as
+      AuthenticationResponse;
+
+  return {
+    data,
+    ...readAccessToken(response),
+  };
+}
+
+export async function loginAdmin(
+  input: AdminLoginInput
+): Promise<AuthenticatedResponse> {
+  return await authenticationRequest(
+    "/auth/login",
+    {
+      method: "POST",
+      headers: {
+        "content-type":
+          "application/json",
+      },
+      body: JSON.stringify(input),
+    }
+  );
+}
+
+export async function refreshAdminSession():
+  Promise<AuthenticatedResponse> {
+  return await authenticationRequest(
+    "/auth/refresh",
+    {
+      method: "POST",
+    }
+  );
+}
+
+export async function logoutAdmin():
+  Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        accept: "application/json",
+      },
+    }
+  );
+
+  if (
+    !response.ok &&
+    response.status !== 401
+  ) {
+    throw await readError(response);
+  }
+}
+
+export async function loadAdminAccess(
+  accessToken: string
+): Promise<AdminAccessResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/access`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        accept: "application/json",
+        authorization:
+          `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw await readError(response);
+  }
+
+  return await response.json() as
+    AdminAccessResponse;
+}
+
+============================================================
+FILE: admin\src\features\account\AccountProfileManager.tsx
+============================================================
+
+"use client";
+
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import useAdminAuth from "@/features/auth/hooks/useAdminAuth";
+
+import AccountProfileForm from "./forms/AccountProfileForm";
+
+import type {
+  AdminAccountProfile,
+  AdminAccountProfileDraft,
+  AdminAccountProfileErrors,
+} from "./contracts/account-profile.types";
+
+import {
+  createInitialAdminProfile,
+  loadStoredAdminProfile,
+  saveStoredAdminProfile,
+} from "./services/account-profile.service";
+
+import {
+  hasAdminAccountProfileErrors,
+  validateAdminAccountProfile,
+} from "./validation/account-profile.validation";
+
+import styles from "./AccountProfileManager.module.css";
+
+function profileToDraft(
+  profile: AdminAccountProfile
+): AdminAccountProfileDraft {
+  return {
+    fullName: profile.fullName,
+    displayName:
+      profile.displayName,
+    jobTitle: profile.jobTitle,
+    businessEmail:
+      profile.businessEmail,
+    primaryPhone:
+      profile.primaryPhone,
+    alternatePhone:
+      profile.alternatePhone,
+    signalAccount:
+      profile.signalAccount,
+    telegramUsername:
+      profile.telegramUsername,
+    preferredLanguage:
+      profile.preferredLanguage,
+    timeZone: profile.timeZone,
+  };
+}
+
+function initials(value: string) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) =>
+      part.charAt(0).toUpperCase()
+    )
+    .join("");
+}
+
+export default function AccountProfileManager() {
+  const {
+    identity,
+    logout,
+  } = useAdminAuth();
+
+  const [
+    profile,
+    setProfile,
+  ] =
+    useState<
+      AdminAccountProfile | null
+    >(null);
+
+  const [
+    draft,
+    setDraft,
+  ] =
+    useState<
+      AdminAccountProfileDraft | null
+    >(null);
+
+  const [
+    errors,
+    setErrors,
+  ] =
+    useState<
+      AdminAccountProfileErrors
+    >({});
+
+  const [
+    saved,
+    setSaved,
+  ] = useState(false);
+
+  useEffect(() => {
+    if (!identity) {
+      return;
+    }
+
+    const timer =
+      window.setTimeout(() => {
+        const stored =
+          loadStoredAdminProfile();
+
+        const nextProfile =
+          stored?.userId ===
+          identity.account.id
+            ? stored
+            : createInitialAdminProfile({
+                userId:
+                  identity.account.id,
+                loginEmail:
+                  identity.account.email,
+                fullName:
+                  identity.account.fullName,
+                emailVerifiedAt:
+                  identity.account
+                    .emailVerifiedAt,
+                createdAt:
+                  identity.account
+                    .createdAt,
+              });
+
+        setProfile(nextProfile);
+        setDraft(
+          profileToDraft(nextProfile)
+        );
+      }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [identity]);
+
+  const roles =
+    identity?.access.access
+      .platformRoles ?? [];
+
+  const permissions =
+    identity?.access.access
+      .platformPermissions ?? [];
+
+  const profileInitials =
+    useMemo(
+      () =>
+        initials(
+          profile?.displayName ||
+            profile?.fullName ||
+            "Admin"
+        ),
+      [profile]
+    );
+
+  if (
+    !identity ||
+    !profile ||
+    !draft
+  ) {
+    return (
+      <div className={styles.loading}>
+        Loading account profile…
+      </div>
+    );
+  }
+
+  const save = () => {
+    const nextErrors =
+      validateAdminAccountProfile(
+        draft
+      );
+
+    setErrors(nextErrors);
+    setSaved(false);
+
+    if (
+      hasAdminAccountProfileErrors(
+        nextErrors
+      )
+    ) {
+      return;
+    }
+
+    const nextProfile =
+      saveStoredAdminProfile(
+        profile,
+        draft
+      );
+
+    setProfile(nextProfile);
+    setDraft(
+      profileToDraft(nextProfile)
+    );
+    setSaved(true);
+  };
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <div className={styles.identity}>
+          <div className={styles.avatar}>
+            {profileInitials || "A"}
+          </div>
+
+          <div>
+            <p>Admin account</p>
+
+            <h1>
+              {profile.displayName}
+            </h1>
+
+            <span>
+              {profile.jobTitle ||
+                "Administrator"}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.logoutButton}
+          onClick={() => {
+            void logout();
+          }}
+        >
+          Sign out
+        </button>
+      </header>
+
+      {saved ? (
+        <div
+          className={styles.success}
+          role="status"
+        >
+          Account profile saved locally.
+          Backend persistence will replace
+          this temporary adapter.
+        </div>
+      ) : null}
+
+      <section className={styles.summary}>
+        <article>
+          <span>Login email</span>
+          <strong>
+            {profile.loginEmail}
+          </strong>
+          <small>
+            Managed through secure
+            authentication workflows
+          </small>
+        </article>
+
+        <article>
+          <span>Account status</span>
+          <strong>
+            {identity.account.status}
+          </strong>
+          <small>
+            Email{" "}
+            {profile.emailVerifiedAt
+              ? "verified"
+              : "not verified"}
+          </small>
+        </article>
+
+        <article>
+          <span>Current session</span>
+          <strong>
+            Active
+          </strong>
+          <small>
+            Expires{" "}
+            {new Date(
+              identity.session.expiresAt
+            ).toLocaleString("en-IN")}
+          </small>
+        </article>
+      </section>
+
+      <div className={styles.layout}>
+        <AccountProfileForm
+          draft={draft}
+          errors={errors}
+          saving={false}
+          onChange={(nextDraft) => {
+            setDraft(nextDraft);
+            setSaved(false);
+
+            if (
+              Object.keys(errors)
+                .length > 0
+            ) {
+              setErrors({});
+            }
+          }}
+          onSubmit={save}
+        />
+
+        <aside className={styles.accessPanel}>
+          <section>
+            <h2>Platform roles</h2>
+
+            {roles.length ? (
+              <ul>
+                {roles.map((role) => (
+                  <li key={role}>
+                    {role.replaceAll(
+                      "_",
+                      " "
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No platform roles.</p>
+            )}
+          </section>
+
+          <section>
+            <h2>Permissions</h2>
+
+            {permissions.length ? (
+              <ul>
+                {permissions.map(
+                  (permission) => (
+                    <li key={permission}>
+                      {permission}
+                    </li>
+                  )
+                )}
+              </ul>
+            ) : (
+              <p>
+                No platform permissions.
+              </p>
+            )}
+          </section>
+
+          <section>
+            <h2>Security</h2>
+
+            <dl>
+              <div>
+                <dt>Created</dt>
+                <dd>
+                  {new Date(
+                    profile.createdAt
+                  ).toLocaleDateString(
+                    "en-IN"
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Last login</dt>
+                <dd>
+                  {profile.lastLoginAt
+                    ? new Date(
+                        profile.lastLoginAt
+                      ).toLocaleString(
+                        "en-IN"
+                      )
+                    : "Not available"}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+============================================================
+FILE: admin\src\features\account\contracts\account-profile.types.ts
+============================================================
+
+export interface AdminAccountProfile {
+  userId: string;
+
+  loginEmail: string;
+
+  fullName: string;
+
+  displayName: string;
+
+  jobTitle: string;
+
+  businessEmail: string;
+
+  primaryPhone: string;
+
+  alternatePhone: string;
+
+  signalAccount: string;
+
+  telegramUsername: string;
+
+  preferredLanguage: string;
+
+  timeZone: string;
+
+  emailVerifiedAt:
+    | string
+    | null;
+
+  createdAt: string;
+
+  lastLoginAt:
+    | string
+    | null;
+}
+
+export interface AdminAccountProfileDraft {
+  fullName: string;
+  displayName: string;
+  jobTitle: string;
+  businessEmail: string;
+  primaryPhone: string;
+  alternatePhone: string;
+  signalAccount: string;
+  telegramUsername: string;
+  preferredLanguage: string;
+  timeZone: string;
+}
+
+export type AdminAccountProfileErrors =
+  Partial<
+    Record<
+      keyof AdminAccountProfileDraft,
+      string
+    >
+  >;
+
+============================================================
+FILE: admin\src\features\account\services\account-profile.service.ts
+============================================================
+
+import type {
+  AdminAccountProfile,
+  AdminAccountProfileDraft,
+} from "../contracts/account-profile.types";
+
+const STORAGE_KEY =
+  "poster-admin-account-profile";
+
+function storageAvailable() {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.localStorage !==
+      "undefined"
+  );
+}
+
+export function createInitialAdminProfile(
+  input: {
+    userId: string;
+    loginEmail: string;
+    fullName: string;
+    emailVerifiedAt:
+      | string
+      | null;
+    createdAt: string;
+  }
+): AdminAccountProfile {
+  return {
+    userId: input.userId,
+    loginEmail: input.loginEmail,
+    fullName: input.fullName,
+    displayName: input.fullName,
+    jobTitle: "Administrator",
+    businessEmail:
+      input.loginEmail,
+    primaryPhone: "",
+    alternatePhone: "",
+    signalAccount: "",
+    telegramUsername: "",
+    preferredLanguage: "en",
+    timeZone:
+      "Asia/Kolkata",
+    emailVerifiedAt:
+      input.emailVerifiedAt,
+    createdAt:
+      input.createdAt,
+    lastLoginAt:
+      new Date().toISOString(),
+  };
+}
+
+export function loadStoredAdminProfile():
+  AdminAccountProfile | null {
+  if (!storageAvailable()) {
+    return null;
+  }
+
+  const stored =
+    window.localStorage.getItem(
+      STORAGE_KEY
+    );
+
+  if (!stored) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(
+      stored
+    ) as AdminAccountProfile;
+  } catch {
+    return null;
+  }
+}
+
+export function saveStoredAdminProfile(
+  current: AdminAccountProfile,
+  draft: AdminAccountProfileDraft
+): AdminAccountProfile {
+  const nextProfile:
+    AdminAccountProfile = {
+    ...current,
+
+    fullName:
+      draft.fullName.trim(),
+
+    displayName:
+      draft.displayName.trim(),
+
+    jobTitle:
+      draft.jobTitle.trim(),
+
+    businessEmail:
+      draft.businessEmail
+        .trim()
+        .toLowerCase(),
+
+    primaryPhone:
+      draft.primaryPhone.trim(),
+
+    alternatePhone:
+      draft.alternatePhone.trim(),
+
+    signalAccount:
+      draft.signalAccount.trim(),
+
+    telegramUsername:
+      draft.telegramUsername.trim(),
+
+    preferredLanguage:
+      draft.preferredLanguage,
+
+    timeZone:
+      draft.timeZone,
+  };
+
+  if (storageAvailable()) {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(nextProfile)
+    );
+  }
+
+  return nextProfile;
+}
+
+============================================================
+FILE: admin\src\features\account\forms\AccountProfileForm.tsx
+============================================================
+
+"use client";
+
+import type {
+  AdminAccountProfileDraft,
+  AdminAccountProfileErrors,
+} from "../contracts/account-profile.types";
+
+import styles from "./AccountProfileForm.module.css";
+
+interface AccountProfileFormProps {
+  draft: AdminAccountProfileDraft;
+  errors: AdminAccountProfileErrors;
+  saving: boolean;
+  onChange:
+    (
+      draft:
+        AdminAccountProfileDraft
+    ) => void;
+  onSubmit: () => void;
+}
+
+export default function AccountProfileForm({
+  draft,
+  errors,
+  saving,
+  onChange,
+  onSubmit,
+}: AccountProfileFormProps) {
+  const update = <
+    Key extends keyof AdminAccountProfileDraft,
+  >(
+    key: Key,
+    value:
+      AdminAccountProfileDraft[Key]
+  ) => {
+    onChange({
+      ...draft,
+      [key]: value,
+    });
+  };
+
+  return (
+    <form
+      className={styles.form}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
+      <section className={styles.section}>
+        <header>
+          <h2>Personal details</h2>
+
+          <p>
+            Information used to identify
+            the Admin operator internally.
+          </p>
+        </header>
+
+        <div className={styles.grid}>
+          <Field
+            label="Full name"
+            value={draft.fullName}
+            error={errors.fullName}
+            onChange={(value) => {
+              update("fullName", value);
+            }}
+          />
+
+          <Field
+            label="Display name"
+            value={draft.displayName}
+            error={errors.displayName}
+            onChange={(value) => {
+              update(
+                "displayName",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Job title"
+            value={draft.jobTitle}
+            placeholder="Administrator"
+            onChange={(value) => {
+              update("jobTitle", value);
+            }}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <header>
+          <h2>Business contact</h2>
+
+          <p>
+            Contact details for authorized
+            Poster colleagues and operational
+            communication.
+          </p>
+        </header>
+
+        <div className={styles.grid}>
+          <Field
+            label="Business email"
+            type="email"
+            value={draft.businessEmail}
+            error={errors.businessEmail}
+            onChange={(value) => {
+              update(
+                "businessEmail",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Primary phone"
+            type="tel"
+            value={draft.primaryPhone}
+            error={errors.primaryPhone}
+            placeholder="+91..."
+            onChange={(value) => {
+              update(
+                "primaryPhone",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Alternate phone"
+            type="tel"
+            value={draft.alternatePhone}
+            error={errors.alternatePhone}
+            placeholder="Optional"
+            onChange={(value) => {
+              update(
+                "alternatePhone",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Signal account"
+            value={draft.signalAccount}
+            error={errors.signalAccount}
+            placeholder="@username or +91..."
+            onChange={(value) => {
+              update(
+                "signalAccount",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Telegram username"
+            value={draft.telegramUsername}
+            placeholder="Optional"
+            onChange={(value) => {
+              update(
+                "telegramUsername",
+                value
+              );
+            }}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <header>
+          <h2>Preferences</h2>
+
+          <p>
+            Display and regional preferences
+            for the Admin workspace.
+          </p>
+        </header>
+
+        <div className={styles.grid}>
+          <SelectField
+            label="Preferred language"
+            value={
+              draft.preferredLanguage
+            }
+            error={
+              errors.preferredLanguage
+            }
+            options={[
+              {
+                value: "en",
+                label: "English",
+              },
+              {
+                value: "hi",
+                label: "Hindi",
+              },
+            ]}
+            onChange={(value) => {
+              update(
+                "preferredLanguage",
+                value
+              );
+            }}
+          />
+
+          <SelectField
+            label="Time zone"
+            value={draft.timeZone}
+            error={errors.timeZone}
+            options={[
+              {
+                value:
+                  "Asia/Kolkata",
+                label:
+                  "India Standard Time",
+              },
+              {
+                value: "UTC",
+                label: "UTC",
+              },
+            ]}
+            onChange={(value) => {
+              update(
+                "timeZone",
+                value
+              );
+            }}
+          />
+        </div>
+      </section>
+
+      <footer className={styles.actions}>
+        <button
+          type="submit"
+          disabled={saving}
+        >
+          {saving
+            ? "Saving…"
+            : "Save profile"}
+        </button>
+      </footer>
+    </form>
+  );
+}
+
+interface FieldProps {
+  label: string;
+  value: string;
+  type?:
+    | "text"
+    | "email"
+    | "tel";
+  placeholder?: string;
+  error?: string;
+  onChange:
+    (value: string) => void;
+}
+
+function Field({
+  label,
+  value,
+  type = "text",
+  placeholder,
+  error,
+  onChange,
+}: FieldProps) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      />
+
+      {error ? (
+        <small>{error}</small>
+      ) : null}
+    </label>
+  );
+}
+
+interface SelectFieldProps {
+  label: string;
+  value: string;
+  error?: string;
+  options:
+    ReadonlyArray<{
+      value: string;
+      label: string;
+    }>;
+  onChange:
+    (value: string) => void;
+}
+
+function SelectField({
+  label,
+  value,
+  error,
+  options,
+  onChange,
+}: SelectFieldProps) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <select
+        value={value}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      >
+        {options.map((option) => (
+          <option
+            key={option.value}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {error ? (
+        <small>{error}</small>
+      ) : null}
+    </label>
+  );
+}
+
+============================================================
+FILE: admin\src\components\admin\AdminShell.tsx
+============================================================
+
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ReactNode,
+  useState,
+} from "react";
+
+interface AdminShellProps {
+  children: ReactNode;
+}
+
+const primaryItems = [
+  ["/", "Dashboard"],
+  ["/content", "Content"],
+  ["/sources", "Sources"],
+  ["/copyright", "Copyright"],
+] as const;
+
+const monetizationItems = [
+  [
+    "/monetization/campaigns",
+    "Campaigns",
+  ],
+  [
+    "/monetization/analytics",
+    "Analytics",
+  ],
+  [
+    "/monetization/sponsorships",
+    "Direct Sponsorship",
+  ],
+  [
+    "/monetization/affiliate",
+    "Affiliate",
+  ],
+  [
+    "/monetization/poster-promotion",
+    "Poster Promotion",
+  ],
+] as const;
+
+const operationsItems = [
+  [
+    "/operations/business-identity",
+    "Business Identity",
+  ],
+  [
+    "/operations/external-promotions/programs",
+    "Programs",
+  ],
+  [
+    "/operations/external-promotions/promotions",
+    "Promotions",
+  ],
+  [
+    "/operations/external-promotions/earnings",
+    "Earnings",
+  ],
+] as const;
+
+const utilityItems = [
+  ["/reports", "Reports"],
+  ["/users", "Users"],
+  ["/account", "Account"],
+  [
+    "/system-status",
+    "System Status",
+  ],
+] as const;
+
+const titleItems = [
+  ...primaryItems,
+  ...monetizationItems,
+  ...operationsItems,
+  ...utilityItems,
+] as const;
+
+function active(
+  pathname: string,
+  href: string
+) {
+  return href === "/"
+    ? pathname === "/"
+    : pathname === href ||
+        pathname.startsWith(
+          `${href}/`
+        );
+}
+
+
+function isPublicRoute(
+  pathname: string
+) {
+  return (
+    pathname ===
+      "/copyright-request" ||
+    pathname.startsWith(
+      "/copyright-request/"
+    ) ||
+    pathname ===
+      "/advertise" ||
+    pathname.startsWith(
+      "/advertise/"
+    )
+  );
+}
+
+export default function AdminShell({
+  children,
+}: AdminShellProps) {
+  const pathname =
+    usePathname();
+
+  const [
+    open,
+    setOpen,
+  ] =
+    useState(false);
+
+  if (
+    isPublicRoute(
+      pathname
+    )
+  ) {
+    return (
+      <>
+        {children}
+      </>
+    );
+  }
+
+  const title =
+    titleItems.find(
+      ([href]) =>
+        active(
+          pathname,
+          href
+        )
+    )?.[1] ??
+    "Poster Admin";
+
+  const closeNavigation =
+    () => {
+      setOpen(false);
+    };
+
+  return (
+    <div className="shell">
+      <aside
+        className={`sidebar ${
+          open
+            ? "sidebar-open"
+            : ""
+        }`}
+      >
+        <div className="brand">
+          <div className="brand-mark">
+            P
+          </div>
+
+          <div className="brand-copy">
+            <strong>
+              Poster
+            </strong>
+
+            <span>
+              Admin
+            </span>
+          </div>
+        </div>
+
+        <nav
+          className="nav"
+          aria-label="Admin navigation"
+        >
+          {primaryItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+
+          <div className="nav-group">
+            <div className="nav-group-title">
+              Monetization
+            </div>
+
+            {monetizationItems.map(
+              ([
+                href,
+                label,
+              ]) => {
+                const isActive =
+                  active(
+                    pathname,
+                    href
+                  );
+
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={
+                      isActive
+                        ? "page"
+                        : undefined
+                    }
+                    className={`nav-link nav-sub-link ${
+                      isActive
+                        ? "nav-active"
+                        : ""
+                    }`}
+                    onClick={
+                      closeNavigation
+                    }
+                  >
+                    <span className="nav-dot" />
+
+                    <span>
+                      {label}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+
+          <div className="nav-group">
+          <div className="nav-group-title">
+            Operations
+          </div>
+
+          {operationsItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link nav-sub-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+        </div>
+
+        {utilityItems.map(
+            ([
+              href,
+              label,
+            ]) => {
+              const isActive =
+                active(
+                  pathname,
+                  href
+                );
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`nav-link ${
+                    isActive
+                      ? "nav-active"
+                      : ""
+                  }`}
+                  onClick={
+                    closeNavigation
+                  }
+                >
+                  <span className="nav-dot" />
+
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              );
+            }
+          )}
+        </nav>
+
+        <div className="sidebar-foot">
+          <div className="health">
+            <i />
+
+            <div>
+              <strong>
+                Admin healthy
+              </strong>
+
+              <span>
+                Authentication connected
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {open ? (
+        <button
+          type="button"
+          className="backdrop"
+          aria-label="Close navigation"
+          onClick={
+            closeNavigation
+          }
+        />
+      ) : null}
+
+      <div className="workspace">
+        <header className="topbar">
+          <div className="topbar-left">
+            <button
+              type="button"
+              className="menu"
+              aria-label={
+                open
+                  ? "Close navigation"
+                  : "Open navigation"
+              }
+              aria-expanded={
+                open
+              }
+              onClick={() =>
+                setOpen(
+                  (value) =>
+                    !value
+                )
+              }
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+
+            <div className="topbar-copy">
+              <small>
+                Poster operations
+              </small>
+
+              <h1>
+                {title}
+              </h1>
+            </div>
+          </div>
+
+          <Link
+            href="/account"
+            className="operator operator-link"
+            aria-label="Open Admin account profile"
+          >
+            <div className="operator-mark">
+              A
+            </div>
+
+            <div>
+              <strong>
+                Admin
+              </strong>
+
+              <span>
+                Account profile
+              </span>
+            </div>
+          </Link>
+        </header>
+
+        <main className="main">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+

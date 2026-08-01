@@ -1,0 +1,1784 @@
+﻿POSTER REPORTS B1 CURRENT FAILURES
+Generated: 2026-08-01 16:51:35 +05:30
+
+============================================================
+1. TYPESCRIPT
+============================================================
+src/app.ts(471,5): error TS2304: Cannot find name 'adminReportsRoutes'.
+
+============================================================
+2. FULL TEST SUITE
+============================================================
+
+> poster-backend@0.1.0 test
+> vitest run --reporter=verbose
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mF:/Project/Poster/backend[39m
+
+ [31m├ù[39m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrotates the protected refresh cookie and issues a new access token[32m 282[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrejects a missing refresh cookie and clears the browser cookie[32m 35[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrevokes the current session and clears the cookie during logout[32m 29[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mkeeps logout idempotent when the refresh cookie is absent[32m 35[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mreturns authoritative content to an authorized Admin[32m 286[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mremoves content using the authenticated Admin identity[32m 30[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects copyright removal without claimant verification fields[32m 20[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects content mutation without content.manage[32m 49[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mcreates a login session, sets the protected refresh cookie, and returns no raw token[32m 293[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects an invalid login body before creating a session[32m 22[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mmaps invalid login credentials to the safe public authentication error[32m 25[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mregisters an account and returns only a safe signup response[32m 47[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects unauthenticated content access[32m 22[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects an invalid signup body before calling the service[32m 21[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mverifies a signup email and serializes the activated account[32m 20[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mmaps authentication-domain failures to safe public API errors[32m 22[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects malformed verification codes before domain execution[32m 19[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/health.test.ts[2m > [22mPoster Backend health routes[2m > [22mreturns a healthy service response[32m 296[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/health.test.ts[2m > [22mPoster Backend health routes[2m > [22mreturns a structured not-found response[32m 25[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mreturns authoritative sources to an authorized Admin[32m 298[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mpauses a source using the authenticated Admin identity[32m 26[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mblocks a source and forwards the existing-content decision[32m 19[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mrejects source mutation without sources.manage[32m 40[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mrejects unauthenticated source access[32m 17[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mreturns the same accepted response for every valid reset request[33m 302[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mconfirms a reset, clears the refresh cookie, and returns no secret[32m 32[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mrejects malformed reset requests before calling the service[32m 26[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mmaps invalid reset challenges to the safe authentication error[32m 28[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mreturns protected user metrics to an authorized Admin[33m 311[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mreturns the compact dashboard summary with dashboard permission[32m 27[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mrequires authentication before reading user metrics[32m 21[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mrejects an Admin without the required metrics permission[32m 25[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mreturns growth-aware aggregate Audience Insights[33m 312[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mrejects an Admin without the Audience Insights permission[32m 28[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mrejects an unauthenticated request[32m 38[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mreturns the authenticated Admin access context[33m 315[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrequires authentication before entering Admin[32m 27[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrejects an authenticated identity without Admin permission[32m 21[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrejects a malformed bearer header before resolving context[32m 28[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mstores only email-verification digests and supersedes an older active token[32m 104[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mincrements email-verification attempts and invalidates the token at the maximum[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mconsumes an email-verification token exactly once[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mstores only password-reset digests, supersedes older tokens, and consumes once[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mrejects expired tokens and explicitly invalidates active user tokens[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-token.repository.test.ts[2m > [22mPoster authentication token repositories[2m > [22mreturns an expired pending signup token for service-level error classification[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mreturns serialized Copyright cases to an authorized Admin[33m 317[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mrejects unauthenticated Copyright access[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mrejects an Admin without copyright.read[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mreturns serialized case details, verification, evidence and immutable audit history[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mremoves verified content using the authenticated Admin identity[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mrejects malformed removal input before calling the service[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mmaps a Copyright case version conflict to HTTP 409[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mmaps a blocked Copyright restoration to HTTP 422[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.routes.test.ts[2m > [22mPoster Admin Copyright HTTP routes[2m > [22mrejects Copyright mutation without copyright.manage[32m 7[2mms[22m[39m
+ [31m├ù[39m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22maccepts an organization-authorized Client advertising request[33m 360[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22mrejects Client submission without an allowed organization role[32m 29[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [31m├ù[39m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22mlets an authorized Admin approve and receive a non-deliverable draft campaign[32m 28[2mms[22m[39m
+[31m   ΓåÆ adminReportsRoutes is not defined[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mhashes passwords with Argon2id and verifies only the correct password[32m 155[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mgenerates different salted hashes for the same password[32m 198[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mrejects passwords below the configured security minimum[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mgenerates opaque tokens while exposing only irreversible database digests[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22muses timing-safe equality for valid SHA-256 digests[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mcreates fixed-width numeric verification codes without persisting the raw code[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mrejects unsupported password hashes and exposes structured authentication errors[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.security.test.ts[2m > [22mPoster authentication security[2m > [22mgenerates URL-safe tokens with sufficient entropy[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-cookie.test.ts[2m > [22mPoster authentication refresh-cookie transport[2m > [22msets a protected production refresh-token cookie[33m 356[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-cookie.test.ts[2m > [22mPoster authentication refresh-cookie transport[2m > [22mdoes not require HTTPS for the local-development cookie[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-cookie.test.ts[2m > [22mPoster authentication refresh-cookie transport[2m > [22mreads the refresh token from the parsed request cookies[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication-cookie.test.ts[2m > [22mPoster authentication refresh-cookie transport[2m > [22mclears the refresh cookie using the same protected path[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.repository.test.ts[2m > [22mPoster session-lifecycle repository[2m > [22mrotates one digest and revokes the session when the old digest is replayed[32m 115[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.repository.test.ts[2m > [22mPoster session-lifecycle repository[2m > [22mrevokes a session when logout supplies a rotated historical digest[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m tests/password-reset.repository.test.ts[2m > [22mPoster password-reset repository attempts[2m > [22mfinds the pending token, records failures, and invalidates it at the limit[32m 110[2mms[22m[39m
+ [32mΓ£ô[39m tests/transaction-aware.identity-repository.test.ts[2m > [22mPoster transaction-aware identity repositories[2m > [22muses one caller-provided client and rolls back the complete identity workflow[32m 124[2mms[22m[39m
+ [32mΓ£ô[39m tests/commercial-request.repository.test.ts[2m > [22mPoster commercial-request repository workflow[2m > [22mpersists an initial request and a controlled Client resubmission revision[32m 123[2mms[22m[39m
+ [32mΓ£ô[39m tests/database.transaction.test.ts[2m > [22mPoster database transaction foundation[2m > [22mexecutes work using the requested PostgreSQL transaction settings[32m 76[2mms[22m[39m
+ [32mΓ£ô[39m tests/database.transaction.test.ts[2m > [22mPoster database transaction foundation[2m > [22mrolls back failed work and releases transaction-scoped advisory locks[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mlists all reports as summaries[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mlists only actionable reports[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mreturns report details with immutable audit history[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mthrows REPORT_NOT_FOUND for an unknown report[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mresolves a non-Copyright report and appends immutable audit[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mdismisses an actionable report[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mroutes a Copyright report to a matching Copyright case[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mblocks normal resolution for Copyright reports[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mrejects Copyright routing for a non-Copyright report[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mrejects a Copyright case linked to a different affected content UUID[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mrejects actions against a completed report[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-reports.service.test.ts[2m > [22mAdmin Reports application service[2m > [22mreports optimistic concurrency failure before appending audit[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mremoves verified content and enforces prevent-reimport atomically[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mblocks removal when verification is incomplete[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mdismisses a case without changing linked content[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mblocks restoration for prevent-reimport copyright cases[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mrestores eligible content and records the resolved case[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m admin-copyright.service.test.ts[2m > [22mAdmin Copyright application service[2m > [22mreports a case version conflict when resolution loses optimistic concurrency[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mconsumes the signup token and activates the account atomically[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mrecords an incorrect code before returning an invalid-token error[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mcounts malformed verification codes without hashing them[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mreturns the expired-token error without consuming or activating[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mrejects replay when no pending signup token remains[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mrejects a token that already reached the attempt limit[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22msurfaces concurrent token consumption as a retryable conflict[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-verification.service.test.ts[2m > [22mPoster signup email verification service[2m > [22mrolls back when optimistic user activation loses a race[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/admin-user-metrics.service.test.ts[2m > [22mPoster Admin user-metrics service[2m > [22mcreates one snapshot using the canonical rolling windows[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m tests/admin-user-metrics.service.test.ts[2m > [22mPoster Admin user-metrics service[2m > [22mrejects an invalid generation time before querying PostgreSQL[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/password-reset.service.test.ts[2m > [22mPoster password-reset service[2m > [22missues and delivers a reset code without exposing account existence in the result[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m tests/password-reset.service.test.ts[2m > [22mPoster password-reset service[2m > [22mreturns the same accepted response for an unknown email without creating a token[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/password-reset.service.test.ts[2m > [22mPoster password-reset service[2m > [22mrecords a failed confirmation attempt before returning the public invalid-token error[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m tests/password-reset.service.test.ts[2m > [22mPoster password-reset service[2m > [22matomically updates the password, consumes the challenge, and revokes every session[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/signup-registration.service.test.ts[2m > [22mPoster signup registration application service[2m > [22mregisters first, sends the signup verification email, and returns no raw code[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m tests/signup-registration.service.test.ts[2m > [22mPoster signup registration application service[2m > [22mdoes not call the email provider when account registration fails[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/signup-registration.service.test.ts[2m > [22mPoster signup registration application service[2m > [22mpropagates provider failure after registration has completed[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/login-session.service.test.ts[2m > [22mPoster login and session service[2m > [22mverifies credentials and atomically creates a revocable session[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m tests/login-session.service.test.ts[2m > [22mPoster login and session service[2m > [22mreturns the same credentials error for an unknown email and an invalid password[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m tests/login-session.service.test.ts[2m > [22mPoster login and session service[2m > [22mrejects a valid password until the account is active and email verified[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/login-session.service.test.ts[2m > [22mPoster login and session service[2m > [22mrolls back session creation when the successful-login row version loses a race[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.service.test.ts[2m > [22mPoster authentication service[2m > [22mregisters an account and verification challenge atomically[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.service.test.ts[2m > [22mPoster authentication service[2m > [22mrejects an already registered normalized email before hashing[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m tests/authentication.service.test.ts[2m > [22mPoster authentication service[2m > [22mmaps PostgreSQL email uniqueness races to a domain conflict[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-delivery.service.test.ts[2m > [22mPoster email delivery boundary[2m > [22mcreates a normalized signup-verification email without exposing the code in metadata[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-delivery.service.test.ts[2m > [22mPoster email delivery boundary[2m > [22mrejects malformed recipients, verification codes, expiry dates, and idempotency keys[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-delivery.service.test.ts[2m > [22mPoster email delivery boundary[2m > [22mcaptures development messages only in memory and returns a provider receipt[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m tests/email-delivery.service.test.ts[2m > [22mPoster email delivery boundary[2m > [22mrefuses to initialize the development provider in production[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m admin-audience-insights.service.test.ts[2m > [22mAdmin Audience Insights service[2m > [22mbuilds a privacy-filtered aggregate snapshot with growth[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m admin-audience-insights.service.test.ts[2m > [22mAdmin Audience Insights service[2m > [22mrejects an invalid generation time before repository reads[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m admin-audience-insights.service.test.ts[2m > [22mAdmin Audience Insights service[2m > [22mpropagates repository failures without returning partial data[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.service.test.ts[2m > [22mPoster authentication session lifecycle service[2m > [22mrotates a refresh token and returns only the replacement raw token[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.service.test.ts[2m > [22mPoster authentication session lifecycle service[2m > [22mcommits replay handling and then rejects the refresh[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.service.test.ts[2m > [22mPoster authentication session lifecycle service[2m > [22mrevokes a rotated session when the account is no longer active[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/session-lifecycle.service.test.ts[2m > [22mPoster authentication session lifecycle service[2m > [22mrevokes the refresh-token session during logout[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/commercial-request.service.test.ts[2m > [22mPoster commercial-request application services[2m > [22mcreates the request and immutable first revision in one transaction[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m tests/commercial-request.service.test.ts[2m > [22mPoster commercial-request application services[2m > [22mreturns a non-deliverable draft campaign after atomic approval[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m tests/authorization.policy.test.ts[2m > [22mPoster platform authorization policy[2m > [22mgrants every platform permission to a super Admin[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m tests/authorization.policy.test.ts[2m > [22mPoster platform authorization policy[2m > [22mcombines permissions without duplicates[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/authorization.policy.test.ts[2m > [22mPoster platform authorization policy[2m > [22mdoes not grant management permissions to analytics viewers[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/access-token.service.test.ts[2m > [22mPoster authentication access tokens[2m > [22missues and verifies a short-lived signed access token[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m tests/access-token.service.test.ts[2m > [22mPoster authentication access tokens[2m > [22mrejects a modified access-token payload[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/access-token.service.test.ts[2m > [22mPoster authentication access tokens[2m > [22mrejects an expired access token[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m tests/access-token.service.test.ts[2m > [22mPoster authentication access tokens[2m > [22mrejects malformed access-token values[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22msuppresses values when the current audience is below the reporting threshold[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22msuppresses growth when the previous audience is below the reporting threshold[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22mcalculates positive audience growth[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22mcalculates negative audience growth[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22mmarks a topic campaign eligible at the campaign threshold[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22mreturns zero audience share when there are no registered users[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m audience-privacy.policy.test.ts[2m > [22mAudience Insights privacy policy[2m > [22mrounds percentages to two decimal places[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m tests/commercial-permissions.test.ts[2m > [22mPoster commercial workflow permissions[2m > [22mgrants request and campaign management to operations Admins[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m tests/commercial-permissions.test.ts[2m > [22mPoster commercial workflow permissions[2m > [22mkeeps analytics viewers read-only[32m 1[2mms[22m[39m
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\jaman\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m[1m[41m Failed Tests 42 [49m[22m[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+
+[41m[1m FAIL [22m[49m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mreturns growth-aware aggregate Audience Insights
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-audience-insights.routes.test.ts:[2m224:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mrejects an Admin without the Audience Insights permission
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-audience-insights.routes.test.ts:[2m366:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-audience-insights.routes.test.ts[2m > [22mPoster Admin Audience Insights HTTP route[2m > [22mrejects an unauthenticated request
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-audience-insights.routes.test.ts:[2m410:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mreturns authoritative content to an authorized Admin
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-content.routes.test.ts:[2m278:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mremoves content using the authenticated Admin identity
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-content.routes.test.ts:[2m346:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects copyright removal without claimant verification fields
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-content.routes.test.ts:[2m437:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects content mutation without content.manage
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-content.routes.test.ts:[2m492:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-content.routes.test.ts[2m > [22mPoster Admin Content HTTP routes[2m > [22mrejects unauthenticated content access
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-content.routes.test.ts:[2m541:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[8/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mreturns authoritative sources to an authorized Admin
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-source.routes.test.ts:[2m303:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[9/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mpauses a source using the authenticated Admin identity
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-source.routes.test.ts:[2m365:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[10/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mblocks a source and forwards the existing-content decision
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-source.routes.test.ts:[2m426:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[11/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mrejects source mutation without sources.manage
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-source.routes.test.ts:[2m493:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[12/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m admin-source.routes.test.ts[2m > [22mPoster Admin Source HTTP routes[2m > [22mrejects unauthenticated source access
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m admin-source.routes.test.ts:[2m542:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[13/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mreturns the authenticated Admin access context
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-access.routes.test.ts:[2m124:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[14/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrequires authentication before entering Admin
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-access.routes.test.ts:[2m200:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[15/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrejects an authenticated identity without Admin permission
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-access.routes.test.ts:[2m253:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[16/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-access.routes.test.ts[2m > [22mPoster Admin access authorization[2m > [22mrejects a malformed bearer header before resolving context
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-access.routes.test.ts:[2m301:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[17/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mreturns protected user metrics to an authorized Admin
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-metrics.routes.test.ts:[2m159:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[18/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mreturns the compact dashboard summary with dashboard permission
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-metrics.routes.test.ts:[2m237:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[19/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mrequires authentication before reading user metrics
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-metrics.routes.test.ts:[2m311:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[20/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/admin-metrics.routes.test.ts[2m > [22mPoster Admin metrics HTTP routes[2m > [22mrejects an Admin without the required metrics permission
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/admin-metrics.routes.test.ts:[2m358:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[21/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mcreates a login session, sets the protected refresh cookie, and returns 
+no raw token
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m193:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[22/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects an invalid login body before creating a session
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m394:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[23/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mmaps invalid login credentials to the safe public authentication error
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m465:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[24/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mregisters an account and returns only a safe signup response
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m572:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[25/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects an invalid signup body before calling the service
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m685:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[26/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mverifies a signup email and serializes the activated account
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m776:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[27/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mmaps authentication-domain failures to safe public API errors
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m870:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[28/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/authentication.routes.test.ts[2m > [22mPoster authentication HTTP routes[2m > [22mrejects malformed verification codes before domain execution
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/authentication.routes.test.ts:[2m968:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[29/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22maccepts an organization-authorized Client advertising request
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/commercial-request.routes.test.ts:[2m338:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[30/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22mrejects Client submission without an allowed organization role
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/commercial-request.routes.test.ts:[2m460:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[31/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/commercial-request.routes.test.ts[2m > [22mPoster commercial-request HTTP routes[2m > [22mlets an authorized Admin approve and receive a non-deliverable 
+draft campaign
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/commercial-request.routes.test.ts:[2m565:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[32/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/health.test.ts[2m > [22mPoster Backend health routes[2m > [22mreturns a healthy service response
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/health.test.ts:[2m38:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[33/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/health.test.ts[2m > [22mPoster Backend health routes[2m > [22mreturns a structured not-found response
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/health.test.ts:[2m71:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[34/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mreturns the same accepted response for every valid reset request
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/password-reset.routes.test.ts:[2m115:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[35/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mconfirms a reset, clears the refresh cookie, and returns no secret
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/password-reset.routes.test.ts:[2m174:11[22m[39m
+
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[36/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mrejects malformed reset requests before calling the service
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/password-reset.routes.test.ts:[2m270:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[37/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/password-reset.routes.test.ts[2m > [22mPoster password-reset HTTP routes[2m > [22mmaps invalid reset challenges to the safe authentication error
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/password-reset.routes.test.ts:[2m328:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[38/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrotates the protected refresh cookie and issues a 
+new access token
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/session-lifecycle.routes.test.ts:[2m200:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrejects a missing refresh cookie and clears the 
+browser cookie
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/session-lifecycle.routes.test.ts:[2m364:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[40/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mrevokes the current session and clears the cookie 
+during logout
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/session-lifecycle.routes.test.ts:[2m419:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[41/42]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m tests/session-lifecycle.routes.test.ts[2m > [22mPoster authentication refresh and logout HTTP routes[2m > [22mkeeps logout idempotent when the refresh cookie is 
+absent
+[31m[1mReferenceError[22m: adminReportsRoutes is not defined[39m
+[36m [2mΓ¥»[22m buildApp src/app.ts:[2m471:5[22m[39m
+    [90m469|[39m
+    [90m470|[39m   [35mawait[39m app[33m.[39m[34mregister[39m(
+    [90m471|[39m     adminReportsRoutes[33m,[39m
+    [90m   |[39m     [31m^[39m
+    [90m472|[39m     {
+    [90m473|[39m       prefix[33m:[39m
+[90m [2mΓ¥»[22m tests/session-lifecycle.routes.test.ts:[2m479:11[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[42/42]ΓÄ»[22m[39m
+
+[2m Test Files [22m [1m[31m10 failed[39m[22m[2m | [22m[1m[32m25 passed[39m[22m[90m (35)[39m
+[2m      Tests [22m [1m[31m42 failed[39m[22m[2m | [22m[1m[32m105 passed[39m[22m[90m (147)[39m
+[2m   Start at [22m 16:51:42
+[2m   Duration [22m 12.31s[2m (transform 2.28s, setup 0ms, import 15.74s, tests 6.59s, environment 8ms)[22m
+
+
+============================================================
+3. REPORTS ROUTE IMPORTS
+============================================================
+import cookie
+  from "@fastify/cookie";
+
+import cors
+  from "@fastify/cors";
+
+import helmet
+  from "@fastify/helmet";
+
+import Fastify, {
+  type FastifyInstance,
+} from "fastify";
+
+import {
+  createAdminCopyrightService,
+  type AdminCopyrightService,
+} from "./application/copyright/index.js";
+
+import {
+  createAdminReportsService,
+  type AdminReportsService,
+} from "./application/reports/index.js";
+import {
+  createAdminUserMetricsService,
+  type AdminUserMetricsService,
+} from "./application/admin-metrics/admin-user-metrics.service.js";
+
+import {
+  createAdminContentService,
+  createAdminSourceService,
+  type AdminContentService,
+  type AdminSourceService,
+} from "./application/content-sources/index.js";
+
+import {
+  createAdminAudienceInsightsService,
+  type AdminAudienceInsightsService,
+} from "./application/audience-insights/admin-audience-insights.service.js";
+
+import {
+  createAdminProfileService,
+  type AdminProfileService,
+} from "./application/admin-profile/admin-profile.service.js";
+
+import {
+  createAdminCommercialRequestService,
+  type AdminCommercialRequestService,
+} from "./application/monetization/admin-commercial-request.service.js";
+
+import {
+  createClientCommercialRequestService,
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+import {
+  createSessionLifecycleService,
+  type SessionLifecycleService,
+} from "./application/authentication/session-lifecycle.service.js";
+
+import {
+  createSignupRegistrationService,
+  type SignupRegistrationService,
+} from "./application/authentication/signup-registration.service.js";
+
+import {
+  getEnvironment,
+} from "./config/environment.js";
+
+import {
+  createAuthenticationAccessTokenService,
+  type AuthenticationAccessTokenService,
+} from "./domains/authentication/access-token.service.js";
+
+import {
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
+
+import {
+  registerErrorHandler,
+} from "./plugins/error-handler.js";
+
+import {
+  adminAccessRoutes,
+  adminCommercialRequestRoutes,
+  adminCopyrightRoutes,
+  adminContentRoutes,
+  adminMetricsRoutes,
+  adminProfileRoutes,
+  adminSourceRoutes,
+  authenticationRoutes,
+  clientCommercialRequestRoutes,
+  healthRoutes,
+  type AuthenticationRoutesOptions,
+} from "./routes/index.js";
+
+import {
+  adminAudienceInsightsRoutes,
+} from "./routes/admin-audience-insights.routes.js";
+
+import {
+  createDevelopmentEmailDeliveryProvider,
+  type EmailDeliveryProvider,
+} from "./services/email/index.js";
+
+export interface BuildAppOptions {
+  adminCommercialRequestService?:
+    AdminCommercialRequestService;
+
+  clientCommercialRequestService?:
+    ClientCommercialRequestService;
+
+
+============================================================
+4. ROUTE EXPORTS
+============================================================
+export * from "./health.routes.js";
+
+export * from "./authentication.routes.js";
+
+export * from "./admin-access.routes.js";
+
+export * from "./admin-metrics.routes.js";
+
+export * from "./admin-content.routes.js";
+
+export * from "./admin-source.routes.js";
+
+export * from "./client-commercial-request.routes.js";
+
+export * from "./admin-commercial-request.routes.js";
+
+export * from "./admin-profile.routes.js";
+
+export * from "./admin-copyright.routes.js";
+
+export * from "./admin-reports.routes.js";
+
+============================================================
+5. REPORTS ROUTE FILE
+============================================================
+import type {
+  FastifyPluginAsync,
+  FastifyReply,
+} from "fastify";
+
+import {
+  ReportsApplicationError,
+  type AdminReportDetails,
+  type AdminReportSummary,
+  type AdminReportsService,
+} from "../application/reports/index.js";
+
+import type {
+  CopyrightCaseRecord,
+} from "../domains/copyright/index.js";
+
+import type {
+  AdminReportAuditEventRecord,
+  AdminReportRecord,
+} from "../domains/reports/index.js";
+
+import {
+  requirePlatformPermission,
+} from "../http/authorization-context.js";
+
+export interface AdminReportsRoutesOptions {
+  service:
+    AdminReportsService;
+}
+
+interface ReportParams {
+  reportId: string;
+}
+
+interface ReportActionBody {
+  expectedRowVersion?: unknown;
+
+  resolutionNote?: unknown;
+}
+
+interface RouteCopyrightBody
+  extends ReportActionBody {
+  copyrightCaseId?: unknown;
+}
+
+function requiredString(
+  value: unknown,
+  field: string
+): string {
+  if (
+    typeof value !== "string" ||
+    value.trim().length === 0
+  ) {
+    throw new TypeError(
+      `${field} is required.`
+    );
+  }
+
+  return value.trim();
+}
+
+function optionalString(
+  value: unknown,
+  field: string
+): string | null {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value !== "string"
+  ) {
+    throw new TypeError(
+      `${field} must be a string.`
+    );
+  }
+
+  const normalized =
+    value.trim();
+
+  return normalized.length > 0
+    ? normalized
+    : null;
+}
+
+function requiredUuid(
+  value: unknown,
+  field: string
+): string {
+  const normalized =
+    requiredString(
+      value,
+      field
+    );
+
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (
+    !uuidPattern.test(
+      normalized
+    )
+  ) {
+    throw new TypeError(
+      `${field} must be a valid UUID.`
+    );
+  }
+
+  return normalized;
+}
+
+function serializeReport(
+  record:
+    AdminReportRecord
+) {
+  return {
+    id:
+      record.id,
+
+    publicId:
+      record.publicId,
+
+    reportType:
+      record.reportType,
+
+    status:
+      record.status,
+
+    reporterName:
+      record.reporterName,
+
+    reporterReference:
+      record.reporterReference,
+
+    affectedKind:
+      record.affectedKind,
+
+    affectedRecordId:
+      record.affectedRecordId,
+
+    affectedTitle:
+      record.affectedTitle,
+
+    affectedMetadata:
+      record.affectedMetadata,
+
+    reason:
+      record.reason,
+
+    routedToCopyright:
+      record.routedToCopyright,
+
+    copyrightCaseId:
+      record.copyrightCaseId,
+
+    resolutionNote:
+      record.resolutionNote,
+
+    receivedAt:
+      record
+        .receivedAt
+        .toISOString(),
+
+    resolvedAt:
+      record
+        .resolvedAt
+        ?.toISOString() ??
+      null,
+
+    resolvedByUserId:
+      record.resolvedByUserId,
+
+    createdAt:
+      record
+        .createdAt
+        .toISOString(),
+
+    updatedAt:
+      record
+        .updatedAt
+        .toISOString(),
+
+    rowVersion:
+      record.rowVersion,
+  };
+}
+
+function serializeAudit(
+  record:
+    AdminReportAuditEventRecord
+) {
+  return {
+    id:
+      record.id,
+
+    reportId:
+      record.reportId,
+
+    action:
+      record.action,
+
+    actorUserId:
+      record.actorUserId,
+
+    actorLabel:
+      record.actorLabel,
+
+    previousStatus:
+      record.previousStatus,
+
+    resultingStatus:
+      record.resultingStatus,
+
+    metadata:
+      record.metadata,
+
+    occurredAt:
+      record
+        .occurredAt
+        .toISOString(),
+  };
+}
+
+function serializeCopyrightCase(
+  record:
+    CopyrightCaseRecord
+) {
+  return {
+    id:
+      record.id,
+
+    publicId:
+      record.publicId,
+
+    requestType:
+      record.requestType,
+
+    status:
+      record.status,
+
+    contentId:
+      record.contentId,
+
+    claimantName:
+      record.claimantName,
+
+    claimantType:
+      record.claimantType,
+
+    claimantBusinessEmail:
+      record.claimantBusinessEmail,
+
+    claimantWebsiteUrl:
+      record.claimantWebsiteUrl,
+
+    claimantReference:
+      record.claimantReference,
+
+    requestReason:
+      record.requestReason,
+
+    submittedOriginalUrl:
+      record.submittedOriginalUrl,
+
+    supportingInformation:
+      record.supportingInformation,
+
+    verificationStatus:
+      record.verificationStatus,
+
+    actionTaken:
+      record.actionTaken,
+
+    preventReimport:
+      record.preventReimport,
+
+    receivedAt:
+      record
+        .receivedAt
+        .toISOString(),
+
+    resolvedAt:
+      record
+        .resolvedAt
+        ?.toISOString() ??
+      null,
+
+    resolvedByUserId:
+      record.resolvedByUserId,
+
+    createdAt:
+      record
+        .createdAt
+        .toISOString(),
+
+    updatedAt:
+      record
+        .updatedAt
+        .toISOString(),
+
+    rowVersion:
+      record.rowVersion,
+  };
+}
+
+function serializeSummary(
+  summary:
+    AdminReportSummary
+) {
+  return {
+    report:
+      serializeReport(
+        summary.report
+      ),
+  };
+}
+
+function serializeDetails(
+  details:
+    AdminReportDetails
+) {
+  return {
+    report:
+      serializeReport(
+        details.report
+      ),
+
+    audit:
+      details
+        .audit
+        .map(
+          serializeAudit
+        ),
+
+    copyrightCase:
+      details.copyrightCase
+        ? serializeCopyrightCase(
+            details.copyrightCase
+          )
+        : null,
+  };
+}
+
+function sendApplicationError(
+  error:
+    ReportsApplicationError,
+  reply:
+    FastifyReply
+) {
+  const statusCode =
+    error.code ===
+      "REPORT_NOT_FOUND" ||
+    error.code ===
+      "REPORT_COPYRIGHT_CASE_NOT_FOUND"
+      ? 404
+      : error.code ===
+          "REPORT_COPYRIGHT_TYPE_REQUIRED" ||
+        error.code ===
+          "REPORT_COPYRIGHT_CONTENT_MISMATCH"
+        ? 422
+        : 409;
+
+  return reply
+    .status(
+      statusCode
+    )
+    .send({
+      error: {
+        code:
+          error.code,
+
+        message:
+          error.message,
+      },
+    });
+}
+
+function sendInvalidRequest(
+  error: TypeError,
+  reply:
+    FastifyReply
+) {
+  return reply
+    .status(
+      400
+    )
+    .send({
+      error: {
+        code:
+          "INVALID_REPORT_ACTION",
+
+        message:
+          error.message,
+      },
+    });
+}
+
+function getAuthorizationActor(
+  request: {
+    authorizationContext:
+      {
+        userId: string;
+
+        fullName: string;
+      } |
+      null;
+  }
+) {
+  const authorization =
+    request.authorizationContext;
+
+  if (
+    !authorization
+  ) {
+    throw new Error(
+      "Authorization context is unavailable after permission enforcement."
+    );
+  }
+
+  return {
+    actorUserId:
+      authorization.userId,
+
+    actorLabel:
+      authorization.fullName,
+  };
+}
+
+export const adminReportsRoutes:
+  FastifyPluginAsync<
+    AdminReportsRoutesOptions
+  > =
+  async (
+    app,
+    options
+  ) => {
+    app.get(
+      "/reports",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        const reports =
+          await options
+            .service
+            .list();
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            generatedAt:
+              new Date()
+                .toISOString(),
+
+            reports:
+              reports.map(
+                serializeSummary
+              ),
+          });
+      }
+    );
+
+    app.get(
+      "/reports/actionable",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        const reports =
+          await options
+            .service
+            .listActionable();
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            generatedAt:
+              new Date()
+                .toISOString(),
+
+            reports:
+              reports.map(
+                serializeSummary
+              ),
+          });
+      }
+    );
+
+    app.get<{
+      Params:
+        ReportParams;
+    }>(
+      "/reports/:reportId",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        try {
+          const reportId =
+            requiredUuid(
+              request
+                .params
+                .reportId,
+              "reportId"
+            );
+
+          const details =
+            await options
+              .service
+              .getById(
+                reportId
+              );
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        ReportActionBody;
+    }>(
+      "/reports/:reportId/resolve",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .resolve({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        ReportActionBody;
+    }>(
+      "/reports/:reportId/dismiss",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .dismiss({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        RouteCopyrightBody;
+    }>(
+      "/reports/:reportId/route-copyright",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .routeToCopyright({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                copyrightCaseId:
+                  requiredUuid(
+                    request.body
+                      ?.copyrightCaseId,
+                    "copyrightCaseId"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+  };

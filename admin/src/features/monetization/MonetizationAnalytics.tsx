@@ -1,427 +1,731 @@
 "use client";
 
-import Link from "next/link";
 import {
   useMemo,
   useState,
 } from "react";
 
+import {
+  useAdminAnalytics,
+} from "./analytics";
+
+import type {
+  AdminAnalyticsQuery,
+  AnalyticsCampaignRecord,
+  AnalyticsMetricTotals,
+  AnalyticsPlacement,
+  AnalyticsPlacementRecord,
+} from "./analytics";
+
 import styles from "./MonetizationAnalytics.module.css";
 
-type RangeKey =
-  | "today"
-  | "7d"
-  | "30d";
+interface AnalyticsFilters {
+  startDate: string;
 
-type Placement =
-  | "Home"
-  | "Search"
-  | "Trending";
+  endDate: string;
 
-interface PlacementMetric {
-  placement: Placement;
-  impressions: number;
-  clicks: number;
-  conversions: number;
+  campaignId: string;
+
+  organizationId: string;
 }
 
-interface CampaignMetric {
-  id: string;
-  name: string;
-
-  type:
-    | "Poster Promotion"
-    | "Affiliate"
-    | "Direct Sponsorship";
-
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  revenue: number;
-}
-
-interface AnalyticsSnapshot {
-  revenue: number;
-  previousRevenue: number;
-
-  impressions: number;
-  previousImpressions: number;
-
-  clicks: number;
-  previousClicks: number;
-
-  conversions: number;
-  previousConversions: number;
-
-  activeCampaigns: number;
-
-  placements: PlacementMetric[];
-  campaigns: CampaignMetric[];
-}
-
-const ANALYTICS: Record<
-  RangeKey,
-  AnalyticsSnapshot
-> = {
-  today: {
-    revenue: 18400,
-    previousRevenue: 16900,
-
-    impressions: 84200,
-    previousImpressions: 78100,
-
-    clicks: 2420,
-    previousClicks: 2180,
-
-    conversions: 118,
-    previousConversions: 103,
-
-    activeCampaigns: 2,
-
-    placements: [
-      {
-        placement: "Home",
-        impressions: 38200,
-        clicks: 1240,
-        conversions: 62,
-      },
-      {
-        placement: "Search",
-        impressions: 27600,
-        clicks: 760,
-        conversions: 39,
-      },
-      {
-        placement: "Trending",
-        impressions: 18400,
-        clicks: 420,
-        conversions: 17,
-      },
-    ],
-
-    campaigns: [
-      {
-        id: "CMP-3001",
-        name:
-          "Cloud Skills Direct Sponsorship",
-        type:
-          "Direct Sponsorship",
-        impressions: 34200,
-        clicks: 812,
-        conversions: 41,
-        revenue: 10600,
-      },
-      {
-        id: "CMP-3002",
-        name:
-          "Learning Partner Offer",
-        type:
-          "Affiliate",
-        impressions: 28100,
-        clicks: 968,
-        conversions: 52,
-        revenue: 7800,
-      },
-      {
-        id: "CMP-3003",
-        name:
-          "Poster Premium Discovery",
-        type:
-          "Poster Promotion",
-        impressions: 21900,
-        clicks: 640,
-        conversions: 25,
-        revenue: 0,
-      },
-    ],
-  },
-
-  "7d": {
-    revenue: 125000,
-    previousRevenue: 114800,
-
-    impressions: 624000,
-    previousImpressions: 586000,
-
-    clicks: 17840,
-    previousClicks: 16220,
-
-    conversions: 846,
-    previousConversions: 771,
-
-    activeCampaigns: 2,
-
-    placements: [
-      {
-        placement: "Home",
-        impressions: 284000,
-        clicks: 8640,
-        conversions: 428,
-      },
-      {
-        placement: "Search",
-        impressions: 205000,
-        clicks: 5940,
-        conversions: 296,
-      },
-      {
-        placement: "Trending",
-        impressions: 135000,
-        clicks: 3260,
-        conversions: 122,
-      },
-    ],
-
-    campaigns: [
-      {
-        id: "CMP-3001",
-        name:
-          "Cloud Skills Direct Sponsorship",
-        type:
-          "Direct Sponsorship",
-        impressions: 248000,
-        clicks: 5980,
-        conversions: 271,
-        revenue: 71000,
-      },
-      {
-        id: "CMP-3002",
-        name:
-          "Learning Partner Offer",
-        type:
-          "Affiliate",
-        impressions: 192000,
-        clicks: 6460,
-        conversions: 342,
-        revenue: 54000,
-      },
-      {
-        id: "CMP-3003",
-        name:
-          "Poster Premium Discovery",
-        type:
-          "Poster Promotion",
-        impressions: 184000,
-        clicks: 5400,
-        conversions: 233,
-        revenue: 0,
-      },
-    ],
-  },
-
-  "30d": {
-    revenue: 487000,
-    previousRevenue: 441000,
-
-    impressions: 2480000,
-    previousImpressions: 2260000,
-
-    clicks: 69400,
-    previousClicks: 61800,
-
-    conversions: 3210,
-    previousConversions: 2870,
-
-    activeCampaigns: 2,
-
-    placements: [
-      {
-        placement: "Home",
-        impressions: 1120000,
-        clicks: 32600,
-        conversions: 1540,
-      },
-      {
-        placement: "Search",
-        impressions: 824000,
-        clicks: 24100,
-        conversions: 1160,
-      },
-      {
-        placement: "Trending",
-        impressions: 536000,
-        clicks: 12700,
-        conversions: 510,
-      },
-    ],
-
-    campaigns: [
-      {
-        id: "CMP-3001",
-        name:
-          "Cloud Skills Direct Sponsorship",
-        type:
-          "Direct Sponsorship",
-        impressions: 986000,
-        clicks: 23100,
-        conversions: 1010,
-        revenue: 278000,
-      },
-      {
-        id: "CMP-3002",
-        name:
-          "Learning Partner Offer",
-        type:
-          "Affiliate",
-        impressions: 762000,
-        clicks: 25200,
-        conversions: 1360,
-        revenue: 209000,
-      },
-      {
-        id: "CMP-3003",
-        name:
-          "Poster Premium Discovery",
-        type:
-          "Poster Promotion",
-        impressions: 732000,
-        clicks: 21100,
-        conversions: 840,
-        revenue: 0,
-      },
-    ],
-  },
-};
-
-function formatNumber(
-  value: number
-): string {
-  return new Intl.NumberFormat(
+const NUMBER_FORMATTER =
+  new Intl.NumberFormat(
     "en-IN"
-  ).format(value);
-}
+  );
 
-function formatRevenue(
-  value: number
-): string {
-  return new Intl.NumberFormat(
+const DATE_FORMATTER =
+  new Intl.DateTimeFormat(
     "en-IN",
     {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
     }
-  ).format(value);
-}
+  );
 
-function calculateCtr(
-  clicks: number,
-  impressions: number
-): number {
-  if (
-    impressions ===
-    0
-  ) {
-    return 0;
-  }
+const DAY_MILLISECONDS =
+  24 *
+  60 *
+  60 *
+  1000;
 
-  return (
-    clicks /
-    impressions
-  ) * 100;
-}
-
-function percentChange(
-  current: number,
-  previous: number
-): number {
-  if (
-    previous ===
-    0
-  ) {
-    return 0;
-  }
-
-  return (
-    (
-      current -
-      previous
-    ) /
-    previous
-  ) * 100;
-}
-
-function trendLabel(
-  current: number,
-  previous: number
+function formatIsoDate(
+  date: Date
 ): string {
-  const value =
-    percentChange(
-      current,
-      previous
+  return date
+    .toISOString()
+    .slice(
+      0,
+      10
+    );
+}
+
+function createInitialFilters():
+  AnalyticsFilters {
+  const end =
+    new Date();
+
+  const start =
+    new Date(
+      end.getTime() -
+      29 *
+        DAY_MILLISECONDS
+    );
+
+  return {
+    startDate:
+      formatIsoDate(
+        start
+      ),
+
+    endDate:
+      formatIsoDate(
+        end
+      ),
+
+    campaignId:
+      "",
+
+    organizationId:
+      "",
+  };
+}
+
+function toQuery(
+  filters:
+    AnalyticsFilters
+): AdminAnalyticsQuery {
+  return {
+    startDate:
+      filters.startDate,
+
+    endDate:
+      filters.endDate,
+
+    campaignId:
+      filters
+        .campaignId
+        .trim() ||
+      null,
+
+    organizationId:
+      filters
+        .organizationId
+        .trim() ||
+      null,
+  };
+}
+
+function formatCount(
+  value: string
+): string {
+  try {
+    return NUMBER_FORMATTER.format(
+      BigInt(
+        value
+      )
+    );
+  } catch {
+    return value;
+  }
+}
+
+function formatCtr(
+  value: number
+): string {
+  return `${(
+    value *
+    100
+  ).toFixed(
+    2
+  )}%`;
+}
+
+function formatTimestamp(
+  value:
+    string |
+    null
+): string {
+  if (
+    !value
+  ) {
+    return "No validated event watermark";
+  }
+
+  const date =
+    new Date(
+      value
     );
 
   if (
-    value ===
-    0
+    !Number.isFinite(
+      date.getTime()
+    )
   ) {
-    return "No change";
+    return value;
   }
 
-  const direction =
-    value > 0
-      ? "↑"
-      : "↓";
-
-  return `${direction} ${Math.abs(
-    value
-  ).toFixed(
-    1
-  )}% vs previous period`;
+  return DATE_FORMATTER.format(
+    date
+  );
 }
 
-function rangeLabel(
-  range: RangeKey
+function formatLabel(
+  value: string
 ): string {
-  switch (range) {
-    case "today":
-      return "Today";
+  return value
+    .split(
+      "_"
+    )
+    .filter(
+      Boolean
+    )
+    .map(
+      part =>
+        part
+          .charAt(
+            0
+          )
+          .toUpperCase() +
+        part.slice(
+          1
+        )
+    )
+    .join(
+      " "
+    );
+}
 
-    case "7d":
-      return "7 days";
+function placementLabel(
+  placement:
+    AnalyticsPlacement
+): string {
+  switch (
+    placement
+  ) {
+    case "home":
+      return "Home";
 
-    case "30d":
-      return "30 days";
+    case "search":
+      return "Search";
+
+    case "trending":
+      return "Trending";
   }
+}
+
+function totalInvalidEvents(
+  totals:
+    AnalyticsMetricTotals
+): bigint {
+  return (
+    BigInt(
+      totals.invalidImpressions
+    ) +
+    BigInt(
+      totals.invalidClicks
+    ) +
+    BigInt(
+      totals.invalidConversions
+    )
+  );
+}
+
+function totalDuplicateEvents(
+  totals:
+    AnalyticsMetricTotals
+): bigint {
+  return (
+    BigInt(
+      totals.duplicateImpressions
+    ) +
+    BigInt(
+      totals.duplicateClicks
+    ) +
+    BigInt(
+      totals.duplicateConversions
+    )
+  );
+}
+
+function formatBigInt(
+  value: bigint
+): string {
+  return NUMBER_FORMATTER.format(
+    value
+  );
+}
+
+function finalizationLabel(
+  finalizedRows: number,
+  totalRows: number
+): string {
+  if (
+    totalRows ===
+    0
+  ) {
+    return "No metric rows";
+  }
+
+  if (
+    finalizedRows ===
+    totalRows
+  ) {
+    return "Fully finalized";
+  }
+
+  if (
+    finalizedRows ===
+    0
+  ) {
+    return "Open";
+  }
+
+  return "Partially finalized";
+}
+
+function MetricCard({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+
+  value: string;
+
+  detail: string;
+}) {
+  return (
+    <article
+      className={
+        styles.metricCard
+      }
+    >
+      <span
+        className={
+          styles.metricLabel
+        }
+      >
+        {label}
+      </span>
+
+      <strong
+        className={
+          styles.metricValue
+        }
+      >
+        {value}
+      </strong>
+
+      <span
+        className={
+          styles.metricDetail
+        }
+      >
+        {detail}
+      </span>
+    </article>
+  );
+}
+
+function PlacementTable({
+  placements,
+}: {
+  placements:
+    AnalyticsPlacementRecord[];
+}) {
+  if (
+    placements.length ===
+    0
+  ) {
+    return (
+      <div
+        className={
+          styles.emptySection
+        }
+      >
+        No placement metrics exist for
+        the selected date range.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={
+        styles.tableViewport
+      }
+    >
+      <table
+        className={
+          styles.dataTable
+        }
+      >
+        <thead>
+          <tr>
+            <th>
+              Placement
+            </th>
+
+            <th>
+              Impressions
+            </th>
+
+            <th>
+              Clicks
+            </th>
+
+            <th>
+              CTR
+            </th>
+
+            <th>
+              Conversions
+            </th>
+
+            <th>
+              Invalid
+            </th>
+
+            <th>
+              Duplicate
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {placements.map(
+            placement => (
+              <tr
+                key={
+                  placement
+                    .placement
+                }
+              >
+                <td>
+                  <strong>
+                    {placementLabel(
+                      placement
+                        .placement
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  {formatCount(
+                    placement
+                      .validImpressions
+                  )}
+                </td>
+
+                <td>
+                  {formatCount(
+                    placement
+                      .validClicks
+                  )}
+                </td>
+
+                <td>
+                  {formatCtr(
+                    placement.ctr
+                  )}
+                </td>
+
+                <td>
+                  {formatCount(
+                    placement
+                      .validConversions
+                  )}
+                </td>
+
+                <td>
+                  {formatBigInt(
+                    totalInvalidEvents(
+                      placement
+                    )
+                  )}
+                </td>
+
+                <td>
+                  {formatBigInt(
+                    totalDuplicateEvents(
+                      placement
+                    )
+                  )}
+                </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function CampaignTable({
+  campaigns,
+}: {
+  campaigns:
+    AnalyticsCampaignRecord[];
+}) {
+  if (
+    campaigns.length ===
+    0
+  ) {
+    return (
+      <div
+        className={
+          styles.emptySection
+        }
+      >
+        No campaign metrics exist for
+        the selected filters.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={
+        styles.tableViewport
+      }
+    >
+      <table
+        className={
+          styles.dataTable
+        }
+      >
+        <thead>
+          <tr>
+            <th>
+              Campaign
+            </th>
+
+            <th>
+              Type
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th>
+              Impressions
+            </th>
+
+            <th>
+              Clicks
+            </th>
+
+            <th>
+              CTR
+            </th>
+
+            <th>
+              Conversions
+            </th>
+
+            <th>
+              Finalization
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {campaigns.map(
+            campaign => (
+              <tr
+                key={
+                  campaign
+                    .campaignId
+                }
+              >
+                <td>
+                  <div
+                    className={
+                      styles.campaignIdentity
+                    }
+                  >
+                    <strong>
+                      {
+                        campaign
+                          .campaignName
+                      }
+                    </strong>
+
+                    <span>
+                      {
+                        campaign
+                          .campaignReference
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  {formatLabel(
+                    campaign
+                      .campaignType
+                  )}
+                </td>
+
+                <td>
+                  <span
+                    className={
+                      styles.statusBadge
+                    }
+                  >
+                    {formatLabel(
+                      campaign
+                        .campaignStatus
+                    )}
+                  </span>
+                </td>
+
+                <td>
+                  {formatCount(
+                    campaign
+                      .validImpressions
+                  )}
+                </td>
+
+                <td>
+                  {formatCount(
+                    campaign
+                      .validClicks
+                  )}
+                </td>
+
+                <td>
+                  {formatCtr(
+                    campaign.ctr
+                  )}
+                </td>
+
+                <td>
+                  {formatCount(
+                    campaign
+                      .validConversions
+                  )}
+                </td>
+
+                <td>
+                  <div
+                    className={
+                      styles.finalizationCell
+                    }
+                  >
+                    <strong>
+                      {finalizationLabel(
+                        campaign
+                          .finalizedMetricRows,
+                        campaign
+                          .totalMetricRows
+                      )}
+                    </strong>
+
+                    <span>
+                      {
+                        campaign
+                          .finalizedMetricRows
+                      }
+                      /
+                      {
+                        campaign
+                          .totalMetricRows
+                      }{" "}
+                      rows
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default function MonetizationAnalytics() {
   const [
-    range,
-    setRange,
+    draftFilters,
+    setDraftFilters,
   ] =
-    useState<RangeKey>(
-      "7d"
+    useState<
+      AnalyticsFilters
+    >(
+      createInitialFilters
     );
 
-  const snapshot =
-    ANALYTICS[range];
+  const [
+    appliedFilters,
+    setAppliedFilters,
+  ] =
+    useState<
+      AnalyticsFilters
+    >(
+      createInitialFilters
+    );
 
-  const currentCtr =
+  const query =
     useMemo(
       () =>
-        calculateCtr(
-          snapshot.clicks,
-          snapshot.impressions
+        toQuery(
+          appliedFilters
         ),
       [
-        snapshot.clicks,
-        snapshot.impressions,
+        appliedFilters,
       ]
     );
 
-  const previousCtr =
-    calculateCtr(
-      snapshot.previousClicks,
-      snapshot.previousImpressions
+  const {
+    data,
+    error,
+    isLoading,
+    isRefreshing,
+    refresh,
+  } =
+    useAdminAnalytics(
+      query
     );
 
-  const ctrDifference =
-    currentCtr -
-    previousCtr;
+  const hasMetrics =
+    data !==
+      null &&
+    (
+      data.totalMetricRows >
+        0 ||
+      data.placements.length >
+        0 ||
+      data.campaigns.length >
+        0
+    );
+
+  const applyFilters = () => {
+    setAppliedFilters({
+      ...draftFilters,
+    });
+  };
+
+  const resetFilters = () => {
+    const initial =
+      createInitialFilters();
+
+    setDraftFilters(
+      initial
+    );
+
+    setAppliedFilters(
+      initial
+    );
+  };
 
   return (
-    <div
+    <main
       className={
         styles.page
       }
@@ -432,570 +736,612 @@ export default function MonetizationAnalytics() {
         }
       >
         <div>
-          <div
+          <span
             className={
               styles.eyebrow
             }
           >
             Monetization
-          </div>
+          </span>
 
-          <h2>
+          <h1>
             Analytics
-          </h2>
+          </h1>
 
           <p>
-            See essential campaign
-            performance across Poster
-            without turning Admin into
-            a large business-intelligence
-            dashboard.
+            Authoritative campaign
+            delivery performance from
+            validated Poster events.
           </p>
         </div>
 
-        <div
+        <button
+          type="button"
           className={
-            styles.rangeControls
+            styles.refreshButton
           }
-          aria-label="Analytics date range"
+          onClick={
+            refresh
+          }
+          disabled={
+            isLoading ||
+            isRefreshing
+          }
         >
-          {(
-            [
-              "today",
-              "7d",
-              "30d",
-            ] as const
-          ).map(
-            (
-              item
-            ) => (
-              <button
-                key={
-                  item
-                }
-                type="button"
-                className={
-                  range ===
-                  item
-                    ? styles.rangeActive
-                    : styles.rangeButton
-                }
-                onClick={() =>
-                  setRange(
-                    item
-                  )
-                }
-              >
-                {rangeLabel(
-                  item
-                )}
-              </button>
-            )
-          )}
-        </div>
+          {isRefreshing
+            ? "Refreshing..."
+            : "Refresh"}
+        </button>
       </header>
 
       <section
         className={
-          styles.summaryGrid
+          styles.filterPanel
         }
-        aria-label="Monetization summary"
-      >
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            Revenue / earnings
-          </span>
-
-          <strong>
-            {formatRevenue(
-              snapshot.revenue
-            )}
-          </strong>
-
-          <small
-            className={
-              percentChange(
-                snapshot.revenue,
-                snapshot.previousRevenue
-              ) >=
-              0
-                ? styles.positive
-                : styles.negative
-            }
-          >
-            {trendLabel(
-              snapshot.revenue,
-              snapshot.previousRevenue
-            )}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            Impressions
-          </span>
-
-          <strong>
-            {formatNumber(
-              snapshot.impressions
-            )}
-          </strong>
-
-          <small
-            className={
-              percentChange(
-                snapshot.impressions,
-                snapshot.previousImpressions
-              ) >=
-              0
-                ? styles.positive
-                : styles.negative
-            }
-          >
-            {trendLabel(
-              snapshot.impressions,
-              snapshot.previousImpressions
-            )}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            Clicks
-          </span>
-
-          <strong>
-            {formatNumber(
-              snapshot.clicks
-            )}
-          </strong>
-
-          <small
-            className={
-              percentChange(
-                snapshot.clicks,
-                snapshot.previousClicks
-              ) >=
-              0
-                ? styles.positive
-                : styles.negative
-            }
-          >
-            {trendLabel(
-              snapshot.clicks,
-              snapshot.previousClicks
-            )}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            CTR
-          </span>
-
-          <strong>
-            {currentCtr.toFixed(
-              2
-            )}
-            %
-          </strong>
-
-          <small
-            className={
-              ctrDifference >=
-              0
-                ? styles.positive
-                : styles.negative
-            }
-          >
-            {ctrDifference >=
-            0
-              ? "↑"
-              : "↓"}
-            {" "}
-            {Math.abs(
-              ctrDifference
-            ).toFixed(
-              2
-            )}
-            {" pp vs previous period"}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            Conversions
-          </span>
-
-          <strong>
-            {formatNumber(
-              snapshot.conversions
-            )}
-          </strong>
-
-          <small
-            className={
-              percentChange(
-                snapshot.conversions,
-                snapshot.previousConversions
-              ) >=
-              0
-                ? styles.positive
-                : styles.negative
-            }
-          >
-            {trendLabel(
-              snapshot.conversions,
-              snapshot.previousConversions
-            )}
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.metricCard
-          }
-        >
-          <span>
-            Active campaigns
-          </span>
-
-          <strong>
-            {
-              snapshot.activeCampaigns
-            }
-          </strong>
-
-          <small>
-            Currently running
-          </small>
-        </article>
-      </section>
-
-      <section
-        className={
-          styles.panel
-        }
+        aria-label="Analytics filters"
       >
         <div
           className={
-            styles.panelHeader
+            styles.filterGrid
           }
         >
-          <div>
-            <h3>
-              Placement performance
-            </h3>
-
-            <p>
-              Compare Home,
-              Search, and Trending
-              for the selected
-              period.
-            </p>
-          </div>
-
-          <span
+          <label
             className={
-              styles.periodBadge
+              styles.field
             }
           >
-            {rangeLabel(
-              range
-            )}
-          </span>
+            <span>
+              Start date
+            </span>
+
+            <input
+              type="date"
+              value={
+                draftFilters
+                  .startDate
+              }
+              max={
+                draftFilters
+                  .endDate
+              }
+              onChange={
+                event =>
+                  setDraftFilters(
+                    current => ({
+                      ...current,
+
+                      startDate:
+                        event
+                          .target
+                          .value,
+                    })
+                  )
+              }
+            />
+          </label>
+
+          <label
+            className={
+              styles.field
+            }
+          >
+            <span>
+              End date
+            </span>
+
+            <input
+              type="date"
+              value={
+                draftFilters
+                  .endDate
+              }
+              min={
+                draftFilters
+                  .startDate
+              }
+              onChange={
+                event =>
+                  setDraftFilters(
+                    current => ({
+                      ...current,
+
+                      endDate:
+                        event
+                          .target
+                          .value,
+                    })
+                  )
+              }
+            />
+          </label>
+
+          <label
+            className={
+              styles.field
+            }
+          >
+            <span>
+              Campaign ID
+            </span>
+
+            <input
+              type="text"
+              value={
+                draftFilters
+                  .campaignId
+              }
+              placeholder="Optional UUID"
+              autoComplete="off"
+              onChange={
+                event =>
+                  setDraftFilters(
+                    current => ({
+                      ...current,
+
+                      campaignId:
+                        event
+                          .target
+                          .value,
+                    })
+                  )
+              }
+            />
+          </label>
+
+          <label
+            className={
+              styles.field
+            }
+          >
+            <span>
+              Organization ID
+            </span>
+
+            <input
+              type="text"
+              value={
+                draftFilters
+                  .organizationId
+              }
+              placeholder="Optional UUID"
+              autoComplete="off"
+              onChange={
+                event =>
+                  setDraftFilters(
+                    current => ({
+                      ...current,
+
+                      organizationId:
+                        event
+                          .target
+                          .value,
+                    })
+                  )
+              }
+            />
+          </label>
         </div>
 
         <div
           className={
-            styles.tableWrap
+            styles.filterActions
           }
         >
-          <table
+          <button
+            type="button"
             className={
-              styles.table
+              styles.secondaryButton
+            }
+            onClick={
+              resetFilters
+            }
+            disabled={
+              isLoading ||
+              isRefreshing
             }
           >
-            <thead>
-              <tr>
-                <th>
-                  Placement
-                </th>
+            Reset
+          </button>
 
-                <th>
-                  Impressions
-                </th>
-
-                <th>
-                  Clicks
-                </th>
-
-                <th>
-                  CTR
-                </th>
-
-                <th>
-                  Conversions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {snapshot.placements.map(
-                (
-                  placement:
-                    PlacementMetric
-                ) => (
-                  <tr
-                    key={
-                      placement.placement
-                    }
-                  >
-                    <td>
-                      <strong
-                        className={
-                          styles.primaryText
-                        }
-                      >
-                        {
-                          placement.placement
-                        }
-                      </strong>
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        placement.impressions
-                      )}
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        placement.clicks
-                      )}
-                    </td>
-
-                    <td>
-                      {calculateCtr(
-                        placement.clicks,
-                        placement.impressions
-                      ).toFixed(
-                        2
-                      )}
-                      %
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        placement.conversions
-                      )}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
+          <button
+            type="button"
+            className={
+              styles.primaryButton
+            }
+            onClick={
+              applyFilters
+            }
+            disabled={
+              isLoading ||
+              isRefreshing ||
+              !draftFilters
+                .startDate ||
+              !draftFilters
+                .endDate
+            }
+          >
+            Apply filters
+          </button>
         </div>
       </section>
 
-      <section
+      <div
         className={
-          styles.panel
+          styles.srStatus
         }
+        role="status"
+        aria-live="polite"
       >
-        <div
+        {isLoading
+          ? "Loading Monetization Analytics."
+          : isRefreshing
+            ? "Refreshing Monetization Analytics."
+            : error
+              ? "Monetization Analytics failed to load."
+              : "Monetization Analytics are current."}
+      </div>
+
+      {isLoading &&
+      !data ? (
+        <section
           className={
-            styles.panelHeader
+            styles.statePanel
           }
+          aria-busy="true"
         >
-          <div>
-            <h3>
-              Campaign performance
-            </h3>
-
-            <p>
-              Essential performance
-              across current
-              commercial campaign
-              types.
-            </p>
-          </div>
-
-          <Link
-            href="/monetization/campaigns"
-            className={
-              styles.headerLink
-            }
-          >
-            Open Campaigns
-          </Link>
-        </div>
-
-        <div
-          className={
-            styles.tableWrap
-          }
-        >
-          <table
-            className={`${styles.table} ${styles.campaignTable}`}
-          >
-            <thead>
-              <tr>
-                <th>
-                  Campaign
-                </th>
-
-                <th>
-                  Type
-                </th>
-
-                <th>
-                  Impressions
-                </th>
-
-                <th>
-                  Clicks
-                </th>
-
-                <th>
-                  CTR
-                </th>
-
-                <th>
-                  Conversions
-                </th>
-
-                <th>
-                  Revenue
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {snapshot.campaigns.map(
-                (
-                  campaign:
-                    CampaignMetric
-                ) => (
-                  <tr
-                    key={
-                      campaign.id
-                    }
-                  >
-                    <td>
-                      <Link
-                        href={`/monetization/campaigns?record=${encodeURIComponent(
-                          campaign.id
-                        )}`}
-                        className={
-                          styles.campaignLink
-                        }
-                      >
-                        <strong>
-                          {
-                            campaign.name
-                          }
-                        </strong>
-
-                        <span>
-                          {
-                            campaign.id
-                          }
-                        </span>
-                      </Link>
-                    </td>
-
-                    <td>
-                      {
-                        campaign.type
-                      }
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        campaign.impressions
-                      )}
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        campaign.clicks
-                      )}
-                    </td>
-
-                    <td>
-                      {calculateCtr(
-                        campaign.clicks,
-                        campaign.impressions
-                      ).toFixed(
-                        2
-                      )}
-                      %
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        campaign.conversions
-                      )}
-                    </td>
-
-                    <td>
-                      {campaign.revenue >
-                      0
-                        ? formatRevenue(
-                            campaign.revenue
-                          )
-                        : "Not applicable"}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section
-        className={
-          styles.note
-        }
-      >
-        <div>
           <strong>
-            Commercial analytics stay
-            separate from organic ranking.
+            Loading Analytics
           </strong>
 
           <p>
-            Revenue, sponsorship value,
-            affiliate commission, and
-            other commercial metrics
-            must never influence
-            Poster&apos;s organic
-            recommendation ranking.
+            Retrieving validated
+            campaign delivery metrics.
           </p>
-        </div>
-      </section>
-    </div>
+        </section>
+      ) : null}
+
+      {error ? (
+        <section
+          className={
+            styles.errorPanel
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Analytics unavailable
+            </strong>
+
+            <p>
+              {error}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.retryButton
+            }
+            onClick={
+              refresh
+            }
+            disabled={
+              isRefreshing
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
+
+      {data ? (
+        <>
+          <section
+            className={
+              styles.snapshotBar
+            }
+          >
+            <div>
+              <span>
+                Date range
+              </span>
+
+              <strong>
+                {data.startDate}
+                {" — "}
+                {data.endDate}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Latest event watermark
+              </span>
+
+              <strong>
+                {formatTimestamp(
+                  data
+                    .latestSourceEventWatermark
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Metric state
+              </span>
+
+              <strong>
+                {finalizationLabel(
+                  data
+                    .finalizedMetricRows,
+                  data
+                    .totalMetricRows
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Finalized rows
+              </span>
+
+              <strong>
+                {
+                  data
+                    .finalizedMetricRows
+                }
+                /
+                {
+                  data
+                    .totalMetricRows
+                }
+              </strong>
+            </div>
+          </section>
+
+          <section
+            className={
+              styles.metricGrid
+            }
+            aria-label="Analytics overview"
+          >
+            <MetricCard
+              label="Valid impressions"
+              value={
+                formatCount(
+                  data
+                    .validImpressions
+                )
+              }
+              detail="Validated delivery events"
+            />
+
+            <MetricCard
+              label="Valid clicks"
+              value={
+                formatCount(
+                  data
+                    .validClicks
+                )
+              }
+              detail="Validated click events"
+            />
+
+            <MetricCard
+              label="CTR"
+              value={
+                formatCtr(
+                  data.ctr
+                )
+              }
+              detail="Valid clicks divided by valid impressions"
+            />
+
+            <MetricCard
+              label="Valid conversions"
+              value={
+                formatCount(
+                  data
+                    .validConversions
+                )
+              }
+              detail="Validated conversion events"
+            />
+          </section>
+
+          <section
+            className={
+              styles.qualityGrid
+            }
+            aria-label="Traffic quality"
+          >
+            <article
+              className={
+                styles.qualityCard
+              }
+            >
+              <span>
+                Invalid events
+              </span>
+
+              <strong>
+                {formatBigInt(
+                  totalInvalidEvents(
+                    data
+                  )
+                )}
+              </strong>
+
+              <p>
+                Events rejected by
+                trusted validation.
+              </p>
+            </article>
+
+            <article
+              className={
+                styles.qualityCard
+              }
+            >
+              <span>
+                Duplicate events
+              </span>
+
+              <strong>
+                {formatBigInt(
+                  totalDuplicateEvents(
+                    data
+                  )
+                )}
+              </strong>
+
+              <p>
+                Repeated immutable
+                delivery events.
+              </p>
+            </article>
+
+            <article
+              className={
+                styles.qualityCard
+              }
+            >
+              <span>
+                Unattributed conversions
+              </span>
+
+              <strong>
+                {formatCount(
+                  data
+                    .unattributedConversions
+                )}
+              </strong>
+
+              <p>
+                Valid conversions without
+                an attribution record.
+              </p>
+            </article>
+          </section>
+
+          {!hasMetrics ? (
+            <section
+              className={
+                styles.statePanel
+              }
+            >
+              <strong>
+                No Analytics data
+              </strong>
+
+              <p>
+                No aggregated campaign
+                metrics match the selected
+                filters.
+              </p>
+            </section>
+          ) : (
+            <>
+              <section
+                className={
+                  styles.section
+                }
+              >
+                <div
+                  className={
+                    styles.sectionHeader
+                  }
+                >
+                  <div>
+                    <h2>
+                      Placement performance
+                    </h2>
+
+                    <p>
+                      Validated delivery
+                      across Home, Search,
+                      and Trending.
+                    </p>
+                  </div>
+                </div>
+
+                <PlacementTable
+                  placements={
+                    data.placements
+                  }
+                />
+              </section>
+
+              <section
+                className={
+                  styles.section
+                }
+              >
+                <div
+                  className={
+                    styles.sectionHeader
+                  }
+                >
+                  <div>
+                    <h2>
+                      Campaign performance
+                    </h2>
+
+                    <p>
+                      Campaign-level
+                      validated metrics and
+                      finalization state.
+                    </p>
+                  </div>
+
+                  <span
+                    className={
+                      styles.recordCount
+                    }
+                  >
+                    {
+                      data
+                        .campaigns
+                        .length
+                    }{" "}
+                    campaign
+                    {data.campaigns
+                      .length ===
+                    1
+                      ? ""
+                      : "s"}
+                  </span>
+                </div>
+
+                <CampaignTable
+                  campaigns={
+                    data.campaigns
+                  }
+                />
+              </section>
+            </>
+          )}
+
+          <section
+            className={
+              styles.scopeNote
+            }
+          >
+            <strong>
+              Delivery analytics only
+            </strong>
+
+            <p>
+              Financial values remain
+              unavailable while payment,
+              Wallet, settlement, refund,
+              and ledger integrations are
+              paused.
+            </p>
+          </section>
+        </>
+      ) : null}
+    </main>
   );
 }

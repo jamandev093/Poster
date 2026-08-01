@@ -1,0 +1,2004 @@
+﻿POSTER ADMIN FINAL AUDIT - STEP 7
+Production Configuration, Security, Metadata, and Deployment Readiness
+
+Generated: 2026-07-31 09:26:00
+
+============================================================
+1. NEXT.JS CONFIGURATION
+============================================================
+
+FILE: F:\Project\Poster\admin\next.config.ts
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+
+============================================================
+2. PACKAGE AND SCRIPT CONFIGURATION
+============================================================
+
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "typescript": "^5"
+  }
+}
+
+============================================================
+3. ENVIRONMENT VARIABLE REFERENCES
+============================================================
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 32
+TEXT: "js-tokens": "^4.0.0",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 304
+TEXT: "eslint-visitor-keys": "^3.4.3"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 316
+TEXT: "node_modules/@eslint-community/eslint-utils/node_modules/eslint-visitor-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 318
+TEXT: "resolved": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1383
+TEXT: "@typescript-eslint/visitor-keys": "8.64.0",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1421
+TEXT: "@typescript-eslint/visitor-keys": "8.64.0",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1466
+TEXT: "@typescript-eslint/visitor-keys": "8.64.0"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1542
+TEXT: "@typescript-eslint/visitor-keys": "8.64.0",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1636
+TEXT: "node_modules/@typescript-eslint/visitor-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1638
+TEXT: "resolved": "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-8.64.0.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1644
+TEXT: "eslint-visitor-keys": "^5.0.0"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1654
+TEXT: "node_modules/@typescript-eslint/visitor-keys/node_modules/eslint-visitor-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 1656
+TEXT: "resolved": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-5.0.1.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 2528
+TEXT: "path-key": "^3.1.0",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 2656
+TEXT: "object-keys": "^1.1.1"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 2760
+TEXT: "object-keys": "^1.1.1",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 2762
+TEXT: "own-keys": "^1.0.1",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 2964
+TEXT: "eslint-visitor-keys": "^4.2.1",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 3268
+TEXT: "node_modules/eslint-visitor-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 3270
+TEXT: "resolved": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.1.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 3290
+TEXT: "eslint-visitor-keys": "^4.2.1"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 3457
+TEXT: "keyv": "^4.5.4"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4302
+TEXT: "node_modules/js-tokens": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4304
+TEXT: "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4395
+TEXT: "node_modules/keyv": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4397
+TEXT: "resolved": "https://registry.npmjs.org/keyv/-/keyv-4.5.4.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4469
+TEXT: "js-tokens": "^3.0.0 || ^4.0.0"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4695
+TEXT: "node_modules/object-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4697
+TEXT: "resolved": "https://registry.npmjs.org/object-keys/-/object-keys-1.1.1.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4717
+TEXT: "object-keys": "^1.1.1"
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4813
+TEXT: "node_modules/own-keys": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4815
+TEXT: "resolved": "https://registry.npmjs.org/own-keys/-/own-keys-1.0.1.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4821
+TEXT: "object-keys": "^1.1.1",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4886
+TEXT: "node_modules/path-key": {
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4888
+TEXT: "resolved": "https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 4906
+TEXT: "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 5095
+TEXT: "object-keys": "^1.1.1",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 5695
+TEXT: "integrity": "sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==",
+
+FILE: F:\Project\Poster\admin\package-lock.json
+LINE: 5895
+TEXT: "integrity": "sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 126
+TEXT: key={label}
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 174
+TEXT: key={`${label}-${reference}`}
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 228
+TEXT: key={`${title}-${detail}`}
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 190
+TEXT: key={href}
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 234
+TEXT: key={href}
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 279
+TEXT: key={href}
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 319
+TEXT: key={href}
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 73
+TEXT: type ErrorKey =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 74
+TEXT: | keyof FormState
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 81
+TEXT: ErrorKey,
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 294
+TEXT: K extends keyof FormState
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 759
+TEXT: Object.keys(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1841
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2366
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 767
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 771
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 772
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 777
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 783
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 794
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 844
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1262
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1455
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 985
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 989
+TEXT: key={key}
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 993
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 999
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1010
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1046
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1436
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1656
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 43
+TEXT: keyof FormState | "contentReference",
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 285
+TEXT: K extends keyof FormState
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 336
+TEXT: Object.keys(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 846
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 850
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 851
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 856
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 862
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 873
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 943
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1416
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1001
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1005
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1006
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1011
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1017
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1028
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1086
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1578
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 844
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 848
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 849
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 854
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 860
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 871
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 940
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1473
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 11
+TEXT: type RangeKey =
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 63
+TEXT: RangeKey,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 374
+TEXT: range: RangeKey
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 393
+TEXT: useState<RangeKey>(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 473
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 770
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 901
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1073
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1077
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1078
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1083
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1089
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1100
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1166
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1688
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 111
+TEXT: TKey extends
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 112
+TEXT: keyof PosterPromotionDraft
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 114
+TEXT: key:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 115
+TEXT: TKey,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 117
+TEXT: PosterPromotionDraft[TKey]
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 125
+TEXT: [key]:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 132
+TEXT: TKey extends
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 133
+TEXT: keyof PosterPromotionDraft["creative"]
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 135
+TEXT: key:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 136
+TEXT: TKey,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 138
+TEXT: PosterPromotionDraft["creative"][TKey]
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 149
+TEXT: [key]:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 381
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 458
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 640
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 79
+TEXT: key={area.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 236
+TEXT: key={section.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 582
+TEXT: key={property.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 146
+TEXT: keyof ExternalEarningDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 301
+TEXT: return Object.keys(errors).length > 0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 310
+TEXT: key={entry.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 64
+TEXT: Key extends keyof ExternalEarningDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 66
+TEXT: key: Key,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 67
+TEXT: value: ExternalEarningDraft[Key]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 71
+TEXT: [key]: value,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 76
+TEXT: key:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 84
+TEXT: [key]: value,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 150
+TEXT: key={program.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 191
+TEXT: key={promotion.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 744
+TEXT: key={option.value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1281
+TEXT: <tr key={earning.id}>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1547
+TEXT: Object.keys(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.types.ts
+LINE: 115
+TEXT: keyof ExternalProgramDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 115
+TEXT: return Object.keys(errors).length > 0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 209
+TEXT: key={entry.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 41
+TEXT: Key extends keyof ExternalProgramDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 43
+TEXT: key: Key,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 44
+TEXT: value: ExternalProgramDraft[Key]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 48
+TEXT: [key]: value,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 407
+TEXT: key={option.value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 517
+TEXT: <tr key={program.id}>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 152
+TEXT: keyof ExternalPromotionDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 169
+TEXT: return Object.keys(errors).length > 0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 287
+TEXT: key={entry.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 52
+TEXT: Key extends keyof ExternalPromotionDraft,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 54
+TEXT: key: Key,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 55
+TEXT: value: ExternalPromotionDraft[Key]
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 59
+TEXT: [key]: value,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 124
+TEXT: key={program.id}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 380
+TEXT: key={option.value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 606
+TEXT: key={option.value}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 769
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 945
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 949
+TEXT: key={key}
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 953
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 959
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 968
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 998
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1555
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 686
+TEXT: key,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 690
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 691
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 696
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 702
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 713
+TEXT: key
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 767
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1138
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 317
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 354
+TEXT: key={
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 245
+TEXT: key={
+
+
+============================================================
+4. ENVIRONMENT FILE INVENTORY
+============================================================
+
+
+============================================================
+5. GITIGNORE COVERAGE
+============================================================
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+============================================================
+6. SECURITY HEADERS AND MIDDLEWARE
+============================================================
+
+
+============================================================
+7. AUTHENTICATION AND AUTHORIZATION REFERENCES
+============================================================
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 42
+TEXT: "Authorized RSS source has a sync issue and should be reviewed before enabling.",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 66
+TEXT: authorizedRepresentative: boolean;
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 69
+TEXT: authorizedClaimsAndLinks: boolean;
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 119
+TEXT: authorizedRepresentative: false,
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 122
+TEXT: authorizedClaimsAndLinks: false,
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 720
+TEXT: !form.authorizedRepresentative
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 722
+TEXT: nextErrors.authorizedRepresentative =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 723
+TEXT: "Confirm that you are authorized to submit this request.";
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 737
+TEXT: "Confirm that you own, license, or are authorized to provide the submitted campaign materials.";
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 741
+TEXT: !form.authorizedClaimsAndLinks
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 743
+TEXT: nextErrors.authorizedClaimsAndLinks =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 744
+TEXT: "Confirm that campaign claims and destination links are accurate and authorized.";
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1736
+TEXT: Client-authorized promotional
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2602
+TEXT: {/* 9 — RIGHTS / AUTHORIZATION */}
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2618
+TEXT: Rights & authorization
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2622
+TEXT: Confirm authority over the
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2643
+TEXT: form.authorizedRepresentative
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2649
+TEXT: "authorizedRepresentative",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2656
+TEXT: I am authorized to submit
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2662
+TEXT: {errors.authorizedRepresentative ? (
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2669
+TEXT: errors.authorizedRepresentative
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2697
+TEXT: authorized to provide all
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2725
+TEXT: form.authorizedClaimsAndLinks
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2731
+TEXT: "authorizedClaimsAndLinks",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2742
+TEXT: are accurate and authorized.
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2746
+TEXT: {errors.authorizedClaimsAndLinks ? (
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2753
+TEXT: errors.authorizedClaimsAndLinks
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 96
+TEXT: "Added to Poster from authorized RSS",
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 289
+TEXT: return "Authorized RSS";
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1378
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 502
+TEXT: return "Authorized RSS";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 523
+TEXT: return "Fields permitted by the authorized publisher feed only.";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1792
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 34
+TEXT: confirmAuthority: boolean;
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 68
+TEXT: confirmAuthority: false,
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 136
+TEXT: "Enter the authorized representative’s full name.";
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 203
+TEXT: !form.confirmAuthority
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 205
+TEXT: errors.confirmAuthority =
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 206
+TEXT: "Confirm that you are the rights holder or authorized to act for the rights holder.";
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 574
+TEXT: authorized representative and believe
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 659
+TEXT: label="Authorized representative"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1008
+TEXT: Confirm your authority and the
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1017
+TEXT: form.confirmAuthority
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1020
+TEXT: errors.confirmAuthority
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1026
+TEXT: "confirmAuthority",
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1033
+TEXT: or that I am authorized to act on
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1055
+TEXT: not authorized by the rights holder,
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1078
+TEXT: authorized to submit it.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 557
+TEXT: role="alert"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1560
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1769
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1617
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1881
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 223
+TEXT: role="status"
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 798
+TEXT: description="Internal readiness indicators only. Sensitive bank and tax details will be protected by backend permissions."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1432
+TEXT: role="presentation"
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 201
+TEXT: "Authorized RSS · Sync requires review",
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1713
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 169
+TEXT: return "Authorized RSS";
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 190
+TEXT: return "Use only fields permitted by the authorized publisher feed.";
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1289
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1359
+TEXT: unauthorized sources,
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1420
+TEXT: role="dialog"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1458
+TEXT: authorization issue,
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 104
+TEXT: "Authorized RSS scheduling, synchronization, retries, and live feed monitoring are not connected yet.",
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 359
+TEXT: DAU, MAU, and live-session counts
+
+
+============================================================
+8. METADATA, TITLE, DESCRIPTION, AND ROBOTS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\app\layout.tsx
+LINE: 1
+TEXT: import type { Metadata } from "next";
+
+FILE: F:\Project\Poster\admin\src\app\layout.tsx
+LINE: 7
+TEXT: export const metadata: Metadata = {
+
+FILE: F:\Project\Poster\admin\src\app\layout.tsx
+LINE: 8
+TEXT: title: "Poster Admin",
+
+FILE: F:\Project\Poster\admin\src\app\layout.tsx
+LINE: 9
+TEXT: description: "Operational control panel for Poster",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 30
+TEXT: title: "Copyright strike by BBC",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 31
+TEXT: description:
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 40
+TEXT: title: "Example News is paused",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 41
+TEXT: description:
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 50
+TEXT: title: "Actionable reports need review",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 51
+TEXT: description:
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 60
+TEXT: title: "Copyright request verified",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 66
+TEXT: title: "Content removed",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 72
+TEXT: title: "Source paused",
+
+FILE: F:\Project\Poster\admin\src\app\page.tsx
+LINE: 78
+TEXT: title: "Report received",
+
+
+============================================================
+9. CONSOLE, DEBUG, AND DEVELOPMENT OUTPUT
+============================================================
+
+
+============================================================
+10. UNSAFE HTML AND DYNAMIC CONTENT
+============================================================
+
+
+============================================================
+11. EXTERNAL LINKS AND WINDOW OPENING
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1311
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1312
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 234
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 235
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 111
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 112
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 121
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 122
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 190
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 191
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 219
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 220
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 228
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 229
+TEXT: rel="noreferrer"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1184
+TEXT: target="_blank"
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1185
+TEXT: rel="noreferrer"
+
+
+============================================================
+12. FILE UPLOAD AND URL INPUT HANDLING
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 40
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 52
+TEXT: affiliateTrackingUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 95
+TEXT: destinationUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 105
+TEXT: affiliateTrackingUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 160
+TEXT: new URL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 273
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 281
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 396
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 406
+TEXT: URL.createObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 427
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 489
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 499
+TEXT: URL.createObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 520
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 588
+TEXT: form.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 591
+TEXT: nextErrors.destinationUrl =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 662
+TEXT: form.affiliateTrackingUrl.trim() &&
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 664
+TEXT: form.affiliateTrackingUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 667
+TEXT: nextErrors.affiliateTrackingUrl =
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 812
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 820
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1544
+TEXT: form.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1551
+TEXT: "destinationUrl",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1557
+TEXT: {errors.destinationUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1564
+TEXT: errors.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1940
+TEXT: type="file"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1941
+TEXT: accept="image/jpeg,image/png,image/webp"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2041
+TEXT: type="file"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2042
+TEXT: accept="image/jpeg,image/png,image/webp"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2160
+TEXT: form.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2167
+TEXT: "destinationUrl",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2173
+TEXT: {errors.destinationUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2180
+TEXT: errors.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2241
+TEXT: form.affiliateTrackingUrl
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2248
+TEXT: "affiliateTrackingUrl",
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2254
+TEXT: {errors.affiliateTrackingUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2261
+TEXT: errors.affiliateTrackingUrl
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 83
+TEXT: new URL(value);
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.types.ts
+LINE: 44
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.types.ts
+LINE: 151
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.validation.ts
+LINE: 31
+TEXT: destinationUrl?:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.validation.ts
+LINE: 63
+TEXT: new URL(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.validation.ts
+LINE: 210
+TEXT: draft.creative.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\poster-promotion.validation.ts
+LINE: 214
+TEXT: errors.destinationUrl =
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 651
+TEXT: draft.creative.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 658
+TEXT: "destinationUrl",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 664
+TEXT: {errors.destinationUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 667
+TEXT: errors.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 95
+TEXT: URL.createObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 114
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 133
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 150
+TEXT: URL.revokeObjectURL(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 202
+TEXT: type="file"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 203
+TEXT: accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 376
+TEXT: request.creative.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 35
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 63
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 130
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 197
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1266
+TEXT: selectedAffiliate.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1466
+TEXT: selectedCampaign.destinationUrl ??
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 36
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 66
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 136
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 192
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1273
+TEXT: selectedSponsorship.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 62
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 130
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 197
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 267
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 313
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 395
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 629
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 690
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 756
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 822
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 143
+TEXT: destinationUrl?: string;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 161
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 43
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 72
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 136
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 537
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 538
+TEXT: draft.creative.destinationUrl.trim(),
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 552
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 553
+TEXT: draft.creative.destinationUrl.trim(),
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 659
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 660
+TEXT: promotion.destinationUrl,
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 697
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 698
+TEXT: draft.creative.destinationUrl.trim(),
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 723
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 724
+TEXT: draft.creative.destinationUrl.trim(),
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1494
+TEXT: selectedPromotion.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 72
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 192
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 329
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 432
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 94
+TEXT: evidenceUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 135
+TEXT: evidenceUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 35
+TEXT: evidenceUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 51
+TEXT: const url = new URL(value);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 288
+TEXT: draft.evidenceUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 291
+TEXT: errors.evidenceUrl =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 230
+TEXT: {earning.evidenceUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 233
+TEXT: href={earning.evidenceUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 273
+TEXT: value={draft.evidenceUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 274
+TEXT: error={errors.evidenceUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 278
+TEXT: "evidenceUrl",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 152
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 153
+TEXT: earning.evidenceUrl,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 737
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 738
+TEXT: draft.evidenceUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 899
+TEXT: evidenceUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 900
+TEXT: draft.evidenceUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.validation.ts
+LINE: 41
+TEXT: const url = new URL(value);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 40
+TEXT: mediaUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 43
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 46
+TEXT: trackingUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 154
+TEXT: mediaUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 157
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 160
+TEXT: trackingUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 86
+TEXT: mediaUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 88
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 89
+TEXT: trackingUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 130
+TEXT: mediaUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 132
+TEXT: destinationUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.types.ts
+LINE: 133
+TEXT: trackingUrl: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 23
+TEXT: mediaUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 25
+TEXT: destinationUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 26
+TEXT: trackingUrl: "",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 50
+TEXT: const url = new URL(value);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 110
+TEXT: draft.mediaUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 113
+TEXT: errors.mediaUrl =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 119
+TEXT: draft.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 122
+TEXT: errors.destinationUrl =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 127
+TEXT: draft.trackingUrl &&
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 129
+TEXT: draft.trackingUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.validation.ts
+LINE: 132
+TEXT: errors.trackingUrl =
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 186
+TEXT: {promotion.mediaUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 189
+TEXT: href={promotion.mediaUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 218
+TEXT: href={promotion.destinationUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 225
+TEXT: {promotion.trackingUrl ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 227
+TEXT: href={promotion.trackingUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 281
+TEXT: mediaUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 284
+TEXT: : draft.mediaUrl,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 294
+TEXT: value={draft.mediaUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 295
+TEXT: error={errors.mediaUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 299
+TEXT: "mediaUrl",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 319
+TEXT: draft.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 322
+TEXT: errors.destinationUrl
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 327
+TEXT: "destinationUrl",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 336
+TEXT: value={draft.trackingUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 337
+TEXT: error={errors.trackingUrl}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 341
+TEXT: "trackingUrl",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 89
+TEXT: mediaUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 90
+TEXT: promotion.mediaUrl,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 92
+TEXT: destinationUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 93
+TEXT: promotion.destinationUrl,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 95
+TEXT: trackingUrl:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 96
+TEXT: promotion.trackingUrl,
+
+
+============================================================
+13. API ROUTES AND SERVER-SIDE CODE
+============================================================
+
+
+============================================================
+14. DEPLOYMENT FILE INVENTORY
+============================================================
+
+
+============================================================
+15. DEPENDENCY AUDIT
+============================================================
+
+# npm audit report
+
+next  9.3.4-canary.0 - 16.3.0-preview.7
+Severity: high
+Next.js: Middleware / Proxy bypass in App Router applications using Turbopack and single locale - https://github.com/advisories/GHSA-6gpp-xcg3-4w24
+Next.js: Denial of Service in App Router using Server Actions - https://github.com/advisories/GHSA-m99w-x7hq-7vfj
+Next.js: Server-Side Request Forgery in Server Actions on custom servers - https://github.com/advisories/GHSA-89xv-2m56-2m9x
+Next.js: Cache confusion of response bodies for requests with bodies - https://github.com/advisories/GHSA-68g3-v927-f742
+Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences - https://github.com/advisories/GHSA-4633-3j49-mh5q
+Next.js: Unbounded Server Action payload in Edge runtime - https://github.com/advisories/GHSA-4c39-4ccg-62r3
+Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname - https://github.com/advisories/GHSA-p9j2-gv94-2wf4
+Next.js: Denial of Service in the Image Optimization API using SVGs - https://github.com/advisories/GHSA-q8wf-6r8g-63ch
+Next.js: Unauthenticated disclosure of internal Server Function endpoints - https://github.com/advisories/GHSA-955p-x3mx-jcvp
+Depends on vulnerable versions of postcss
+Depends on vulnerable versions of sharp
+fix available via `npm audit fix --force`
+Will install next@16.2.12, which is outside the stated dependency range
+node_modules/next
+
+postcss  <=8.5.17
+Severity: high
+PostCSS has XSS via Unescaped </style> in its CSS Stringify Output - https://github.com/advisories/GHSA-qx2v-qp2m-jg93
+PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments - https://github.com/advisories/GHSA-6g55-p6wh-862q
+PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure - https://github.com/advisories/GHSA-r28c-9q8g-f849
+fix available via `npm audit fix --force`
+Will install next@16.2.12, which is outside the stated dependency range
+node_modules/postcss
+
+sharp  <0.35.0
+Severity: high
+sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591 - https://github.com/advisories/GHSA-f88m-g3jw-g9cj
+fix available via `npm audit fix --force`
+Will install next@16.2.12, which is outside the stated dependency range
+node_modules/sharp
+
+3 high severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix --force
+
+============================================================
+16. TYPESCRIPT VERIFICATION
+============================================================
+
+
+============================================================
+17. ESLINT VERIFICATION
+============================================================
+
+
+> admin@0.1.0 lint
+> eslint .
+
+
+============================================================
+18. PRODUCTION BUILD VERIFICATION
+============================================================
+
+
+> admin@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.10 (Turbopack)
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.7s
+  Running TypeScript ...
+  Finished TypeScript in 11.2s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/22) ...
+  Generating static pages using 3 workers (5/22) 
+  Generating static pages using 3 workers (10/22) 
+  Generating static pages using 3 workers (16/22) 
+Γ£ô Generating static pages using 3 workers (22/22) in 1082ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /advertise
+Γö£ Γùï /content
+Γö£ Γùï /copyright
+Γö£ Γùï /copyright-request
+Γö£ Γùï /monetization
+Γö£ Γùï /monetization/affiliate
+Γö£ Γùï /monetization/analytics
+Γö£ Γùï /monetization/campaigns
+Γö£ Γùï /monetization/poster-promotion
+Γö£ Γùï /monetization/sponsorships
+Γö£ Γùï /operations/business-identity
+Γö£ Γùï /operations/external-promotions
+Γö£ Γùï /operations/external-promotions/earnings
+Γö£ Γùï /operations/external-promotions/programs
+Γö£ Γùï /operations/external-promotions/promotions
+Γö£ Γùï /reports
+Γö£ Γùï /sources
+Γö£ Γùï /system-status
+Γöö Γùï /users
+
+
+Γùï  (Static)  prerendered as static content
+
+
+============================================================
+END OF STEP 7 AUDIT OUTPUT
+============================================================

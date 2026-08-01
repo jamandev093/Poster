@@ -1,0 +1,146 @@
+$signupBody = @{
+  email = "jaman091190@gmail.com"
+  password = "P0_$!9?93%#_1A"
+  fullName = "Poster Administrator(Jaman)"
+} | ConvertTo-Json
+
+
+
+
+$email = "jaman091190@gmail.com"
+$fullName = "Poster Administrator(Jaman)"
+$securePassword = Read-Host "P0_$!9?93%#_1A" -AsSecureString
+$passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+
+try {
+  $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+
+  $signupBody = @{
+    email = $email
+    password = $password
+    fullName = $fullName
+  } | ConvertTo-Json
+
+  Invoke-RestMethod `
+    -Uri "http://localhost:4000/api/v1/auth/signup" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $signupBody
+}
+finally {
+  if ($passwordPointer -ne [IntPtr]::Zero) {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+  }
+
+  Remove-Variable password -ErrorAction SilentlyContinue
+  Remove-Variable signupBody -ErrorAction SilentlyContinue
+}
+
+
+
+
+
+$email = "jaman001100x@gmail.com"
+$fullName = "Poster Administrator(Jaman)"
+$securePassword = Read-Host "EP0_$!9?93%#_1A&" -AsSecureString
+$passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+
+try {
+  $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+
+  $signupBody = @{
+    email = $email
+    password = $password
+    fullName = $fullName
+  } | ConvertTo-Json
+
+  Invoke-RestMethod `
+    -Uri "http://localhost:4000/api/v1/auth/signup" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $signupBody
+}
+finally {
+  if ($passwordPointer -ne [IntPtr]::Zero) {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+  }
+
+  Remove-Variable password -ErrorAction SilentlyContinue
+  Remove-Variable signupBody -ErrorAction SilentlyContinue
+}
+
+
+
+
+$email = "jaman001100x@gmail.com"
+$fullName = "Poster Administrator(Jaman)"
+$securePassword = Read-Host "EP0$!9?93%#1A&" -AsSecureString
+$passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+
+try {
+  $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+
+  $signupBody = @{
+    email = $email
+    password = $password
+    fullName = $fullName
+  } | ConvertTo-Json
+
+  Invoke-RestMethod `
+    -Uri "http://localhost:4000/api/v1/auth/signup" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $signupBody
+}
+finally {
+  if ($passwordPointer -ne [IntPtr]::Zero) {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+  }
+
+  Remove-Variable password -ErrorAction SilentlyContinue
+  Remove-Variable signupBody -ErrorAction SilentlyContinue
+}
+
+
+
+$email = "jaman001100x@gmail.com"
+$fullName = "Poster Administrator"
+do {
+  $securePassword = Read-Host "Enter Admin password (minimum 12 characters)" -AsSecureString
+  $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+
+  try {
+    $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+  }
+  finally {
+    if ($passwordPointer -ne [IntPtr]::Zero) {
+      [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+    }
+  }
+
+  Write-Host "Password length received:" $password.Length
+
+  if ($password.Length -lt 12) {
+    Write-Host "Too short. Enter at least 12 characters again." -ForegroundColor Red
+  }
+}
+while ($password.Length -lt 12)
+
+$signupBody = @{
+  email = $email
+  password = $password
+  fullName = $fullName
+} | ConvertTo-Json
+
+try {
+  Invoke-RestMethod `
+    -Uri "http://localhost:4000/api/v1/auth/signup" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $signupBody
+}
+finally {
+  Remove-Variable password -ErrorAction SilentlyContinue
+  Remove-Variable securePassword -ErrorAction SilentlyContinue
+  Remove-Variable signupBody -ErrorAction SilentlyContinue
+}

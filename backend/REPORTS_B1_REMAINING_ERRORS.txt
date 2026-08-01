@@ -1,0 +1,89 @@
+﻿POSTER REPORTS B1 REMAINING ERRORS
+Generated: 2026-08-01 16:49:04 +05:30
+
+============================================================
+TYPESCRIPT
+============================================================
+src/app.ts(471,5): error TS2304: Cannot find name 'adminReportsRoutes'.
+
+============================================================
+APP ROUTE IMPORT BLOCK
+============================================================
+  91: } from "./domains/authentication/authentication.service.js";
+  92: 
+  93: import {
+  94:   registerAuthorizationContext,
+  95: } from "./http/authorization-context.js";
+  96: 
+  97: import {
+  98:   registerErrorHandler,
+  99: } from "./plugins/error-handler.js";
+ 100: 
+ 101: import {
+ 102:   adminAccessRoutes,
+ 103:   adminCommercialRequestRoutes,
+ 104:   adminCopyrightRoutes,
+ 105:   adminContentRoutes,
+ 106:   adminMetricsRoutes,
+ 107:   adminProfileRoutes,
+ 108:   adminSourceRoutes,
+ 109:   authenticationRoutes,
+ 110:   clientCommercialRequestRoutes,
+ 111:   healthRoutes,
+ 112:   type AuthenticationRoutesOptions,
+ 113: } from "./routes/index.js";
+ 114: 
+ 115: import {
+ 116:   adminAudienceInsightsRoutes,
+ 117: } from "./routes/admin-audience-insights.routes.js";
+ 118: 
+ 119: import {
+ 120:   createDevelopmentEmailDeliveryProvider,
+ 121:   type EmailDeliveryProvider,
+ 122: } from "./services/email/index.js";
+ 123: 
+ 124: export interface BuildAppOptions {
+ 125:   adminCommercialRequestService?:
+
+============================================================
+AUTHORIZATION ACTOR FUNCTION
+============================================================
+ 400: }
+ 401: 
+ 402: function getAuthorizationActor(
+ 403:   request: {
+ 404:     authorizationContext:
+ 405:       {
+ 406:         userId: string;
+ 407: 
+ 408:         fullName: string;
+ 409:       } |
+ 410:       null;
+ 411:   }
+ 412: ) {
+ 413:   const authorization =
+ 414:     request.authorizationContext;
+ 415: 
+ 416:   if (
+ 417:     !authorization
+ 418:   ) {
+ 419:     throw new Error(
+ 420:       "Authorization context is unavailable after permission enforcement."
+ 421:     );
+ 422:   }
+ 423: 
+ 424:   return {
+ 425:     actorUserId:
+ 426:       authorization.userId,
+ 427: 
+ 428:     actorLabel:
+ 429:       authorization.fullName,
+ 430:   };
+ 431: }
+ 432: 
+ 433: export const adminReportsRoutes:
+ 434:   FastifyPluginAsync<
+ 435:     AdminReportsRoutesOptions
+ 436:   > =
+ 437:   async (
+ 438:     app,

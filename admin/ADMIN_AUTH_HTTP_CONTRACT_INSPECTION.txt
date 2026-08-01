@@ -1,0 +1,1979 @@
+﻿POSTER ADMIN
+AUTH HTTP CONTRACT INSPECTION
+
+Generated: 2026-07-31 13:12:13
+
+============================================================
+FILE: backend\src\routes\authentication.routes.ts
+============================================================
+
+import type {
+  FastifyPluginAsync,
+  FastifyReply,
+} from "fastify";
+
+import {
+  z,
+} from "zod";
+
+import type {
+  LoginSessionService,
+} from "../application/authentication/login-session.service.js";
+
+import type {
+  PasswordResetService,
+} from "../application/authentication/password-reset.service.js";
+
+import type {
+  AuthenticationSessionSummary,
+} from "../application/authentication/login-session.types.js";
+
+import type {
+  SessionLifecycleService,
+} from "../application/authentication/session-lifecycle.service.js";
+
+import type {
+  SignupRegistrationService,
+} from "../application/authentication/signup-registration.service.js";
+
+import {
+  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+  AUTHENTICATION_ACCESS_TOKEN_HEADER,
+  type AuthenticationAccessTokenService,
+  type IssuedAuthenticationAccessToken,
+} from "../domains/authentication/access-token.service.js";
+
+import {
+  AuthenticationSessionInvalidError,
+} from "../domains/authentication/authentication.errors.js";
+
+import type {
+  AuthenticationAccountSummary,
+  VerifySignupEmailInput,
+  VerifySignupEmailResult,
+} from "../domains/authentication/authentication.service.types.js";
+
+import {
+  clearAuthenticationRefreshCookie,
+  readAuthenticationRefreshToken,
+  setAuthenticationRefreshCookie,
+} from "../http/authentication-cookie.js";
+
+import {
+  parseHttpRequestBody,
+} from "../http/request-validation.js";
+
+const EMAIL_MAXIMUM_LENGTH =
+  320;
+
+const FULL_NAME_MAXIMUM_LENGTH =
+  200;
+
+const PASSWORD_MINIMUM_LENGTH =
+  12;
+
+const PASSWORD_MAXIMUM_LENGTH =
+  1024;
+
+const SignupRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      password:
+        z
+          .string()
+          .min(
+            PASSWORD_MINIMUM_LENGTH,
+            `Password must contain at least ${PASSWORD_MINIMUM_LENGTH} characters.`
+          )
+          .max(
+            PASSWORD_MAXIMUM_LENGTH,
+            "Password is too long."
+          ),
+
+      fullName:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Full name is required."
+          )
+          .max(
+            FULL_NAME_MAXIMUM_LENGTH,
+            "Full name is too long."
+          ),
+    })
+    .strict();
+
+const LoginRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      password:
+        z
+          .string()
+          .min(
+            1,
+            "Password is required."
+          )
+          .max(
+            PASSWORD_MAXIMUM_LENGTH,
+            "Password is too long."
+          ),
+    })
+    .strict();
+
+const VerifySignupEmailRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      code:
+        z
+          .string()
+          .trim()
+          .regex(
+            /^\d{6}$/,
+            "Verification code must contain exactly six digits."
+          ),
+    })
+    .strict();
+
+const PasswordResetRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+    })
+    .strict();
+
+const PasswordResetConfirmSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+
+      code:
+        z
+          .string()
+          .trim()
+          .regex(
+            /^\d{6}$/,
+            "Password-reset code must contain exactly six digits."
+          ),
+
+      password:
+        z
+          .string()
+          .min(
+            PASSWORD_MINIMUM_LENGTH,
+            `Password must contain at least ${PASSWORD_MINIMUM_LENGTH} characters.`
+          )
+          .max(
+            PASSWORD_MAXIMUM_LENGTH,
+            "Password is too long."
+          ),
+    })
+    .strict();
+
+interface AuthenticationAccountResponse {
+  id: string;
+
+  email: string;
+
+  fullName: string;
+
+  status:
+    AuthenticationAccountSummary[
+      "status"
+    ];
+
+  emailVerifiedAt:
+    | string
+    | null;
+
+  createdAt: string;
+}
+
+interface AuthenticationSessionResponse {
+  id: string;
+
+  userId: string;
+
+  organizationId:
+    | string
+    | null;
+
+  createdAt: string;
+
+  expiresAt: string;
+}
+
+interface LoginHttpResponse {
+  account:
+    AuthenticationAccountResponse;
+
+  session:
+    AuthenticationSessionResponse;
+}
+
+interface SignupHttpResponse {
+  account:
+    AuthenticationAccountResponse;
+
+  emailVerification: {
+    purpose: "signup";
+
+    expiresAt: string;
+
+    delivery: {
+      provider: string;
+
+      messageId: string;
+
+      acceptedAt: string;
+    };
+  };
+}
+
+interface VerifySignupEmailHttpResponse {
+  account:
+    AuthenticationAccountResponse;
+
+  verifiedAt: string;
+}
+
+export type VerifySignupEmailOperation =
+  (
+    input:
+      VerifySignupEmailInput
+  ) => Promise<
+    VerifySignupEmailResult
+  >;
+
+export interface AuthenticationRoutesOptions {
+  accessTokenService:
+    AuthenticationAccessTokenService;
+
+  signupRegistrationService:
+    SignupRegistrationService;
+
+  verifySignupEmail:
+    VerifySignupEmailOperation;
+
+  loginSessionService:
+    LoginSessionService;
+
+  sessionLifecycleService:
+    SessionLifecycleService;
+
+  passwordResetService:
+    PasswordResetService;
+
+  isProduction: boolean;
+}
+
+function mapAuthenticationAccount(
+  account:
+    AuthenticationAccountSummary
+): AuthenticationAccountResponse {
+  return {
+    id:
+      account.id,
+
+    email:
+      account.email,
+
+    fullName:
+      account.fullName,
+
+    status:
+      account.status,
+
+    emailVerifiedAt:
+      account.emailVerifiedAt
+        ? account
+            .emailVerifiedAt
+            .toISOString()
+        : null,
+
+    createdAt:
+      account
+        .createdAt
+        .toISOString(),
+  };
+}
+
+function mapAuthenticationSession(
+  session:
+    AuthenticationSessionSummary
+): AuthenticationSessionResponse {
+  return {
+    id:
+      session.id,
+
+    userId:
+      session.userId,
+
+    organizationId:
+      session.organizationId,
+
+    createdAt:
+      session
+        .createdAt
+        .toISOString(),
+
+    expiresAt:
+      session
+        .expiresAt
+        .toISOString(),
+  };
+}
+
+function mapVerificationResult(
+  result:
+    VerifySignupEmailResult
+): VerifySignupEmailHttpResponse {
+  return {
+    account:
+      mapAuthenticationAccount(
+        result.account
+      ),
+
+    verifiedAt:
+      result
+        .verifiedAt
+        .toISOString(),
+  };
+}
+
+function writeAccessTokenHeaders(
+  reply:
+    FastifyReply,
+  accessToken:
+    IssuedAuthenticationAccessToken
+): void {
+  reply
+    .header(
+      "cache-control",
+      "no-store"
+    )
+    .header(
+      AUTHENTICATION_ACCESS_TOKEN_HEADER,
+      accessToken.token
+    )
+    .header(
+      AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+      accessToken
+        .expiresAt
+        .toISOString()
+    );
+}
+
+/**
+ * Poster authentication HTTP routes.
+ *
+ * Route handlers validate and serialize HTTP data while
+ * delegating authoritative session behavior to application
+ * services and PostgreSQL repositories.
+ */
+export const authenticationRoutes:
+  FastifyPluginAsync<
+    AuthenticationRoutesOptions
+  > =
+  async (
+    app,
+    options
+  ) => {
+    app.post(
+      "/login",
+      async (
+        request,
+        reply
+      ) => {
+        const credentials =
+          parseHttpRequestBody(
+            LoginRequestSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .loginSessionService
+            .login({
+              email:
+                credentials.email,
+
+              password:
+                credentials.password,
+
+              ipAddress:
+                request.ip,
+
+              userAgent:
+                request.headers[
+                  "user-agent"
+                ] ??
+                null,
+            });
+
+        const accessToken =
+          options
+            .accessTokenService
+            .issue({
+              userId:
+                result.account.id,
+
+              sessionId:
+                result.session.id,
+            });
+
+        writeAccessTokenHeaders(
+          reply,
+          accessToken
+        );
+
+        setAuthenticationRefreshCookie(
+          reply,
+          result.refreshToken,
+          {
+            expiresAt:
+              result
+                .session
+                .expiresAt,
+
+            isProduction:
+              options.isProduction,
+          }
+        );
+
+        const response:
+          LoginHttpResponse = {
+            account:
+              mapAuthenticationAccount(
+                result.account
+              ),
+
+            session:
+              mapAuthenticationSession(
+                result.session
+              ),
+          };
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
+
+    app.post(
+      "/refresh",
+      async (
+        request,
+        reply
+      ) => {
+        const refreshToken =
+          readAuthenticationRefreshToken(
+            request
+          );
+
+        if (
+          !refreshToken
+        ) {
+          clearAuthenticationRefreshCookie(
+            reply,
+            options.isProduction
+          );
+
+          throw new AuthenticationSessionInvalidError(
+            "The refresh-token cookie was missing or blank."
+          );
+        }
+
+        try {
+          const result =
+            await options
+              .sessionLifecycleService
+              .refresh({
+                refreshToken,
+
+                ipAddress:
+                  request.ip,
+
+                userAgent:
+                  request.headers[
+                    "user-agent"
+                  ] ??
+                  null,
+              });
+
+          const accessToken =
+            options
+              .accessTokenService
+              .issue({
+                userId:
+                  result.account.id,
+
+                sessionId:
+                  result.session.id,
+              });
+
+          writeAccessTokenHeaders(
+            reply,
+            accessToken
+          );
+
+          setAuthenticationRefreshCookie(
+            reply,
+            result.refreshToken,
+            {
+              expiresAt:
+                result
+                  .session
+                  .expiresAt,
+
+              isProduction:
+                options.isProduction,
+            }
+          );
+
+          const response:
+            LoginHttpResponse = {
+              account:
+                mapAuthenticationAccount(
+                  result.account
+                ),
+
+              session:
+                mapAuthenticationSession(
+                  result.session
+                ),
+            };
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              response
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+            AuthenticationSessionInvalidError
+          ) {
+            clearAuthenticationRefreshCookie(
+              reply,
+              options.isProduction
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post(
+      "/logout",
+      async (
+        request,
+        reply
+      ) => {
+        const refreshToken =
+          readAuthenticationRefreshToken(
+            request
+          );
+
+        clearAuthenticationRefreshCookie(
+          reply,
+          options.isProduction
+        );
+
+        if (
+          refreshToken
+        ) {
+          await options
+            .sessionLifecycleService
+            .logout({
+              refreshToken,
+            });
+        }
+
+        return reply
+          .status(
+            204
+          )
+          .send();
+      }
+    );
+
+    app.post(
+      "/password-reset/request",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            PasswordResetRequestSchema,
+            request.body
+          );
+
+        await options
+          .passwordResetService
+          .request({
+            email:
+              input.email,
+
+            ipAddress:
+              request.ip,
+
+            userAgent:
+              request.headers[
+                "user-agent"
+              ] ??
+              null,
+          });
+
+        return reply
+          .status(
+            202
+          )
+          .send({
+            status:
+              "accepted",
+          });
+      }
+    );
+
+    app.post(
+      "/password-reset/confirm",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            PasswordResetConfirmSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .passwordResetService
+            .confirm({
+              email:
+                input.email,
+
+              code:
+                input.code,
+
+              password:
+                input.password,
+            });
+
+        clearAuthenticationRefreshCookie(
+          reply,
+          options.isProduction
+        );
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            result
+          );
+      }
+    );
+
+    app.post(
+      "/signup",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            SignupRequestSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .signupRegistrationService
+            .register(
+              input
+            );
+
+        const response:
+          SignupHttpResponse = {
+            account:
+              mapAuthenticationAccount(
+                result.account
+              ),
+
+            emailVerification: {
+              purpose:
+                "signup",
+
+              expiresAt:
+                result
+                  .emailVerification
+                  .expiresAt
+                  .toISOString(),
+
+              delivery: {
+                provider:
+                  result
+                    .emailVerification
+                    .delivery
+                    .provider,
+
+                messageId:
+                  result
+                    .emailVerification
+                    .delivery
+                    .messageId,
+
+                acceptedAt:
+                  result
+                    .emailVerification
+                    .delivery
+                    .acceptedAt
+                    .toISOString(),
+              },
+            },
+          };
+
+        return reply
+          .status(
+            201
+          )
+          .send(
+            response
+          );
+      }
+    );
+
+    app.post(
+      "/signup/verify",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            VerifySignupEmailRequestSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .verifySignupEmail(
+              input
+            );
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            mapVerificationResult(
+              result
+            )
+          );
+      }
+    );
+  };
+
+============================================================
+FILE: backend\src\routes\admin-access.routes.ts
+============================================================
+
+import type {
+  FastifyPluginAsync,
+} from "fastify";
+
+import {
+  requirePlatformPermission,
+} from "../http/authorization-context.js";
+
+/**
+ * Admin bootstrap endpoint.
+ *
+ * Admin clients use this response to determine whether the
+ * authenticated identity can enter the operational Admin UI.
+ */
+export const adminAccessRoutes:
+  FastifyPluginAsync =
+  async (
+    app
+  ) => {
+    app.get(
+      "/access",
+      async (
+        request,
+        reply
+      ) => {
+        const context =
+          requirePlatformPermission(
+            request,
+            "admin.access"
+          );
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            account: {
+              id:
+                context.userId,
+
+              email:
+                context.email,
+
+              fullName:
+                context.fullName,
+
+              status:
+                context.accountStatus,
+            },
+
+            access: {
+              sessionId:
+                context.sessionId,
+
+              platformRoles:
+                context.platformRoles,
+
+              platformPermissions:
+                context.platformPermissions,
+            },
+
+            organizations:
+              context
+                .organizationMemberships,
+          });
+      }
+    );
+  };
+
+============================================================
+FILE: backend\src\http\authorization-context.ts
+============================================================
+
+import type {
+  FastifyInstance,
+  FastifyRequest,
+} from "fastify";
+
+import {
+  AuthenticationAccessTokenInvalidError,
+  AuthenticationForbiddenError,
+  AuthenticationRequiredError,
+} from "../domains/authentication/authentication.errors.js";
+
+import {
+  hasPlatformPermission,
+} from "../domains/authorization/authorization.policy.js";
+
+import type {
+  AuthorizationContext,
+  PlatformPermission,
+} from "../domains/authorization/authorization.types.js";
+
+import type {
+  AuthorizationContextService,
+} from "../application/authorization/authorization-context.service.js";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    authorizationContext:
+      AuthorizationContext |
+      null;
+  }
+}
+
+export interface RegisterAuthorizationContextOptions {
+  authorizationContextService:
+    AuthorizationContextService;
+}
+
+const BEARER_ACCESS_TOKEN_PATTERN =
+  /^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i;
+
+export function registerAuthorizationContext(
+  app:
+    FastifyInstance,
+  options:
+    RegisterAuthorizationContextOptions
+): void {
+  app.decorateRequest(
+    "authorizationContext",
+    null
+  );
+
+  app.addHook(
+    "onRequest",
+    async (
+      request
+    ) => {
+      const authorizationHeader =
+        request
+          .headers
+          .authorization;
+
+      if (
+        authorizationHeader ===
+        undefined
+      ) {
+        return;
+      }
+
+      const match =
+        BEARER_ACCESS_TOKEN_PATTERN.exec(
+          authorizationHeader
+        );
+
+      const accessToken =
+        match?.[1];
+
+      if (
+        !accessToken
+      ) {
+        throw new AuthenticationAccessTokenInvalidError();
+      }
+
+      request.authorizationContext =
+        await options
+          .authorizationContextService
+          .resolve(
+            accessToken
+          );
+    }
+  );
+}
+
+export function requireAuthenticatedRequest(
+  request:
+    FastifyRequest
+): AuthorizationContext {
+  if (
+    !request
+      .authorizationContext
+  ) {
+    throw new AuthenticationRequiredError();
+  }
+
+  return request
+    .authorizationContext;
+}
+
+export function requirePlatformPermission(
+  request:
+    FastifyRequest,
+  permission:
+    PlatformPermission
+): AuthorizationContext {
+  const context =
+    requireAuthenticatedRequest(
+      request
+    );
+
+  if (
+    !hasPlatformPermission(
+      context.platformPermissions,
+      permission
+    )
+  ) {
+    throw new AuthenticationForbiddenError(
+      `The authenticated identity lacks platform permission "${permission}".`
+    );
+  }
+
+  return context;
+}
+
+============================================================
+FILE: backend\src\plugins\error-handler.ts
+============================================================
+
+import type {
+  FastifyError,
+  FastifyInstance,
+} from "fastify";
+
+import {
+  AuthenticationDomainError,
+} from "../domains/authentication/authentication.errors.js";
+
+import {
+  ApiRequestValidationError,
+  type ApiValidationIssue,
+} from "../http/request-validation.js";
+
+interface ApiErrorResponse {
+  error: {
+    code: string;
+
+    message: string;
+
+    requestId: string;
+
+    details?:
+      readonly ApiValidationIssue[];
+  };
+}
+
+export function registerErrorHandler(
+  app:
+    FastifyInstance
+): void {
+  app.setNotFoundHandler(
+    (
+      request,
+      reply
+    ) => {
+      const response:
+        ApiErrorResponse = {
+          error: {
+            code:
+              "ROUTE_NOT_FOUND",
+
+            message:
+              "The requested API route was not found.",
+
+            requestId:
+              request.id,
+          },
+        };
+
+      return reply
+        .status(
+          404
+        )
+        .send(
+          response
+        );
+    }
+  );
+
+  app.setErrorHandler(
+    (
+      error:
+        FastifyError,
+      request,
+      reply
+    ) => {
+      if (
+        error instanceof
+        ApiRequestValidationError
+      ) {
+        request.log.info(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster API request validation failed."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+
+              details:
+                error.issues,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      if (
+        error instanceof
+        AuthenticationDomainError
+      ) {
+        request.log.warn(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster authentication request was rejected."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      const statusCode =
+        typeof error.statusCode ===
+          "number" &&
+        error.statusCode >= 400 &&
+        error.statusCode <= 599
+          ? error.statusCode
+          : 500;
+
+      request.log.error(
+        {
+          error,
+
+          requestId:
+            request.id,
+        },
+        "Poster API request failed."
+      );
+
+      const response:
+        ApiErrorResponse = {
+          error: {
+            code:
+              statusCode >= 500
+                ? "INTERNAL_SERVER_ERROR"
+                : error.code ||
+                  "REQUEST_FAILED",
+
+            message:
+              statusCode >= 500
+                ? "The request could not be completed."
+                : "The request could not be processed.",
+
+            requestId:
+              request.id,
+          },
+        };
+
+      return reply
+        .status(
+          statusCode
+        )
+        .send(
+          response
+        );
+    }
+  );
+}
+
+============================================================
+FILE: backend\src\domains\authentication\authentication.service.types.ts
+============================================================
+
+import type {
+  UserStatus,
+} from "../identity/identity.types.js";
+
+export interface RegisterAuthenticationAccountInput {
+  email: string;
+
+  password: string;
+
+  fullName: string;
+}
+
+/**
+ * Safe account representation returned by authentication
+ * services.
+ *
+ * Password hashes and internal optimistic-concurrency values
+ * are intentionally excluded.
+ */
+export interface AuthenticationAccountSummary {
+  id: string;
+
+  email: string;
+
+  fullName: string;
+
+  status: UserStatus;
+
+  emailVerifiedAt:
+    | Date
+    | null;
+
+  createdAt: Date;
+}
+
+export interface SignupEmailVerificationChallenge {
+  purpose: "signup";
+
+  /**
+   * Non-secret identifier of the persisted verification-token
+   * record.
+   *
+   * This value may be used as the email-provider idempotency
+   * key. It must not be treated as the verification secret.
+   */
+  tokenId: string;
+
+  /**
+   * Raw verification code that must be passed directly to the
+   * email-delivery boundary.
+   *
+   * It must never be persisted or written to application logs.
+   */
+  code: string;
+
+  expiresAt: Date;
+}
+
+export interface RegisterAuthenticationAccountResult {
+  account:
+    AuthenticationAccountSummary;
+
+  emailVerification:
+    SignupEmailVerificationChallenge;
+}
+
+export interface VerifySignupEmailInput {
+  email: string;
+
+  code: string;
+}
+
+export interface VerifySignupEmailResult {
+  account:
+    AuthenticationAccountSummary;
+
+  verifiedAt: Date;
+}
+
+============================================================
+FILE: backend\src\application\authentication\login-session.types.ts
+============================================================
+
+import type {
+  AuthenticationAccountSummary,
+} from "../../domains/authentication/authentication.service.types.js";
+
+export interface LoginAuthenticationSessionInput {
+  email: string;
+
+  /**
+   * Passwords must never be trimmed or normalized.
+   */
+  password: string;
+
+  ipAddress?:
+    | string
+    | null;
+
+  userAgent?:
+    | string
+    | null;
+}
+
+/**
+ * Safe session metadata.
+ *
+ * Refresh-token digests and other internal authentication
+ * values are intentionally excluded.
+ */
+export interface AuthenticationSessionSummary {
+  id: string;
+
+  userId: string;
+
+  organizationId:
+    | string
+    | null;
+
+  createdAt: Date;
+
+  expiresAt: Date;
+}
+
+/**
+ * Successful login result.
+ *
+ * refreshToken is returned exactly once so the transport
+ * boundary can deliver it securely. It must never be logged
+ * or persisted in raw form.
+ */
+export interface LoginAuthenticationSessionResult {
+  account:
+    AuthenticationAccountSummary;
+
+  session:
+    AuthenticationSessionSummary;
+
+  refreshToken: string;
+}
+
+============================================================
+FILE: backend\src\application\authentication\session-lifecycle.types.ts
+============================================================
+
+import type {
+  AuthenticationAccountSummary,
+} from "../../domains/authentication/authentication.service.types.js";
+
+import type {
+  AuthenticationSessionSummary,
+} from "./login-session.types.js";
+
+export interface RefreshAuthenticationSessionInput {
+  refreshToken: string;
+
+  ipAddress?:
+    | string
+    | null;
+
+  userAgent?:
+    | string
+    | null;
+}
+
+export interface RefreshAuthenticationSessionResult {
+  account:
+    AuthenticationAccountSummary;
+
+  session:
+    AuthenticationSessionSummary;
+
+  /**
+   * Returned once for immediate protected-cookie replacement.
+   * It must never be logged or serialized in a response body.
+   */
+  refreshToken: string;
+}
+
+export interface LogoutAuthenticationSessionInput {
+  refreshToken: string;
+}
+
+export interface LogoutAuthenticationSessionResult {
+  revoked: boolean;
+}
+
+============================================================
+FILE: backend\src\domains\authorization\authorization.types.ts
+============================================================
+
+import type {
+  OrganizationRole,
+  UserStatus,
+} from "../identity/identity.types.js";
+
+export const PLATFORM_ROLES = [
+  "super_admin",
+  "operations_admin",
+  "content_moderator",
+  "copyright_admin",
+  "support_analyst",
+  "analytics_viewer",
+] as const;
+
+export type PlatformRole =
+  (typeof PLATFORM_ROLES)[number];
+
+export const PLATFORM_ROLE_ASSIGNMENT_STATUSES = [
+  "active",
+  "revoked",
+] as const;
+
+export type PlatformRoleAssignmentStatus =
+  (typeof PLATFORM_ROLE_ASSIGNMENT_STATUSES)[number];
+
+export const PLATFORM_PERMISSIONS = [
+  "admin.access",
+  "dashboard.read",
+  "users.metrics.read",
+  "content.read",
+  "content.manage",
+  "sources.read",
+  "sources.manage",
+  "reports.read",
+  "reports.manage",
+  "copyright.read",
+  "copyright.manage",
+  "monetization.requests.read",
+  "monetization.requests.manage",
+  "monetization.campaigns.read",
+  "monetization.campaigns.manage",
+  "audit.read",
+] as const;
+
+export type PlatformPermission =
+  (typeof PLATFORM_PERMISSIONS)[number];
+
+export interface PlatformRoleAssignmentRecord {
+  id: string;
+
+  userId: string;
+
+  role:
+    PlatformRole;
+
+  status:
+    PlatformRoleAssignmentStatus;
+
+  grantedByUserId:
+    | string
+    | null;
+
+  grantedAt: Date;
+
+  revokedAt:
+    | Date
+    | null;
+
+  createdAt: Date;
+
+  updatedAt: Date;
+
+  rowVersion: string;
+}
+
+export interface GrantPlatformRoleInput {
+  userId: string;
+
+  role:
+    PlatformRole;
+
+  grantedByUserId?:
+    | string
+    | null;
+
+  grantedAt: Date;
+}
+
+export interface RevokePlatformRoleInput {
+  assignmentId: string;
+
+  expectedRowVersion: string;
+
+  revokedAt: Date;
+}
+
+export interface AuthorizationOrganizationMembership {
+  membershipId: string;
+
+  organizationId: string;
+
+  role:
+    OrganizationRole;
+
+  isPrimaryContact:
+    boolean;
+}
+
+export interface AuthorizationContext {
+  userId: string;
+
+  sessionId: string;
+
+  email: string;
+
+  fullName: string;
+
+  accountStatus:
+    UserStatus;
+
+  platformRoles:
+    readonly PlatformRole[];
+
+  platformPermissions:
+    readonly PlatformPermission[];
+
+  organizationMemberships:
+    readonly AuthorizationOrganizationMembership[];
+}
+
+============================================================
+FILE: backend\src\app.ts
+============================================================
+
+import cookie
+  from "@fastify/cookie";
+
+import cors
+  from "@fastify/cors";
+
+import helmet
+  from "@fastify/helmet";
+
+import Fastify, {
+  type FastifyInstance,
+} from "fastify";
+
+import {
+  createAdminUserMetricsService,
+  type AdminUserMetricsService,
+} from "./application/admin-metrics/admin-user-metrics.service.js";
+
+import {
+  createAdminCommercialRequestService,
+  type AdminCommercialRequestService,
+} from "./application/monetization/admin-commercial-request.service.js";
+
+import {
+  createClientCommercialRequestService,
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+import {
+  createSessionLifecycleService,
+  type SessionLifecycleService,
+} from "./application/authentication/session-lifecycle.service.js";
+
+import {
+  createSignupRegistrationService,
+  type SignupRegistrationService,
+} from "./application/authentication/signup-registration.service.js";
+
+import {
+  getEnvironment,
+} from "./config/environment.js";
+
+import {
+  createAuthenticationAccessTokenService,
+  type AuthenticationAccessTokenService,
+} from "./domains/authentication/access-token.service.js";
+
+import {
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
+
+import {
+  registerErrorHandler,
+} from "./plugins/error-handler.js";
+
+import {
+  adminAccessRoutes,
+  adminCommercialRequestRoutes,
+  adminMetricsRoutes,
+  authenticationRoutes,
+  clientCommercialRequestRoutes,
+  healthRoutes,
+  type AuthenticationRoutesOptions,
+} from "./routes/index.js";
+
+import {
+  createDevelopmentEmailDeliveryProvider,
+  type EmailDeliveryProvider,
+} from "./services/email/index.js";
+
+export interface BuildAppOptions {
+  adminCommercialRequestService?:
+    AdminCommercialRequestService;
+
+  clientCommercialRequestService?:
+    ClientCommercialRequestService;
+
+  adminUserMetricsService?:
+    AdminUserMetricsService;
+
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+  loginSessionService?:
+    LoginSessionService;
+
+  sessionLifecycleService?:
+    SessionLifecycleService;
+
+  passwordResetService?:
+    PasswordResetService;
+}
+
+export async function buildApp(
+  options:
+    BuildAppOptions =
+    {}
+): Promise<
+  FastifyInstance
+> {
+  const environment =
+    getEnvironment();
+
+  const sessionSecret =
+    environment.SESSION_SECRET ??
+    (
+      environment.NODE_ENV ===
+        "test"
+        ? "poster-test-access-token-secret-2026-never-use-in-production"
+        : undefined
+    );
+
+  if (
+    !sessionSecret
+  ) {
+    throw new Error(
+      "SESSION_SECRET is required to issue authentication access tokens."
+    );
+  }
+
+  const app =
+    Fastify({
+      logger:
+        environment.NODE_ENV ===
+        "test"
+          ? false
+          : {
+              level:
+                environment.LOG_LEVEL,
+            },
+
+      trustProxy:
+        true,
+
+      requestIdHeader:
+        "x-request-id",
+    });
+
+  await app.register(
+    cookie
+  );
+
+  await app.register(
+    helmet,
+    {
+      global:
+        true,
+    }
+  );
+
+  const allowedOrigins =
+    new Set([
+      environment.CLIENT_WEB_ORIGIN,
+      environment.ADMIN_WEB_ORIGIN,
+    ]);
+
+  await app.register(
+    cors,
+    {
+      credentials:
+        true,
+
+      exposedHeaders: [
+        "x-poster-access-token",
+        "x-poster-access-token-expires-at",
+      ],
+
+      origin: (
+        origin,
+        callback
+      ) => {
+        if (
+          !origin
+        ) {
+          callback(
+            null,
+            true
+          );
+
+          return;
+        }
+
+        callback(
+          null,
+          allowedOrigins.has(
+            origin
+          )
+        );
+      },
+    }
+  );
+
+  const accessTokenService =
+    options
+      .accessTokenService ??
+    createAuthenticationAccessTokenService({
+      secret:
+        sessionSecret,
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+    {
+      prefix:
+        "/api/v1",
+    }
+  );
+
+  const emailDeliveryProvider =
+    options
+      .emailDeliveryProvider ??
+    createDevelopmentEmailDeliveryProvider({
+      nodeEnvironment:
+        environment.NODE_ENV,
+    });
+
+  const signupRegistrationService =
+    options
+      .signupRegistrationService ??
+    createSignupRegistrationService({
+      emailDeliveryProvider,
+    });
+
+  const passwordResetService =
+    options
+      .passwordResetService ??
+    createPasswordResetService({
+      emailDeliveryProvider,
+    });
+
+  await app.register(
+    authenticationRoutes,
+    {
+      prefix:
+        "/api/v1/auth",
+
+      accessTokenService,
+
+      signupRegistrationService,
+
+      verifySignupEmail:
+        options
+          .verifySignupEmail ??
+        verifySignupEmail,
+
+      loginSessionService:
+        options
+          .loginSessionService ??
+        createLoginSessionService(),
+
+      sessionLifecycleService:
+        options
+          .sessionLifecycleService ??
+        createSessionLifecycleService(),
+
+      passwordResetService,
+
+      isProduction:
+        environment.NODE_ENV ===
+        "production",
+    }
+  );
+
+  await app.register(
+    adminAccessRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+    }
+  );
+
+  await app.register(
+    adminMetricsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      userMetricsService:
+        options
+          .adminUserMetricsService ??
+        createAdminUserMetricsService(),
+    }
+  );
+
+  await app.register(
+    clientCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/client",
+
+      service:
+        options
+          .clientCommercialRequestService ??
+        createClientCommercialRequestService(),
+    }
+  );
+
+  await app.register(
+    adminCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCommercialRequestService ??
+        createAdminCommercialRequestService(),
+    }
+  );
+
+  app.get(
+    "/",
+    async () => ({
+      service:
+        "Poster Backend",
+
+      status:
+        "running",
+
+      apiVersion:
+        "v1",
+    })
+  );
+
+  return app;
+}

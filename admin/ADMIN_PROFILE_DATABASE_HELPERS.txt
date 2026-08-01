@@ -1,0 +1,857 @@
+﻿POSTER ADMIN PROFILE
+DATABASE HELPERS AND TEST PATTERNS
+
+Generated: 2026-07-31 23:33:24
+
+============================================================
+FILE: backend\src\database\database.pool.ts
+============================================================
+
+import {
+  Pool,
+  type PoolClient,
+  type QueryResult,
+  type QueryResultRow,
+} from "pg";
+
+import {
+  getDatabaseConfiguration,
+} from "./database.config.js";
+
+export type DatabaseQueryExecutor =
+  Pick<
+    PoolClient,
+    "query"
+  >;
+
+let databasePool:
+  Pool |
+  null =
+  null;
+
+/**
+ * Returns the shared PostgreSQL connection pool.
+ *
+ * The Backend remains stateless while database connections
+ * are reused efficiently inside each running service instance.
+ */
+export function getDatabasePool():
+  Pool {
+  if (
+    databasePool
+  ) {
+    return databasePool;
+  }
+
+  const configuration =
+    getDatabaseConfiguration();
+
+  const createdPool =
+    new Pool({
+      connectionString:
+        configuration.connectionString,
+
+      ssl:
+        configuration.ssl,
+
+      max:
+        configuration.maximumConnections,
+
+      idleTimeoutMillis:
+        configuration
+          .idleTimeoutMilliseconds,
+
+      connectionTimeoutMillis:
+        configuration
+          .connectionTimeoutMilliseconds,
+
+      statement_timeout:
+        configuration
+          .statementTimeoutMilliseconds,
+
+      application_name:
+        "poster-backend",
+    });
+
+  createdPool.on(
+    "error",
+    (
+      error:
+        Error
+    ) => {
+      process.stderr.write(
+        [
+          "Unexpected PostgreSQL idle-client error.",
+          `Name: ${error.name}`,
+          `Message: ${error.message}`,
+          "",
+        ].join("\n")
+      );
+    }
+  );
+
+  databasePool =
+    createdPool;
+
+  return createdPool;
+}
+
+/**
+ * Executes work using a checked-out database client.
+ *
+ * The client is always released, including after failures.
+ */
+export async function withDatabaseClient<T>(
+  operation:
+    (
+      client:
+        PoolClient
+    ) => Promise<T>
+): Promise<T> {
+  const client =
+    await getDatabasePool()
+      .connect();
+
+  try {
+    return await operation(
+      client
+    );
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Executes a parameterized PostgreSQL query.
+ *
+ * Callers must pass user-provided values through the values
+ * array rather than interpolating them into SQL strings.
+ */
+export async function executeDatabaseQuery<
+  TRow extends QueryResultRow
+>(
+  text: string,
+  values:
+    readonly unknown[] =
+    [],
+  executor:
+    DatabaseQueryExecutor =
+    getDatabasePool()
+): Promise<
+  QueryResult<TRow>
+> {
+  return await executor
+    .query<TRow>(
+      text,
+      Array.from(
+        values
+      )
+    );
+}
+
+/**
+ * Closes the shared pool during graceful service shutdown.
+ */
+export async function closeDatabasePool():
+  Promise<void> {
+  const activePool =
+    databasePool;
+
+  databasePool =
+    null;
+
+  if (
+    activePool
+  ) {
+    await activePool.end();
+  }
+}
+
+============================================================
+FILE: backend\src\database\database.transaction.ts
+============================================================
+
+import type {
+  PoolClient,
+} from "pg";
+
+import {
+  withDatabaseClient,
+} from "./database.pool.js";
+
+export const DATABASE_TRANSACTION_ISOLATION_LEVELS = [
+  "read_committed",
+  "repeatable_read",
+  "serializable",
+] as const;
+
+export type DatabaseTransactionIsolationLevel =
+  (typeof DATABASE_TRANSACTION_ISOLATION_LEVELS)[number];
+
+export interface DatabaseTransactionOptions {
+  /**
+   * PostgreSQL transaction isolation level.
+   *
+   * READ COMMITTED remains the default for normal application
+   * workflows. Stronger isolation must be selected explicitly.
+   */
+  isolationLevel?:
+    DatabaseTransactionIsolationLevel;
+
+  /**
+   * Marks the transaction as read-only when no mutation should
+   * be permitted.
+   */
+  readOnly?:
+    boolean;
+}
+
+const DATABASE_TRANSACTION_ISOLATION_SQL: Readonly<
+  Record<
+    DatabaseTransactionIsolationLevel,
+    string
+  >
+> = {
+  read_committed:
+    "READ COMMITTED",
+
+  repeatable_read:
+    "REPEATABLE READ",
+
+  serializable:
+    "SERIALIZABLE",
+};
+
+function createBeginTransactionStatement(
+  options:
+    DatabaseTransactionOptions
+): string {
+  const isolationLevel =
+    options.isolationLevel ??
+    "read_committed";
+
+  const accessMode =
+    options.readOnly === true
+      ? "READ ONLY"
+      : "READ WRITE";
+
+  return [
+    "BEGIN",
+    "ISOLATION LEVEL",
+    DATABASE_TRANSACTION_ISOLATION_SQL[
+      isolationLevel
+    ],
+    accessMode,
+  ].join(
+    " "
+  );
+}
+
+/**
+ * Executes one database workflow inside a PostgreSQL
+ * transaction using a dedicated checked-out client.
+ *
+ * The operation receives the same PoolClient for every query,
+ * allowing multi-repository workflows to become atomic.
+ *
+ * Successful operations commit.
+ * Failed operations roll back and rethrow the original error.
+ */
+export async function runDatabaseTransaction<T>(
+  operation:
+    (
+      client:
+        PoolClient
+    ) => Promise<T>,
+  options:
+    DatabaseTransactionOptions =
+    {}
+): Promise<T> {
+  return await withDatabaseClient(
+    async (
+      client
+    ) => {
+      await client.query(
+        createBeginTransactionStatement(
+          options
+        )
+      );
+
+      try {
+        const result =
+          await operation(
+            client
+          );
+
+        await client.query(
+          "COMMIT"
+        );
+
+        return result;
+      } catch (
+        operationError
+      ) {
+        try {
+          await client.query(
+            "ROLLBACK"
+          );
+        } catch (
+          rollbackError
+        ) {
+          throw new AggregateError(
+            [
+              operationError,
+              rollbackError,
+            ],
+            "The database operation failed and PostgreSQL rollback also failed.",
+            {
+              cause:
+                rollbackError,
+            }
+          );
+        }
+
+        throw operationError;
+      }
+    }
+  );
+}
+
+============================================================
+FILE: backend\tests\admin-access.routes.test.ts
+============================================================
+
+import type {
+  FastifyInstance,
+} from "fastify";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  AuthorizationContextService,
+} from "../src/application/authorization/authorization-context.service.js";
+
+import type {
+  AuthorizationContext,
+} from "../src/domains/authorization/authorization.types.js";
+
+const AUTHORIZED_CONTEXT:
+  AuthorizationContext = {
+  userId:
+    "00000000-0000-4000-8000-000000000101",
+
+  sessionId:
+    "00000000-0000-4000-8000-000000000201",
+
+  email:
+    "admin@getpostar.com",
+
+  fullName:
+    "Poster Admin",
+
+  accountStatus:
+    "active",
+
+  platformRoles: [
+    "operations_admin",
+  ],
+
+  platformPermissions: [
+    "admin.access",
+    "dashboard.read",
+    "users.metrics.read",
+    "content.read",
+    "content.manage",
+    "sources.read",
+    "sources.manage",
+    "reports.read",
+    "reports.manage",
+    "copyright.read",
+    "copyright.manage",
+    "audit.read",
+  ],
+
+  organizationMemberships:
+    [],
+};
+
+function createAuthorizationContextService(
+  context:
+    AuthorizationContext
+) {
+  const resolveMock =
+    vi.fn<
+      AuthorizationContextService[
+        "resolve"
+      ]
+    >();
+
+  resolveMock
+    .mockResolvedValue(
+      context
+    );
+
+  const service:
+    AuthorizationContextService = {
+    resolve:
+      resolveMock,
+  };
+
+  return {
+    resolveMock,
+
+    service,
+  };
+}
+
+describe(
+  "Poster Admin access authorization",
+  () => {
+    let app:
+      FastifyInstance |
+      null =
+        null;
+
+    afterEach(
+      async () => {
+        if (
+          app
+        ) {
+          await app.close();
+
+          app =
+            null;
+        }
+      }
+    );
+
+    it(
+      "returns the authenticated Admin access context",
+      async () => {
+        const context =
+          createAuthorizationContextService(
+            AUTHORIZED_CONTEXT
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        expect(
+          context.resolveMock
+        ).toHaveBeenCalledWith(
+          "payload.signature"
+        );
+
+        expect(
+          response.json()
+        ).toEqual({
+          account: {
+            id:
+              AUTHORIZED_CONTEXT.userId,
+
+            email:
+              AUTHORIZED_CONTEXT.email,
+
+            fullName:
+              AUTHORIZED_CONTEXT.fullName,
+
+            status:
+              "active",
+          },
+
+          access: {
+            sessionId:
+              AUTHORIZED_CONTEXT.sessionId,
+
+            platformRoles: [
+              "operations_admin",
+            ],
+
+            platformPermissions:
+              AUTHORIZED_CONTEXT
+                .platformPermissions,
+          },
+
+          organizations:
+            [],
+        });
+      }
+    );
+
+    it(
+      "requires authentication before entering Admin",
+      async () => {
+        const context =
+          createAuthorizationContextService(
+            AUTHORIZED_CONTEXT
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+        ).toMatchObject({
+          error: {
+            code:
+              "AUTH_REQUIRED",
+
+            message:
+              "Authentication is required.",
+          },
+        });
+
+        expect(
+          context.resolveMock
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects an authenticated identity without Admin permission",
+      async () => {
+        const context =
+          createAuthorizationContextService({
+            ...AUTHORIZED_CONTEXT,
+
+            platformRoles:
+              [],
+
+            platformPermissions:
+              [],
+          });
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          403
+        );
+
+        expect(
+          response.json()
+        ).toMatchObject({
+          error: {
+            code:
+              "AUTH_FORBIDDEN",
+
+            message:
+              "You do not have permission to perform this action.",
+          },
+        });
+      }
+    );
+
+    it(
+      "rejects a malformed bearer header before resolving context",
+      async () => {
+        const context =
+          createAuthorizationContextService(
+            AUTHORIZED_CONTEXT
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Basic invalid",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+        ).toMatchObject({
+          error: {
+            code:
+              "AUTH_ACCESS_TOKEN_INVALID",
+          },
+        });
+
+        expect(
+          context.resolveMock
+        ).not.toHaveBeenCalled();
+      }
+    );
+  }
+);
+
+============================================================
+FILE: backend\tests\database.transaction.test.ts
+============================================================
+
+import type {
+  QueryResultRow,
+} from "pg";
+
+import {
+  afterAll,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  closeDatabasePool,
+  runDatabaseTransaction,
+} from "../src/database/index.js";
+
+interface TransactionStateRow
+  extends QueryResultRow {
+  authenticated_user: string;
+
+  isolation_level: string;
+
+  read_only: string;
+}
+
+interface AdvisoryLockRow
+  extends QueryResultRow {
+  acquired: boolean;
+}
+
+describe(
+  "Poster database transaction foundation",
+  () => {
+    afterAll(
+      async () => {
+        await closeDatabasePool();
+      }
+    );
+
+    it(
+      "executes work using the requested PostgreSQL transaction settings",
+      async () => {
+        const transactionState =
+          await runDatabaseTransaction(
+            async (
+              client
+            ) => {
+              const result =
+                await client.query<
+                  TransactionStateRow
+                >(
+                  `
+                    SELECT
+                      current_user::text
+                        AS authenticated_user,
+
+                      current_setting(
+                        'transaction_isolation'
+                      )::text
+                        AS isolation_level,
+
+                      current_setting(
+                        'transaction_read_only'
+                      )::text
+                        AS read_only
+                  `
+                );
+
+              const row =
+                result.rows[0];
+
+              if (!row) {
+                throw new Error(
+                  "PostgreSQL returned no transaction-state row."
+                );
+              }
+
+              return row;
+            },
+            {
+              isolationLevel:
+                "repeatable_read",
+
+              readOnly:
+                true,
+            }
+          );
+
+        expect(
+          transactionState
+            .authenticated_user
+        ).toBe(
+          "poster_app"
+        );
+
+        expect(
+          transactionState
+            .isolation_level
+        ).toBe(
+          "repeatable read"
+        );
+
+        expect(
+          transactionState
+            .read_only
+        ).toBe(
+          "on"
+        );
+      }
+    );
+
+    it(
+      "rolls back failed work and releases transaction-scoped advisory locks",
+      async () => {
+        const advisoryLockKey =
+          700_000_000 +
+          Math.floor(
+            Math.random() *
+            1_000_000
+          );
+
+        const expectedError =
+          new Error(
+            "Intentional transaction rollback test."
+          );
+
+        await expect(
+          runDatabaseTransaction(
+            async (
+              client
+            ) => {
+              await client.query(
+                `
+                  SELECT
+                    pg_advisory_xact_lock(
+                      $1::integer
+                    )
+                `,
+                [
+                  advisoryLockKey,
+                ]
+              );
+
+              throw expectedError;
+            }
+          )
+        ).rejects.toBe(
+          expectedError
+        );
+
+        const lockWasReleased =
+          await runDatabaseTransaction(
+            async (
+              client
+            ) => {
+              const result =
+                await client.query<
+                  AdvisoryLockRow
+                >(
+                  `
+                    SELECT
+                      pg_try_advisory_xact_lock(
+                        $1::integer
+                      )
+                        AS acquired
+                  `,
+                  [
+                    advisoryLockKey,
+                  ]
+                );
+
+              return (
+                result.rows[0]
+                  ?.acquired ??
+                false
+              );
+            }
+          );
+
+        expect(
+          lockWasReleased
+        ).toBe(
+          true
+        );
+      }
+    );
+  }
+);

@@ -1,0 +1,3248 @@
+﻿============================================================
+AdminDrawer.tsx
+============================================================
+
+"use client";
+
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
+
+import styles from "./AdminDrawer.module.css";
+
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+interface AdminDrawerProps {
+  open: boolean;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+  closeLabel?: string;
+  width?: "standard" | "wide";
+  showHeader?: boolean;
+  onClose: () => void;
+}
+
+export default function AdminDrawer({
+  open,
+  title,
+  description,
+  children,
+  footer,
+  closeLabel = "Close drawer",
+  width = "standard",
+  showHeader = true,
+  onClose,
+}: AdminDrawerProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const drawerRef = useRef<HTMLElement>(null);
+  const previouslyFocusedElementRef =
+    useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    previouslyFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => {
+      const drawer = drawerRef.current;
+
+      if (!drawer) {
+        return;
+      }
+
+      const firstFocusable =
+        drawer.querySelector<HTMLElement>(
+          FOCUSABLE_SELECTOR
+        );
+
+      (firstFocusable ?? drawer).focus();
+    }, 0);
+
+    const handleDocumentKeyDown = (
+      event: KeyboardEvent
+    ) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleDocumentKeyDown
+    );
+
+    return () => {
+      window.clearTimeout(focusTimer);
+
+      document.removeEventListener(
+        "keydown",
+        handleDocumentKeyDown
+      );
+
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.setTimeout(() => {
+        previouslyFocusedElementRef.current?.focus();
+      }, 0);
+    };
+  }, [open, onClose]);
+
+  if (!open) {
+    return null;
+  }
+
+  const handleDrawerKeyDown = (
+    event: ReactKeyboardEvent<HTMLElement>
+  ) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const drawer = drawerRef.current;
+
+    if (!drawer) {
+      return;
+    }
+
+    const focusableElements = Array.from(
+      drawer.querySelectorAll<HTMLElement>(
+        FOCUSABLE_SELECTOR
+      )
+    ).filter((element) => {
+      return (
+        !element.hasAttribute("disabled") &&
+        element.getAttribute("aria-hidden") !==
+          "true"
+      );
+    });
+
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      drawer.focus();
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement =
+      focusableElements[
+        focusableElements.length - 1
+      ];
+
+    if (
+      event.shiftKey &&
+      document.activeElement === firstElement
+    ) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (
+      !event.shiftKey &&
+      document.activeElement === lastElement
+    ) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  };
+
+  return (
+    <div
+      className={styles.layer}
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <aside
+        ref={drawerRef}
+        className={`${styles.drawer} ${
+          width === "wide"
+            ? styles.drawerWide
+            : ""
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={
+          description
+            ? descriptionId
+            : undefined
+        }
+        tabIndex={-1}
+        onKeyDown={handleDrawerKeyDown}
+      >
+        {showHeader ? (
+          <header className={styles.header}>
+            <div className={styles.heading}>
+              <h2 id={titleId}>{title}</h2>
+
+              {description ? (
+                <p id={descriptionId}>
+                  {description}
+                </p>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              className={styles.closeButton}
+              aria-label={closeLabel}
+              onClick={onClose}
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </header>
+        ) : (
+          <>
+            <h2
+              id={titleId}
+              className={styles.srOnly}
+            >
+              {title}
+            </h2>
+
+            {description ? (
+              <p
+                id={descriptionId}
+                className={styles.srOnly}
+              >
+                {description}
+              </p>
+            ) : null}
+          </>
+        )}
+
+        <div
+          className={
+            showHeader
+              ? styles.body
+              : styles.bodyFlush
+          }
+        >
+          {children}
+        </div>
+
+        {footer ? (
+          <footer className={styles.footer}>
+            {footer}
+          </footer>
+        ) : null}
+      </aside>
+    </div>
+  );
+}
+
+============================================================
+AdminDrawer.module.css
+============================================================
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(15 23 42 / 34%);
+}
+
+.drawer {
+  width: min(640px, 96vw);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--card, #ffffff);
+  border-left: 1px solid var(--border, #e2e8f0);
+  box-shadow: -16px 0 40px rgb(15 23 42 / 14%);
+  outline: none;
+}
+
+.drawerWide {
+  width: min(760px, 97vw);
+}
+
+.drawer:focus-visible {
+  box-shadow:
+    -16px 0 40px rgb(15 23 42 / 14%),
+    inset 3px 0 0 var(--primary, #5b86e5);
+}
+
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.heading {
+  min-width: 0;
+}
+
+.heading h2 {
+  margin: 0;
+  color: var(--text, #0f172a);
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.heading p {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--text-secondary, #64748b);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.closeButton {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--text-secondary, #64748b);
+  background: var(--background, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: var(--text, #0f172a);
+  border-color: #cbd5e1;
+}
+
+.closeButton:focus-visible {
+  outline: 3px solid rgb(91 134 229 / 24%);
+  outline-offset: 2px;
+  border-color: var(--primary, #5b86e5);
+}
+
+.closeButton span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.bodyFlush {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--background, #f8fafc);
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  .drawer,
+  .drawerWide {
+    width: 100%;
+  }
+
+  .header {
+    padding: 18px;
+  }
+
+  .body {
+    padding: 18px;
+  }
+
+  .footer {
+    padding: 14px 18px;
+  }
+}
+
+============================================================
+ExternalProgramDetails.module.css
+============================================================
+
+.panel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.platform {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.closeButton {
+  width: 34px;
+  height: 34px;
+  color: #475569;
+  font: inherit;
+  font-size: 1.35rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 0 2px;
+}
+
+.statusRow > span {
+  padding: 5px 8px;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.status[data-status="approved"] {
+  color: #166534;
+  background: #ecfdf3;
+}
+
+.status[data-status="under_review"],
+.status[data-status="applied"] {
+  color: #92400e;
+  background: #fffbeb;
+}
+
+.status[data-status="rejected"],
+.status[data-status="suspended"],
+.status[data-status="closed"] {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+.definitionGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin: 0;
+}
+
+.definitionGrid div {
+  min-width: 0;
+}
+
+.definitionGrid dt {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.definitionGrid dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 0.81rem;
+  line-height: 1.45;
+}
+
+.linkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.linkActions a {
+  padding: 7px 10px;
+  color: #244b8f;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: #f4f7ff;
+  border: 1px solid #cbd8f4;
+  border-radius: 5px;
+}
+
+.notes {
+  margin: 0;
+  color: #475569;
+  font-size: 0.81rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auditEntry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.auditEntry div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auditEntry strong {
+  color: #0f172a;
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.auditEntry span,
+.auditEntry time {
+  color: #64748b;
+  font-size: 0.69rem;
+}
+
+.auditEntry time {
+  flex: 0 0 auto;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+  padding-top: 20px;
+}
+
+.primaryButton,
+.secondaryButton,
+.warningButton,
+.dangerButton {
+  min-height: 36px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+}
+
+.secondaryButton {
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.warningButton {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #f4d59b;
+}
+
+.dangerButton {
+  color: #991b1b;
+  background: #ffffff;
+  border: 1px solid #efb5b5;
+}
+
+@media (max-width: 620px) {
+  .definitionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .auditEntry {
+    flex-direction: column;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .warningButton,
+  .dangerButton {
+    width: 100%;
+  }
+}
+
+============================================================
+ExternalProgramsManager.module.css
+============================================================
+
+.page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 2rem;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: #5b86e5;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.description {
+  max-width: 720px;
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.primaryButton {
+  min-height: 38px;
+  padding: 0 15px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.metrics > div {
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.metrics > div + div {
+  border-left: 1px solid #e2e8f0;
+}
+
+.metrics span {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.metrics strong {
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 1.45rem;
+}
+
+.metrics small {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.searchField {
+  flex: 1 1 420px;
+}
+
+.searchField input,
+.filterField select {
+  width: 100%;
+  min-height: 39px;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.8rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+}
+
+.searchField input {
+  padding: 0 11px;
+}
+
+.searchField input:focus,
+.filterField select:focus {
+  border-color: #5b86e5;
+  box-shadow:
+    0 0 0 3px
+    rgba(91, 134, 229, 0.12);
+}
+
+.filterField {
+  display: flex;
+  width: 190px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterField span {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.filterField select {
+  padding: 0 9px;
+}
+
+.tableCard {
+  margin-top: 18px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tableHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.96rem;
+}
+
+.tableHeader p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.tableScroll table {
+  width: 100%;
+  min-width: 960px;
+  border-collapse: collapse;
+}
+
+.tableScroll th,
+.tableScroll td {
+  padding: 13px 15px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tableScroll th {
+  color: #64748b;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #f8fafc;
+}
+
+.tableScroll td {
+  color: #334155;
+  font-size: 0.78rem;
+}
+
+.tableScroll tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableScroll tbody tr:hover {
+  background: #fbfdff;
+}
+
+.tableScroll td:first-child strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.8rem;
+}
+
+.tableScroll td:first-child span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.status {
+  display: inline-flex;
+  padding: 5px 8px;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.status[data-status="approved"] {
+  color: #166534;
+  background: #ecfdf3;
+}
+
+.status[data-status="applied"],
+.status[data-status="under_review"] {
+  color: #92400e;
+  background: #fffbeb;
+}
+
+.status[data-status="rejected"],
+.status[data-status="suspended"],
+.status[data-status="closed"] {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.viewButton {
+  min-height: 32px;
+  padding: 0 10px;
+  color: #244b8f;
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #cbd8f4;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.emptyState {
+  padding: 58px 20px;
+  text-align: center;
+}
+
+.emptyState h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+
+.emptyState p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgb(15 23 42 / 0.38);
+  border: 0;
+  cursor: default;
+}
+
+.drawer {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  right: 0;
+  width: min(680px, 100%);
+  height: 100vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow:
+    -18px 0 48px
+    rgb(15 23 42 / 0.12);
+}
+
+.editor {
+  min-height: 100%;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.editorHeader p {
+  margin: 0 0 6px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.editorHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+}
+
+.editorHeader button {
+  width: 34px;
+  height: 34px;
+  color: #475569;
+  font: inherit;
+  font-size: 1.35rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics > div + div {
+    border-top: 1px solid #e2e8f0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .page {
+    padding: 22px 16px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .primaryButton {
+    width: 100%;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchField,
+  .filterField {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .drawer {
+    padding: 18px;
+  }
+}
+
+============================================================
+ExternalPromotionsManager.tsx
+============================================================
+
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  INITIAL_EXTERNAL_PROGRAMS,
+} from "../external-programs/external-program.mock";
+
+import ExternalPromotionDetails from "./ExternalPromotionDetails";
+import ExternalPromotionEditor from "./ExternalPromotionEditor";
+
+import {
+  offerTypeLabel,
+  placementLabel,
+  promotionStatusLabel,
+} from "./external-promotion.constants";
+
+import {
+  INITIAL_EXTERNAL_PROMOTIONS,
+} from "./external-promotion.mock";
+
+import {
+  EMPTY_EXTERNAL_PROMOTION_DRAFT,
+  hasExternalPromotionErrors,
+  validateExternalPromotion,
+} from "./external-promotion.validation";
+
+import type {
+  ExternalPromotionDraft,
+  ExternalPromotionErrors,
+  ExternalPromotionRecord,
+  ExternalPromotionStatus,
+} from "./external-promotion.types";
+
+import styles from "./ExternalPromotionsManager.module.css";
+
+type EditorMode =
+  | "create"
+  | "edit"
+  | null;
+
+function nowLabel() {
+  return new Date().toLocaleString(
+    "en-IN",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
+  );
+}
+
+function promotionToDraft(
+  promotion: ExternalPromotionRecord
+): ExternalPromotionDraft {
+  return {
+    programId:
+      promotion.programId,
+
+    name:
+      promotion.name,
+
+    externalOfferId:
+      promotion.externalOfferId,
+
+    offerType:
+      promotion.offerType,
+
+    conversionGoal:
+      promotion.conversionGoal,
+
+    category:
+      promotion.category,
+
+    headline:
+      promotion.headline,
+
+    description:
+      promotion.description,
+
+    callToAction:
+      promotion.callToAction,
+
+    mediaType:
+      promotion.mediaType,
+
+    mediaUrl:
+      promotion.mediaUrl,
+
+    destinationUrl:
+      promotion.destinationUrl,
+
+    trackingUrl:
+      promotion.trackingUrl,
+
+    referralCode:
+      promotion.referralCode,
+
+    disclosure:
+      promotion.disclosure,
+
+    placements:
+      [...promotion.placements],
+
+    startDate:
+      promotion.startDate,
+
+    endDate:
+      promotion.endDate,
+
+    status:
+      promotion.status,
+
+    notes:
+      promotion.notes,
+  };
+}
+
+function statusAuditAction(
+  previousStatus:
+    ExternalPromotionStatus,
+  nextStatus:
+    ExternalPromotionStatus
+):
+  ExternalPromotionRecord[
+    "auditHistory"
+  ][number]["action"] {
+  if (
+    nextStatus === "active" &&
+    previousStatus === "paused"
+  ) {
+    return "resumed";
+  }
+
+  if (nextStatus === "active") {
+    return "activated";
+  }
+
+  if (nextStatus === "paused") {
+    return "paused";
+  }
+
+  if (nextStatus === "scheduled") {
+    return "scheduled";
+  }
+
+  if (nextStatus === "ended") {
+    return "ended";
+  }
+
+  return "updated";
+}
+
+export default function ExternalPromotionsManager() {
+  const [
+    promotions,
+    setPromotions,
+  ] = useState<
+    ExternalPromotionRecord[]
+  >(INITIAL_EXTERNAL_PROMOTIONS);
+
+  const [
+    selectedPromotionId,
+    setSelectedPromotionId,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    editorMode,
+    setEditorMode,
+  ] = useState<EditorMode>(null);
+
+  const [
+    draft,
+    setDraft,
+  ] = useState<
+    ExternalPromotionDraft
+  >({
+    ...EMPTY_EXTERNAL_PROMOTION_DRAFT,
+    placements: [
+      ...EMPTY_EXTERNAL_PROMOTION_DRAFT
+        .placements,
+    ],
+  });
+
+  const [
+    errors,
+    setErrors,
+  ] = useState<
+    ExternalPromotionErrors
+  >({});
+
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState<
+    ExternalPromotionStatus | "all"
+  >("all");
+
+  const approvedPrograms =
+    useMemo(
+      () =>
+        INITIAL_EXTERNAL_PROGRAMS
+          .filter(
+            (program) =>
+              program.status ===
+              "approved"
+          )
+          .map((program) => ({
+            id: program.id,
+            programName:
+              program.programName,
+            platformName:
+              program.platformName,
+          })),
+      []
+    );
+
+  const selectedPromotion =
+    promotions.find(
+      (promotion) =>
+        promotion.id ===
+        selectedPromotionId
+    ) ?? null;
+
+  const programNameById =
+    useMemo(
+      () =>
+        new Map(
+          INITIAL_EXTERNAL_PROGRAMS.map(
+            (program) => [
+              program.id,
+              program.programName,
+            ]
+          )
+        ),
+      []
+    );
+
+  const visiblePromotions =
+    useMemo(() => {
+      const query =
+        search.trim().toLowerCase();
+
+      return promotions.filter(
+        (promotion) => {
+          const matchesStatus =
+            statusFilter === "all" ||
+            promotion.status ===
+              statusFilter;
+
+          const programName =
+            programNameById.get(
+              promotion.programId
+            ) ?? "";
+
+          const searchable = [
+            promotion.name,
+            promotion.headline,
+            promotion.category,
+            promotion.externalOfferId,
+            programName,
+            offerTypeLabel(
+              promotion.offerType
+            ),
+            promotionStatusLabel(
+              promotion.status
+            ),
+            promotion.placements
+              .map(placementLabel)
+              .join(" "),
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return (
+            matchesStatus &&
+            (!query ||
+              searchable.includes(
+                query
+              ))
+          );
+        }
+      );
+    }, [
+      promotions,
+      programNameById,
+      search,
+      statusFilter,
+    ]);
+
+  const activeCount =
+    promotions.filter(
+      (promotion) =>
+        promotion.status === "active"
+    ).length;
+
+  const scheduledCount =
+    promotions.filter(
+      (promotion) =>
+        promotion.status ===
+        "scheduled"
+    ).length;
+
+  const totalImpressions =
+    promotions.reduce(
+      (total, promotion) =>
+        total +
+        promotion.metrics.impressions,
+      0
+    );
+
+  const totalValidClicks =
+    promotions.reduce(
+      (total, promotion) =>
+        total +
+        promotion.metrics.validClicks,
+      0
+    );
+
+  const totalConversions =
+    promotions.reduce(
+      (total, promotion) =>
+        total +
+        promotion.metrics.conversions,
+      0
+    );
+
+  const openCreate = () => {
+    setDraft({
+      ...EMPTY_EXTERNAL_PROMOTION_DRAFT,
+      placements: [
+        ...EMPTY_EXTERNAL_PROMOTION_DRAFT
+          .placements,
+      ],
+    });
+
+    setErrors({});
+    setSelectedPromotionId(null);
+    setEditorMode("create");
+  };
+
+  const openEdit = (
+    promotion:
+      ExternalPromotionRecord
+  ) => {
+    setDraft(
+      promotionToDraft(promotion)
+    );
+
+    setErrors({});
+    setSelectedPromotionId(
+      promotion.id
+    );
+    setEditorMode("edit");
+  };
+
+  const closeOverlay = () => {
+    setEditorMode(null);
+    setSelectedPromotionId(null);
+    setErrors({});
+  };
+
+  const submitPromotion = () => {
+    const nextErrors =
+      validateExternalPromotion(
+        draft
+      );
+
+    setErrors(nextErrors);
+
+    if (
+      hasExternalPromotionErrors(
+        nextErrors
+      )
+    ) {
+      return;
+    }
+
+    const timestamp =
+      nowLabel();
+
+    if (editorMode === "create") {
+      const nextPromotion:
+        ExternalPromotionRecord = {
+        id:
+          `external-promotion-${Date.now()}`,
+
+        ...draft,
+
+        placements:
+          [...draft.placements],
+
+        metrics: {
+          impressions: 0,
+          validClicks: 0,
+          conversions: 0,
+        },
+
+        createdAt: timestamp,
+        updatedAt: timestamp,
+
+        auditHistory: [
+          {
+            id:
+              `external-promotion-audit-${Date.now()}`,
+
+            action:
+              draft.status ===
+              "scheduled"
+                ? "scheduled"
+                : draft.status ===
+                    "active"
+                  ? "activated"
+                  : "created",
+
+            message:
+              `External promotion created with ${promotionStatusLabel(
+                draft.status
+              )} status.`,
+
+            actor: "Admin",
+            occurredAt: timestamp,
+          },
+        ],
+      };
+
+      setPromotions(
+        (current) => [
+          nextPromotion,
+          ...current,
+        ]
+      );
+
+      setSelectedPromotionId(
+        nextPromotion.id
+      );
+
+      setEditorMode(null);
+      return;
+    }
+
+    if (
+      editorMode === "edit" &&
+      selectedPromotion
+    ) {
+      const statusChanged =
+        selectedPromotion.status !==
+        draft.status;
+
+      setPromotions(
+        (current) =>
+          current.map(
+            (promotion) => {
+              if (
+                promotion.id !==
+                selectedPromotion.id
+              ) {
+                return promotion;
+              }
+
+              return {
+                ...promotion,
+                ...draft,
+
+                placements:
+                  [...draft.placements],
+
+                updatedAt:
+                  timestamp,
+
+                auditHistory: [
+                  {
+                    id:
+                      `external-promotion-audit-${Date.now()}`,
+
+                    action:
+                      statusChanged
+                        ? statusAuditAction(
+                            promotion.status,
+                            draft.status
+                          )
+                        : "updated",
+
+                    message:
+                      statusChanged
+                        ? `Promotion status changed from ${promotionStatusLabel(
+                            promotion.status
+                          )} to ${promotionStatusLabel(
+                            draft.status
+                          )}.`
+                        : "External promotion details updated.",
+
+                    actor:
+                      "Admin",
+
+                    occurredAt:
+                      timestamp,
+                  },
+
+                  ...promotion.auditHistory,
+                ],
+              };
+            }
+          )
+      );
+
+      setEditorMode(null);
+    }
+  };
+
+  const changeStatus = (
+    status:
+      ExternalPromotionStatus
+  ) => {
+    if (!selectedPromotion) {
+      return;
+    }
+
+    const timestamp =
+      nowLabel();
+
+    setPromotions(
+      (current) =>
+        current.map(
+          (promotion) => {
+            if (
+              promotion.id !==
+              selectedPromotion.id
+            ) {
+              return promotion;
+            }
+
+            return {
+              ...promotion,
+              status,
+              updatedAt:
+                timestamp,
+
+              auditHistory: [
+                {
+                  id:
+                    `external-promotion-audit-${Date.now()}`,
+
+                  action:
+                    statusAuditAction(
+                      promotion.status,
+                      status
+                    ),
+
+                  message:
+                    `Promotion status changed from ${promotionStatusLabel(
+                      promotion.status
+                    )} to ${promotionStatusLabel(
+                      status
+                    )}.`,
+
+                  actor:
+                    "Admin",
+
+                  occurredAt:
+                    timestamp,
+                },
+
+                ...promotion.auditHistory,
+              ],
+            };
+          }
+        )
+    );
+  };
+
+  return (
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>
+            External Promotions
+          </p>
+
+          <h1>Promotions</h1>
+
+          <p
+            className={
+              styles.description
+            }
+          >
+            Manage external products,
+            services and commercial offers
+            selected directly by Poster
+            Admin.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className={
+            styles.primaryButton
+          }
+          onClick={openCreate}
+        >
+          Add promotion
+        </button>
+      </header>
+
+      <section className={styles.metrics}>
+        <Metric
+          label="Total promotions"
+          value={promotions.length}
+          detail="All external promotion records"
+        />
+
+        <Metric
+          label="Active"
+          value={activeCount}
+          detail="Currently eligible for delivery"
+        />
+
+        <Metric
+          label="Scheduled"
+          value={scheduledCount}
+          detail="Prepared for future delivery"
+        />
+
+        <Metric
+          label="Impressions"
+          value={totalImpressions}
+          detail="Poster-owned delivery metric"
+        />
+
+        <Metric
+          label="Valid clicks"
+          value={totalValidClicks}
+          detail="Validated outbound clicks"
+        />
+
+        <Metric
+          label="Conversions"
+          value={totalConversions}
+          detail="Externally confirmed outcomes"
+        />
+      </section>
+
+      <section className={styles.toolbar}>
+        <label
+          className={
+            styles.searchField
+          }
+        >
+          <span className={styles.srOnly}>
+            Search promotions
+          </span>
+
+          <input
+            type="search"
+            value={search}
+            placeholder="Search promotions, offers, programs or categories"
+            onChange={(event) => {
+              setSearch(
+                event.target.value
+              );
+            }}
+          />
+        </label>
+
+        <label
+          className={
+            styles.filterField
+          }
+        >
+          <span>Status</span>
+
+          <select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(
+                event.target
+                  .value as
+                  | ExternalPromotionStatus
+                  | "all"
+              );
+            }}
+          >
+            <option value="all">
+              All statuses
+            </option>
+
+            <option value="draft">
+              Draft
+            </option>
+
+            <option value="scheduled">
+              Scheduled
+            </option>
+
+            <option value="active">
+              Active
+            </option>
+
+            <option value="paused">
+              Paused
+            </option>
+
+            <option value="ended">
+              Ended
+            </option>
+          </select>
+        </label>
+      </section>
+
+      <section
+        className={
+          styles.tableCard
+        }
+      >
+        <header
+          className={
+            styles.tableHeader
+          }
+        >
+          <div>
+            <h2>
+              External promotions
+            </h2>
+
+            <p>
+              {visiblePromotions.length}{" "}
+              {visiblePromotions.length ===
+              1
+                ? "record"
+                : "records"}
+            </p>
+          </div>
+        </header>
+
+        {visiblePromotions.length ? (
+          <div
+            className={
+              styles.tableScroll
+            }
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th>Promotion</th>
+                  <th>Program</th>
+                  <th>Offer</th>
+                  <th>Placements</th>
+                  <th>Status</th>
+                  <th>Impressions</th>
+                  <th>Valid clicks</th>
+                  <th>Conversions</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+
+              <tbody>
+                {visiblePromotions.map(
+                  (promotion) => (
+                    <tr
+                      key={
+                        promotion.id
+                      }
+                    >
+                      <td>
+                        <strong>
+                          {
+                            promotion.name
+                          }
+                        </strong>
+
+                        <span>
+                          {
+                            promotion.headline
+                          }
+                        </span>
+                      </td>
+
+                      <td>
+                        {programNameById.get(
+                          promotion.programId
+                        ) ??
+                          "Unknown program"}
+                      </td>
+
+                      <td>
+                        {offerTypeLabel(
+                          promotion.offerType
+                        )}
+                      </td>
+
+                      <td>
+                        {promotion.placements
+                          .map(
+                            placementLabel
+                          )
+                          .join(", ")}
+                      </td>
+
+                      <td>
+                        <span
+                          className={
+                            styles.status
+                          }
+                          data-status={
+                            promotion.status
+                          }
+                        >
+                          {promotionStatusLabel(
+                            promotion.status
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        {promotion.metrics.impressions.toLocaleString(
+                          "en-IN"
+                        )}
+                      </td>
+
+                      <td>
+                        {promotion.metrics.validClicks.toLocaleString(
+                          "en-IN"
+                        )}
+                      </td>
+
+                      <td>
+                        {promotion.metrics.conversions.toLocaleString(
+                          "en-IN"
+                        )}
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className={
+                            styles.viewButton
+                          }
+                          onClick={() => {
+                            setSelectedPromotionId(
+                              promotion.id
+                            );
+
+                            setEditorMode(
+                              null
+                            );
+                          }}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div
+            className={
+              styles.emptyState
+            }
+          >
+            <h3>
+              No promotions found
+            </h3>
+
+            <p>
+              Adjust the filters or create
+              a new external promotion.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {selectedPromotion ||
+      editorMode ? (
+        <>
+          <button
+            type="button"
+            className={
+              styles.backdrop
+            }
+            aria-label="Close promotion panel"
+            onClick={closeOverlay}
+          />
+
+          <aside
+            className={
+              styles.drawer
+            }
+            aria-label={
+              editorMode
+                ? "Promotion editor"
+                : "Promotion details"
+            }
+          >
+            {editorMode ? (
+              <div
+                className={
+                  styles.editor
+                }
+              >
+                <header
+                  className={
+                    styles.editorHeader
+                  }
+                >
+                  <div>
+                    <p>
+                      External Promotions
+                    </p>
+
+                    <h2>
+                      {editorMode ===
+                      "create"
+                        ? "Add promotion"
+                        : "Edit promotion"}
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={
+                      closeOverlay
+                    }
+                    aria-label="Close editor"
+                  >
+                    ×
+                  </button>
+                </header>
+
+                <ExternalPromotionEditor
+                  draft={draft}
+                  errors={errors}
+                  approvedPrograms={
+                    approvedPrograms
+                  }
+                  submitLabel={
+                    editorMode ===
+                    "create"
+                      ? "Create promotion"
+                      : "Save changes"
+                  }
+                  onChange={setDraft}
+                  onSubmit={
+                    submitPromotion
+                  }
+                  onCancel={
+                    closeOverlay
+                  }
+                />
+              </div>
+            ) : selectedPromotion ? (
+              <ExternalPromotionDetails
+                promotion={
+                  selectedPromotion
+                }
+                programName={
+                  programNameById.get(
+                    selectedPromotion.programId
+                  ) ??
+                  "Unknown program"
+                }
+                onClose={
+                  closeOverlay
+                }
+                onEdit={() => {
+                  openEdit(
+                    selectedPromotion
+                  );
+                }}
+                onStatusChange={
+                  changeStatus
+                }
+              />
+            ) : null}
+          </aside>
+        </>
+      ) : null}
+    </main>
+  );
+}
+
+interface MetricProps {
+  label: string;
+  value: number;
+  detail: string;
+}
+
+function Metric({
+  label,
+  value,
+  detail,
+}: MetricProps) {
+  return (
+    <div>
+      <span>{label}</span>
+
+      <strong>
+        {value.toLocaleString(
+          "en-IN"
+        )}
+      </strong>
+
+      <small>{detail}</small>
+    </div>
+  );
+}
+
+============================================================
+ExternalPromotionsManager.module.css
+============================================================
+
+.page {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 2rem;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+  color: #5b86e5;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.description {
+  max-width: 720px;
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.primaryButton {
+  min-height: 38px;
+  padding: 0 15px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.metrics > div {
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.metrics > div + div {
+  border-left: 1px solid #e2e8f0;
+}
+
+.metrics > div:nth-child(4) {
+  border-left: 0;
+}
+
+.metrics > div:nth-child(n + 4) {
+  border-top: 1px solid #e2e8f0;
+}
+
+.metrics span {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.metrics strong {
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 1.45rem;
+}
+
+.metrics small {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.searchField {
+  flex: 1 1 420px;
+}
+
+.searchField input,
+.filterField select {
+  width: 100%;
+  min-height: 39px;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.8rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+}
+
+.searchField input {
+  padding: 0 11px;
+}
+
+.searchField input:focus,
+.filterField select:focus {
+  border-color: #5b86e5;
+  box-shadow:
+    0 0 0 3px
+    rgb(91 134 229 / 0.12);
+}
+
+.filterField {
+  display: flex;
+  width: 190px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterField span {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.filterField select {
+  padding: 0 9px;
+}
+
+.tableCard {
+  margin-top: 18px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.tableHeader {
+  padding: 17px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tableHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.96rem;
+}
+
+.tableHeader p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.tableScroll table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+}
+
+.tableScroll th,
+.tableScroll td {
+  padding: 13px 15px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tableScroll th {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #f8fafc;
+}
+
+.tableScroll td {
+  color: #334155;
+  font-size: 0.77rem;
+}
+
+.tableScroll tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableScroll tbody tr:hover {
+  background: #fbfdff;
+}
+
+.tableScroll td:first-child strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.8rem;
+}
+
+.tableScroll td:first-child span {
+  display: block;
+  max-width: 260px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.71rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  padding: 5px 8px;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.status[data-status="active"] {
+  color: #166534;
+  background: #ecfdf3;
+}
+
+.status[data-status="scheduled"] {
+  color: #92400e;
+  background: #fffbeb;
+}
+
+.status[data-status="paused"] {
+  color: #9a3412;
+  background: #fff7ed;
+}
+
+.status[data-status="ended"] {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.viewButton {
+  min-height: 32px;
+  padding: 0 10px;
+  color: #244b8f;
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #cbd8f4;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.emptyState {
+  padding: 58px 20px;
+  text-align: center;
+}
+
+.emptyState h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+
+.emptyState p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgb(15 23 42 / 0.38);
+  border: 0;
+}
+
+.drawer {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  right: 0;
+  width: min(720px, 100%);
+  height: 100vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow:
+    -18px 0 48px
+    rgb(15 23 42 / 0.12);
+}
+
+.editor {
+  min-height: 100%;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.editorHeader p {
+  margin: 0 0 6px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.editorHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+}
+
+.editorHeader button {
+  width: 34px;
+  height: 34px;
+  color: #475569;
+  font: inherit;
+  font-size: 1.35rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics > div + div,
+  .metrics > div:nth-child(4) {
+    border-top: 1px solid #e2e8f0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .page {
+    padding: 22px 16px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .primaryButton {
+    width: 100%;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchField,
+  .filterField {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .drawer {
+    padding: 18px;
+  }
+}
+
+============================================================
+ExternalPromotionDetails.tsx
+============================================================
+
+"use client";
+
+import {
+  conversionGoalLabel,
+  mediaTypeLabel,
+  offerTypeLabel,
+  placementLabel,
+  promotionStatusLabel,
+} from "./external-promotion.constants";
+
+import type {
+  ExternalPromotionRecord,
+} from "./external-promotion.types";
+
+import styles from "./ExternalPromotionDetails.module.css";
+
+interface ExternalPromotionDetailsProps {
+  promotion: ExternalPromotionRecord;
+  programName: string;
+  onEdit: () => void;
+  onClose: () => void;
+  onStatusChange: (
+    status: ExternalPromotionRecord["status"]
+  ) => void;
+}
+
+export default function ExternalPromotionDetails({
+  promotion,
+  programName,
+  onEdit,
+  onClose,
+  onStatusChange,
+}: ExternalPromotionDetailsProps) {
+  const ctr =
+    promotion.metrics.impressions > 0
+      ? (
+          (promotion.metrics.validClicks /
+            promotion.metrics.impressions) *
+          100
+        ).toFixed(2)
+      : "0.00";
+
+  const conversionRate =
+    promotion.metrics.validClicks > 0
+      ? (
+          (promotion.metrics.conversions /
+            promotion.metrics.validClicks) *
+          100
+        ).toFixed(2)
+      : "0.00";
+
+  return (
+    <div className={styles.panel}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>
+            External promotion
+          </p>
+
+          <h2>{promotion.name}</h2>
+
+          <p className={styles.program}>
+            {programName}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="Close promotion details"
+        >
+          ×
+        </button>
+      </header>
+
+      <div className={styles.statusRow}>
+        <span
+          className={styles.status}
+          data-status={promotion.status}
+        >
+          {promotionStatusLabel(
+            promotion.status
+          )}
+        </span>
+
+        <span>
+          {offerTypeLabel(
+            promotion.offerType
+          )}
+        </span>
+      </div>
+
+      <section className={styles.metrics}>
+        <Metric
+          label="Impressions"
+          value={promotion.metrics.impressions.toLocaleString(
+            "en-IN"
+          )}
+        />
+
+        <Metric
+          label="Valid clicks"
+          value={promotion.metrics.validClicks.toLocaleString(
+            "en-IN"
+          )}
+        />
+
+        <Metric
+          label="CTR"
+          value={`${ctr}%`}
+        />
+
+        <Metric
+          label="Conversions"
+          value={promotion.metrics.conversions.toLocaleString(
+            "en-IN"
+          )}
+        />
+
+        <Metric
+          label="Conversion rate"
+          value={`${conversionRate}%`}
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h3>Offer</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="External offer ID"
+            value={
+              promotion.externalOfferId ||
+              "Not recorded"
+            }
+          />
+
+          <Detail
+            label="Category"
+            value={promotion.category}
+          />
+
+          <Detail
+            label="Offer type"
+            value={offerTypeLabel(
+              promotion.offerType
+            )}
+          />
+
+          <Detail
+            label="Conversion goal"
+            value={conversionGoalLabel(
+              promotion.conversionGoal
+            )}
+          />
+        </dl>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Creative</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Headline"
+            value={promotion.headline}
+          />
+
+          <Detail
+            label="Call to action"
+            value={promotion.callToAction}
+          />
+
+          <Detail
+            label="Media type"
+            value={mediaTypeLabel(
+              promotion.mediaType
+            )}
+          />
+        </dl>
+
+        <p className={styles.description}>
+          {promotion.description}
+        </p>
+
+        {promotion.mediaUrl ? (
+          <a
+            className={styles.externalLink}
+            href={promotion.mediaUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open media
+          </a>
+        ) : null}
+      </section>
+
+      <section className={styles.section}>
+        <h3>Tracking</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Referral code"
+            value={
+              promotion.referralCode ||
+              "Not used"
+            }
+          />
+
+          <Detail
+            label="Disclosure"
+            value={promotion.disclosure}
+          />
+        </dl>
+
+        <div className={styles.linkActions}>
+          <a
+            href={promotion.destinationUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open destination
+          </a>
+
+          {promotion.trackingUrl ? (
+            <a
+              href={promotion.trackingUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open tracking link
+            </a>
+          ) : null}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Placement and schedule</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Placements"
+            value={promotion.placements
+              .map(placementLabel)
+              .join(", ")}
+          />
+
+          <Detail
+            label="Start date"
+            value={
+              promotion.startDate ||
+              "Not scheduled"
+            }
+          />
+
+          <Detail
+            label="End date"
+            value={
+              promotion.endDate ||
+              "No end date"
+            }
+          />
+
+          <Detail
+            label="Last updated"
+            value={promotion.updatedAt}
+          />
+        </dl>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Internal notes</h3>
+
+        <p className={styles.notes}>
+          {promotion.notes ||
+            "No internal notes."}
+        </p>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Audit history</h3>
+
+        <div className={styles.auditList}>
+          {promotion.auditHistory.map(
+            (entry) => (
+              <article
+                key={entry.id}
+                className={styles.auditEntry}
+              >
+                <div>
+                  <strong>
+                    {entry.message}
+                  </strong>
+
+                  <span>
+                    {entry.actor}
+                  </span>
+                </div>
+
+                <time>
+                  {entry.occurredAt}
+                </time>
+              </article>
+            )
+          )}
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={onEdit}
+        >
+          Edit promotion
+        </button>
+
+        {promotion.status === "draft" ||
+        promotion.status === "scheduled" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("active");
+            }}
+          >
+            Activate
+          </button>
+        ) : null}
+
+        {promotion.status === "active" ? (
+          <button
+            type="button"
+            className={styles.warningButton}
+            onClick={() => {
+              onStatusChange("paused");
+            }}
+          >
+            Pause
+          </button>
+        ) : null}
+
+        {promotion.status === "paused" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("active");
+            }}
+          >
+            Resume
+          </button>
+        ) : null}
+
+        {promotion.status !== "ended" ? (
+          <button
+            type="button"
+            className={styles.dangerButton}
+            onClick={() => {
+              onStatusChange("ended");
+            }}
+          >
+            End promotion
+          </button>
+        ) : null}
+      </footer>
+    </div>
+  );
+}
+
+interface DetailProps {
+  label: string;
+  value: string;
+}
+
+function Detail({
+  label,
+  value,
+}: DetailProps) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+
+interface MetricProps {
+  label: string;
+  value: string;
+}
+
+function Metric({
+  label,
+  value,
+}: MetricProps) {
+  return (
+    <div>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+============================================================
+ExternalPromotionDetails.module.css
+============================================================
+
+.panel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.program {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.closeButton {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  color: #475569;
+  font: inherit;
+  font-size: 1.35rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 0 2px;
+}
+
+.statusRow > span {
+  padding: 5px 8px;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.status[data-status="active"] {
+  color: #166534;
+  background: #ecfdf3;
+}
+
+.status[data-status="scheduled"] {
+  color: #92400e;
+  background: #fffbeb;
+}
+
+.status[data-status="paused"] {
+  color: #9a3412;
+  background: #fff7ed;
+}
+
+.status[data-status="ended"] {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  margin-top: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+.metrics > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 14px;
+}
+
+.metrics > div + div {
+  border-left: 1px solid #e2e8f0;
+}
+
+.metrics span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.metrics strong {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+.definitionGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin: 0;
+}
+
+.definitionGrid div {
+  min-width: 0;
+}
+
+.definitionGrid dt {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.definitionGrid dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 0.81rem;
+  line-height: 1.5;
+}
+
+.description,
+.notes {
+  margin: 15px 0 0;
+  color: #475569;
+  font-size: 0.81rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.linkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.externalLink,
+.linkActions a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 10px;
+  color: #244b8f;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: #f4f7ff;
+  border: 1px solid #cbd8f4;
+  border-radius: 5px;
+}
+
+.externalLink {
+  margin-top: 14px;
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auditEntry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.auditEntry div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auditEntry strong {
+  color: #0f172a;
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.auditEntry span,
+.auditEntry time {
+  color: #64748b;
+  font-size: 0.69rem;
+}
+
+.auditEntry time {
+  flex: 0 0 auto;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+  padding-top: 20px;
+}
+
+.primaryButton,
+.secondaryButton,
+.warningButton,
+.dangerButton {
+  min-height: 36px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+}
+
+.secondaryButton {
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.warningButton {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #f4d59b;
+}
+
+.dangerButton {
+  color: #991b1b;
+  background: #ffffff;
+  border: 1px solid #efb5b5;
+}
+
+@media (max-width: 760px) {
+  .metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .metrics > div + div {
+    border-left: 0;
+  }
+
+  .metrics > div:nth-child(even) {
+    border-left: 1px solid #e2e8f0;
+  }
+
+  .metrics > div:nth-child(n + 3) {
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+@media (max-width: 620px) {
+  .definitionGrid,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics > div:nth-child(even) {
+    border-left: 0;
+  }
+
+  .metrics > div + div {
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .auditEntry {
+    flex-direction: column;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .warningButton,
+  .dangerButton {
+    width: 100%;
+  }
+}

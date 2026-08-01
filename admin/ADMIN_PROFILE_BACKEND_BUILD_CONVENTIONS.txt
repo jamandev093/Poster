@@ -1,0 +1,3575 @@
+﻿POSTER ADMIN PROFILE
+BACKEND BUILD CONVENTIONS
+
+Generated: 2026-07-31 23:28:46
+
+============================================================
+DATABASE MIGRATION FILES
+============================================================
+
+FILE: F:\Project\Poster\backend\database\migrations\0001_platform_metadata.sql
+
+CREATE TABLE IF NOT EXISTS app.platform_metadata (
+  metadata_key text PRIMARY KEY
+    CHECK (
+      char_length(
+        btrim(metadata_key)
+      ) > 0
+    ),
+
+  metadata_value jsonb NOT NULL,
+
+  created_at timestamptz NOT NULL
+    DEFAULT now(),
+
+  updated_at timestamptz NOT NULL
+    DEFAULT now()
+);
+
+COMMENT ON TABLE app.platform_metadata IS
+  'Backend-owned platform metadata and database foundation records.';
+
+COMMENT ON COLUMN app.platform_metadata.metadata_key IS
+  'Stable unique metadata identifier.';
+
+COMMENT ON COLUMN app.platform_metadata.metadata_value IS
+  'Structured metadata payload controlled by the Poster Backend.';
+
+INSERT INTO app.platform_metadata (
+  metadata_key,
+  metadata_value
+)
+VALUES (
+  'database_foundation',
+  jsonb_build_object(
+    'service',
+    'poster-backend',
+    'database',
+    'PostgreSQL',
+    'migrationVersion',
+    '0001'
+  )
+)
+ON CONFLICT (
+  metadata_key
+)
+DO NOTHING;
+
+FILE: F:\Project\Poster\backend\database\migrations\0002_identity_and_organizations.sql
+
+-- Poster Core Backend
+-- Migration: 0002_identity_and_organizations
+--
+-- Establishes authoritative identity, organization, membership,
+-- session, email-verification, and password-recovery storage.
+--
+-- Raw authentication tokens must never be stored in these tables.
+-- Only cryptographically secure token digests may be persisted.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+END;
+$migration$;
+
+CREATE OR REPLACE FUNCTION app.set_updated_at_and_version()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.row_version = OLD.row_version + 1;
+
+    RETURN NEW;
+END;
+$function$;
+
+CREATE TABLE app.users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    email text NOT NULL,
+    password_hash text NOT NULL,
+    full_name text NOT NULL,
+
+    status text NOT NULL DEFAULT 'pending_verification',
+
+    email_verified_at timestamp with time zone,
+    last_login_at timestamp with time zone,
+
+    failed_login_attempts integer NOT NULL DEFAULT 0,
+    locked_until timestamp with time zone,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    deleted_at timestamp with time zone,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT users_email_not_blank
+        CHECK (length(btrim(email)) >= 3),
+
+    CONSTRAINT users_email_normalized
+        CHECK (email = lower(btrim(email))),
+
+    CONSTRAINT users_password_hash_not_blank
+        CHECK (length(btrim(password_hash)) >= 20),
+
+    CONSTRAINT users_full_name_not_blank
+        CHECK (length(btrim(full_name)) >= 1),
+
+    CONSTRAINT users_status_valid
+        CHECK (
+            status IN (
+                'pending_verification',
+                'active',
+                'suspended',
+                'disabled',
+                'deleted'
+            )
+        ),
+
+    CONSTRAINT users_failed_login_attempts_valid
+        CHECK (failed_login_attempts >= 0),
+
+    CONSTRAINT users_row_version_valid
+        CHECK (row_version >= 1)
+);
+
+CREATE UNIQUE INDEX users_email_unique
+    ON app.users (lower(email))
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX users_status_index
+    ON app.users (status)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX users_created_at_index
+    ON app.users (created_at DESC);
+
+CREATE TABLE app.organizations (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    legal_name text NOT NULL,
+    display_name text NOT NULL,
+
+    website_url text,
+    billing_email text,
+    country_code text NOT NULL,
+
+    status text NOT NULL DEFAULT 'pending',
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    suspended_at timestamp with time zone,
+    closed_at timestamp with time zone,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT organizations_legal_name_not_blank
+        CHECK (length(btrim(legal_name)) >= 1),
+
+    CONSTRAINT organizations_display_name_not_blank
+        CHECK (length(btrim(display_name)) >= 1),
+
+    CONSTRAINT organizations_website_url_not_blank
+        CHECK (
+            website_url IS NULL
+            OR length(btrim(website_url)) >= 1
+        ),
+
+    CONSTRAINT organizations_billing_email_normalized
+        CHECK (
+            billing_email IS NULL
+            OR billing_email = lower(btrim(billing_email))
+        ),
+
+    CONSTRAINT organizations_country_code_valid
+        CHECK (country_code ~ '^[A-Z]{2}$'),
+
+    CONSTRAINT organizations_status_valid
+        CHECK (
+            status IN (
+                'pending',
+                'active',
+                'suspended',
+                'closed'
+            )
+        ),
+
+    CONSTRAINT organizations_row_version_valid
+        CHECK (row_version >= 1)
+);
+
+CREATE INDEX organizations_status_index
+    ON app.organizations (status);
+
+CREATE INDEX organizations_created_at_index
+    ON app.organizations (created_at DESC);
+
+CREATE TABLE app.organization_memberships (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    organization_id uuid NOT NULL
+        REFERENCES app.organizations(id)
+        ON DELETE CASCADE,
+
+    user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE CASCADE,
+
+    role text NOT NULL DEFAULT 'viewer',
+    status text NOT NULL DEFAULT 'invited',
+
+    is_primary_contact boolean NOT NULL DEFAULT false,
+
+    invited_by_user_id uuid
+        REFERENCES app.users(id)
+        ON DELETE SET NULL,
+
+    invited_at timestamp with time zone,
+    joined_at timestamp with time zone,
+    suspended_at timestamp with time zone,
+    revoked_at timestamp with time zone,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT organization_memberships_role_valid
+        CHECK (
+            role IN (
+                'owner',
+                'admin',
+                'finance',
+                'campaign_manager',
+                'viewer'
+            )
+        ),
+
+    CONSTRAINT organization_memberships_status_valid
+        CHECK (
+            status IN (
+                'invited',
+                'active',
+                'suspended',
+                'revoked'
+            )
+        ),
+
+    CONSTRAINT organization_memberships_row_version_valid
+        CHECK (row_version >= 1),
+
+    CONSTRAINT organization_memberships_unique_user
+        UNIQUE (organization_id, user_id)
+);
+
+CREATE UNIQUE INDEX organization_primary_contact_unique
+    ON app.organization_memberships (organization_id)
+    WHERE
+        is_primary_contact = true
+        AND status = 'active';
+
+CREATE INDEX organization_memberships_user_index
+    ON app.organization_memberships (
+        user_id,
+        status
+    );
+
+CREATE INDEX organization_memberships_organization_index
+    ON app.organization_memberships (
+        organization_id,
+        status
+    );
+
+CREATE TABLE app.user_sessions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE CASCADE,
+
+    organization_id uuid
+        REFERENCES app.organizations(id)
+        ON DELETE SET NULL,
+
+    refresh_token_digest text NOT NULL,
+
+    ip_address inet,
+    user_agent text,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    last_seen_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    expires_at timestamp with time zone NOT NULL,
+
+    revoked_at timestamp with time zone,
+    revocation_reason text,
+
+    CONSTRAINT user_sessions_refresh_digest_not_blank
+        CHECK (length(btrim(refresh_token_digest)) >= 32),
+
+    CONSTRAINT user_sessions_expiry_valid
+        CHECK (expires_at > created_at),
+
+    CONSTRAINT user_sessions_revocation_reason_not_blank
+        CHECK (
+            revocation_reason IS NULL
+            OR length(btrim(revocation_reason)) >= 1
+        )
+);
+
+CREATE UNIQUE INDEX user_sessions_refresh_digest_unique
+    ON app.user_sessions (refresh_token_digest);
+
+CREATE INDEX user_sessions_active_user_index
+    ON app.user_sessions (
+        user_id,
+        expires_at DESC
+    )
+    WHERE revoked_at IS NULL;
+
+CREATE INDEX user_sessions_organization_index
+    ON app.user_sessions (
+        organization_id,
+        expires_at DESC
+    )
+    WHERE
+        organization_id IS NOT NULL
+        AND revoked_at IS NULL;
+
+CREATE TABLE app.email_verification_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE CASCADE,
+
+    token_digest text NOT NULL,
+    purpose text NOT NULL DEFAULT 'signup',
+
+    attempt_count integer NOT NULL DEFAULT 0,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    expires_at timestamp with time zone NOT NULL,
+
+    consumed_at timestamp with time zone,
+    invalidated_at timestamp with time zone,
+
+    CONSTRAINT email_verification_digest_not_blank
+        CHECK (length(btrim(token_digest)) >= 32),
+
+    CONSTRAINT email_verification_purpose_valid
+        CHECK (
+            purpose IN (
+                'signup',
+                'email_change'
+            )
+        ),
+
+    CONSTRAINT email_verification_attempt_count_valid
+        CHECK (attempt_count >= 0),
+
+    CONSTRAINT email_verification_expiry_valid
+        CHECK (expires_at > created_at)
+);
+
+CREATE UNIQUE INDEX email_verification_token_digest_unique
+    ON app.email_verification_tokens (token_digest);
+
+CREATE INDEX email_verification_active_user_index
+    ON app.email_verification_tokens (
+        user_id,
+        expires_at DESC
+    )
+    WHERE
+        consumed_at IS NULL
+        AND invalidated_at IS NULL;
+
+CREATE TABLE app.password_reset_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE CASCADE,
+
+    token_digest text NOT NULL,
+
+    requested_ip_address inet,
+    requested_user_agent text,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    expires_at timestamp with time zone NOT NULL,
+
+    consumed_at timestamp with time zone,
+    invalidated_at timestamp with time zone,
+
+    CONSTRAINT password_reset_digest_not_blank
+        CHECK (length(btrim(token_digest)) >= 32),
+
+    CONSTRAINT password_reset_expiry_valid
+        CHECK (expires_at > created_at)
+);
+
+CREATE UNIQUE INDEX password_reset_token_digest_unique
+    ON app.password_reset_tokens (token_digest);
+
+CREATE INDEX password_reset_active_user_index
+    ON app.password_reset_tokens (
+        user_id,
+        expires_at DESC
+    )
+    WHERE
+        consumed_at IS NULL
+        AND invalidated_at IS NULL;
+
+CREATE TRIGGER users_set_updated_at_and_version
+BEFORE UPDATE ON app.users
+FOR EACH ROW
+EXECUTE FUNCTION app.set_updated_at_and_version();
+
+CREATE TRIGGER organizations_set_updated_at_and_version
+BEFORE UPDATE ON app.organizations
+FOR EACH ROW
+EXECUTE FUNCTION app.set_updated_at_and_version();
+
+CREATE TRIGGER organization_memberships_set_updated_at_and_version
+BEFORE UPDATE ON app.organization_memberships
+FOR EACH ROW
+EXECUTE FUNCTION app.set_updated_at_and_version();
+
+COMMENT ON TABLE app.users IS
+    'Authoritative Client and Admin user identities.';
+
+COMMENT ON TABLE app.organizations IS
+    'Authoritative advertising-client and operational organizations.';
+
+COMMENT ON TABLE app.organization_memberships IS
+    'Organization-scoped user roles and membership status.';
+
+COMMENT ON TABLE app.user_sessions IS
+    'Revocable authenticated user sessions using refresh-token digests.';
+
+COMMENT ON TABLE app.email_verification_tokens IS
+    'Single-use email-verification token digests.';
+
+COMMENT ON TABLE app.password_reset_tokens IS
+    'Single-use password-recovery token digests.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0003_application_role_permissions.sql
+
+-- Poster Core Backend
+-- Migration: 0003_application_role_permissions
+--
+-- Grants the restricted Poster application role access only to
+-- the existing identity and authentication tables required by
+-- the TypeScript Core Backend.
+--
+-- Client, Admin, and Mobile applications never connect directly
+-- to PostgreSQL. Authorization remains enforced by the Backend.
+
+DO $migration$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_roles
+        WHERE rolname = 'poster_app'
+    ) THEN
+        RAISE EXCEPTION
+            'Required PostgreSQL role "poster_app" does not exist.';
+    END IF;
+
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.users') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.users does not exist.';
+    END IF;
+
+    IF to_regclass('app.organizations') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.organizations does not exist.';
+    END IF;
+
+    IF to_regclass('app.organization_memberships') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.organization_memberships does not exist.';
+    END IF;
+
+    IF to_regclass('app.user_sessions') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.user_sessions does not exist.';
+    END IF;
+
+    IF to_regclass('app.email_verification_tokens') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.email_verification_tokens does not exist.';
+    END IF;
+
+    IF to_regclass('app.password_reset_tokens') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.password_reset_tokens does not exist.';
+    END IF;
+END;
+$migration$;
+
+REVOKE ALL
+ON TABLE
+    app.users,
+    app.organizations,
+    app.organization_memberships,
+    app.user_sessions,
+    app.email_verification_tokens,
+    app.password_reset_tokens
+FROM PUBLIC;
+
+GRANT USAGE
+ON SCHEMA app
+TO poster_app;
+
+GRANT
+    SELECT,
+    INSERT,
+    UPDATE,
+    DELETE
+ON TABLE
+    app.users,
+    app.organizations,
+    app.organization_memberships,
+    app.user_sessions,
+    app.email_verification_tokens,
+    app.password_reset_tokens
+TO poster_app;
+
+GRANT EXECUTE
+ON FUNCTION app.set_updated_at_and_version()
+TO poster_app;
+
+COMMENT ON TABLE app.email_verification_tokens IS
+    'Single-use email-verification token digests accessible only through the Poster Core Backend.';
+
+COMMENT ON TABLE app.password_reset_tokens IS
+    'Single-use password-recovery token digests accessible only through the Poster Core Backend.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0004_platform_access_control.sql
+
+-- Poster Core Backend
+-- Migration: 0004_platform_access_control
+--
+-- Establishes authoritative platform-level Admin role assignments.
+-- Organization membership roles remain organization-scoped and must
+-- never grant access to the Poster operational Admin application.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.users') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.users does not exist.';
+    END IF;
+END;
+$migration$;
+
+CREATE TABLE app.platform_role_assignments (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE CASCADE,
+
+    role text NOT NULL,
+
+    status text NOT NULL DEFAULT 'active',
+
+    granted_by_user_id uuid
+        REFERENCES app.users(id)
+        ON DELETE SET NULL,
+
+    granted_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    revoked_at timestamp with time zone,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT platform_role_assignments_role_valid
+        CHECK (
+            role IN (
+                'super_admin',
+                'operations_admin',
+                'content_moderator',
+                'copyright_admin',
+                'support_analyst',
+                'analytics_viewer'
+            )
+        ),
+
+    CONSTRAINT platform_role_assignments_status_valid
+        CHECK (
+            status IN (
+                'active',
+                'revoked'
+            )
+        ),
+
+    CONSTRAINT platform_role_assignments_revocation_valid
+        CHECK (
+            (
+                status = 'active'
+                AND revoked_at IS NULL
+            )
+            OR
+            (
+                status = 'revoked'
+                AND revoked_at IS NOT NULL
+            )
+        ),
+
+    CONSTRAINT platform_role_assignments_row_version_valid
+        CHECK (row_version >= 1),
+
+    CONSTRAINT platform_role_assignments_self_grant_guard
+        CHECK (
+            granted_by_user_id IS NULL
+            OR granted_by_user_id <> user_id
+        )
+);
+
+CREATE UNIQUE INDEX platform_role_assignments_active_unique
+    ON app.platform_role_assignments (
+        user_id,
+        role
+    )
+    WHERE
+        status = 'active'
+        AND revoked_at IS NULL;
+
+CREATE INDEX platform_role_assignments_user_index
+    ON app.platform_role_assignments (
+        user_id,
+        status
+    );
+
+CREATE INDEX platform_role_assignments_role_index
+    ON app.platform_role_assignments (
+        role,
+        status
+    );
+
+CREATE TRIGGER platform_role_assignments_set_updated_at_and_version
+    BEFORE UPDATE ON app.platform_role_assignments
+    FOR EACH ROW
+    EXECUTE FUNCTION app.set_updated_at_and_version();
+
+REVOKE ALL
+ON TABLE
+    app.platform_role_assignments
+FROM PUBLIC;
+
+GRANT
+    SELECT,
+    INSERT,
+    UPDATE,
+    DELETE
+ON TABLE
+    app.platform_role_assignments
+TO poster_app;
+
+COMMENT ON TABLE app.platform_role_assignments IS
+    'Authoritative platform-level Poster Admin role assignments. Organization roles do not grant platform Admin access.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0005_admin_user_metrics_indexes.sql
+
+-- Poster Core Backend
+-- Migration: 0005_admin_user_metrics_indexes
+--
+-- Adds read-performance indexes for authoritative Admin user metrics.
+-- Metric values remain derived from app.users and app.user_sessions.
+-- No duplicated counter table or mutable analytics total is introduced.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.users') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.users does not exist.';
+    END IF;
+
+    IF to_regclass('app.user_sessions') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.user_sessions does not exist.';
+    END IF;
+END;
+$migration$;
+
+CREATE INDEX users_non_deleted_metrics_index
+    ON app.users (id)
+    WHERE deleted_at IS NULL;
+
+CREATE INDEX user_sessions_activity_metrics_index
+    ON app.user_sessions (
+        last_seen_at DESC,
+        user_id
+    );
+
+CREATE INDEX user_sessions_live_activity_metrics_index
+    ON app.user_sessions (
+        last_seen_at DESC,
+        expires_at DESC,
+        user_id
+    )
+    WHERE revoked_at IS NULL;
+
+COMMENT ON INDEX app.users_non_deleted_metrics_index IS
+    'Supports exact Admin total-user metrics while excluding soft-deleted identities.';
+
+COMMENT ON INDEX app.user_sessions_activity_metrics_index IS
+    'Supports exact distinct-user activity metrics over rolling daily and monthly windows.';
+
+COMMENT ON INDEX app.user_sessions_live_activity_metrics_index IS
+    'Supports exact live-user metrics over recent unrevoked sessions.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0006_session_refresh_token_history.sql
+
+-- Poster Core Backend
+-- Migration: 0006_session_refresh_token_history
+--
+-- Stores only irreversible digests of refresh tokens that have
+-- already been rotated out of an active session.
+--
+-- The history allows a previously used refresh token to be
+-- identified as a replay attempt. Raw refresh tokens are never
+-- stored in PostgreSQL.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.user_sessions') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.user_sessions does not exist.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_roles
+        WHERE rolname = 'poster_app'
+    ) THEN
+        RAISE EXCEPTION
+            'Required PostgreSQL role "poster_app" does not exist.';
+    END IF;
+END;
+$migration$;
+
+CREATE TABLE app.user_session_refresh_token_history (
+    id uuid PRIMARY KEY
+        DEFAULT gen_random_uuid(),
+
+    session_id uuid NOT NULL
+        REFERENCES app.user_sessions(id)
+        ON DELETE CASCADE,
+
+    refresh_token_digest text NOT NULL,
+
+    rotated_at timestamp with time zone
+        NOT NULL,
+
+    replay_detected_at timestamp with time zone,
+
+    CONSTRAINT user_session_refresh_history_digest_not_blank
+        CHECK (
+            length(
+                btrim(refresh_token_digest)
+            ) >= 32
+        ),
+
+    CONSTRAINT user_session_refresh_history_replay_time_valid
+        CHECK (
+            replay_detected_at IS NULL
+            OR replay_detected_at >= rotated_at
+        )
+);
+
+CREATE UNIQUE INDEX user_session_refresh_history_digest_unique
+    ON app.user_session_refresh_token_history (
+        refresh_token_digest
+    );
+
+CREATE INDEX user_session_refresh_history_session_index
+    ON app.user_session_refresh_token_history (
+        session_id,
+        rotated_at DESC
+    );
+
+REVOKE ALL
+ON TABLE
+    app.user_session_refresh_token_history
+FROM PUBLIC;
+
+GRANT
+    SELECT,
+    INSERT,
+    UPDATE,
+    DELETE
+ON TABLE
+    app.user_session_refresh_token_history
+TO poster_app;
+
+COMMENT ON TABLE app.user_session_refresh_token_history IS
+    'Irreversible digests of rotated refresh tokens used for replay detection.';
+
+COMMENT ON COLUMN app.user_session_refresh_token_history.refresh_token_digest IS
+    'SHA-256 digest only. A raw refresh token must never be persisted.';
+
+COMMENT ON COLUMN app.user_session_refresh_token_history.replay_detected_at IS
+    'First time a rotated token was presented again.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0007_password_reset_attempts.sql
+
+-- Poster Core Backend
+-- Migration: 0007_password_reset_attempts
+--
+-- Adds bounded failed-attempt tracking to password-reset
+-- challenges. The raw six-digit reset code remains outside
+-- PostgreSQL; only a salted SHA-256 digest is stored.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.password_reset_tokens') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.password_reset_tokens does not exist.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_roles
+        WHERE rolname = 'poster_app'
+    ) THEN
+        RAISE EXCEPTION
+            'Required PostgreSQL role "poster_app" does not exist.';
+    END IF;
+END;
+$migration$;
+
+ALTER TABLE app.password_reset_tokens
+    ADD COLUMN attempt_count integer
+        NOT NULL
+        DEFAULT 0;
+
+ALTER TABLE app.password_reset_tokens
+    ADD CONSTRAINT password_reset_attempt_count_valid
+        CHECK (
+            attempt_count >= 0
+        );
+
+COMMENT ON COLUMN app.password_reset_tokens.attempt_count IS
+    'Number of failed confirmation attempts for this password-reset challenge.';
+
+FILE: F:\Project\Poster\backend\database\migrations\0008_commercial_request_workflow.sql
+
+-- Poster Core Backend
+-- Migration: 0008_commercial_request_workflow
+--
+-- Authoritative Client request, Admin review, linked campaign
+-- draft, revision history, and immutable Admin audit foundation.
+--
+-- Approval does not make a campaign deliverable.
+
+DO $migration$
+BEGIN
+    IF to_regnamespace('app') IS NULL THEN
+        RAISE EXCEPTION
+            'Required application schema "app" does not exist.';
+    END IF;
+
+    IF to_regclass('app.users') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.users does not exist.';
+    END IF;
+
+    IF to_regclass('app.organizations') IS NULL THEN
+        RAISE EXCEPTION
+            'Required table app.organizations does not exist.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_roles
+        WHERE rolname = 'poster_app'
+    ) THEN
+        RAISE EXCEPTION
+            'Required PostgreSQL role "poster_app" does not exist.';
+    END IF;
+END;
+$migration$;
+
+CREATE TABLE app.commercial_requests (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    request_reference text NOT NULL,
+
+    organization_id uuid NOT NULL
+        REFERENCES app.organizations(id)
+        ON DELETE CASCADE,
+
+    submitted_by_user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE RESTRICT,
+
+    request_type text NOT NULL,
+    status text NOT NULL DEFAULT 'pending_review',
+
+    title text NOT NULL,
+    objective text NOT NULL,
+    destination_url text NOT NULL,
+
+    requested_placements text[] NOT NULL,
+    requested_start_date date NOT NULL,
+    requested_end_date date NOT NULL,
+
+    budget_minor_units bigint,
+    currency_code text,
+
+    creative_spec jsonb NOT NULL DEFAULT '{}'::jsonb,
+    commercial_terms jsonb NOT NULL DEFAULT '{}'::jsonb,
+
+    submitted_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    decided_at timestamp with time zone,
+
+    decided_by_user_id uuid
+        REFERENCES app.users(id)
+        ON DELETE SET NULL,
+
+    decision_note text,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT commercial_requests_reference_not_blank
+        CHECK (length(btrim(request_reference)) >= 5),
+
+    CONSTRAINT commercial_requests_type_valid
+        CHECK (
+            request_type IN (
+                'direct_sponsorship',
+                'affiliate'
+            )
+        ),
+
+    CONSTRAINT commercial_requests_status_valid
+        CHECK (
+            status IN (
+                'pending_review',
+                'changes_requested',
+                'approved',
+                'rejected'
+            )
+        ),
+
+    CONSTRAINT commercial_requests_title_not_blank
+        CHECK (length(btrim(title)) >= 1),
+
+    CONSTRAINT commercial_requests_objective_not_blank
+        CHECK (length(btrim(objective)) >= 1),
+
+    CONSTRAINT commercial_requests_destination_not_blank
+        CHECK (length(btrim(destination_url)) >= 1),
+
+    CONSTRAINT commercial_requests_placements_valid
+        CHECK (
+            cardinality(requested_placements)
+                BETWEEN 1 AND 3
+            AND requested_placements
+                <@ ARRAY[
+                    'home',
+                    'search',
+                    'trending'
+                ]::text[]
+        ),
+
+    CONSTRAINT commercial_requests_schedule_valid
+        CHECK (requested_end_date >= requested_start_date),
+
+    CONSTRAINT commercial_requests_budget_valid
+        CHECK (
+            budget_minor_units IS NULL
+            OR budget_minor_units >= 0
+        ),
+
+    CONSTRAINT commercial_requests_currency_valid
+        CHECK (
+            (
+                budget_minor_units IS NULL
+                AND currency_code IS NULL
+            )
+            OR
+            (
+                budget_minor_units IS NOT NULL
+                AND currency_code ~ '^[A-Z]{3}$'
+            )
+        ),
+
+    CONSTRAINT commercial_requests_creative_object
+        CHECK (jsonb_typeof(creative_spec) = 'object'),
+
+    CONSTRAINT commercial_requests_terms_object
+        CHECK (jsonb_typeof(commercial_terms) = 'object'),
+
+    CONSTRAINT commercial_requests_decision_consistent
+        CHECK (
+            (
+                status = 'pending_review'
+                AND decided_at IS NULL
+                AND decided_by_user_id IS NULL
+                AND decision_note IS NULL
+            )
+            OR
+            (
+                status IN (
+                    'changes_requested',
+                    'approved',
+                    'rejected'
+                )
+                AND decided_at IS NOT NULL
+                AND decided_by_user_id IS NOT NULL
+            )
+        ),
+
+    CONSTRAINT commercial_requests_decision_note_not_blank
+        CHECK (
+            decision_note IS NULL
+            OR length(btrim(decision_note)) >= 1
+        ),
+
+    CONSTRAINT commercial_requests_row_version_valid
+        CHECK (row_version >= 1)
+);
+
+CREATE UNIQUE INDEX commercial_requests_reference_unique
+    ON app.commercial_requests (request_reference);
+
+CREATE INDEX commercial_requests_admin_queue_index
+    ON app.commercial_requests (
+        status,
+        submitted_at DESC,
+        id DESC
+    );
+
+CREATE INDEX commercial_requests_organization_index
+    ON app.commercial_requests (
+        organization_id,
+        submitted_at DESC,
+        id DESC
+    );
+
+CREATE TABLE app.commercial_request_revisions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    request_id uuid NOT NULL
+        REFERENCES app.commercial_requests(id)
+        ON DELETE CASCADE,
+
+    revision_number integer NOT NULL,
+
+    submitted_by_user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE RESTRICT,
+
+    payload jsonb NOT NULL,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT commercial_request_revisions_number_valid
+        CHECK (revision_number >= 1),
+
+    CONSTRAINT commercial_request_revisions_payload_object
+        CHECK (jsonb_typeof(payload) = 'object'),
+
+    CONSTRAINT commercial_request_revisions_unique
+        UNIQUE (request_id, revision_number)
+);
+
+CREATE INDEX commercial_request_revisions_request_index
+    ON app.commercial_request_revisions (
+        request_id,
+        revision_number DESC
+    );
+
+CREATE TABLE app.monetization_campaigns (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    campaign_reference text NOT NULL,
+
+    source_request_id uuid
+        REFERENCES app.commercial_requests(id)
+        ON DELETE RESTRICT,
+
+    organization_id uuid NOT NULL
+        REFERENCES app.organizations(id)
+        ON DELETE CASCADE,
+
+    name text NOT NULL,
+    campaign_type text NOT NULL,
+    origin text NOT NULL,
+    status text NOT NULL DEFAULT 'draft',
+
+    placements text[] NOT NULL,
+
+    scheduled_start_date date NOT NULL,
+    scheduled_end_date date NOT NULL,
+
+    readiness_status text NOT NULL DEFAULT 'pending_setup',
+    commercial_status text NOT NULL DEFAULT 'pending_funding',
+    delivery_eligible boolean NOT NULL DEFAULT false,
+
+    created_by_user_id uuid NOT NULL
+        REFERENCES app.users(id)
+        ON DELETE RESTRICT,
+
+    created_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    row_version bigint NOT NULL DEFAULT 1,
+
+    CONSTRAINT monetization_campaigns_reference_not_blank
+        CHECK (length(btrim(campaign_reference)) >= 5),
+
+    CONSTRAINT monetization_campaigns_name_not_blank
+        CHECK (length(btrim(name)) >= 1),
+
+    CONSTRAINT monetization_campaigns_type_valid
+        CHECK (
+            campaign_type IN (
+                'poster_promotion',
+                'affiliate',
+                'direct_sponsorship',
+                'programmatic'
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_origin_valid
+        CHECK (
+            origin IN (
+                'client_request',
+                'admin_internal',
+                'programmatic_provider'
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_status_valid
+        CHECK (
+            status IN (
+                'draft',
+                'scheduled',
+                'active',
+                'paused',
+                'ended',
+                'disabled'
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_placements_valid
+        CHECK (
+            cardinality(placements)
+                BETWEEN 1 AND 3
+            AND placements
+                <@ ARRAY[
+                    'home',
+                    'search',
+                    'trending'
+                ]::text[]
+        ),
+
+    CONSTRAINT monetization_campaigns_schedule_valid
+        CHECK (scheduled_end_date >= scheduled_start_date),
+
+    CONSTRAINT monetization_campaigns_readiness_valid
+        CHECK (
+            readiness_status IN (
+                'pending_setup',
+                'ready',
+                'blocked'
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_commercial_valid
+        CHECK (
+            commercial_status IN (
+                'approved',
+                'pending_funding',
+                'funded',
+                'blocked'
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_delivery_gate
+        CHECK (
+            delivery_eligible = false
+            OR (
+                status IN ('scheduled', 'active')
+                AND readiness_status = 'ready'
+                AND commercial_status IN ('approved', 'funded')
+            )
+        ),
+
+    CONSTRAINT monetization_campaigns_row_version_valid
+        CHECK (row_version >= 1)
+);
+
+CREATE UNIQUE INDEX monetization_campaigns_reference_unique
+    ON app.monetization_campaigns (campaign_reference);
+
+CREATE UNIQUE INDEX monetization_campaigns_source_request_unique
+    ON app.monetization_campaigns (source_request_id)
+    WHERE source_request_id IS NOT NULL;
+
+CREATE INDEX monetization_campaigns_organization_index
+    ON app.monetization_campaigns (
+        organization_id,
+        status,
+        created_at DESC
+    );
+
+CREATE TABLE app.admin_audit_entries (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    actor_user_id uuid
+        REFERENCES app.users(id)
+        ON DELETE SET NULL,
+
+    action text NOT NULL,
+    entity_type text NOT NULL,
+    entity_id uuid NOT NULL,
+
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+
+    occurred_at timestamp with time zone
+        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT admin_audit_entries_action_not_blank
+        CHECK (length(btrim(action)) >= 1),
+
+    CONSTRAINT admin_audit_entries_entity_type_not_blank
+        CHECK (length(btrim(entity_type)) >= 1),
+
+    CONSTRAINT admin_audit_entries_metadata_object
+        CHECK (jsonb_typeof(metadata) = 'object')
+);
+
+CREATE INDEX admin_audit_entries_entity_index
+    ON app.admin_audit_entries (
+        entity_type,
+        entity_id,
+        occurred_at DESC
+    );
+
+CREATE INDEX admin_audit_entries_actor_index
+    ON app.admin_audit_entries (
+        actor_user_id,
+        occurred_at DESC
+    )
+    WHERE actor_user_id IS NOT NULL;
+
+CREATE TRIGGER commercial_requests_set_updated_at_and_version
+    BEFORE UPDATE ON app.commercial_requests
+    FOR EACH ROW
+    EXECUTE FUNCTION app.set_updated_at_and_version();
+
+CREATE TRIGGER monetization_campaigns_set_updated_at_and_version
+    BEFORE UPDATE ON app.monetization_campaigns
+    FOR EACH ROW
+    EXECUTE FUNCTION app.set_updated_at_and_version();
+
+REVOKE ALL
+ON TABLE
+    app.commercial_requests,
+    app.commercial_request_revisions,
+    app.monetization_campaigns,
+    app.admin_audit_entries
+FROM PUBLIC;
+
+GRANT
+    SELECT,
+    INSERT,
+    UPDATE,
+    DELETE
+ON TABLE
+    app.commercial_requests,
+    app.monetization_campaigns
+TO poster_app;
+
+GRANT
+    SELECT,
+    INSERT
+ON TABLE
+    app.commercial_request_revisions,
+    app.admin_audit_entries
+TO poster_app;
+
+COMMENT ON TABLE app.commercial_requests IS
+    'Authoritative advertising requests submitted by Client organizations for Admin review.';
+
+COMMENT ON TABLE app.commercial_request_revisions IS
+    'Immutable Client submission and resubmission history for one commercial request.';
+
+COMMENT ON TABLE app.monetization_campaigns IS
+    'Authoritative campaigns. Approval creates a draft that is not automatically eligible for delivery.';
+
+COMMENT ON TABLE app.admin_audit_entries IS
+    'Immutable audit history for sensitive Poster Admin decisions.';
+
+
+============================================================
+DOMAIN AND APPLICATION ERROR FILES
+============================================================
+
+FILE: F:\Project\Poster\backend\src\domains\authentication\authentication.errors.ts
+
+export const AUTHENTICATION_ERROR_CODES = [
+  "AUTH_INVALID_CREDENTIALS",
+  "AUTH_PASSWORD_POLICY",
+  "AUTH_TOKEN_INVALID",
+  "AUTH_TOKEN_EXPIRED",
+  "AUTH_REQUIRED",
+  "AUTH_ACCESS_TOKEN_INVALID",
+  "AUTH_ACCESS_TOKEN_EXPIRED",
+  "AUTH_SESSION_INVALID",
+  "AUTH_FORBIDDEN",
+  "AUTH_CONFLICT",
+  "AUTH_CONCURRENCY_CONFLICT",
+] as const;
+
+export type AuthenticationErrorCode =
+  (typeof AUTHENTICATION_ERROR_CODES)[number];
+
+export interface AuthenticationErrorOptions {
+  code: AuthenticationErrorCode;
+
+  message: string;
+
+  publicMessage: string;
+
+  statusCode: number;
+}
+
+/**
+ * Base error for expected authentication-domain failures.
+ *
+ * Internal messages may contain diagnostic context.
+ * Public messages are safe for API responses.
+ */
+export class AuthenticationDomainError
+  extends Error {
+  public readonly code:
+    AuthenticationErrorCode;
+
+  public readonly publicMessage:
+    string;
+
+  public readonly statusCode:
+    number;
+
+  public readonly operational =
+    true;
+
+  public constructor(
+    options: AuthenticationErrorOptions
+  ) {
+    super(
+      options.message
+    );
+
+    this.name =
+      "AuthenticationDomainError";
+
+    this.code =
+      options.code;
+
+    this.publicMessage =
+      options.publicMessage;
+
+    this.statusCode =
+      options.statusCode;
+
+    Object.setPrototypeOf(
+      this,
+      new.target.prototype
+    );
+  }
+}
+
+export class InvalidCredentialsError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_INVALID_CREDENTIALS",
+
+      message:
+        "The supplied authentication credentials were invalid.",
+
+      publicMessage:
+        "The email or password is incorrect.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "InvalidCredentialsError";
+  }
+}
+
+export class PasswordPolicyError
+  extends AuthenticationDomainError {
+  public constructor(
+    message:
+      string
+  ) {
+    super({
+      code:
+        "AUTH_PASSWORD_POLICY",
+
+      message,
+
+      publicMessage:
+        "The password does not meet the security requirements.",
+
+      statusCode:
+        400,
+    });
+
+    this.name =
+      "PasswordPolicyError";
+  }
+}
+
+export class AuthenticationTokenInvalidError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_TOKEN_INVALID",
+
+      message:
+        "The supplied authentication token was invalid.",
+
+      publicMessage:
+        "The verification link or code is invalid.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationTokenInvalidError";
+  }
+}
+
+export class AuthenticationTokenExpiredError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_TOKEN_EXPIRED",
+
+      message:
+        "The supplied authentication token has expired.",
+
+      publicMessage:
+        "The verification link or code has expired.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationTokenExpiredError";
+  }
+}
+
+export class AuthenticationRequiredError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_REQUIRED",
+
+      message:
+        "The requested operation requires an authenticated identity.",
+
+      publicMessage:
+        "Authentication is required.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationRequiredError";
+  }
+}
+
+export class AuthenticationAccessTokenInvalidError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_ACCESS_TOKEN_INVALID",
+
+      message:
+        "The supplied access token was invalid.",
+
+      publicMessage:
+        "The authentication session is invalid.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationAccessTokenInvalidError";
+  }
+}
+
+export class AuthenticationAccessTokenExpiredError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_ACCESS_TOKEN_EXPIRED",
+
+      message:
+        "The supplied access token has expired.",
+
+      publicMessage:
+        "The authentication session has expired.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationAccessTokenExpiredError";
+  }
+}
+
+export class AuthenticationSessionInvalidError
+  extends AuthenticationDomainError {
+  public constructor(
+    message:
+      string =
+        "The authentication session or refresh token is invalid."
+  ) {
+    super({
+      code:
+        "AUTH_SESSION_INVALID",
+
+      message,
+
+      publicMessage:
+        "The authentication session is invalid or has expired.",
+
+      statusCode:
+        401,
+    });
+
+    this.name =
+      "AuthenticationSessionInvalidError";
+  }
+}
+
+export class AuthenticationForbiddenError
+  extends AuthenticationDomainError {
+  public constructor(
+    message:
+      string =
+        "The authenticated identity is not permitted to perform this operation."
+  ) {
+    super({
+      code:
+        "AUTH_FORBIDDEN",
+
+      message,
+
+      publicMessage:
+        "You do not have permission to perform this action.",
+
+      statusCode:
+        403,
+    });
+
+    this.name =
+      "AuthenticationForbiddenError";
+  }
+}
+
+export class AuthenticationConflictError
+  extends AuthenticationDomainError {
+  public constructor(
+    message:
+      string
+  ) {
+    super({
+      code:
+        "AUTH_CONFLICT",
+
+      message,
+
+      publicMessage:
+        "The authentication request conflicts with an existing record.",
+
+      statusCode:
+        409,
+    });
+
+    this.name =
+      "AuthenticationConflictError";
+  }
+}
+
+export class AuthenticationConcurrencyError
+  extends AuthenticationDomainError {
+  public constructor() {
+    super({
+      code:
+        "AUTH_CONCURRENCY_CONFLICT",
+
+      message:
+        "The authentication record changed before the operation completed.",
+
+      publicMessage:
+        "The account changed during this request. Please try again.",
+
+      statusCode:
+        409,
+    });
+
+    this.name =
+      "AuthenticationConcurrencyError";
+  }
+}
+
+FILE: F:\Project\Poster\backend\src\plugins\error-handler.ts
+
+import type {
+  FastifyError,
+  FastifyInstance,
+} from "fastify";
+
+import {
+  AuthenticationDomainError,
+} from "../domains/authentication/authentication.errors.js";
+
+import {
+  ApiRequestValidationError,
+  type ApiValidationIssue,
+} from "../http/request-validation.js";
+
+interface ApiErrorResponse {
+  error: {
+    code: string;
+
+    message: string;
+
+    requestId: string;
+
+    details?:
+      readonly ApiValidationIssue[];
+  };
+}
+
+export function registerErrorHandler(
+  app:
+    FastifyInstance
+): void {
+  app.setNotFoundHandler(
+    (
+      request,
+      reply
+    ) => {
+      const response:
+        ApiErrorResponse = {
+          error: {
+            code:
+              "ROUTE_NOT_FOUND",
+
+            message:
+              "The requested API route was not found.",
+
+            requestId:
+              request.id,
+          },
+        };
+
+      return reply
+        .status(
+          404
+        )
+        .send(
+          response
+        );
+    }
+  );
+
+  app.setErrorHandler(
+    (
+      error:
+        FastifyError,
+      request,
+      reply
+    ) => {
+      if (
+        error instanceof
+        ApiRequestValidationError
+      ) {
+        request.log.info(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster API request validation failed."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+
+              details:
+                error.issues,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      if (
+        error instanceof
+        AuthenticationDomainError
+      ) {
+        request.log.warn(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster authentication request was rejected."
+        );
+
+        const response:
+          ApiErrorResponse = {
+            error: {
+              code:
+                error.code,
+
+              message:
+                error.publicMessage,
+
+              requestId:
+                request.id,
+            },
+          };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      const statusCode =
+        typeof error.statusCode ===
+          "number" &&
+        error.statusCode >= 400 &&
+        error.statusCode <= 599
+          ? error.statusCode
+          : 500;
+
+      request.log.error(
+        {
+          error,
+
+          requestId:
+            request.id,
+        },
+        "Poster API request failed."
+      );
+
+      const response:
+        ApiErrorResponse = {
+          error: {
+            code:
+              statusCode >= 500
+                ? "INTERNAL_SERVER_ERROR"
+                : error.code ||
+                  "REQUEST_FAILED",
+
+            message:
+              statusCode >= 500
+                ? "The request could not be completed."
+                : "The request could not be processed.",
+
+            requestId:
+              request.id,
+          },
+        };
+
+      return reply
+        .status(
+          statusCode
+        )
+        .send(
+          response
+        );
+    }
+  );
+}
+
+
+============================================================
+DATABASE TRANSACTION AND QUERY HELPERS
+============================================================
+
+
+============================================================
+ROUTE AND SERVICE TEST INVENTORY
+============================================================
+
+FILE: F:\Project\Poster\backend\tests\access-token.service.test.ts
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\admin-user-metrics.service.test.ts
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\authentication.security.test.ts
+FILE: F:\Project\Poster\backend\tests\authentication.service.test.ts
+FILE: F:\Project\Poster\backend\tests\authentication-cookie.test.ts
+FILE: F:\Project\Poster\backend\tests\authentication-token.repository.test.ts
+FILE: F:\Project\Poster\backend\tests\authorization.policy.test.ts
+FILE: F:\Project\Poster\backend\tests\commercial-permissions.test.ts
+FILE: F:\Project\Poster\backend\tests\commercial-request.repository.test.ts
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\commercial-request.service.test.ts
+FILE: F:\Project\Poster\backend\tests\database.transaction.test.ts
+FILE: F:\Project\Poster\backend\tests\email-delivery.service.test.ts
+FILE: F:\Project\Poster\backend\tests\email-verification.service.test.ts
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+FILE: F:\Project\Poster\backend\tests\login-session.service.test.ts
+FILE: F:\Project\Poster\backend\tests\password-reset.repository.test.ts
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\password-reset.service.test.ts
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.repository.test.ts
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.service.test.ts
+FILE: F:\Project\Poster\backend\tests\signup-registration.service.test.ts
+FILE: F:\Project\Poster\backend\tests\transaction-aware.identity-repository.test.ts
+
+============================================================
+ADMIN ROUTE TEST EXAMPLES
+============================================================
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  AuthorizationContextService,
+} from "../src/application/authorization/authorization-context.service.js";
+
+import type {
+  AuthorizationContext,
+} from "../src/domains/authorization/authorization.types.js";
+
+const AUTHORIZED_CONTEXT:
+  AuthorizationContext = {
+  userId:
+    "00000000-0000-4000-8000-000000000101",
+
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 124
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 130
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 135
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        expect(
+          context.resolveMock
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 200
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+          });
+
+        expect(
+          response.statusCode
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 206
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 211
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+        ).toMatchObject({
+          error: {
+            code:
+              "AUTH_REQUIRED",
+
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 253
+          });
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 259
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 264
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          403
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 301
+          );
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              context.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Basic invalid",
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 307
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Basic invalid",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\admin-access.routes.test.ts
+LINE: 312
+              "GET",
+
+            url:
+              "/api/v1/admin/access",
+
+            headers: {
+              authorization:
+                "Basic invalid",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  AdminUserMetricsService,
+} from "../src/application/admin-metrics/admin-user-metrics.service.js";
+
+import type {
+  AuthorizationContextService,
+} from "../src/application/authorization/authorization-context.service.js";
+
+import type {
+  AuthorizationContext,
+  PlatformPermission,
+} from "../src/domains/authorization/authorization.types.js";
+
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 159
+          createUserMetricsService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService([
+                "admin.access",
+                "users.metrics.read",
+              ]),
+
+            adminUserMetricsService:
+              metrics.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 171
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/users/metrics",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 237
+          createUserMetricsService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService([
+                "admin.access",
+                "dashboard.read",
+              ]),
+
+            adminUserMetricsService:
+              metrics.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 249
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/dashboard/summary",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 311
+          createUserMetricsService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService([
+                "users.metrics.read",
+              ]),
+
+            adminUserMetricsService:
+              metrics.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 322
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/users/metrics",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 358
+          createUserMetricsService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService([
+                "admin.access",
+              ]),
+
+            adminUserMetricsService:
+              metrics.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\admin-metrics.routes.test.ts
+LINE: 369
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/admin/users/metrics",
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\authentication-cookie.test.ts
+LINE: 118
+        );
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/issue-production-cookie",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        const setCookieHeader =
+          normalizeSetCookieHeader(
+
+FILE: F:\Project\Poster\backend\tests\authentication-cookie.test.ts
+LINE: 220
+        );
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/issue-development-cookie",
+          });
+
+        const setCookieHeader =
+          normalizeSetCookieHeader(
+            response.headers[
+              "set-cookie"
+            ]
+          );
+
+        expect(
+
+FILE: F:\Project\Poster\backend\tests\authentication-cookie.test.ts
+LINE: 274
+        );
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/auth/read-cookie",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=opaque-incoming-refresh-token`,
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\authentication-cookie.test.ts
+LINE: 327
+        );
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/logout",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        const setCookieHeader =
+          normalizeSetCookieHeader(
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  LoginSessionService,
+} from "../src/application/authentication/login-session.service.js";
+
+import type {
+  SignupRegistrationService,
+} from "../src/application/authentication/signup-registration.service.js";
+
+import {
+  AuthenticationConflictError,
+  AuthenticationTokenExpiredError,
+  InvalidCredentialsError,
+} from "../src/domains/authentication/authentication.errors.js";
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 193
+          });
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+
+            loginSessionService:
+              context
+                .loginSessionService,
+          });
+
+        const response =
+          await app.inject({
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 208
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/login",
+
+            headers: {
+              "user-agent":
+                "Poster-Route-Test/1.0",
+            },
+
+            payload: {
+              email:
+                " PERSON@EXAMPLE.COM ",
+
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 394
+          createRouteTestContext();
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+
+            loginSessionService:
+              context
+                .loginSessionService,
+          });
+
+        const response =
+          await app.inject({
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 409
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/login",
+
+            payload: {
+              email:
+                "not-an-email",
+
+              password:
+                "",
+
+              unexpected:
+                true,
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 465
+          );
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+
+            loginSessionService:
+              context
+                .loginSessionService,
+          });
+
+        const response =
+          await app.inject({
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 480
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/login",
+
+            payload: {
+              email:
+                "person@example.com",
+
+              password:
+                "Incorrect-Password-2026!",
+            },
+          });
+
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 572
+          });
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 583
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup",
+
+            payload: {
+              email:
+                " person@example.com ",
+
+              password:
+                "Poster-Secure-Password-2026!",
+
+              fullName:
+                " Example Person ",
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 685
+          createRouteTestContext();
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 696
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup",
+
+            payload: {
+              email:
+                "not-an-email",
+
+              password:
+                "short",
+
+              fullName:
+                "",
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 776
+          });
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 787
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup/verify",
+
+            payload: {
+              email:
+                " PERSON@EXAMPLE.COM ",
+
+              code:
+                "123456",
+            },
+          });
+
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 870
+          );
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+          });
+
+        const signupResponse =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 881
+          });
+
+        const signupResponse =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup",
+
+            payload: {
+              email:
+                "person@example.com",
+
+              password:
+                "Poster-Secure-Password-2026!",
+
+              fullName:
+                "Example Person",
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 925
+        );
+
+        const verificationResponse =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup/verify",
+
+            payload: {
+              email:
+                "person@example.com",
+
+              code:
+                "123456",
+            },
+          });
+
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 968
+          createRouteTestContext();
+
+        app =
+          await buildApp({
+            signupRegistrationService:
+              context
+                .signupRegistrationService,
+
+            verifySignupEmail:
+              context
+                .verifySignupEmailMock,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+
+FILE: F:\Project\Poster\backend\tests\authentication.routes.test.ts
+LINE: 979
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/signup/verify",
+
+            payload: {
+              email:
+                "person@example.com",
+
+              code:
+                "12AB",
+            },
+          });
+
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  AdminCommercialRequestService,
+} from "../src/application/monetization/admin-commercial-request.service.js";
+
+import type {
+  ClientCommercialRequestService,
+} from "../src/application/monetization/client-commercial-request.service.js";
+
+import type {
+  AuthorizationContextService,
+} from "../src/application/authorization/authorization-context.service.js";
+
+import type {
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 338
+          createClientService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              authorizationService({
+                userId:
+                  USER_ID,
+
+                sessionId:
+                  "00000000-0000-4000-8000-000000002101",
+
+                email:
+                  "client@example.com",
+
+                fullName:
+                  "Client User",
+
+                accountStatus:
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 384
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              `/api/v1/client/organizations/${ORGANIZATION_ID}/advertising-requests`,
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+
+            payload: {
+              requestType:
+                "direct_sponsorship",
+
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 460
+          createClientService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              authorizationService({
+                userId:
+                  USER_ID,
+
+                sessionId:
+                  "00000000-0000-4000-8000-000000002201",
+
+                email:
+                  "viewer@example.com",
+
+                fullName:
+                  "Viewer",
+
+                accountStatus:
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 506
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              `/api/v1/client/organizations/${ORGANIZATION_ID}/advertising-requests`,
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+
+            payload: {
+              requestType:
+                "direct_sponsorship",
+
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 565
+          createAdminService();
+
+        app =
+          await buildApp({
+            authorizationContextService:
+              authorizationService({
+                userId:
+                  ADMIN_ID,
+
+                sessionId:
+                  "00000000-0000-4000-8000-000000002301",
+
+                email:
+                  "admin@getpostar.com",
+
+                fullName:
+                  "Poster Admin",
+
+                accountStatus:
+
+FILE: F:\Project\Poster\backend\tests\commercial-request.routes.test.ts
+LINE: 604
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              `/api/v1/admin/monetization/requests/${REQUEST_ID}/approve`,
+
+            headers: {
+              authorization:
+                "Bearer payload.signature",
+            },
+
+            payload: {
+              expectedRowVersion:
+                "1",
+
+
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+LINE: 13
+} from "vitest";
+
+import {
+  buildApp
+} from "../src/app.js";
+
+describe(
+  "Poster Backend health routes",
+  () => {
+    let app:
+      FastifyInstance | null =
+      null;
+
+    afterEach(
+      async () => {
+        if (app) {
+          await app.close();
+
+          app =
+
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+LINE: 38
+      "returns a healthy service response",
+      async () => {
+        app =
+          await buildApp();
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/health"
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+LINE: 41
+          await buildApp();
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/health"
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+LINE: 71
+      "returns a structured not-found response",
+      async () => {
+        app =
+          await buildApp();
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/unknown"
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          404
+        );
+
+FILE: F:\Project\Poster\backend\tests\health.test.ts
+LINE: 74
+          await buildApp();
+
+        const response =
+          await app.inject({
+            method:
+              "GET",
+
+            url:
+              "/api/v1/unknown"
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          404
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  PasswordResetService,
+} from "../src/application/authentication/password-reset.service.js";
+
+import {
+  AuthenticationTokenInvalidError,
+} from "../src/domains/authentication/authentication.errors.js";
+
+import {
+  AUTHENTICATION_REFRESH_COOKIE_NAME,
+  AUTHENTICATION_REFRESH_COOKIE_PATH,
+} from "../src/http/authentication-cookie.js";
+
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 115
+          createPasswordResetServiceMock();
+
+        app =
+          await buildApp({
+            passwordResetService:
+              passwordReset.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/request",
+
+            headers: {
+              "user-agent":
+                "Poster Route Test",
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 121
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/request",
+
+            headers: {
+              "user-agent":
+                "Poster Route Test",
+            },
+
+            payload: {
+              email:
+                " PERSON@Example.COM ",
+            },
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 174
+          createPasswordResetServiceMock();
+
+        app =
+          await buildApp({
+            passwordResetService:
+              passwordReset.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=old-refresh-token`,
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 180
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=old-refresh-token`,
+            },
+
+            payload: {
+              email:
+                "person@example.com",
+
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 270
+          createPasswordResetServiceMock();
+
+        app =
+          await buildApp({
+            passwordResetService:
+              passwordReset.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            payload: {
+              email:
+                "not-an-email",
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 276
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            payload: {
+              email:
+                "not-an-email",
+
+              code:
+                "12",
+
+              password:
+                "short",
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 328
+          );
+
+        app =
+          await buildApp({
+            passwordResetService:
+              passwordReset.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            payload: {
+              email:
+                "person@example.com",
+
+FILE: F:\Project\Poster\backend\tests\password-reset.routes.test.ts
+LINE: 334
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/password-reset/confirm",
+
+            payload: {
+              email:
+                "person@example.com",
+
+              code:
+                "999999",
+
+              password:
+                "Poster-New-Password-2026!",
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 14
+} from "vitest";
+
+import {
+  buildApp,
+} from "../src/app.js";
+
+import type {
+  SessionLifecycleService,
+} from "../src/application/authentication/session-lifecycle.service.js";
+
+import type {
+  AuthenticationAccessTokenService,
+} from "../src/domains/authentication/access-token.service.js";
+
+import {
+  AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER,
+  AUTHENTICATION_ACCESS_TOKEN_HEADER,
+} from "../src/domains/authentication/access-token.service.js";
+
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 200
+          createLifecycleService();
+
+        app =
+          await buildApp({
+            accessTokenService:
+              createAccessTokenService(),
+
+            sessionLifecycleService:
+              lifecycle.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/refresh",
+
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 209
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/refresh",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=current-refresh-token`,
+
+              "user-agent":
+                "Poster Route Test",
+            },
+          });
+
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 364
+          createLifecycleService();
+
+        app =
+          await buildApp({
+            accessTokenService:
+              createAccessTokenService(),
+
+            sessionLifecycleService:
+              lifecycle.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/refresh",
+          });
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 373
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/refresh",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          401
+        );
+
+        expect(
+          response.json()
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 419
+          createLifecycleService();
+
+        app =
+          await buildApp({
+            sessionLifecycleService:
+              lifecycle.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/logout",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=logout-refresh-token`,
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 425
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/logout",
+
+            headers: {
+              cookie:
+                `${AUTHENTICATION_REFRESH_COOKIE_NAME}=logout-refresh-token`,
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 479
+          createLifecycleService();
+
+        app =
+          await buildApp({
+            sessionLifecycleService:
+              lifecycle.service,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/logout",
+          });
+
+        expect(
+          response.statusCode
+
+FILE: F:\Project\Poster\backend\tests\session-lifecycle.routes.test.ts
+LINE: 485
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "POST",
+
+            url:
+              "/api/v1/auth/logout",
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          204
+        );
+
+        expect(
+          lifecycle.logout
+

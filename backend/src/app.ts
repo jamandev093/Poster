@@ -1,4 +1,4 @@
-﻿import cookie
+import cookie
   from "@fastify/cookie";
 
 import cors
@@ -12,14 +12,48 @@ import Fastify, {
 } from "fastify";
 
 import {
+  createAdminCopyrightService,
+  type AdminCopyrightService,
+} from "./application/copyright/index.js";
+
+import {
+  createAdminReportsService,
+  type AdminReportsService,
+} from "./application/reports/index.js";
+
+import {
+  createAdminSystemStatusService,
+  type AdminSystemStatusService,
+} from "./application/system-status/index.js";
+
+import {
   createAdminUserMetricsService,
   type AdminUserMetricsService,
 } from "./application/admin-metrics/admin-user-metrics.service.js";
 
 import {
+  createAdminContentService,
+  createAdminSourceService,
+  type AdminContentService,
+  type AdminSourceService,
+} from "./application/content-sources/index.js";
+
+import {
+  createAdminAudienceInsightsService,
+  type AdminAudienceInsightsService,
+} from "./application/audience-insights/admin-audience-insights.service.js";
+
+import {
   createAdminProfileService,
   type AdminProfileService,
 } from "./application/admin-profile/admin-profile.service.js";
+
+import {
+  createAdminAnalyticsService,
+  createAdminCampaignService,
+  type AdminAnalyticsService,
+  type AdminCampaignService,
+} from "./application/monetization/index.js";
 
 import {
   createAdminCommercialRequestService,
@@ -79,9 +113,16 @@ import {
 
 import {
   adminAccessRoutes,
+  adminAnalyticsRoutes,
+  adminCampaignRoutes,
   adminCommercialRequestRoutes,
+  adminCopyrightRoutes,
+  adminContentRoutes,
   adminMetricsRoutes,
   adminProfileRoutes,
+  adminReportsRoutes,
+  adminSourceRoutes,
+  adminSystemStatusRoutes,
   authenticationRoutes,
   clientCommercialRequestRoutes,
   healthRoutes,
@@ -89,11 +130,19 @@ import {
 } from "./routes/index.js";
 
 import {
+  adminAudienceInsightsRoutes,
+} from "./routes/admin-audience-insights.routes.js";
+
+import {
   createDevelopmentEmailDeliveryProvider,
   type EmailDeliveryProvider,
 } from "./services/email/index.js";
-
 export interface BuildAppOptions {
+  adminAnalyticsService?:
+    AdminAnalyticsService;
+  adminCampaignService?:
+    AdminCampaignService;
+
   adminCommercialRequestService?:
     AdminCommercialRequestService;
 
@@ -103,8 +152,26 @@ export interface BuildAppOptions {
   adminUserMetricsService?:
     AdminUserMetricsService;
 
+  adminAudienceInsightsService?:
+    AdminAudienceInsightsService;
+
+  adminContentService?:
+    AdminContentService;
+
+  adminSourceService?:
+    AdminSourceService;
+
   adminProfileService?:
     AdminProfileService;
+
+  adminCopyrightService?:
+    AdminCopyrightService;
+
+  adminReportsService?:
+    AdminReportsService;
+
+  adminSystemStatusService?:
+    AdminSystemStatusService;
 
   accessTokenService?:
     AuthenticationAccessTokenService;
@@ -177,6 +244,19 @@ export async function buildApp(
       requestIdHeader:
         "x-request-id",
     });
+
+  await app.register(
+    adminSystemStatusRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminSystemStatusService ??
+        createAdminSystemStatusService(),
+    }
+  );
 
   await app.register(
     cookie
@@ -373,6 +453,71 @@ export async function buildApp(
   );
 
   await app.register(
+    adminAudienceInsightsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminAudienceInsightsService ??
+        createAdminAudienceInsightsService(),
+    }
+  );
+
+  await app.register(
+    adminContentRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminContentService ??
+        createAdminContentService(),
+    }
+  );
+
+  await app.register(
+    adminSourceRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminSourceService ??
+        createAdminSourceService(),
+    }
+  );
+
+  await app.register(
+    adminCopyrightRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCopyrightService ??
+        createAdminCopyrightService(),
+    }
+  );
+
+  await app.register(
+    adminReportsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminReportsService ??
+        createAdminReportsService(),
+    }
+  );
+
+  await app.register(
     clientCommercialRequestRoutes,
     {
       prefix:
@@ -382,6 +527,31 @@ export async function buildApp(
         options
           .clientCommercialRequestService ??
         createClientCommercialRequestService(),
+    }
+  );
+
+  await app.register(
+    adminAnalyticsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminAnalyticsService ??
+        createAdminAnalyticsService(),
+    }
+  );
+  await app.register(
+    adminCampaignRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCampaignService ??
+        createAdminCampaignService(),
     }
   );
 
@@ -397,7 +567,6 @@ export async function buildApp(
         createAdminCommercialRequestService(),
     }
   );
-
   app.get(
     "/",
     async () => ({
@@ -414,5 +583,3 @@ export async function buildApp(
 
   return app;
 }
-
-

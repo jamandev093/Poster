@@ -26,7 +26,9 @@ export type PlatformRoleAssignmentStatus =
 export const PLATFORM_PERMISSIONS = [
   "admin.access",
   "dashboard.read",
+  "system.status.read",
   "users.metrics.read",
+  "users.audience_insights.read",
   "content.read",
   "content.manage",
   "sources.read",
@@ -39,6 +41,7 @@ export const PLATFORM_PERMISSIONS = [
   "monetization.requests.manage",
   "monetization.campaigns.read",
   "monetization.campaigns.manage",
+  "monetization.analytics.read",
   "audit.read",
 ] as const;
 

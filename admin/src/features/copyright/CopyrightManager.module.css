@@ -923,3 +923,325 @@
     padding: 16px;
   }
 }
+/* =========================================================
+   AUTHORITATIVE COPYRIGHT STATES
+   ========================================================= */
+
+.screenReaderStatus {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  border: 0;
+
+  clip: rect(0, 0, 0, 0);
+}
+
+.toolbar {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  border-bottom:
+    1px solid
+    var(--border);
+}
+
+.toolbar .filters {
+  flex: 1;
+
+  border-bottom: 0;
+}
+
+.refreshArea {
+  flex: 0 0 auto;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding-right: 16px;
+}
+
+.refreshArea span {
+  max-width: 250px;
+
+  color:
+    var(--placeholder);
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  line-height: 17px;
+
+  text-align: right;
+}
+
+.errorPanel {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding:
+    14px
+    16px;
+
+  border:
+    1px solid
+    rgb(220 38 38 / 0.22);
+
+  border-radius: 12px;
+
+  background:
+    rgb(254 242 242);
+}
+
+.errorPanel strong,
+.drawerError strong {
+  display: block;
+
+  color:
+    var(--text);
+
+  font-size: 13px;
+
+  font-weight: 650;
+
+  line-height: 19px;
+}
+
+.errorPanel p,
+.drawerError p {
+  margin:
+    3px
+    0
+    0;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 12px;
+
+  line-height: 18px;
+}
+
+.loadingState {
+  min-height: 260px;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 32px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+.drawerLoading {
+  flex: 1;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 32px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+.drawerError {
+  margin:
+    14px
+    18px
+    0;
+
+  padding:
+    12px
+    14px;
+
+  border:
+    1px solid
+    rgb(220 38 38 / 0.22);
+
+  border-radius: 10px;
+
+  background:
+    rgb(254 242 242);
+}
+
+.drawerError button {
+  margin-top: 10px;
+}
+
+.supportingInformation {
+  margin:
+    10px
+    0
+    0;
+
+  padding:
+    10px
+    12px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 10px;
+
+  color:
+    var(--text-secondary);
+
+  background:
+    var(--background);
+
+  font-size: 12px;
+
+  line-height: 19px;
+}
+
+.restoreBlocked {
+  align-self: center;
+
+  max-width: 300px;
+
+  color:
+    var(--warning);
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  line-height: 17px;
+
+  text-align: right;
+}
+
+.confirmError {
+  padding:
+    10px
+    12px;
+
+  border:
+    1px solid
+    rgb(220 38 38 / 0.22);
+
+  border-radius: 10px;
+
+  color:
+    var(--danger) !important;
+
+  background:
+    rgb(254 242 242);
+}
+
+.secondaryButton:disabled,
+.softDangerButton:disabled,
+.dangerButton:disabled,
+.primaryButton:disabled,
+.closeButton:disabled,
+.backdrop:disabled,
+.confirmBackdrop:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+.secondaryButton:focus-visible,
+.softDangerButton:focus-visible,
+.dangerButton:focus-visible,
+.primaryButton:focus-visible,
+.closeButton:focus-visible,
+.filter:focus-visible,
+.filterActive:focus-visible {
+  outline:
+    2px solid
+    var(--primary);
+
+  outline-offset: 2px;
+}
+
+@media (max-width: 820px) {
+  .toolbar {
+    align-items: stretch;
+
+    flex-direction: column;
+
+    gap: 0;
+  }
+
+  .refreshArea {
+    justify-content: space-between;
+
+    padding:
+      10px
+      14px;
+
+    border-top:
+      1px solid
+      var(--border);
+  }
+
+  .refreshArea span {
+    text-align: left;
+  }
+}
+
+@media (max-width: 680px) {
+  .errorPanel {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .errorPanel button {
+    width: 100%;
+  }
+
+  .refreshArea {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .refreshArea span {
+    max-width: none;
+  }
+
+  .restoreBlocked {
+    max-width: none;
+
+    text-align: left;
+  }
+}

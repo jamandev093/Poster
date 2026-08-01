@@ -1,0 +1,5380 @@
+﻿POSTER ADMIN FINAL AUDIT - STEP 8
+Code Structure, Duplication, Maintainability, Tests, and Technical Debt
+
+Generated: 2026-07-31 09:35:04
+
+============================================================
+1. LARGE SOURCE FILES
+============================================================
+
+
+File                                                                                              Lines SizeBytes
+----                                                                                              ----- ---------
+F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx                            2597     68067
+F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx                       1684     41569
+F:\Project\Poster\admin\src\app\globals.css                                                        1630     28323
+F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx                                1612     40694
+F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx                               1598     36754
+F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx                                    1557     40433
+F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx                     1472     36398
+F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx                             1415     34136
+F:\Project\Poster\admin\src\features\content\ContentManager.tsx                                    1375     32698
+F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx      1348     33721
+F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx                                    1345     32255
+F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx                    1247     33976
+F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx      1050     31128
+F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx                         893     20421
+F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx   875     21986
+F:\Project\Poster\admin\src\features\content\ContentManager.module.css                              822     17405
+F:\Project\Poster\admin\src\features\reports\ReportsManager.module.css                              781     17099
+F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx        743     17705
+F:\Project\Poster\admin\src\features\sources\SourcesManager.module.css                              727     15416
+F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx         700     17044
+F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx              697     14700
+F:\Project\Poster\admin\src\features\copyright\CopyrightManager.module.css                          651     13387
+F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts                              607     14026
+F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx       602     15605
+F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx              583     13628
+F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.module.css               575     11183
+F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx     571     14371
+F:\Project\Poster\admin\src\features\monetization\MonetizationManager.module.css                    566     10237
+F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.module.css                 545     10419
+F:\Project\Poster\admin\src\features\monetization\AffiliateManager.module.css                       531     10149
+
+
+
+
+============================================================
+2. VERY LARGE FILES REQUIRING REFACTOR REVIEW
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINES: 2597
+SIZE: 68067
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINES: 1375
+SIZE: 32698
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINES: 1612
+SIZE: 40694
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINES: 1247
+SIZE: 33976
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINES: 1415
+SIZE: 34136
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINES: 1598
+SIZE: 36754
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINES: 1472
+SIZE: 36398
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINES: 893
+SIZE: 20421
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINES: 1684
+SIZE: 41569
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINES: 1050
+SIZE: 31128
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINES: 1348
+SIZE: 33721
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINES: 875
+SIZE: 21986
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINES: 1557
+SIZE: 40433
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINES: 1345
+SIZE: 32255
+
+
+============================================================
+3. CLIENT COMPONENT INVENTORY
+============================================================
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionMediaField.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 1
+
+
+============================================================
+4. REACT STATE COMPLEXITY
+============================================================
+
+
+File                                                                                               UseState UseMemo UseEffect
+----                                                                                               -------- ------- ---------
+F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx                   10       1         1
+F:\Project\Poster\admin\src\features\content\ContentManager.tsx                                           8       4         0
+F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx                                           7       5         0
+F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx             7       1         0
+F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx         7       3         0
+F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx                                   7       0         1
+F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx             7       7         0
+F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx                            5       6         0
+F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx                              5       7         0
+F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx                                    5       6         0
+F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx                                      5       4         0
+F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx                                       4       3         0
+F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx                           4       1         0
+F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx                                           4       3         0
+F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx             3       1         0
+F:\Project\Poster\admin\src\features\users\UsersManager.tsx                                               2       0         1
+F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx              2       1         0
+F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx        1       0         0
+F:\Project\Poster\admin\src\components\admin\AdminShell.tsx                                               1       0         0
+F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx          1       0         0
+F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx                               1       1         0
+F:\Project\Poster\admin\src\features\monetization\MonetizationManager.tsx                                 1       1         0
+
+
+
+
+============================================================
+5. REPEATED DOMAIN HELPERS AND FORMATTERS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 303
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 449
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 602
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 47
+TEXT: function formatDate(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 68
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 94
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 30
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 58
+TEXT: function formatDate(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 75
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 242
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 263
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 271
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 339
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 305
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 369
+TEXT: function formatDate(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 391
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 442
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 254
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 275
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 283
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 335
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 289
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 297
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 181
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 205
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 251
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 27
+TEXT: function formatAmount(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 32
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 55
+TEXT: function currentTimestamp() {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 56
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 69
+TEXT: function createIdentifier(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 176
+TEXT: function formatAmount(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 181
+TEXT: return new Intl.NumberFormat(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 194
+TEXT: function formatCurrencyTotals(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 473
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 535
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 131
+TEXT: function statusLabel(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 204
+TEXT: return new Intl.DateTimeFormat(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 43
+TEXT: return new Intl.DateTimeFormat(
+
+
+============================================================
+6. REPEATED UI PATTERNS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1024
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2864
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 974
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 992
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 997
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1016
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1031
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1301
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1306
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1341
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1558
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1181
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1246
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1262
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1267
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1291
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1304
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1695
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1704
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1751
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1878
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1897
+TEXT: : styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 543
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1227
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 251
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 780
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 792
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 806
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 9
+TEXT: interface CommercialRequestDrawerProps {
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 111
+TEXT: export default function CommercialRequestDrawer(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 113
+TEXT: CommercialRequestDrawerProps
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 125
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 141
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 147
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 173
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 186
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 576
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 584
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 622
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 16
+TEXT: import CommercialRequestDrawer from "./CommercialRequestDrawer";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 734
+TEXT: <CommercialRequestDrawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 724
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 744
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 764
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1097
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1115
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1120
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1140
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1155
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1455
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1463
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1475
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1506
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1608
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1250
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1268
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1273
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1293
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1308
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1619
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1648
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1665
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1696
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1820
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 722
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 742
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 762
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1102
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1120
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1125
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1145
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1160
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1512
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1520
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1532
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1563
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1666
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 506
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 539
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 572
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 605
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 643
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 676
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 926
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 946
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 966
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 986
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1323
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1341
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1346
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1366
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1381
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1727
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1755
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1767
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1798
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1929
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 160
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 77
+TEXT: className={styles.closeButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 335
+TEXT: className={styles.secondaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 344
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 356
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 368
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 380
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 556
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 566
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1114
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1125
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1133
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1141
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1150
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1159
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1168
+TEXT: <SummaryCard
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1180
+TEXT: className={styles.searchField}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1202
+TEXT: className={styles.filterField}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1326
+TEXT: styles.statusBadge
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1412
+TEXT: className={styles.emptyState}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1431
+TEXT: className={styles.overlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1443
+TEXT: className={styles.drawer}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1487
+TEXT: styles.editorPanel
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1579
+TEXT: interface SummaryCardProps {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1585
+TEXT: function SummaryCard({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1589
+TEXT: }: SummaryCardProps) {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1592
+TEXT: className={styles.summaryCard}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 48
+TEXT: className={styles.closeButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 234
+TEXT: className={styles.secondaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 255
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 320
+TEXT: className={styles.secondaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 328
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 222
+TEXT: const closeOverlay = () => {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 391
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 419
+TEXT: <label className={styles.searchField}>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 436
+TEXT: <label className={styles.filterField}>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 587
+TEXT: <div className={styles.emptyState}>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 605
+TEXT: onClick={closeOverlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 609
+TEXT: className={styles.drawer}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 637
+TEXT: onClick={closeOverlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 654
+TEXT: onCancel={closeOverlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 660
+TEXT: onClose={closeOverlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 69
+TEXT: className={styles.closeButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 312
+TEXT: className={styles.secondaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 322
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 346
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 476
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 485
+TEXT: className={styles.primaryButton}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 366
+TEXT: const closeOverlay = () => {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 606
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 655
+TEXT: styles.searchField
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 676
+TEXT: styles.filterField
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 869
+TEXT: styles.emptyState
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 893
+TEXT: onClick={closeOverlay}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 898
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 933
+TEXT: closeOverlay
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 958
+TEXT: closeOverlay
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 974
+TEXT: closeOverlay
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 717
+TEXT: const closeDrawer =
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1158
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1188
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1220
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1245
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1255
+TEXT: closeDrawer
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1261
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1267
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1291
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1295
+TEXT: closeDrawer
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1304
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1594
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1631
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1662
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1802
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1819
+TEXT: : styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 929
+TEXT: styles.drawerLayer
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 947
+TEXT: styles.drawer
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 952
+TEXT: styles.drawerHeader
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 972
+TEXT: styles.closeButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 987
+TEXT: styles.drawerBody
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1177
+TEXT: styles.drawerFooter
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1187
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1198
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1213
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1227
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1374
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1473
+TEXT: styles.secondaryButton
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1485
+TEXT: styles.primaryButton
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 218
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 238
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 258
+TEXT: styles.summaryCard
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 404
+TEXT: className={`${styles.statusBadge} ${statusClass(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 249
+TEXT: styles.metricCard
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 293
+TEXT: styles.metricCard
+
+
+============================================================
+7. REPEATED CSS VALUES AND TOKENS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\app\globals.css
+LINE: 7
+TEXT: --primary: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\app\globals.css
+LINE: 10
+TEXT: --background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\app\globals.css
+LINE: 13
+TEXT: --border: #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\app\globals.css
+LINE: 15
+TEXT: --text: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\app\globals.css
+LINE: 16
+TEXT: --text-secondary: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.module.css
+LINE: 157
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.module.css
+LINE: 399
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.module.css
+LINE: 813
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.module.css
+LINE: 981
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.module.css
+LINE: 411
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.module.css
+LINE: 356
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.module.css
+LINE: 465
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 25
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 35
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 47
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 48
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 57
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 69
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 73
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 80
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 86
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 116
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 122
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 134
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 135
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 147
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 153
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 158
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 165
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 192
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 196
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 197
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 215
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 233
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 238
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 244
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 284
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 294
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 299
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 311
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 321
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 325
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 335
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 349
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.module.css
+LINE: 365
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 14
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 19
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 28
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 36
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 49
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 54
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 55
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 60
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 61
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 72
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 83
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 127
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 128
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 136
+TEXT: background: #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 137
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 154
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 160
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 167
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 172
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 190
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 263
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 280
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 281
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 293
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 299
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 300
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.module.css
+LINE: 306
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 9
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 25
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 54
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 58
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 59
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 78
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 92
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 98
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 122
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 128
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 129
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.module.css
+LINE: 135
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 4
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 17
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 26
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 34
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 47
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 48
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 49
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 65
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 66
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 71
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 79
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 87
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 95
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 96
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 105
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 136
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 140
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 141
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 147
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 172
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 176
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 202
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 215
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 259
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 260
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 277
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 283
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 323
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 328
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 337
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 349
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 354
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.module.css
+LINE: 355
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 13
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 18
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 27
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 34
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 45
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 46
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 86
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 91
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 108
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 118
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 161
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 171
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 178
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 209
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 210
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.module.css
+LINE: 216
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 9
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 25
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 54
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 58
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 59
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 78
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 108
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 114
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 115
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.module.css
+LINE: 121
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 25
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 35
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 47
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 48
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 58
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 69
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 73
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 80
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 86
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 98
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 109
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 113
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 114
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 124
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 151
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 160
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 165
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 171
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 190
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 194
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 199
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 217
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 224
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 276
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 282
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 308
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 325
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 330
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 339
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 350
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 351
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.module.css
+LINE: 370
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 13
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 18
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 27
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 34
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 46
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 47
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 93
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 104
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 108
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 116
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 122
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 127
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 144
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 154
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 206
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 217
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 224
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 255
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 256
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 262
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 288
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 292
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.module.css
+LINE: 307
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 9
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 25
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 55
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 59
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 60
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 79
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 124
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 125
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 139
+TEXT: accent-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 156
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 162
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 163
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.module.css
+LINE: 169
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 18
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 25
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 35
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 47
+TEXT: background: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 48
+TEXT: border: 1px solid #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 58
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 69
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 77
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 81
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 88
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 94
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 106
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 117
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 121
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 122
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 132
+TEXT: border-color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 159
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 164
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 169
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 175
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 194
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 198
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 203
+TEXT: background: #f8fafc;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 221
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 230
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 286
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 292
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 317
+TEXT: border-left: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 334
+TEXT: border-bottom: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 339
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 348
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 359
+TEXT: border: 1px solid #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 360
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.module.css
+LINE: 380
+TEXT: border-top: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 15
+TEXT: color: #5b86e5;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 24
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 32
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 54
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 72
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 80
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 86
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 103
+TEXT: border: 1px solid #e2e8f0;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 109
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 118
+TEXT: color: #0f172a;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 124
+TEXT: color: #64748b;
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.module.css
+LINE: 136
+TEXT: border-radius: 6px;
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.module.css
+LINE: 122
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.module.css
+LINE: 530
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.module.css
+LINE: 157
+TEXT: border-color: #cbd5e1;
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.module.css
+LINE: 458
+TEXT: border-radius: 8px;
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.module.css
+LINE: 817
+TEXT: border-color: #cbd5e1;
+
+
+============================================================
+8. TYPE SAFETY ESCAPES
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2823
+TEXT: decline any campaign.
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 870
+TEXT: and provide any useful references.
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 436
+TEXT: Review Client submissions before any campaign is created.
+
+
+============================================================
+9. TEST FILE INVENTORY
+============================================================
+
+
+============================================================
+10. TEST TOOLING AND SCRIPTS
+============================================================
+
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "typescript": "^5"
+  }
+}
+
+============================================================
+11. MOCK AND PROTOTYPE DEPENDENCY INVENTORY
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 86
+TEXT: const INITIAL_FORM: FormState = {
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 210
+TEXT: INITIAL_FORM
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 826
+TEXT: INITIAL_FORM
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1017
+TEXT: frontend demonstration.
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 62
+TEXT: const INITIAL_CONTENT: ContentRecord[] = [
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 340
+TEXT: INITIAL_CONTENT
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 363
+TEXT: INITIAL_CONTENT.some(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 98
+TEXT: const INITIAL_CASES: CopyrightCase[] = [
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 623
+TEXT: INITIAL_CASES
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 48
+TEXT: const INITIAL_FORM: FormState = {
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 239
+TEXT: INITIAL_FORM
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 375
+TEXT: INITIAL_FORM
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 3
+TEXT: } from "../monetization.mock";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 53
+TEXT: const INITIAL_AFFILIATES: AffiliateRecord[] = [
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 360
+TEXT: INITIAL_AFFILIATES
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 758
+TEXT: Demonstration conversion data
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 778
+TEXT: Demonstration affiliate revenue
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 15
+TEXT: } from "./monetization.mock";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 40
+TEXT: const INITIAL_AUDIT_BY_CAMPAIGN:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 246
+TEXT: const INITIAL_CAMPAIGNS:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 267
+TEXT: INITIAL_AUDIT_BY_CAMPAIGN[
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 281
+TEXT: "Current demonstration state",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 514
+TEXT: INITIAL_CAMPAIGNS
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 543
+TEXT: INITIAL_CAMPAIGNS.some(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 56
+TEXT: const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 356
+TEXT: INITIAL_SPONSORSHIPS
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 756
+TEXT: Demonstration contract values
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationManager.tsx
+LINE: 13
+TEXT: } from "./requests/commercial-request.mock-service";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 62
+TEXT: const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 272
+TEXT: INITIAL_PROMOTIONS
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 960
+TEXT: Demonstration exposure data
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 980
+TEXT: Demonstration engagement
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\business-identity.mock.ts
+LINE: 5
+TEXT: export const INITIAL_BUSINESS_IDENTITY:
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 9
+TEXT: INITIAL_BUSINESS_IDENTITY,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 10
+TEXT: } from "./business-identity.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 76
+TEXT: INITIAL_BUSINESS_IDENTITY
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 5
+TEXT: export const INITIAL_EXTERNAL_EARNINGS:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 82
+TEXT: "Demonstration confirmed sale reported by the external platform.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 202
+TEXT: "Demonstration payout received and manually reconciled.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 339
+TEXT: "Demonstration subscription awaiting external confirmation.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 442
+TEXT: "Demonstration reversed commission retained for audit history.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 21
+TEXT: INITIAL_EXTERNAL_EARNINGS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 22
+TEXT: } from "./external-earning.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 25
+TEXT: INITIAL_EXTERNAL_PROGRAMS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 26
+TEXT: } from "../external-programs/external-program.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 29
+TEXT: INITIAL_EXTERNAL_PROMOTIONS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 30
+TEXT: } from "../external-promotions/external-promotion.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 271
+TEXT: INITIAL_EXTERNAL_EARNINGS
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 319
+TEXT: INITIAL_EXTERNAL_PROGRAMS
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 338
+TEXT: INITIAL_EXTERNAL_PROMOTIONS
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 5
+TEXT: export const INITIAL_EXTERNAL_PROGRAMS:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 41
+TEXT: "Demonstration record. Replace with a real external program after registration.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 17
+TEXT: INITIAL_EXTERNAL_PROGRAMS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 18
+TEXT: } from "./external-program.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 103
+TEXT: >(INITIAL_EXTERNAL_PROGRAMS);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 5
+TEXT: export const INITIAL_EXTERNAL_PROMOTIONS:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 32
+TEXT: "A demonstration external affiliate promotion selected and managed by Poster Admin.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 76
+TEXT: "Demonstration promotion. Replace with a real approved product or service.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 146
+TEXT: "A demonstration subscription offer prepared for a future scheduled promotion.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 189
+TEXT: "Scheduled demonstration record.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 9
+TEXT: INITIAL_EXTERNAL_PROGRAMS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 10
+TEXT: } from "../external-programs/external-program.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 22
+TEXT: INITIAL_EXTERNAL_PROMOTIONS,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 23
+TEXT: } from "./external-promotion.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 162
+TEXT: >(INITIAL_EXTERNAL_PROMOTIONS);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 211
+TEXT: INITIAL_EXTERNAL_PROGRAMS
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 238
+TEXT: INITIAL_EXTERNAL_PROGRAMS.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 3
+TEXT: import styles from "./OperationsFoundation.module.css";
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 5
+TEXT: interface OperationsFoundationProps {
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 47
+TEXT: export default function OperationsFoundation({
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 52
+TEXT: }: OperationsFoundationProps) {
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 117
+TEXT: Workspace foundation ready
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 128
+TEXT: Foundation
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 71
+TEXT: const INITIAL_REPORTS:
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 556
+TEXT: INITIAL_REPORTS
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 52
+TEXT: const INITIAL_SOURCES: SourceRecord[] = [
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 234
+TEXT: INITIAL_SOURCES
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 255
+TEXT: INITIAL_SOURCES.some(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 16
+TEXT: const DEMO_LIVE_USERS =
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 59
+TEXT: DEMO_LIVE_USERS
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 75
+TEXT: * Keep the current demonstration count
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 93
+TEXT: DEMO_LIVE_USERS
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 357
+TEXT: demonstration data. The backend
+
+
+============================================================
+12. DIRECT LOCAL STATE MUTATION PATTERNS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 299
+TEXT: setForm(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 309
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 330
+TEXT: ? form.placements.filter(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 363
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 380
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 401
+TEXT: setPrimaryImage(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 405
+TEXT: setPrimaryPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 411
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 432
+TEXT: setPrimaryImage(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 436
+TEXT: setPrimaryPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 456
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 473
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 494
+TEXT: setBrandLogo(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 498
+TEXT: setLogoPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 504
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 525
+TEXT: setBrandLogo(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 529
+TEXT: setLogoPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 754
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 796
+TEXT: setSubmittedId(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 825
+TEXT: setForm(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 829
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 833
+TEXT: setPrimaryImage(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 837
+TEXT: setPrimaryPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 841
+TEXT: setBrandLogo(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 845
+TEXT: setLogoPreview(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 849
+TEXT: setSubmittedId(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1836
+TEXT: {CTA_OPTIONS.map(
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2361
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 409
+TEXT: return records.filter(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 488
+TEXT: records.filter(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 495
+TEXT: records.filter(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 511
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 515
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 521
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 523
+TEXT: setPreventReimport(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 532
+TEXT: setRemoveTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 536
+TEXT: setRemoveNote("");
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 538
+TEXT: setPreventReimport(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 551
+TEXT: setRecords(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 553
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 620
+TEXT: setRecords(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 622
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 736
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 765
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 782
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 839
+TEXT: {visibleRecords.map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 855
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 984
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1020
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1257
+TEXT: {selectedRecord.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1329
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1450
+TEXT: {REMOVAL_REASONS.map(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1473
+TEXT: setRemoveReason(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1508
+TEXT: setRemoveNote(
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1529
+TEXT: setPreventReimport(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 663
+TEXT: return cases.filter(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 695
+TEXT: cases.filter(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 702
+TEXT: cases.filter(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 709
+TEXT: cases.filter(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 729
+TEXT: setCases(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 731
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 884
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 891
+TEXT: setSelectedCaseId(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 895
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 983
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 998
+TEXT: setActiveFilter(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1035
+TEXT: visibleCases.map(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1184
+TEXT: setSelectedCaseId(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1201
+TEXT: setSelectedCaseId(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1205
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1219
+TEXT: setSelectedCaseId(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1223
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1431
+TEXT: {selectedCase.verificationChecks.map(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1651
+TEXT: {selectedCase.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1707
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1722
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1736
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1754
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1782
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1881
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 290
+TEXT: setForm(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 297
+TEXT: setValidated(false);
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 298
+TEXT: setLocalReference(null);
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 300
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 331
+TEXT: setErrors(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 341
+TEXT: setValidated(false);
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 361
+TEXT: setLocalReference(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 365
+TEXT: setValidated(true);
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 374
+TEXT: setForm(
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 378
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 379
+TEXT: setValidated(false);
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 380
+TEXT: setLocalReference(null);
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 52
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 65
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionCreateAction.tsx
+LINE: 77
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 49
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 65
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditAction.tsx
+LINE: 80
+TEXT: setEditorOpen(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 119
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 140
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 174
+TEXT: setSubmitted(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 370
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 399
+TEXT: ? draft.placements.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 453
+TEXT: {props.detail.revisions.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 185
+TEXT: setLoading(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 189
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 194
+TEXT: setRequests(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 208
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 215
+TEXT: setLoading(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 231
+TEXT: window.setTimeout(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 253
+TEXT: requests.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 274
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 287
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 294
+TEXT: setSelected(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 298
+TEXT: setNote(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 305
+TEXT: setCampaignName(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 313
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 333
+TEXT: setBusy(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 337
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 386
+TEXT: setSelected(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 402
+TEXT: setError(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 409
+TEXT: setBusy(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 481
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 495
+TEXT: setStatus(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 531
+TEXT: setType(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 635
+TEXT: {requests.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 754
+TEXT: setSelected(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 403
+TEXT: return affiliates.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 486
+TEXT: affiliates.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 495
+TEXT: affiliates.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 504
+TEXT: affiliates.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 513
+TEXT: affiliates.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 530
+TEXT: affiliates.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 548
+TEXT: affiliates.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 571
+TEXT: setAffiliates(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 575
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 657
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 676
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 805
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 844
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 861
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 938
+TEXT: {visibleAffiliates.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 954
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1048
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1107
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1144
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1411
+TEXT: {selectedAffiliate.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1550
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 1611
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 248
+TEXT: campaignRecords.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 348
+TEXT: .map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 572
+TEXT: return campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 671
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 680
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 689
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 698
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 707
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 716
+TEXT: campaigns.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 738
+TEXT: setCampaigns(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 742
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 846
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 853
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 872
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 950
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 999
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1016
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1081
+TEXT: {visibleCampaigns.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1097
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1191
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1260
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1297
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 1573
+TEXT: {selectedCampaign.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 399
+TEXT: return sponsorships.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 482
+TEXT: sponsorships.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 491
+TEXT: sponsorships.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 500
+TEXT: sponsorships.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 509
+TEXT: sponsorships.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 528
+TEXT: setSponsorships(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 532
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 614
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 633
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 642
+TEXT: .filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 649
+TEXT: .reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 666
+TEXT: sponsorships.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 803
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 842
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 859
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 928
+TEXT: {visibleSponsorships.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 951
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1052
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1112
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1149
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1468
+TEXT: {selectedSponsorship.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1607
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 1669
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 468
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 484
+TEXT: setRange(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 764
+TEXT: {snapshot.placements.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationAnalytics.tsx
+LINE: 895
+TEXT: {snapshot.campaigns.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationManager.tsx
+LINE: 68
+TEXT: setWorkspace(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\MonetizationManager.tsx
+LINE: 91
+TEXT: setWorkspace(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 315
+TEXT: return promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 400
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 409
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 418
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 427
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 436
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 453
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 471
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 489
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 601
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 610
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 678
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 682
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 765
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 769
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 851
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 870
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1027
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1071
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1088
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1161
+TEXT: {visiblePromotions.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1177
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1273
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1333
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1370
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1683
+TEXT: {selectedPromotion.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1871
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1932
+TEXT: setEndTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 111
+TEXT: const completed = checks.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 128
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 133
+TEXT: setSavedMessage(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 195
+TEXT: record.properties.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 234
+TEXT: {sections.map((section) => (
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 244
+TEXT: setActiveSection(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 269
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 286
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 304
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 320
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 336
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 353
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 369
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 386
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 403
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 421
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 450
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 468
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 486
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 503
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 520
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 538
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 557
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 579
+TEXT: {record.properties.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 623
+TEXT: setRecord(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 627
+TEXT: current.properties.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 672
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 690
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 709
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 727
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 744
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 762
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 780
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 809
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 827
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 844
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 861
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 881
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 899
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 917
+TEXT: setRecord((current) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 307
+TEXT: {earning.auditHistory.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 102
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 147
+TEXT: {programs.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 188
+TEXT: {matchingPromotions.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 741
+TEXT: {options.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 320
+TEXT: .filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 325
+TEXT: .map((program) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 339
+TEXT: .map((promotion) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 368
+TEXT: approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 382
+TEXT: promotionOptions.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 399
+TEXT: return earnings.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 458
+TEXT: earnings.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 471
+TEXT: .filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 479
+TEXT: .reduce(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 535
+TEXT: earnings.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 556
+TEXT: earnings.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 567
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 571
+TEXT: setSelectedEarningId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 575
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 579
+TEXT: setDraft({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 583
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 585
+TEXT: setSelectedEarningId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 589
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 597
+TEXT: setSelectedEarningId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 601
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 603
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 611
+TEXT: setSelectedEarningId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 615
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 619
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 621
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 632
+TEXT: setErrors(nextErrors);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 780
+TEXT: setEarnings(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 787
+TEXT: setSelectedEarningId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 791
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 803
+TEXT: setEarnings(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 805
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 944
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 968
+TEXT: setErrors({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 988
+TEXT: setDraft({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 998
+TEXT: setErrors({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1015
+TEXT: setDraft({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1023
+TEXT: setErrors({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1034
+TEXT: setEarnings(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1036
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1194
+TEXT: setSearchQuery(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1209
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1266
+TEXT: {filteredEarnings.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1542
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1551
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1561
+TEXT: setWorkspaceMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramDetails.tsx
+LINE: 206
+TEXT: {program.auditHistory.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 405
+TEXT: {options.map((option) => (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 151
+TEXT: return programs.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 187
+TEXT: programs.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 193
+TEXT: programs.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 201
+TEXT: setDraft({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 205
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 206
+TEXT: setSelectedProgramId(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 207
+TEXT: setEditorMode("create");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 213
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 217
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 218
+TEXT: setSelectedProgramId(program.id);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 219
+TEXT: setEditorMode("edit");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 223
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 224
+TEXT: setSelectedProgramId(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 225
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 232
+TEXT: setErrors(nextErrors);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 266
+TEXT: setPrograms((current) => [
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 271
+TEXT: setSelectedProgramId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 275
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 287
+TEXT: setPrograms((current) =>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 288
+TEXT: current.map((program) => {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 324
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 337
+TEXT: setPrograms((current) =>
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 338
+TEXT: current.map((program) => {
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 429
+TEXT: setSearch(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 442
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 515
+TEXT: {visiblePrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 570
+TEXT: setSelectedProgramId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 574
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 244
+TEXT: .map(placementLabel)
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionDetails.tsx
+LINE: 284
+TEXT: {promotion.auditHistory.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 74
+TEXT: ? draft.placements.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 121
+TEXT: {approvedPrograms.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 377
+TEXT: {PLACEMENT_OPTIONS.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 604
+TEXT: {options.map((option) => (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 212
+TEXT: .filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 217
+TEXT: .map((program) => ({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 238
+TEXT: INITIAL_EXTERNAL_PROGRAMS.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 253
+TEXT: return promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 278
+TEXT: .map(placementLabel)
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 301
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 307
+TEXT: promotions.filter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 314
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 322
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 330
+TEXT: promotions.reduce(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 338
+TEXT: setDraft({
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 346
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 347
+TEXT: setSelectedPromotionId(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 348
+TEXT: setEditorMode("create");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 355
+TEXT: setDraft(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 359
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 360
+TEXT: setSelectedPromotionId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 363
+TEXT: setEditorMode("edit");
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 367
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 368
+TEXT: setSelectedPromotionId(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 369
+TEXT: setErrors({});
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 378
+TEXT: setErrors(nextErrors);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 436
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 443
+TEXT: setSelectedPromotionId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 447
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 459
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 461
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 516
+TEXT: setEditorMode(null);
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 531
+TEXT: setPromotions(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 533
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 667
+TEXT: setSearch(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 684
+TEXT: setStatusFilter(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 766
+TEXT: {visiblePromotions.map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 802
+TEXT: .map(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 848
+TEXT: setSelectedPromotionId(
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 852
+TEXT: setEditorMode(
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 73
+TEXT: {areas.map((area) => {
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 596
+TEXT: return reports.filter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 632
+TEXT: reports.filter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 641
+TEXT: reports.filter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 650
+TEXT: reports.filter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 672
+TEXT: setReports(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 676
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 693
+TEXT: setSelectedReportId(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 697
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 708
+TEXT: setSelectedReportId(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 712
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 719
+TEXT: setSelectedReportId(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 723
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 824
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 943
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 958
+TEXT: setActiveFilter(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 993
+TEXT: visibleReports.map(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1550
+TEXT: {selectedReport.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1620
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1634
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1651
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1665
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1703
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1805
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 290
+TEXT: return sources.filter(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 379
+TEXT: sources.filter(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 386
+TEXT: sources.filter(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 393
+TEXT: sources.filter(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 409
+TEXT: setSources(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 411
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 469
+TEXT: setUnblockTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 484
+TEXT: setBlockTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 488
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 495
+TEXT: setBlockTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 499
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 517
+TEXT: setSources(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 519
+TEXT: current.map(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 555
+TEXT: setUnblockTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 650
+TEXT: setQuery(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 684
+TEXT: ).map(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 701
+TEXT: setFilter(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 762
+TEXT: {visibleSources.map(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 778
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 939
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 976
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1133
+TEXT: {selectedSource.audit.map(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1230
+TEXT: setUnblockTargetId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1234
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1255
+TEXT: setSelectedId(
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 1332
+TEXT: setRemoveExistingContent(
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 165
+TEXT: services.filter(
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 172
+TEXT: services.filter(
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 314
+TEXT: {groups.map(
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 349
+TEXT: {group.services.map(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 86
+TEXT: * setLiveUsers(data.liveUsers);
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 92
+TEXT: setLiveUsers(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 96
+TEXT: setLastUpdated(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 104
+TEXT: window.setTimeout(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 110
+TEXT: window.setInterval(
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 240
+TEXT: {userMetrics.map(
+
+
+============================================================
+13. COMPONENT EXPORT AND BARREL FILE INVENTORY
+============================================================
+
+
+============================================================
+14. CROSS-FEATURE IMPORTS
+============================================================
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 3
+TEXT: } from "../monetization.mock";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.mock-service.ts
+LINE: 7
+TEXT: } from "../monetization.types";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\commercial-request.types.ts
+LINE: 5
+TEXT: } from "../monetization.types";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 14
+TEXT: } from "../monetization.types";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 26
+TEXT: } from "../external-programs/external-program.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 30
+TEXT: } from "../external-promotions/external-promotion.mock";
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 10
+TEXT: } from "../external-programs/external-program.mock";
+
+
+============================================================
+15. TODO-LIKE USER-FACING COPY
+============================================================
+
+FILE: F:\Project\Poster\admin\src\components\admin\AdminShell.tsx
+LINE: 356
+TEXT: Platform services pending
+
+FILE: F:\Project\Poster\admin\src\components\admin\SimplePlaceholderPage.tsx
+LINE: 5
+TEXT: export default function SimplePlaceholderPage({ title, description, note }: Props) {
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 787
+TEXT: direct_sponsorship -> Sponsorship pending requests
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 788
+TEXT: affiliate -> Affiliate pending partnerships
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1001
+TEXT: styles.pendingNotice
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1017
+TEXT: frontend demonstration.
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1179
+TEXT: placeholder="Example Company"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1216
+TEXT: placeholder="Full name"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1254
+TEXT: placeholder="name@company.com"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1292
+TEXT: placeholder="https://company.com"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1508
+TEXT: placeholder="Professional Skills Campaign"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1546
+TEXT: placeholder="https://company.com/campaign"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1585
+TEXT: placeholder="Describe the product, service, learning resource, event, offer, or campaign and why it is relevant to Poster users."
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1651
+TEXT: placeholder="Build your cloud skills"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1708
+TEXT: placeholder="Write the short promotional copy that should appear with the campaign."
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 1766
+TEXT: placeholder="Optional supporting information for the campaign."
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2091
+TEXT: placeholder="Describe what the campaign image shows"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2162
+TEXT: placeholder="https://company.com/campaign"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2201
+TEXT: placeholder="https://company.com/terms"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2243
+TEXT: placeholder="https://partner.com/offer?affiliate=poster"
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2317
+TEXT: placeholder="Example: software developers, students, AI, cloud computing, professional certifications..."
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2557
+TEXT: placeholder={
+
+FILE: F:\Project\Poster\admin\src\features\advertise\AdvertiseRequestForm.tsx
+LINE: 2589
+TEXT: placeholder="Add campaign context, compliance information, partnership details, or anything else Poster should review."
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 731
+TEXT: placeholder="Search ID, title, publisher or URL..."
+
+FILE: F:\Project\Poster\admin\src\features\content\ContentManager.tsx
+LINE: 1504
+TEXT: placeholder="Add a short internal note..."
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 39
+TEXT: | "pending"
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 543
+TEXT: return "pending";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 568
+TEXT: return "pending";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 581
+TEXT: case "pending":
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 582
+TEXT: return "Pending";
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 646
+TEXT: pendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 647
+TEXT: setPendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 747
+TEXT: !pendingAction
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 753
+TEXT: pendingAction;
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 884
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 895
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1205
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1223
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1707
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1722
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1736
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1754
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1769
+TEXT: pendingAction ? (
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1782
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1808
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1811
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1814
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1853
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1881
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1892
+TEXT: pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright\CopyrightManager.tsx
+LINE: 1894
+TEXT: pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 653
+TEXT: placeholder="Example Media Ltd."
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 678
+TEXT: placeholder="Full legal name"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 704
+TEXT: placeholder="rights@example.com"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 729
+TEXT: placeholder="https://example.com"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 787
+TEXT: placeholder="CNT-2001"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 817
+TEXT: placeholder="https://poster.example/content/..."
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 844
+TEXT: placeholder="https://publisher.example/original-work"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 935
+TEXT: placeholder="Example: RIGHTS-2026-1042"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 961
+TEXT: placeholder="Explain the rights issue, why you believe the affected content should be reviewed, and the action you are requesting."
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 983
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1130
+TEXT: placeholder="Full legal name"
+
+FILE: F:\Project\Poster\admin\src\features\copyright-request\CopyrightRequestForm.tsx
+LINE: 1201
+TEXT: Pending
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 289
+TEXT: placeholder="Example: Poster Career Discovery"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 325
+TEXT: placeholder="Explain why Poster is running this promotion."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 545
+TEXT: placeholder="Discover something valuable"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 581
+TEXT: placeholder="Describe the promoted Poster experience."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 619
+TEXT: placeholder="Explore now"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 653
+TEXT: placeholder="https://getpostar.com/..."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\poster-promotion\PosterPromotionEditor.tsx
+LINE: 734
+TEXT: styles.previewPlaceholder
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 120
+TEXT: "pending_review";
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 540
+TEXT: placeholder="Required for changes or rejection."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestDrawer.tsx
+LINE: 647
+TEXT: ? "Waiting for the Client to revise and resubmit this request. Admin actions will return when its status becomes Pending review."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 116
+TEXT: "pending_review"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 252
+TEXT: pending:
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 258
+TEXT: "pending_review"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 449
+TEXT: counts.pending
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 476
+TEXT: placeholder="Search request, organization or campaign…"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 506
+TEXT: <option value="pending_review">
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 507
+TEXT: Pending review
+
+FILE: F:\Project\Poster\admin\src\features\monetization\requests\CommercialRequestsPanel.tsx
+LINE: 719
+TEXT: "pending_review"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 758
+TEXT: Demonstration conversion data
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 778
+TEXT: Demonstration affiliate revenue
+
+FILE: F:\Project\Poster\admin\src\features\monetization\AffiliateManager.tsx
+LINE: 800
+TEXT: placeholder="Search campaign ID, partner or offer..."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 129
+TEXT: "Programmatic advertising remains disabled for initial release",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 281
+TEXT: "Current demonstration state",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\CampaignsPanel.tsx
+LINE: 945
+TEXT: placeholder="Search campaign ID, request ID, name or partner..."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 756
+TEXT: Demonstration contract values
+
+FILE: F:\Project\Poster\admin\src\features\monetization\DirectSponsorshipManager.tsx
+LINE: 798
+TEXT: placeholder="Search campaign ID, advertiser or campaign..."
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.mock.ts
+LINE: 15
+TEXT: "pending_review",
+
+FILE: F:\Project\Poster\admin\src\features\monetization\monetization.types.ts
+LINE: 20
+TEXT: | "pending_review"
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 960
+TEXT: Demonstration exposure data
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 980
+TEXT: Demonstration engagement
+
+FILE: F:\Project\Poster\admin\src\features\monetization\PosterPromotionManager.tsx
+LINE: 1022
+TEXT: placeholder="Search campaign ID or promotion..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 302
+TEXT: placeholder="Private limited, LLP, sole proprietor..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 555
+TEXT: placeholder="Optional until real analytics are available"
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1023
+TEXT: placeholder?: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1031
+TEXT: placeholder,
+
+FILE: F:\Project\Poster\admin\src\features\operations\business-identity\BusinessIdentityManager.tsx
+LINE: 1041
+TEXT: placeholder={placeholder}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 14
+TEXT: value: "pending",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.constants.ts
+LINE: 15
+TEXT: label: "Pending",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 82
+TEXT: "Demonstration confirmed sale reported by the external platform.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 202
+TEXT: "Demonstration payout received and manually reconciled.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 298
+TEXT: "pending",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 339
+TEXT: "Demonstration subscription awaiting external confirmation.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 356
+TEXT: "External earning record created manually with Pending status.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.mock.ts
+LINE: 442
+TEXT: "Demonstration reversed commission retained for audit history.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.types.ts
+LINE: 2
+TEXT: | "pending"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\external-earning.validation.ts
+LINE: 22
+TEXT: status: "pending",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningDetails.tsx
+LINE: 341
+TEXT: {earning.status === "pending" ? (
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 233
+TEXT: placeholder="Optional"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 247
+TEXT: placeholder="Optional until paid"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 261
+TEXT: placeholder="Statement, report or batch reference"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 275
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 377
+TEXT: placeholder="INR"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 601
+TEXT: placeholder?: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 610
+TEXT: placeholder,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 621
+TEXT: placeholder={placeholder}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningEditor.tsx
+LINE: 684
+TEXT: "type" | "placeholder"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 534
+TEXT: pending:
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 538
+TEXT: "pending" ||
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1136
+TEXT: summary.pending
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1138
+TEXT: description="Pending or confirmed records"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1192
+TEXT: placeholder="Conversion, order, payout, program or promotion"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1219
+TEXT: <option value="pending">
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-earnings\ExternalEarningsManager.tsx
+LINE: 1220
+TEXT: Pending
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\external-program.mock.ts
+LINE: 41
+TEXT: "Demonstration record. Replace with a real external program after registration.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 118
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 129
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 151
+TEXT: placeholder="Publisher ID, store ID, partner ID..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 163
+TEXT: placeholder="Optional until issued"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 199
+TEXT: placeholder="Poster business bank account"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 212
+TEXT: placeholder="INR"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 224
+TEXT: placeholder="1,000 or $100"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 341
+TEXT: placeholder?: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 350
+TEXT: placeholder,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramEditor.tsx
+LINE: 361
+TEXT: placeholder={placeholder}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-programs\ExternalProgramsManager.tsx
+LINE: 427
+TEXT: placeholder="Search programs, platforms or IDs"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 32
+TEXT: "A demonstration external affiliate promotion selected and managed by Poster Admin.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 76
+TEXT: "Demonstration promotion. Replace with a real approved product or service.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 146
+TEXT: "A demonstration subscription offer prepared for a future scheduled promotion.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\external-promotion.mock.ts
+LINE: 189
+TEXT: "Scheduled demonstration record.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 144
+TEXT: placeholder="Internal operational name"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 155
+TEXT: placeholder="Optional product or offer reference"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 168
+TEXT: placeholder="Technology, software, education..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 230
+TEXT: placeholder="View product"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 296
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 324
+TEXT: placeholder="https://..."
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 338
+TEXT: placeholder="Optional when referral code is used"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 350
+TEXT: placeholder="Optional"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 515
+TEXT: placeholder?: string;
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 524
+TEXT: placeholder,
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 535
+TEXT: placeholder={placeholder}
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionEditor.tsx
+LINE: 556
+TEXT: "type" | "placeholder"
+
+FILE: F:\Project\Poster\admin\src\features\operations\external-promotions\ExternalPromotionsManager.tsx
+LINE: 665
+TEXT: placeholder="Search promotions, offers, programs or categories"
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 3
+TEXT: import styles from "./OperationsFoundation.module.css";
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 5
+TEXT: interface OperationsFoundationProps {
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 43
+TEXT: "Track pending, approved, reversed and paid commissions.",
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 47
+TEXT: export default function OperationsFoundation({
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 52
+TEXT: }: OperationsFoundationProps) {
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 117
+TEXT: Workspace foundation ready
+
+FILE: F:\Project\Poster\admin\src\features\operations\OperationsFoundation.tsx
+LINE: 128
+TEXT: Foundation
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 579
+TEXT: pendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 580
+TEXT: setPendingAction,
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 697
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 712
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 723
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 732
+TEXT: !pendingAction
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 738
+TEXT: pendingAction;
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 824
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1620
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1634
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1651
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1665
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1690
+TEXT: pendingAction ? (
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1703
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1728
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1731
+TEXT: : pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1753
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1763
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1773
+TEXT: {pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1805
+TEXT: setPendingAction(
+
+FILE: F:\Project\Poster\admin\src\features\reports\ReportsManager.tsx
+LINE: 1816
+TEXT: pendingAction ===
+
+FILE: F:\Project\Poster\admin\src\features\sources\SourcesManager.tsx
+LINE: 645
+TEXT: placeholder="Search ID, source or website..."
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 50
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 64
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 67
+TEXT: "Permanent platform data is not connected to PostgreSQL yet.",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 87
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 90
+TEXT: "Official publisher and provider API integrations are not connected yet.",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 101
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 104
+TEXT: "Authorized RSS scheduling, synchronization, retries, and live feed monitoring are not connected yet.",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 125
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 128
+TEXT: "Classification, ranking, recommendation, and taxonomy intelligence services are not connected yet.",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 139
+TEXT: "Not connected",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 142
+TEXT: "Automatic copyright, commercial, client, and operational email delivery is not connected yet.",
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 171
+TEXT: const pendingCount =
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 262
+TEXT: Pending
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 267
+TEXT: pendingCount
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 272
+TEXT: Not connected yet
+
+FILE: F:\Project\Poster\admin\src\features\system-status\SystemStatusManager.tsx
+LINE: 300
+TEXT: shown as Not connected rather
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 75
+TEXT: * Keep the current demonstration count
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 357
+TEXT: demonstration data. The backend
+
+FILE: F:\Project\Poster\admin\src\features\users\UsersManager.tsx
+LINE: 370
+TEXT: Backend pending
+
+
+============================================================
+16. DUPLICATE FILE NAME INVENTORY
+============================================================
+
+NAME: page.tsx
+COUNT: 20
+  F:\Project\Poster\admin\src\app\page.tsx
+  F:\Project\Poster\admin\src\app\advertise\page.tsx
+  F:\Project\Poster\admin\src\app\content\page.tsx
+  F:\Project\Poster\admin\src\app\copyright\page.tsx
+  F:\Project\Poster\admin\src\app\copyright-request\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\affiliate\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\analytics\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\campaigns\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\poster-promotion\page.tsx
+  F:\Project\Poster\admin\src\app\monetization\sponsorships\page.tsx
+  F:\Project\Poster\admin\src\app\operations\business-identity\page.tsx
+  F:\Project\Poster\admin\src\app\operations\external-promotions\page.tsx
+  F:\Project\Poster\admin\src\app\operations\external-promotions\earnings\page.tsx
+  F:\Project\Poster\admin\src\app\operations\external-promotions\programs\page.tsx
+  F:\Project\Poster\admin\src\app\operations\external-promotions\promotions\page.tsx
+  F:\Project\Poster\admin\src\app\reports\page.tsx
+  F:\Project\Poster\admin\src\app\sources\page.tsx
+  F:\Project\Poster\admin\src\app\system-status\page.tsx
+  F:\Project\Poster\admin\src\app\users\page.tsx
+
+
+============================================================
+17. TYPESCRIPT VERIFICATION
+============================================================
+
+
+============================================================
+18. ESLINT VERIFICATION
+============================================================
+
+
+> admin@0.1.0 lint
+> eslint .
+
+
+============================================================
+19. PRODUCTION BUILD VERIFICATION
+============================================================
+
+
+> admin@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.10 (Turbopack)
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 5.1s
+  Running TypeScript ...
+  Finished TypeScript in 12.1s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/22) ...
+  Generating static pages using 3 workers (5/22) 
+  Generating static pages using 3 workers (10/22) 
+  Generating static pages using 3 workers (16/22) 
+Γ£ô Generating static pages using 3 workers (22/22) in 1014ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /advertise
+Γö£ Γùï /content
+Γö£ Γùï /copyright
+Γö£ Γùï /copyright-request
+Γö£ Γùï /monetization
+Γö£ Γùï /monetization/affiliate
+Γö£ Γùï /monetization/analytics
+Γö£ Γùï /monetization/campaigns
+Γö£ Γùï /monetization/poster-promotion
+Γö£ Γùï /monetization/sponsorships
+Γö£ Γùï /operations/business-identity
+Γö£ Γùï /operations/external-promotions
+Γö£ Γùï /operations/external-promotions/earnings
+Γö£ Γùï /operations/external-promotions/programs
+Γö£ Γùï /operations/external-promotions/promotions
+Γö£ Γùï /reports
+Γö£ Γùï /sources
+Γö£ Γùï /system-status
+Γöö Γùï /users
+
+
+Γùï  (Static)  prerendered as static content
+
+
+============================================================
+END OF STEP 8 AUDIT OUTPUT
+============================================================

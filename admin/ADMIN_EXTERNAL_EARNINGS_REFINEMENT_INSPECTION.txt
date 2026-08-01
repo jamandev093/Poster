@@ -1,0 +1,4945 @@
+﻿POSTER ADMIN
+EXTERNAL EARNINGS REFINEMENT INSPECTION
+
+Generated: 2026-07-31 12:04:43
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningsManager.tsx
+============================================================
+
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  earningEventLabel,
+  earningStatusLabel,
+  payoutStatusLabel,
+} from "./external-earning.constants";
+
+import {
+  EMPTY_EXTERNAL_EARNING_DRAFT,
+  hasExternalEarningErrors,
+  validateExternalEarning,
+} from "./external-earning.validation";
+
+import {
+  INITIAL_EXTERNAL_EARNINGS,
+} from "./external-earning.mock";
+
+import {
+  INITIAL_EXTERNAL_PROGRAMS,
+} from "../external-programs/external-program.mock";
+
+import {
+  INITIAL_EXTERNAL_PROMOTIONS,
+} from "../external-promotions/external-promotion.mock";
+
+import ExternalEarningEditor from "./ExternalEarningEditor";
+import ExternalEarningDetails from "./ExternalEarningDetails";
+
+import type {
+  ExternalEarningAuditEntry,
+  ExternalEarningDraft,
+  ExternalEarningErrors,
+  ExternalEarningRecord,
+  ExternalEarningStatus,
+} from "./external-earning.types";
+
+import styles from "./ExternalEarningsManager.module.css";
+
+type WorkspaceMode =
+  | "closed"
+  | "create"
+  | "edit"
+  | "details";
+
+type StatusFilter =
+  | "all"
+  | ExternalEarningStatus;
+
+function currentTimestamp() {
+  return new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }
+  ).format(new Date());
+}
+
+function createIdentifier(
+  prefix: string
+) {
+  return `${prefix}-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
+}
+
+function recordToDraft(
+  earning: ExternalEarningRecord
+): ExternalEarningDraft {
+  return {
+    programId:
+      earning.programId,
+
+    promotionId:
+      earning.promotionId,
+
+    externalConversionId:
+      earning.externalConversionId,
+
+    externalOrderId:
+      earning.externalOrderId,
+
+    externalPayoutId:
+      earning.externalPayoutId,
+
+    eventType:
+      earning.eventType,
+
+    source:
+      earning.source,
+
+    conversionDate:
+      earning.conversionDate,
+
+    confirmationDate:
+      earning.confirmationDate,
+
+    payoutDate:
+      earning.payoutDate,
+
+    status:
+      earning.status,
+
+    payoutStatus:
+      earning.payoutStatus,
+
+    currency:
+      earning.amount.currency,
+
+    grossAmount:
+      String(
+        earning.amount.grossAmount
+      ),
+
+    commissionAmount:
+      String(
+        earning.amount
+          .commissionAmount
+      ),
+
+    taxWithheld:
+      String(
+        earning.amount.taxWithheld
+      ),
+
+    fees:
+      String(
+        earning.amount.fees
+      ),
+
+    netAmount:
+      String(
+        earning.amount.netAmount
+      ),
+
+    customerCountry:
+      earning.customerCountry,
+
+    statementReference:
+      earning.statementReference,
+
+    evidenceUrl:
+      earning.evidenceUrl,
+
+    reversalReason:
+      earning.reversalReason,
+
+    rejectionReason:
+      earning.rejectionReason,
+
+    notes:
+      earning.notes,
+  };
+}
+
+function numberValue(
+  value: string
+) {
+  const result = Number(value);
+
+  return Number.isFinite(result)
+    ? result
+    : 0;
+}
+
+function formatAmount(
+  value: number,
+  currency: string
+) {
+  try {
+    return new Intl.NumberFormat(
+      "en-IN",
+      {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 2,
+      }
+    ).format(value);
+  } catch {
+    return `${currency} ${value.toFixed(2)}`;
+  }
+}
+
+function formatCurrencyTotals(
+  inrAmount: number,
+  usdAmount: number
+) {
+  return [
+    formatAmount(
+      inrAmount,
+      "INR"
+    ),
+    formatAmount(
+      usdAmount,
+      "USD"
+    ),
+  ].join(" · ");
+}
+
+function auditMessageForStatus(
+  status: ExternalEarningStatus
+) {
+  switch (status) {
+    case "confirmed":
+      return "External conversion confirmed.";
+
+    case "approved":
+      return "External earning approved.";
+
+    case "payable":
+      return "External earning marked payable.";
+
+    case "paid":
+      return "External earning marked paid.";
+
+    case "reversed":
+      return "External earning reversed.";
+
+    case "rejected":
+      return "External earning rejected.";
+
+    default:
+      return "External earning status updated.";
+  }
+}
+
+function auditActionForStatus(
+  status: ExternalEarningStatus
+): ExternalEarningAuditEntry["action"] {
+  switch (status) {
+    case "confirmed":
+      return "confirmed";
+
+    case "approved":
+      return "approved";
+
+    case "payable":
+      return "marked_payable";
+
+    case "paid":
+      return "marked_paid";
+
+    case "reversed":
+      return "reversed";
+
+    case "rejected":
+      return "rejected";
+
+    default:
+      return "updated";
+  }
+}
+
+export default function ExternalEarningsManager() {
+  const [
+    earnings,
+    setEarnings,
+  ] = useState<
+    ExternalEarningRecord[]
+  >(
+    INITIAL_EXTERNAL_EARNINGS
+  );
+
+  const [
+    workspaceMode,
+    setWorkspaceMode,
+  ] = useState<WorkspaceMode>(
+    "closed"
+  );
+
+  const [
+    selectedEarningId,
+    setSelectedEarningId,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    draft,
+    setDraft,
+  ] = useState<
+    ExternalEarningDraft
+  >({
+    ...EMPTY_EXTERNAL_EARNING_DRAFT,
+  });
+
+  const [
+    errors,
+    setErrors,
+  ] = useState<
+    ExternalEarningErrors
+  >({});
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState<StatusFilter>(
+    "all"
+  );
+
+  const approvedPrograms =
+    useMemo(
+      () =>
+        INITIAL_EXTERNAL_PROGRAMS
+          .filter(
+            (program) =>
+              program.status ===
+              "approved"
+          )
+          .map((program) => ({
+            id: program.id,
+            programName:
+              program.programName,
+            platformName:
+              program.platformName,
+          })),
+      []
+    );
+
+  const promotionOptions =
+    useMemo(
+      () =>
+        INITIAL_EXTERNAL_PROMOTIONS
+          .map((promotion) => ({
+            id: promotion.id,
+            programId:
+              promotion.programId,
+            name: promotion.name,
+            headline:
+              promotion.headline,
+          })),
+      []
+    );
+
+  const selectedEarning =
+    useMemo(
+      () =>
+        earnings.find(
+          (earning) =>
+            earning.id ===
+            selectedEarningId
+        ) ?? null,
+      [
+        earnings,
+        selectedEarningId,
+      ]
+    );
+
+  const programNames =
+    useMemo(
+      () =>
+        new Map(
+          approvedPrograms.map(
+            (program) => [
+              program.id,
+              program.programName,
+            ]
+          )
+        ),
+      [approvedPrograms]
+    );
+
+  const promotionNames =
+    useMemo(
+      () =>
+        new Map(
+          promotionOptions.map(
+            (promotion) => [
+              promotion.id,
+              promotion.name,
+            ]
+          )
+        ),
+      [promotionOptions]
+    );
+
+  const filteredEarnings =
+    useMemo(() => {
+      const normalizedQuery =
+        searchQuery
+          .trim()
+          .toLowerCase();
+
+      return earnings.filter(
+        (earning) => {
+          if (
+            statusFilter !==
+              "all" &&
+            earning.status !==
+              statusFilter
+          ) {
+            return false;
+          }
+
+          if (
+            !normalizedQuery
+          ) {
+            return true;
+          }
+
+          const searchableText = [
+            earning
+              .externalConversionId,
+            earning.externalOrderId,
+            earning.externalPayoutId,
+            earning.statementReference,
+            earning.customerCountry,
+            programNames.get(
+              earning.programId
+            ) ?? "",
+            promotionNames.get(
+              earning.promotionId
+            ) ?? "",
+            earningEventLabel(
+              earning.eventType
+            ),
+            earningStatusLabel(
+              earning.status
+            ),
+            payoutStatusLabel(
+              earning.payoutStatus
+            ),
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return searchableText.includes(
+            normalizedQuery
+          );
+        }
+      );
+    }, [
+      earnings,
+      programNames,
+      promotionNames,
+      searchQuery,
+      statusFilter,
+    ]);
+
+  const summary =
+    useMemo(() => {
+      const activeRecords =
+        earnings.filter(
+          (earning) =>
+            earning.status !==
+              "reversed" &&
+            earning.status !==
+              "rejected"
+        );
+
+      const sumNetByCurrency = (
+        statuses: ExternalEarningStatus[],
+        currency: string
+      ) =>
+        activeRecords
+          .filter(
+            (earning) =>
+              statuses.includes(
+                earning.status
+              ) &&
+              earning.amount.currency ===
+                currency
+          )
+          .reduce(
+            (total, earning) =>
+              total +
+              earning.amount.netAmount,
+            0
+          );
+
+      const approvedInr =
+        sumNetByCurrency(
+          [
+            "approved",
+            "payable",
+            "paid",
+          ],
+          "INR"
+        );
+
+      const approvedUsd =
+        sumNetByCurrency(
+          [
+            "approved",
+            "payable",
+            "paid",
+          ],
+          "USD"
+        );
+
+      const payableInr =
+        sumNetByCurrency(
+          ["payable"],
+          "INR"
+        );
+
+      const payableUsd =
+        sumNetByCurrency(
+          ["payable"],
+          "USD"
+        );
+
+      const paidInr =
+        sumNetByCurrency(
+          ["paid"],
+          "INR"
+        );
+
+      const paidUsd =
+        sumNetByCurrency(
+          ["paid"],
+          "USD"
+        );
+
+      return {
+        total:
+          earnings.length,
+
+        pending:
+          earnings.filter(
+            (earning) =>
+              earning.status ===
+                "pending" ||
+              earning.status ===
+                "confirmed"
+          ).length,
+
+        approvedInr,
+
+        approvedUsd,
+
+        payableInr,
+
+        payableUsd,
+
+        paidInr,
+
+        paidUsd,
+
+        reversed:
+          earnings.filter(
+            (earning) =>
+              earning.status ===
+                "reversed" ||
+              earning.status ===
+                "rejected"
+          ).length,
+      };
+    }, [earnings]);
+
+  const closeWorkspace = () => {
+    setWorkspaceMode(
+      "closed"
+    );
+
+    setSelectedEarningId(
+      null
+    );
+
+    setErrors({});
+  };
+
+  const openCreate = () => {
+    setDraft({
+      ...EMPTY_EXTERNAL_EARNING_DRAFT,
+    });
+
+    setErrors({});
+
+    setSelectedEarningId(
+      null
+    );
+
+    setWorkspaceMode(
+      "create"
+    );
+  };
+
+  const openDetails = (
+    earningId: string
+  ) => {
+    setSelectedEarningId(
+      earningId
+    );
+
+    setErrors({});
+
+    setWorkspaceMode(
+      "details"
+    );
+  };
+
+  const openEdit = (
+    earning: ExternalEarningRecord
+  ) => {
+    setSelectedEarningId(
+      earning.id
+    );
+
+    setDraft(
+      recordToDraft(earning)
+    );
+
+    setErrors({});
+
+    setWorkspaceMode(
+      "edit"
+    );
+  };
+
+  const saveDraft = () => {
+    const nextErrors =
+      validateExternalEarning(
+        draft
+      );
+
+    setErrors(nextErrors);
+
+    if (
+      hasExternalEarningErrors(
+        nextErrors
+      )
+    ) {
+      return;
+    }
+
+    const timestamp =
+      currentTimestamp();
+
+    if (
+      workspaceMode ===
+      "create"
+    ) {
+      const newId =
+        createIdentifier(
+          "external-earning"
+        );
+
+      const newRecord:
+        ExternalEarningRecord = {
+        id: newId,
+
+        programId:
+          draft.programId,
+
+        promotionId:
+          draft.promotionId,
+
+        externalConversionId:
+          draft.externalConversionId
+            .trim(),
+
+        externalOrderId:
+          draft.externalOrderId
+            .trim(),
+
+        externalPayoutId:
+          draft.externalPayoutId
+            .trim(),
+
+        eventType:
+          draft.eventType,
+
+        source:
+          draft.source,
+
+        conversionDate:
+          draft.conversionDate,
+
+        confirmationDate:
+          draft.confirmationDate,
+
+        payoutDate:
+          draft.payoutDate,
+
+        status:
+          draft.status,
+
+        payoutStatus:
+          draft.payoutStatus,
+
+        amount: {
+          currency:
+            draft.currency
+              .trim()
+              .toUpperCase(),
+
+          grossAmount:
+            numberValue(
+              draft.grossAmount
+            ),
+
+          commissionAmount:
+            numberValue(
+              draft.commissionAmount
+            ),
+
+          taxWithheld:
+            numberValue(
+              draft.taxWithheld
+            ),
+
+          fees:
+            numberValue(
+              draft.fees
+            ),
+
+          netAmount:
+            numberValue(
+              draft.netAmount
+            ),
+        },
+
+        customerCountry:
+          draft.customerCountry
+            .trim(),
+
+        statementReference:
+          draft.statementReference
+            .trim(),
+
+        evidenceUrl:
+          draft.evidenceUrl
+            .trim(),
+
+        reversalReason:
+          draft.reversalReason
+            .trim(),
+
+        rejectionReason:
+          draft.rejectionReason
+            .trim(),
+
+        notes:
+          draft.notes.trim(),
+
+        createdAt:
+          timestamp,
+
+        updatedAt:
+          timestamp,
+
+        auditHistory: [
+          {
+            id:
+              createIdentifier(
+                "earning-audit"
+              ),
+
+            action:
+              "created",
+
+            message:
+              "External earning record created.",
+
+            actor:
+              "Admin",
+
+            occurredAt:
+              timestamp,
+          },
+        ],
+      };
+
+      setEarnings(
+        (current) => [
+          newRecord,
+          ...current,
+        ]
+      );
+
+      setSelectedEarningId(
+        newId
+      );
+
+      setWorkspaceMode(
+        "details"
+      );
+
+      return;
+    }
+
+    if (
+      workspaceMode ===
+        "edit" &&
+      selectedEarning
+    ) {
+      setEarnings(
+        (current) =>
+          current.map(
+            (earning) => {
+              if (
+                earning.id !==
+                selectedEarning.id
+              ) {
+                return earning;
+              }
+
+              return {
+                ...earning,
+
+                programId:
+                  draft.programId,
+
+                promotionId:
+                  draft.promotionId,
+
+                externalConversionId:
+                  draft
+                    .externalConversionId
+                    .trim(),
+
+                externalOrderId:
+                  draft.externalOrderId
+                    .trim(),
+
+                externalPayoutId:
+                  draft.externalPayoutId
+                    .trim(),
+
+                eventType:
+                  draft.eventType,
+
+                source:
+                  draft.source,
+
+                conversionDate:
+                  draft.conversionDate,
+
+                confirmationDate:
+                  draft.confirmationDate,
+
+                payoutDate:
+                  draft.payoutDate,
+
+                status:
+                  draft.status,
+
+                payoutStatus:
+                  draft.payoutStatus,
+
+                amount: {
+                  currency:
+                    draft.currency
+                      .trim()
+                      .toUpperCase(),
+
+                  grossAmount:
+                    numberValue(
+                      draft.grossAmount
+                    ),
+
+                  commissionAmount:
+                    numberValue(
+                      draft
+                        .commissionAmount
+                    ),
+
+                  taxWithheld:
+                    numberValue(
+                      draft.taxWithheld
+                    ),
+
+                  fees:
+                    numberValue(
+                      draft.fees
+                    ),
+
+                  netAmount:
+                    numberValue(
+                      draft.netAmount
+                    ),
+                },
+
+                customerCountry:
+                  draft.customerCountry
+                    .trim(),
+
+                statementReference:
+                  draft
+                    .statementReference
+                    .trim(),
+
+                evidenceUrl:
+                  draft.evidenceUrl
+                    .trim(),
+
+                reversalReason:
+                  draft.reversalReason
+                    .trim(),
+
+                rejectionReason:
+                  draft.rejectionReason
+                    .trim(),
+
+                notes:
+                  draft.notes.trim(),
+
+                updatedAt:
+                  timestamp,
+
+                auditHistory: [
+                  ...earning.auditHistory,
+
+                  {
+                    id:
+                      createIdentifier(
+                        "earning-audit"
+                      ),
+
+                    action:
+                      "updated",
+
+                    message:
+                      "External earning details updated.",
+
+                    actor:
+                      "Admin",
+
+                    occurredAt:
+                      timestamp,
+                  },
+                ],
+              };
+            }
+          )
+      );
+
+      setWorkspaceMode(
+        "details"
+      );
+    }
+  };
+
+  const changeStatus = (
+    status: ExternalEarningStatus
+  ) => {
+    if (!selectedEarning) {
+      return;
+    }
+
+    if (
+      status === "paid" &&
+      (!selectedEarning
+        .externalPayoutId ||
+        !selectedEarning
+          .payoutDate)
+    ) {
+      openEdit(
+        selectedEarning
+      );
+
+      setErrors({
+        externalPayoutId:
+          "Enter the external payout ID before marking this earning paid.",
+
+        payoutDate:
+          "Enter the payout date before marking this earning paid.",
+      });
+
+      return;
+    }
+
+    if (
+      status === "reversed" &&
+      !selectedEarning
+        .reversalReason
+    ) {
+      openEdit(
+        selectedEarning
+      );
+
+      setDraft({
+        ...recordToDraft(
+          selectedEarning
+        ),
+        status:
+          "reversed",
+        payoutStatus:
+          "reversed",
+      });
+
+      setErrors({
+        reversalReason:
+          "Enter the reversal reason before reversing this earning.",
+      });
+
+      return;
+    }
+
+    if (
+      status === "rejected" &&
+      !selectedEarning
+        .rejectionReason
+    ) {
+      openEdit(
+        selectedEarning
+      );
+
+      setDraft({
+        ...recordToDraft(
+          selectedEarning
+        ),
+        status:
+          "rejected",
+      });
+
+      setErrors({
+        rejectionReason:
+          "Enter the rejection reason before rejecting this earning.",
+      });
+
+      return;
+    }
+
+    const timestamp =
+      currentTimestamp();
+
+    setEarnings(
+      (current) =>
+        current.map(
+          (earning) => {
+            if (
+              earning.id !==
+              selectedEarning.id
+            ) {
+              return earning;
+            }
+
+            return {
+              ...earning,
+
+              status,
+
+              payoutStatus:
+                status === "paid"
+                  ? "paid"
+                  : status ===
+                      "reversed"
+                    ? "reversed"
+                    : earning
+                        .payoutStatus,
+
+              updatedAt:
+                timestamp,
+
+              auditHistory: [
+                ...earning.auditHistory,
+
+                {
+                  id:
+                    createIdentifier(
+                      "earning-audit"
+                    ),
+
+                  action:
+                    auditActionForStatus(
+                      status
+                    ),
+
+                  message:
+                    auditMessageForStatus(
+                      status
+                    ),
+
+                  actor:
+                    "Admin",
+
+                  occurredAt:
+                    timestamp,
+                },
+              ],
+            };
+          }
+        )
+    );
+  };
+
+  return (
+    <main className={styles.page}>
+      <header className={styles.pageHeader}>
+        <div>
+          <p className={styles.eyebrow}>
+            Operations
+          </p>
+
+          <h1>External Earnings</h1>
+
+          <p className={styles.intro}>
+            Track externally reported
+            conversions, commissions,
+            payout states and
+            reconciliation evidence.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className={styles.primaryButton}
+          onClick={openCreate}
+        >
+          Add earning
+        </button>
+      </header>
+
+      <section
+        className={styles.summaryGrid}
+        aria-label="External earnings summary"
+      >
+        <SummaryCard
+          label="Total records"
+          value={String(
+            summary.total
+          )}
+          description="All externally reported earnings"
+        />
+
+        <SummaryCard
+          label="Needs review"
+          value={String(
+            summary.pending
+          )}
+          description="Pending or confirmed records"
+        />
+
+        <SummaryCard
+          label="Approved net"
+          value={formatCurrencyTotals(
+            summary.approvedInr,
+            summary.approvedUsd
+          )}
+          description="Approved, payable and paid earnings by currency"
+        />
+
+        <SummaryCard
+          label="Payable net"
+          value={formatCurrencyTotals(
+            summary.payableInr,
+            summary.payableUsd
+          )}
+          description="Earnings ready for payout by currency"
+        />
+
+        <SummaryCard
+          label="Paid net"
+          value={formatCurrencyTotals(
+            summary.paidInr,
+            summary.paidUsd
+          )}
+          description="Recorded payouts by currency"
+        />
+
+        <SummaryCard
+          label="Exceptions"
+          value={String(
+            summary.reversed
+          )}
+          description="Reversed or rejected records"
+        />
+      </section>
+
+      <section className={styles.workspace}>
+        <div className={styles.toolbar}>
+          <div
+            className={styles.searchField}
+          >
+            <label
+              htmlFor="external-earnings-search"
+            >
+              Search earnings
+            </label>
+
+            <input
+              id="external-earnings-search"
+              type="search"
+              value={searchQuery}
+              placeholder="Conversion, order, payout, program or promotion"
+              onChange={(event) => {
+                setSearchQuery(
+                  event.target.value
+                );
+              }}
+            />
+          </div>
+
+          <label
+            className={styles.filterField}
+          >
+            <span>Status</span>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(
+                  event.target
+                    .value as StatusFilter
+                );
+              }}
+            >
+              <option value="all">
+                All statuses
+              </option>
+
+              <option value="pending">
+                Pending
+              </option>
+
+              <option value="confirmed">
+                Confirmed
+              </option>
+
+              <option value="approved">
+                Approved
+              </option>
+
+              <option value="payable">
+                Payable
+              </option>
+
+              <option value="paid">
+                Paid
+              </option>
+
+              <option value="reversed">
+                Reversed
+              </option>
+
+              <option value="rejected">
+                Rejected
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Conversion</th>
+                <th>Program / promotion</th>
+                <th>Outcome</th>
+                <th>Status</th>
+                <th>Commission</th>
+                <th>Net earning</th>
+                <th>Payout</th>
+                <th aria-label="Actions" />
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredEarnings.map(
+                (earning) => {
+                  const programName =
+                    programNames.get(
+                      earning.programId
+                    ) ??
+                    "Unknown program";
+
+                  const promotionName =
+                    promotionNames.get(
+                      earning.promotionId
+                    ) ??
+                    "Unknown promotion";
+
+                  return (
+                    <tr key={earning.id}>
+                      <td>
+                        <strong>
+                          {
+                            earning
+                              .externalConversionId
+                          }
+                        </strong>
+
+                        <span>
+                          {
+                            earning
+                              .conversionDate
+                          }
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {promotionName}
+                        </strong>
+
+                        <span>
+                          {programName}
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {earningEventLabel(
+                            earning.eventType
+                          )}
+                        </strong>
+
+                        <span>
+                          {
+                            earning
+                              .customerCountry
+                          }
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={
+                            styles.statusBadge
+                          }
+                          data-status={
+                            earning.status
+                          }
+                        >
+                          {earningStatusLabel(
+                            earning.status
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {formatAmount(
+                            earning.amount
+                              .commissionAmount,
+                            earning.amount
+                              .currency
+                          )}
+                        </strong>
+
+                        <span>
+                          Gross{" "}
+                          {formatAmount(
+                            earning.amount
+                              .grossAmount,
+                            earning.amount
+                              .currency
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {formatAmount(
+                            earning.amount
+                              .netAmount,
+                            earning.amount
+                              .currency
+                          )}
+                        </strong>
+
+                        <span>
+                          After tax and fees
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>
+                          {payoutStatusLabel(
+                            earning
+                              .payoutStatus
+                          )}
+                        </strong>
+
+                        <span>
+                          {earning.payoutDate ||
+                            "No payout date"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className={
+                            styles.viewButton
+                          }
+                          onClick={() => {
+                            openDetails(
+                              earning.id
+                            );
+                          }}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+
+          {filteredEarnings.length ===
+          0 ? (
+            <div
+              className={styles.emptyState}
+            >
+              <h2>
+                No earnings found
+              </h2>
+
+              <p>
+                Adjust the search or
+                status filter, or add a
+                new external earning.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      {workspaceMode !==
+      "closed" ? (
+        <div
+          className={styles.overlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              closeWorkspace();
+            }
+          }}
+        >
+          <aside
+            className={styles.drawer}
+            aria-label="External earning workspace"
+          >
+            {workspaceMode ===
+              "details" &&
+            selectedEarning ? (
+              <ExternalEarningDetails
+                earning={
+                  selectedEarning
+                }
+                programName={
+                  programNames.get(
+                    selectedEarning
+                      .programId
+                  ) ??
+                  "Unknown program"
+                }
+                promotionName={
+                  promotionNames.get(
+                    selectedEarning
+                      .promotionId
+                  ) ??
+                  "Unknown promotion"
+                }
+                onEdit={() => {
+                  openEdit(
+                    selectedEarning
+                  );
+                }}
+                onClose={
+                  closeWorkspace
+                }
+                onStatusChange={
+                  changeStatus
+                }
+              />
+            ) : null}
+
+            {workspaceMode ===
+              "create" ||
+            workspaceMode ===
+              "edit" ? (
+              <div
+                className={
+                  styles.editorPanel
+                }
+              >
+                <header
+                  className={
+                    styles.editorHeader
+                  }
+                >
+                  <div>
+                    <p>
+                      External earning
+                    </p>
+
+                    <h2>
+                      {workspaceMode ===
+                      "create"
+                        ? "Add earning"
+                        : "Edit earning"}
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={
+                      closeWorkspace
+                    }
+                    aria-label="Close earning editor"
+                  >
+                    ×
+                  </button>
+                </header>
+
+                <div
+                  className={
+                    styles.editorBody
+                  }
+                >
+                  <ExternalEarningEditor
+                    draft={draft}
+                    errors={errors}
+                    programs={
+                      approvedPrograms
+                    }
+                    promotions={
+                      promotionOptions
+                    }
+                    submitLabel={
+                      workspaceMode ===
+                      "create"
+                        ? "Create earning"
+                        : "Save changes"
+                    }
+                    onChange={(
+                      nextDraft
+                    ) => {
+                      setDraft(
+                        nextDraft
+                      );
+
+                      if (
+                        Object.keys(
+                          errors
+                        ).length > 0
+                      ) {
+                        setErrors({});
+                      }
+                    }}
+                    onSubmit={
+                      saveDraft
+                    }
+                    onCancel={() => {
+                      if (
+                        selectedEarning
+                      ) {
+                        setWorkspaceMode(
+                          "details"
+                        );
+                      } else {
+                        closeWorkspace();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </div>
+      ) : null}
+    </main>
+  );
+}
+
+interface SummaryCardProps {
+  label: string;
+  value: string;
+  description: string;
+}
+
+function SummaryCard({
+  label,
+  value,
+  description,
+}: SummaryCardProps) {
+  return (
+    <article
+      className={styles.summaryCard}
+    >
+      <span>{label}</span>
+
+      <strong>{value}</strong>
+
+      <p>{description}</p>
+    </article>
+  );
+}
+
+
+
+
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningDetails.tsx
+============================================================
+
+"use client";
+
+import {
+  earningEventLabel,
+  earningSourceLabel,
+  earningStatusLabel,
+  payoutStatusLabel,
+} from "./external-earning.constants";
+
+import type {
+  ExternalEarningRecord,
+} from "./external-earning.types";
+
+import styles from "./ExternalEarningDetails.module.css";
+
+interface ExternalEarningDetailsProps {
+  earning: ExternalEarningRecord;
+  programName: string;
+  promotionName: string;
+  onEdit: () => void;
+  onClose: () => void;
+  onStatusChange: (
+    status: ExternalEarningRecord["status"]
+  ) => void;
+}
+
+function formatAmount(
+  value: number,
+  currency: string
+) {
+  try {
+    return new Intl.NumberFormat(
+      "en-IN",
+      {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 2,
+      }
+    ).format(value);
+  } catch {
+    return `${currency} ${value.toFixed(2)}`;
+  }
+}
+
+export default function ExternalEarningDetails({
+  earning,
+  programName,
+  promotionName,
+  onEdit,
+  onClose,
+  onStatusChange,
+}: ExternalEarningDetailsProps) {
+  const currency =
+    earning.amount.currency;
+
+  return (
+    <div className={styles.panel}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>
+            External earning
+          </p>
+
+          <h2>
+            {earning.externalConversionId}
+          </h2>
+
+          <p className={styles.context}>
+            {promotionName}
+            {" · "}
+            {programName}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="Close earning details"
+        >
+          ×
+        </button>
+      </header>
+
+      <div className={styles.statusRow}>
+        <span
+          className={styles.status}
+          data-status={earning.status}
+        >
+          {earningStatusLabel(
+            earning.status
+          )}
+        </span>
+
+        <span
+          className={styles.payoutStatus}
+          data-status={
+            earning.payoutStatus
+          }
+        >
+          {payoutStatusLabel(
+            earning.payoutStatus
+          )}
+        </span>
+
+        <span>
+          {earningEventLabel(
+            earning.eventType
+          )}
+        </span>
+      </div>
+
+      <section className={styles.metrics}>
+        <Metric
+          label="Gross amount"
+          value={formatAmount(
+            earning.amount.grossAmount,
+            currency
+          )}
+        />
+
+        <Metric
+          label="Commission"
+          value={formatAmount(
+            earning.amount
+              .commissionAmount,
+            currency
+          )}
+        />
+
+        <Metric
+          label="Tax withheld"
+          value={formatAmount(
+            earning.amount.taxWithheld,
+            currency
+          )}
+        />
+
+        <Metric
+          label="Fees"
+          value={formatAmount(
+            earning.amount.fees,
+            currency
+          )}
+        />
+
+        <Metric
+          label="Net earning"
+          value={formatAmount(
+            earning.amount.netAmount,
+            currency
+          )}
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h3>Program and promotion</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Program"
+            value={programName}
+          />
+
+          <Detail
+            label="Promotion"
+            value={promotionName}
+          />
+
+          <Detail
+            label="Event type"
+            value={earningEventLabel(
+              earning.eventType
+            )}
+          />
+
+          <Detail
+            label="Source"
+            value={earningSourceLabel(
+              earning.source
+            )}
+          />
+
+          <Detail
+            label="Customer country"
+            value={
+              earning.customerCountry ||
+              "Not recorded"
+            }
+          />
+        </dl>
+      </section>
+
+      <section className={styles.section}>
+        <h3>External references</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Conversion ID"
+            value={
+              earning.externalConversionId
+            }
+          />
+
+          <Detail
+            label="Order ID"
+            value={
+              earning.externalOrderId ||
+              "Not recorded"
+            }
+          />
+
+          <Detail
+            label="Payout ID"
+            value={
+              earning.externalPayoutId ||
+              "Not issued"
+            }
+          />
+
+          <Detail
+            label="Statement reference"
+            value={
+              earning.statementReference ||
+              "Not recorded"
+            }
+          />
+        </dl>
+
+        {earning.evidenceUrl ? (
+          <a
+            className={styles.externalLink}
+            href={earning.evidenceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open evidence
+          </a>
+        ) : null}
+      </section>
+
+      <section className={styles.section}>
+        <h3>Timeline</h3>
+
+        <dl className={styles.definitionGrid}>
+          <Detail
+            label="Conversion date"
+            value={earning.conversionDate}
+          />
+
+          <Detail
+            label="Confirmation date"
+            value={
+              earning.confirmationDate ||
+              "Not confirmed"
+            }
+          />
+
+          <Detail
+            label="Payout date"
+            value={
+              earning.payoutDate ||
+              "Not paid"
+            }
+          />
+
+          <Detail
+            label="Last updated"
+            value={earning.updatedAt}
+          />
+        </dl>
+      </section>
+
+      {earning.reversalReason ? (
+        <section className={styles.section}>
+          <h3>Reversal reason</h3>
+
+          <p className={styles.notes}>
+            {earning.reversalReason}
+          </p>
+        </section>
+      ) : null}
+
+      {earning.rejectionReason ? (
+        <section className={styles.section}>
+          <h3>Rejection reason</h3>
+
+          <p className={styles.notes}>
+            {earning.rejectionReason}
+          </p>
+        </section>
+      ) : null}
+
+      <section className={styles.section}>
+        <h3>Internal notes</h3>
+
+        <p className={styles.notes}>
+          {earning.notes ||
+            "No internal notes."}
+        </p>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Audit history</h3>
+
+        <div className={styles.auditList}>
+          {earning.auditHistory.map(
+            (entry) => (
+              <article
+                key={entry.id}
+                className={styles.auditEntry}
+              >
+                <div>
+                  <strong>
+                    {entry.message}
+                  </strong>
+
+                  <span>
+                    {entry.actor}
+                  </span>
+                </div>
+
+                <time>
+                  {entry.occurredAt}
+                </time>
+              </article>
+            )
+          )}
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={onEdit}
+        >
+          Edit earning
+        </button>
+
+        {earning.status === "pending" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("confirmed");
+            }}
+          >
+            Confirm
+          </button>
+        ) : null}
+
+        {earning.status === "confirmed" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("approved");
+            }}
+          >
+            Approve
+          </button>
+        ) : null}
+
+        {earning.status === "approved" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("payable");
+            }}
+          >
+            Mark payable
+          </button>
+        ) : null}
+
+        {earning.status === "payable" ? (
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => {
+              onStatusChange("paid");
+            }}
+          >
+            Mark paid
+          </button>
+        ) : null}
+
+        {earning.status !== "paid" &&
+        earning.status !== "reversed" &&
+        earning.status !== "rejected" ? (
+          <button
+            type="button"
+            className={styles.warningButton}
+            onClick={() => {
+              onStatusChange("reversed");
+            }}
+          >
+            Reverse
+          </button>
+        ) : null}
+
+        {earning.status !== "paid" &&
+        earning.status !== "rejected" ? (
+          <button
+            type="button"
+            className={styles.dangerButton}
+            onClick={() => {
+              onStatusChange("rejected");
+            }}
+          >
+            Reject
+          </button>
+        ) : null}
+      </footer>
+    </div>
+  );
+}
+
+interface DetailProps {
+  label: string;
+  value: string;
+}
+
+function Detail({
+  label,
+  value,
+}: DetailProps) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+
+interface MetricProps {
+  label: string;
+  value: string;
+}
+
+function Metric({
+  label,
+  value,
+}: MetricProps) {
+  return (
+    <div>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningEditor.tsx
+============================================================
+
+"use client";
+
+import {
+  EARNING_EVENT_OPTIONS,
+  EARNING_SOURCE_OPTIONS,
+  EARNING_STATUS_OPTIONS,
+  PAYOUT_STATUS_OPTIONS,
+} from "./external-earning.constants";
+
+import {
+  calculateNetAmount,
+} from "./external-earning.validation";
+
+import type {
+  ExternalEarningDraft,
+  ExternalEarningErrors,
+  ExternalEarningEventType,
+  ExternalEarningSource,
+  ExternalEarningStatus,
+  ExternalPayoutStatus,
+} from "./external-earning.types";
+
+import styles from "./ExternalEarningEditor.module.css";
+
+export interface ExternalEarningProgramOption {
+  id: string;
+  programName: string;
+  platformName: string;
+}
+
+export interface ExternalEarningPromotionOption {
+  id: string;
+  programId: string;
+  name: string;
+  headline: string;
+}
+
+interface ExternalEarningEditorProps {
+  draft: ExternalEarningDraft;
+  errors: ExternalEarningErrors;
+  programs:
+    ReadonlyArray<ExternalEarningProgramOption>;
+  promotions:
+    ReadonlyArray<ExternalEarningPromotionOption>;
+  submitLabel: string;
+  onChange: (
+    draft: ExternalEarningDraft
+  ) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+}
+
+export default function ExternalEarningEditor({
+  draft,
+  errors,
+  programs,
+  promotions,
+  submitLabel,
+  onChange,
+  onSubmit,
+  onCancel,
+}: ExternalEarningEditorProps) {
+  const update = <
+    Key extends keyof ExternalEarningDraft,
+  >(
+    key: Key,
+    value: ExternalEarningDraft[Key]
+  ) => {
+    onChange({
+      ...draft,
+      [key]: value,
+    });
+  };
+
+  const updateAmounts = (
+    key:
+      | "commissionAmount"
+      | "taxWithheld"
+      | "fees",
+    value: string
+  ) => {
+    const nextDraft = {
+      ...draft,
+      [key]: value,
+    };
+
+    const netAmount =
+      calculateNetAmount(
+        nextDraft.commissionAmount,
+        nextDraft.taxWithheld,
+        nextDraft.fees
+      );
+
+    onChange({
+      ...nextDraft,
+      netAmount:
+        netAmount.toFixed(2),
+    });
+  };
+
+  const matchingPromotions =
+    promotions.filter(
+      (promotion) =>
+        !draft.programId ||
+        promotion.programId ===
+          draft.programId
+    );
+
+  return (
+    <form
+      className={styles.form}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
+      <section className={styles.section}>
+        <SectionHeading
+          title="Program and promotion"
+          description="Connect this earning to the approved external program and promotion that produced the reported conversion."
+        />
+
+        <div className={styles.grid}>
+          <label className={styles.field}>
+            <span>Approved program</span>
+
+            <select
+              value={draft.programId}
+              aria-invalid={
+                errors.programId
+                  ? "true"
+                  : undefined
+              }
+              onChange={(event) => {
+                onChange({
+                  ...draft,
+                  programId:
+                    event.target.value,
+                  promotionId: "",
+                });
+              }}
+            >
+              <option value="">
+                Select a program
+              </option>
+
+              {programs.map(
+                (program) => (
+                  <option
+                    key={program.id}
+                    value={program.id}
+                  >
+                    {program.programName}
+                    {" · "}
+                    {program.platformName}
+                  </option>
+                )
+              )}
+            </select>
+
+            <ErrorMessage
+              value={errors.programId}
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span>External promotion</span>
+
+            <select
+              value={draft.promotionId}
+              aria-invalid={
+                errors.promotionId
+                  ? "true"
+                  : undefined
+              }
+              disabled={!draft.programId}
+              onChange={(event) => {
+                update(
+                  "promotionId",
+                  event.target.value
+                );
+              }}
+            >
+              <option value="">
+                Select a promotion
+              </option>
+
+              {matchingPromotions.map(
+                (promotion) => (
+                  <option
+                    key={promotion.id}
+                    value={promotion.id}
+                  >
+                    {promotion.name}
+                  </option>
+                )
+              )}
+            </select>
+
+            <ErrorMessage
+              value={errors.promotionId}
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <SectionHeading
+          title="External references"
+          description="Record the identifiers issued by the external platform, statement or payout report."
+        />
+
+        <div className={styles.grid}>
+          <Field
+            label="External conversion ID"
+            value={
+              draft.externalConversionId
+            }
+            error={
+              errors.externalConversionId
+            }
+            onChange={(value) => {
+              update(
+                "externalConversionId",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="External order ID (optional)"
+            value={draft.externalOrderId}
+            placeholder="Optional"
+            onChange={(value) => {
+              update(
+                "externalOrderId",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="External payout ID (required when paid)"
+            value={
+              draft.externalPayoutId
+            }
+            placeholder="Optional until paid"
+            onChange={(value) => {
+              update(
+                "externalPayoutId",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Statement reference (optional)"
+            value={
+              draft.statementReference
+            }
+            placeholder="Statement, report or batch reference"
+            onChange={(value) => {
+              update(
+                "statementReference",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Evidence URL (optional)"
+            type="url"
+            value={draft.evidenceUrl}
+            error={errors.evidenceUrl}
+            placeholder="https://..."
+            onChange={(value) => {
+              update(
+                "evidenceUrl",
+                value
+              );
+            }}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <SectionHeading
+          title="Conversion"
+          description="Record the externally reported outcome and how it entered Poster operations."
+        />
+
+        <div className={styles.grid}>
+          <SelectField
+            label="Event type"
+            value={draft.eventType}
+            options={
+              EARNING_EVENT_OPTIONS
+            }
+            onChange={(value) => {
+              update(
+                "eventType",
+                value as ExternalEarningEventType
+              );
+            }}
+          />
+
+          <SelectField
+            label="Source"
+            value={draft.source}
+            options={
+              EARNING_SOURCE_OPTIONS
+            }
+            onChange={(value) => {
+              update(
+                "source",
+                value as ExternalEarningSource
+              );
+            }}
+          />
+
+          <Field
+            label="Conversion date"
+            type="date"
+            value={draft.conversionDate}
+            error={errors.conversionDate}
+            onChange={(value) => {
+              update(
+                "conversionDate",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Confirmation date (required from confirmed status)"
+            type="date"
+            value={
+              draft.confirmationDate
+            }
+            error={
+              errors.confirmationDate
+            }
+            onChange={(value) => {
+              update(
+                "confirmationDate",
+                value
+              );
+            }}
+          />
+
+          <Field
+            label="Customer country (optional)"
+            value={
+              draft.customerCountry
+            }
+            onChange={(value) => {
+              update(
+                "customerCountry",
+                value
+              );
+            }}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <SectionHeading
+          title="Commission amounts"
+          description="Record gross transaction value, externally reported commission, deductions and Poster’s net earning."
+        />
+
+        <div className={styles.grid}>
+          <Field
+            label="Currency"
+            value={draft.currency}
+            error={errors.currency}
+            placeholder="INR"
+            onChange={(value) => {
+              update(
+                "currency",
+                value.toUpperCase()
+              );
+            }}
+          />
+
+          <NumberField
+            label="Gross amount (optional)"
+            value={draft.grossAmount}
+            error={errors.grossAmount}
+            onChange={(value) => {
+              update(
+                "grossAmount",
+                value
+              );
+            }}
+          />
+
+          <NumberField
+            label="Commission amount (required from approved status)"
+            value={
+              draft.commissionAmount
+            }
+            error={
+              errors.commissionAmount
+            }
+            onChange={(value) => {
+              updateAmounts(
+                "commissionAmount",
+                value
+              );
+            }}
+          />
+
+          <NumberField
+            label="Tax withheld (optional)"
+            value={draft.taxWithheld}
+            error={errors.taxWithheld}
+            onChange={(value) => {
+              updateAmounts(
+                "taxWithheld",
+                value
+              );
+            }}
+          />
+
+          <NumberField
+            label="Fees (optional)"
+            value={draft.fees}
+            error={errors.fees}
+            onChange={(value) => {
+              updateAmounts(
+                "fees",
+                value
+              );
+            }}
+          />
+
+          <NumberField
+            label="Net amount"
+            value={draft.netAmount}
+            error={errors.netAmount}
+            readOnly
+            onChange={() => {}}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <SectionHeading
+          title="Status and payout"
+          description="Track commission review and payout state independently for reconciliation."
+        />
+
+        <div className={styles.grid}>
+          <SelectField
+            label="Earning status"
+            value={draft.status}
+            options={
+              EARNING_STATUS_OPTIONS
+            }
+            onChange={(value) => {
+              update(
+                "status",
+                value as ExternalEarningStatus
+              );
+            }}
+          />
+
+          <SelectField
+            label="Payout status"
+            value={draft.payoutStatus}
+            options={
+              PAYOUT_STATUS_OPTIONS
+            }
+            error={errors.payoutStatus}
+            onChange={(value) => {
+              update(
+                "payoutStatus",
+                value as ExternalPayoutStatus
+              );
+            }}
+          />
+
+          <Field
+            label="Payout date (required when paid)"
+            type="date"
+            value={draft.payoutDate}
+            error={errors.payoutDate}
+            onChange={(value) => {
+              update(
+                "payoutDate",
+                value
+              );
+            }}
+          />
+        </div>
+
+        {draft.status ===
+        "reversed" ? (
+          <TextAreaField
+            label="Reversal reason"
+            value={
+              draft.reversalReason
+            }
+            error={
+              errors.reversalReason
+            }
+            onChange={(value) => {
+              update(
+                "reversalReason",
+                value
+              );
+            }}
+          />
+        ) : null}
+
+        {draft.status ===
+        "rejected" ? (
+          <TextAreaField
+            label="Rejection reason"
+            value={
+              draft.rejectionReason
+            }
+            error={
+              errors.rejectionReason
+            }
+            onChange={(value) => {
+              update(
+                "rejectionReason",
+                value
+              );
+            }}
+          />
+        ) : null}
+      </section>
+
+      <section className={styles.section}>
+        <SectionHeading
+          title="Internal notes"
+          description="Record reconciliation context, platform restrictions or follow-up requirements."
+        />
+
+        <TextAreaField
+          label="Notes"
+          value={draft.notes}
+          onChange={(value) => {
+            update("notes", value);
+          }}
+        />
+      </section>
+
+      <footer className={styles.actions}>
+        <button
+          type="button"
+          className={
+            styles.secondaryButton
+          }
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          className={
+            styles.primaryButton
+          }
+        >
+          {submitLabel}
+        </button>
+      </footer>
+    </form>
+  );
+}
+
+interface SectionHeadingProps {
+  title: string;
+  description: string;
+}
+
+function SectionHeading({
+  title,
+  description,
+}: SectionHeadingProps) {
+  return (
+    <header
+      className={
+        styles.sectionHeading
+      }
+    >
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </header>
+  );
+}
+
+interface FieldProps {
+  label: string;
+  value: string;
+  type?: "text" | "url" | "date";
+  placeholder?: string;
+  error?: string;
+  onChange: (value: string) => void;
+}
+
+function Field({
+  label,
+  value,
+  type = "text",
+  placeholder,
+  error,
+  onChange,
+}: FieldProps) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(
+            event.target.value
+          );
+        }}
+      />
+
+      <ErrorMessage value={error} />
+    </label>
+  );
+}
+
+interface NumberFieldProps {
+  label: string;
+  value: string;
+  error?: string;
+  readOnly?: boolean;
+  onChange: (value: string) => void;
+}
+
+function NumberField({
+  label,
+  value,
+  error,
+  readOnly = false,
+  onChange,
+}: NumberFieldProps) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        value={value}
+        readOnly={readOnly}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(
+            event.target.value
+          );
+        }}
+      />
+
+      <ErrorMessage value={error} />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  value,
+  error,
+  onChange,
+}: Omit<
+  FieldProps,
+  "type" | "placeholder"
+>) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <textarea
+        rows={5}
+        value={value}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(
+            event.target.value
+          );
+        }}
+      />
+
+      <ErrorMessage value={error} />
+    </label>
+  );
+}
+
+interface SelectFieldProps {
+  label: string;
+  value: string;
+  options: ReadonlyArray<{
+    value: string;
+    label: string;
+  }>;
+  error?: string;
+  onChange: (value: string) => void;
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  error,
+  onChange,
+}: SelectFieldProps) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+
+      <select
+        value={value}
+        aria-invalid={
+          error ? "true" : undefined
+        }
+        onChange={(event) => {
+          onChange(
+            event.target.value
+          );
+        }}
+      >
+        {options.map(
+          (option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          )
+        )}
+      </select>
+
+      <ErrorMessage value={error} />
+    </label>
+  );
+}
+
+function ErrorMessage({
+  value,
+}: {
+  value?: string;
+}) {
+  return value ? (
+    <small className={styles.error}>
+      {value}
+    </small>
+  ) : null;
+}
+
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningsManager.module.css
+============================================================
+
+.page {
+  min-height: 100%;
+  padding: 28px;
+  background: #f8fafc;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+
+.intro {
+  max-width: 720px;
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.primaryButton {
+  min-height: 40px;
+  flex: 0 0 auto;
+  padding: 0 16px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.summaryCard {
+  min-width: 0;
+  padding: 17px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.summaryCard span {
+  display: block;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.summaryCard strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 1.18rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.summaryCard p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.workspace {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.searchField,
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.searchField {
+  width: min(540px, 100%);
+}
+
+.filterField {
+  width: 190px;
+  flex: 0 0 auto;
+}
+
+.searchField label,
+.filterField span {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.searchField input,
+.filterField select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 11px;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.8rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+}
+
+.searchField input:focus,
+.filterField select:focus {
+  border-color: #5b86e5;
+  box-shadow:
+    0 0 0 3px
+    rgb(91 134 229 / 0.12);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 1160px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.table th {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: #f8fafc;
+}
+
+.table td {
+  color: #334155;
+  font-size: 0.76rem;
+}
+
+.table tbody tr:hover {
+  background: #fbfdff;
+}
+
+.table td strong,
+.table td span {
+  display: block;
+}
+
+.table td strong {
+  color: #1e293b;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.table td span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.statusBadge {
+  display: inline-flex !important;
+  min-height: 24px;
+  align-items: center;
+  margin-top: 0 !important;
+  padding: 0 8px;
+  font-size: 0.68rem !important;
+  font-weight: 800;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+}
+
+.statusBadge[data-status="pending"] {
+  color: #8a5a00;
+  background: #fff9e8;
+  border-color: #f0d48a;
+}
+
+.statusBadge[data-status="confirmed"],
+.statusBadge[data-status="approved"],
+.statusBadge[data-status="payable"] {
+  color: #285ea8;
+  background: #eef5ff;
+  border-color: #bfd3f5;
+}
+
+.statusBadge[data-status="paid"] {
+  color: #16724a;
+  background: #edf9f2;
+  border-color: #b7e3cb;
+}
+
+.statusBadge[data-status="reversed"] {
+  color: #8a5615;
+  background: #fff6e8;
+  border-color: #edc98f;
+}
+
+.statusBadge[data-status="rejected"] {
+  color: #a13737;
+  background: #fff1f1;
+  border-color: #efb7b7;
+}
+
+.viewButton {
+  min-height: 32px;
+  padding: 0 11px;
+  color: #334155;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.viewButton:hover {
+  color: #285ea8;
+  border-color: #9eb8ec;
+  background: #f8fbff;
+}
+
+.emptyState {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.emptyState h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.emptyState p {
+  margin: 7px auto 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.overlay {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(15 23 42 / 0.32);
+}
+
+.drawer {
+  width: min(720px, 94vw);
+  height: 100%;
+  overflow-y: auto;
+  background: #ffffff;
+  box-shadow:
+    -18px 0 44px
+    rgb(15 23 42 / 0.16);
+}
+
+.editorPanel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.editorHeader {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.editorHeader p {
+  margin: 0 0 5px;
+  color: #5b86e5;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.editorHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.editorHeader button {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #64748b;
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.editorBody {
+  padding: 22px;
+}
+
+@media (max-width: 1180px) {
+  .summaryGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 18px;
+  }
+
+  .pageHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .primaryButton {
+    width: 100%;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField,
+  .filterField {
+    width: 100%;
+  }
+
+  .drawer {
+    width: 100%;
+  }
+
+  .editorHeader,
+  .editorBody {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningDetails.module.css
+============================================================
+
+.panel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: #5b86e5;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.context {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.closeButton {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #64748b;
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  color: #475569;
+  font-size: 0.74rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.status,
+.payoutStatus {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 0.69rem;
+  font-weight: 800;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+}
+
+.status[data-status="pending"],
+.payoutStatus[data-status="awaiting_threshold"],
+.payoutStatus[data-status="scheduled"] {
+  color: #8a5a00;
+  background: #fff9e8;
+  border-color: #f0d48a;
+}
+
+.status[data-status="confirmed"],
+.status[data-status="approved"],
+.status[data-status="payable"],
+.payoutStatus[data-status="processing"] {
+  color: #285ea8;
+  background: #eef5ff;
+  border-color: #bfd3f5;
+}
+
+.status[data-status="paid"],
+.payoutStatus[data-status="paid"] {
+  color: #16724a;
+  background: #edf9f2;
+  border-color: #b7e3cb;
+}
+
+.status[data-status="reversed"],
+.payoutStatus[data-status="reversed"] {
+  color: #8a5615;
+  background: #fff6e8;
+  border-color: #edc98f;
+}
+
+.status[data-status="rejected"],
+.payoutStatus[data-status="failed"] {
+  color: #a13737;
+  background: #fff1f1;
+  border-color: #efb7b7;
+}
+
+.payoutStatus[data-status="not_payable"] {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.metrics > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px 22px;
+  background: #ffffff;
+}
+
+.metrics > div:last-child {
+  grid-column: 1 / -1;
+}
+
+.metrics span {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.metrics strong {
+  color: #0f172a;
+  font-size: 0.94rem;
+  overflow-wrap: anywhere;
+}
+
+.section {
+  padding: 20px 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 0.86rem;
+}
+
+.definitionGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin: 0;
+}
+
+.definitionGrid > div {
+  min-width: 0;
+}
+
+.definitionGrid dt {
+  margin: 0 0 4px;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.definitionGrid dd {
+  margin: 0;
+  color: #1e293b;
+  font-size: 0.79rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.externalLink {
+  display: inline-flex;
+  margin-top: 16px;
+  color: #3f6fc7;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.externalLink:hover {
+  text-decoration: underline;
+}
+
+.notes {
+  margin: 0;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+}
+
+.auditEntry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #edf2f7;
+}
+
+.auditEntry:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.auditEntry:last-child {
+  padding-bottom: 0;
+}
+
+.auditEntry > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auditEntry strong {
+  color: #334155;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.auditEntry span,
+.auditEntry time {
+  color: #64748b;
+  font-size: 0.68rem;
+}
+
+.auditEntry time {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: auto;
+  padding: 18px 22px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.primaryButton,
+.secondaryButton,
+.warningButton,
+.dangerButton {
+  min-height: 36px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 750;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+}
+
+.secondaryButton {
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.warningButton {
+  color: #8a5615;
+  background: #fffaf0;
+  border: 1px solid #e7c17d;
+}
+
+.dangerButton {
+  color: #a13737;
+  background: #fff5f5;
+  border: 1px solid #e8b4b4;
+}
+
+@media (max-width: 640px) {
+  .header,
+  .section,
+  .metrics > div,
+  .footer {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .statusRow {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .metrics,
+  .definitionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics > div:last-child {
+    grid-column: auto;
+  }
+
+  .auditEntry {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .auditEntry time {
+    text-align: left;
+  }
+
+  .footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .warningButton,
+  .dangerButton {
+    width: 100%;
+  }
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\ExternalEarningEditor.module.css
+============================================================
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.section {
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sectionHeading {
+  margin-bottom: 16px;
+}
+
+.sectionHeading h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.96rem;
+}
+
+.sectionHeading p {
+  max-width: 680px;
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field > span {
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.82rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+}
+
+.field input,
+.field select {
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.field textarea {
+  min-height: 112px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #5b86e5;
+  box-shadow:
+    0 0 0 3px
+    rgb(91 134 229 / 0.12);
+}
+
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: #dc6b6b;
+}
+
+.field input[readonly] {
+  color: #475569;
+  background: #f8fafc;
+  cursor: default;
+}
+
+.field select:disabled {
+  color: #94a3b8;
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #b42318;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 38px;
+  padding: 0 15px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background: #5b86e5;
+  border: 1px solid #5b86e5;
+}
+
+.secondaryButton {
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\external-earning.types.ts
+============================================================
+
+export type ExternalEarningStatus =
+  | "pending"
+  | "confirmed"
+  | "approved"
+  | "payable"
+  | "paid"
+  | "reversed"
+  | "rejected";
+
+export type ExternalEarningEventType =
+  | "sale"
+  | "lead"
+  | "qualified_lead"
+  | "signup"
+  | "trial_started"
+  | "subscription"
+  | "service_purchase"
+  | "booking"
+  | "installation_completed"
+  | "application_submitted"
+  | "app_installed"
+  | "custom";
+
+export type ExternalEarningSource =
+  | "manual"
+  | "platform_dashboard"
+  | "statement"
+  | "csv_import"
+  | "api"
+  | "webhook";
+
+export type ExternalPayoutStatus =
+  | "not_payable"
+  | "awaiting_threshold"
+  | "scheduled"
+  | "processing"
+  | "paid"
+  | "failed"
+  | "reversed";
+
+export interface ExternalEarningAmount {
+  currency: string;
+  grossAmount: number;
+  commissionAmount: number;
+  taxWithheld: number;
+  fees: number;
+  netAmount: number;
+}
+
+export interface ExternalEarningAuditEntry {
+  id: string;
+
+  action:
+    | "created"
+    | "updated"
+    | "confirmed"
+    | "approved"
+    | "marked_payable"
+    | "marked_paid"
+    | "reversed"
+    | "rejected"
+    | "reconciled";
+
+  message: string;
+  actor: string;
+  occurredAt: string;
+}
+
+export interface ExternalEarningRecord {
+  id: string;
+
+  programId: string;
+  promotionId: string;
+
+  externalConversionId: string;
+  externalOrderId: string;
+  externalPayoutId: string;
+
+  eventType: ExternalEarningEventType;
+  source: ExternalEarningSource;
+
+  conversionDate: string;
+  confirmationDate: string;
+  payoutDate: string;
+
+  status: ExternalEarningStatus;
+  payoutStatus: ExternalPayoutStatus;
+
+  amount: ExternalEarningAmount;
+
+  customerCountry: string;
+
+  statementReference: string;
+  evidenceUrl: string;
+
+  reversalReason: string;
+  rejectionReason: string;
+
+  notes: string;
+
+  createdAt: string;
+  updatedAt: string;
+
+  auditHistory: ExternalEarningAuditEntry[];
+}
+
+export interface ExternalEarningDraft {
+  programId: string;
+  promotionId: string;
+
+  externalConversionId: string;
+  externalOrderId: string;
+  externalPayoutId: string;
+
+  eventType: ExternalEarningEventType;
+  source: ExternalEarningSource;
+
+  conversionDate: string;
+  confirmationDate: string;
+  payoutDate: string;
+
+  status: ExternalEarningStatus;
+  payoutStatus: ExternalPayoutStatus;
+
+  currency: string;
+  grossAmount: string;
+  commissionAmount: string;
+  taxWithheld: string;
+  fees: string;
+  netAmount: string;
+
+  customerCountry: string;
+
+  statementReference: string;
+  evidenceUrl: string;
+
+  reversalReason: string;
+  rejectionReason: string;
+
+  notes: string;
+}
+
+export type ExternalEarningErrors =
+  Partial<
+    Record<
+      keyof ExternalEarningDraft,
+      string
+    >
+  >;
+
+============================================================
+FILE: src\features\operations\external-earnings\external-earning.constants.ts
+============================================================
+
+import type {
+  ExternalEarningEventType,
+  ExternalEarningSource,
+  ExternalEarningStatus,
+  ExternalPayoutStatus,
+} from "./external-earning.types";
+
+export const EARNING_STATUS_OPTIONS:
+  ReadonlyArray<{
+    value: ExternalEarningStatus;
+    label: string;
+  }> = [
+  {
+    value: "pending",
+    label: "Pending",
+  },
+  {
+    value: "confirmed",
+    label: "Confirmed",
+  },
+  {
+    value: "approved",
+    label: "Approved",
+  },
+  {
+    value: "payable",
+    label: "Payable",
+  },
+  {
+    value: "paid",
+    label: "Paid",
+  },
+  {
+    value: "reversed",
+    label: "Reversed",
+  },
+  {
+    value: "rejected",
+    label: "Rejected",
+  },
+];
+
+export const EARNING_EVENT_OPTIONS:
+  ReadonlyArray<{
+    value: ExternalEarningEventType;
+    label: string;
+  }> = [
+  {
+    value: "sale",
+    label: "Sale",
+  },
+  {
+    value: "lead",
+    label: "Lead",
+  },
+  {
+    value: "qualified_lead",
+    label: "Qualified lead",
+  },
+  {
+    value: "signup",
+    label: "Signup",
+  },
+  {
+    value: "trial_started",
+    label: "Trial started",
+  },
+  {
+    value: "subscription",
+    label: "Subscription",
+  },
+  {
+    value: "service_purchase",
+    label: "Service purchase",
+  },
+  {
+    value: "booking",
+    label: "Booking",
+  },
+  {
+    value: "installation_completed",
+    label: "Installation completed",
+  },
+  {
+    value: "application_submitted",
+    label: "Application submitted",
+  },
+  {
+    value: "app_installed",
+    label: "App installed",
+  },
+  {
+    value: "custom",
+    label: "Custom",
+  },
+];
+
+export const EARNING_SOURCE_OPTIONS:
+  ReadonlyArray<{
+    value: ExternalEarningSource;
+    label: string;
+  }> = [
+  {
+    value: "manual",
+    label: "Manual entry",
+  },
+  {
+    value: "platform_dashboard",
+    label: "Platform dashboard",
+  },
+  {
+    value: "statement",
+    label: "Statement",
+  },
+  {
+    value: "csv_import",
+    label: "CSV import",
+  },
+  {
+    value: "api",
+    label: "API",
+  },
+  {
+    value: "webhook",
+    label: "Webhook",
+  },
+];
+
+export const PAYOUT_STATUS_OPTIONS:
+  ReadonlyArray<{
+    value: ExternalPayoutStatus;
+    label: string;
+  }> = [
+  {
+    value: "not_payable",
+    label: "Not payable",
+  },
+  {
+    value: "awaiting_threshold",
+    label: "Awaiting threshold",
+  },
+  {
+    value: "scheduled",
+    label: "Scheduled",
+  },
+  {
+    value: "processing",
+    label: "Processing",
+  },
+  {
+    value: "paid",
+    label: "Paid",
+  },
+  {
+    value: "failed",
+    label: "Failed",
+  },
+  {
+    value: "reversed",
+    label: "Reversed",
+  },
+];
+
+export function earningStatusLabel(
+  status: ExternalEarningStatus
+) {
+  return (
+    EARNING_STATUS_OPTIONS.find(
+      (option) =>
+        option.value === status
+    )?.label ?? status
+  );
+}
+
+export function earningEventLabel(
+  eventType: ExternalEarningEventType
+) {
+  return (
+    EARNING_EVENT_OPTIONS.find(
+      (option) =>
+        option.value === eventType
+    )?.label ?? eventType
+  );
+}
+
+export function earningSourceLabel(
+  source: ExternalEarningSource
+) {
+  return (
+    EARNING_SOURCE_OPTIONS.find(
+      (option) =>
+        option.value === source
+    )?.label ?? source
+  );
+}
+
+export function payoutStatusLabel(
+  status: ExternalPayoutStatus
+) {
+  return (
+    PAYOUT_STATUS_OPTIONS.find(
+      (option) =>
+        option.value === status
+    )?.label ?? status
+  );
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\external-earning.validation.ts
+============================================================
+
+import type {
+  ExternalEarningDraft,
+  ExternalEarningErrors,
+} from "./external-earning.types";
+
+export const EMPTY_EXTERNAL_EARNING_DRAFT:
+  ExternalEarningDraft = {
+  programId: "",
+  promotionId: "",
+
+  externalConversionId: "",
+  externalOrderId: "",
+  externalPayoutId: "",
+
+  eventType: "sale",
+  source: "manual",
+
+  conversionDate: "",
+  confirmationDate: "",
+  payoutDate: "",
+
+  status: "pending",
+  payoutStatus: "not_payable",
+
+  currency: "INR",
+  grossAmount: "",
+  commissionAmount: "",
+  taxWithheld: "",
+  fees: "",
+  netAmount: "0.00",
+
+  customerCountry: "",
+
+  statementReference: "",
+  evidenceUrl: "",
+
+  reversalReason: "",
+  rejectionReason: "",
+
+  notes: "",
+};
+
+function isValidOptionalUrl(
+  value: string
+) {
+  if (!value.trim()) {
+    return true;
+  }
+
+  try {
+    const url = new URL(value);
+
+    return (
+      url.protocol === "https:" ||
+      url.protocol === "http:"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isValidOptionalAmount(
+  value: string
+) {
+  if (!value.trim()) {
+    return true;
+  }
+
+  const number = Number(value);
+
+  return (
+    Number.isFinite(number) &&
+    number >= 0
+  );
+}
+
+function isValidRequiredAmount(
+  value: string
+) {
+  if (!value.trim()) {
+    return false;
+  }
+
+  return isValidOptionalAmount(value);
+}
+
+function requiresConfirmationDate(
+  status: ExternalEarningDraft["status"]
+) {
+  return [
+    "confirmed",
+    "approved",
+    "payable",
+    "paid",
+  ].includes(status);
+}
+
+function requiresCommissionAmount(
+  status: ExternalEarningDraft["status"]
+) {
+  return [
+    "approved",
+    "payable",
+    "paid",
+  ].includes(status);
+}
+
+export function calculateNetAmount(
+  commissionAmount: string,
+  taxWithheld: string,
+  fees: string
+) {
+  const commission =
+    Number(commissionAmount) || 0;
+
+  const tax =
+    Number(taxWithheld) || 0;
+
+  const feeAmount =
+    Number(fees) || 0;
+
+  return Math.max(
+    0,
+    commission -
+      tax -
+      feeAmount
+  );
+}
+
+export function validateExternalEarning(
+  draft: ExternalEarningDraft
+) {
+  const errors:
+    ExternalEarningErrors = {};
+
+  if (!draft.programId) {
+    errors.programId =
+      "Select an approved external program.";
+  }
+
+  if (!draft.promotionId) {
+    errors.promotionId =
+      "Select an external promotion.";
+  }
+
+  if (
+    !draft.externalConversionId.trim()
+  ) {
+    errors.externalConversionId =
+      "External conversion ID is required.";
+  }
+
+  if (!draft.conversionDate) {
+    errors.conversionDate =
+      "Conversion date is required.";
+  }
+
+  if (!draft.currency.trim()) {
+    errors.currency =
+      "Currency is required.";
+  }
+
+  if (
+    !isValidOptionalAmount(
+      draft.grossAmount
+    )
+  ) {
+    errors.grossAmount =
+      "Enter a valid non-negative gross amount.";
+  }
+
+  if (
+    requiresCommissionAmount(
+      draft.status
+    ) &&
+    !isValidRequiredAmount(
+      draft.commissionAmount
+    )
+  ) {
+    errors.commissionAmount =
+      "Commission amount is required for approved, payable or paid earnings.";
+  } else if (
+    !isValidOptionalAmount(
+      draft.commissionAmount
+    )
+  ) {
+    errors.commissionAmount =
+      "Enter a valid non-negative commission amount.";
+  }
+
+  if (
+    !isValidOptionalAmount(
+      draft.taxWithheld
+    )
+  ) {
+    errors.taxWithheld =
+      "Enter a valid non-negative tax amount.";
+  }
+
+  if (
+    !isValidOptionalAmount(
+      draft.fees
+    )
+  ) {
+    errors.fees =
+      "Enter a valid non-negative fee amount.";
+  }
+
+  if (
+    requiresConfirmationDate(
+      draft.status
+    ) &&
+    !draft.confirmationDate
+  ) {
+    errors.confirmationDate =
+      "Confirmation date is required for this earning status.";
+  }
+
+  if (
+    draft.confirmationDate &&
+    draft.conversionDate &&
+    draft.confirmationDate <
+      draft.conversionDate
+  ) {
+    errors.confirmationDate =
+      "Confirmation date cannot be before the conversion date.";
+  }
+
+  if (
+    draft.payoutDate &&
+    draft.confirmationDate &&
+    draft.payoutDate <
+      draft.confirmationDate
+  ) {
+    errors.payoutDate =
+      "Payout date cannot be before the confirmation date.";
+  }
+
+  if (
+    draft.status === "paid"
+  ) {
+    if (
+      !draft.externalPayoutId.trim()
+    ) {
+      errors.externalPayoutId =
+        "External payout ID is required when the earning is paid.";
+    }
+
+    if (!draft.payoutDate) {
+      errors.payoutDate =
+        "Payout date is required when the earning is paid.";
+    }
+
+    if (
+      draft.payoutStatus !== "paid"
+    ) {
+      errors.payoutStatus =
+        "Paid earnings require Paid payout status.";
+    }
+  }
+
+  if (
+    draft.payoutStatus === "paid" &&
+    !draft.payoutDate
+  ) {
+    errors.payoutDate =
+      "Paid payouts require a payout date.";
+  }
+
+  if (
+    draft.status === "reversed" &&
+    !draft.reversalReason.trim()
+  ) {
+    errors.reversalReason =
+      "Enter the reversal reason.";
+  }
+
+  if (
+    draft.status === "rejected" &&
+    !draft.rejectionReason.trim()
+  ) {
+    errors.rejectionReason =
+      "Enter the rejection reason.";
+  }
+
+  if (
+    !isValidOptionalUrl(
+      draft.evidenceUrl
+    )
+  ) {
+    errors.evidenceUrl =
+      "Enter a valid evidence URL.";
+  }
+
+  return errors;
+}
+
+export function hasExternalEarningErrors(
+  errors: ExternalEarningErrors
+) {
+  return Object.keys(errors).length > 0;
+}
+
+============================================================
+FILE: src\features\operations\external-earnings\external-earning.mock.ts
+============================================================
+
+import type {
+  ExternalEarningRecord,
+} from "./external-earning.types";
+
+export const INITIAL_EXTERNAL_EARNINGS:
+  ExternalEarningRecord[] = [
+  {
+    id: "external-earning-example-1",
+
+    programId:
+      "program-example-approved",
+
+    promotionId:
+      "external-promotion-example-1",
+
+    externalConversionId:
+      "CONV-EXAMPLE-1001",
+
+    externalOrderId:
+      "ORDER-EXAMPLE-5001",
+
+    externalPayoutId:
+      "",
+
+    eventType:
+      "sale",
+
+    source:
+      "platform_dashboard",
+
+    conversionDate:
+      "2026-07-24",
+
+    confirmationDate:
+      "2026-07-27",
+
+    payoutDate:
+      "",
+
+    status:
+      "approved",
+
+    payoutStatus:
+      "awaiting_threshold",
+
+    amount: {
+      currency:
+        "INR",
+
+      grossAmount:
+        84990,
+
+      commissionAmount:
+        4250,
+
+      taxWithheld:
+        425,
+
+      fees:
+        0,
+
+      netAmount:
+        3825,
+    },
+
+    customerCountry:
+      "India",
+
+    statementReference:
+      "JUL-2026-STATEMENT-01",
+
+    evidenceUrl:
+      "https://example.com/dashboard/conversions/CONV-EXAMPLE-1001",
+
+    reversalReason:
+      "",
+
+    rejectionReason:
+      "",
+
+    notes:
+      "Demonstration confirmed sale reported by the external platform.",
+
+    createdAt:
+      "24 Jul 2026, 14:20",
+
+    updatedAt:
+      "27 Jul 2026, 10:15",
+
+    auditHistory: [
+      {
+        id:
+          "external-earning-audit-1",
+
+        action:
+          "created",
+
+        message:
+          "External earning record created from platform dashboard data.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "24 Jul 2026, 14:20",
+      },
+
+      {
+        id:
+          "external-earning-audit-2",
+
+        action:
+          "approved",
+
+        message:
+          "Commission approved by the external platform.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "27 Jul 2026, 10:15",
+      },
+    ],
+  },
+
+  {
+    id: "external-earning-example-2",
+
+    programId:
+      "program-example-approved",
+
+    promotionId:
+      "external-promotion-example-1",
+
+    externalConversionId:
+      "CONV-EXAMPLE-1002",
+
+    externalOrderId:
+      "ORDER-EXAMPLE-5002",
+
+    externalPayoutId:
+      "PAYOUT-EXAMPLE-7001",
+
+    eventType:
+      "sale",
+
+    source:
+      "statement",
+
+    conversionDate:
+      "2026-07-18",
+
+    confirmationDate:
+      "2026-07-21",
+
+    payoutDate:
+      "2026-07-29",
+
+    status:
+      "paid",
+
+    payoutStatus:
+      "paid",
+
+    amount: {
+      currency:
+        "INR",
+
+      grossAmount:
+        62490,
+
+      commissionAmount:
+        3125,
+
+      taxWithheld:
+        313,
+
+      fees:
+        25,
+
+      netAmount:
+        2787,
+    },
+
+    customerCountry:
+      "India",
+
+    statementReference:
+      "JUL-2026-PAYOUT-01",
+
+    evidenceUrl:
+      "https://example.com/statements/JUL-2026-PAYOUT-01",
+
+    reversalReason:
+      "",
+
+    rejectionReason:
+      "",
+
+    notes:
+      "Demonstration payout received and manually reconciled.",
+
+    createdAt:
+      "18 Jul 2026, 16:40",
+
+    updatedAt:
+      "29 Jul 2026, 17:05",
+
+    auditHistory: [
+      {
+        id:
+          "external-earning-audit-3",
+
+        action:
+          "created",
+
+        message:
+          "External earning record created from statement data.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "18 Jul 2026, 16:40",
+      },
+
+      {
+        id:
+          "external-earning-audit-4",
+
+        action:
+          "marked_paid",
+
+        message:
+          "Commission marked as paid.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "29 Jul 2026, 16:55",
+      },
+
+      {
+        id:
+          "external-earning-audit-5",
+
+        action:
+          "reconciled",
+
+        message:
+          "Payout reconciled with the external statement.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "29 Jul 2026, 17:05",
+      },
+    ],
+  },
+
+  {
+    id: "external-earning-example-3",
+
+    programId:
+      "program-example-approved",
+
+    promotionId:
+      "external-promotion-example-2",
+
+    externalConversionId:
+      "CONV-EXAMPLE-1003",
+
+    externalOrderId:
+      "",
+
+    externalPayoutId:
+      "",
+
+    eventType:
+      "subscription",
+
+    source:
+      "manual",
+
+    conversionDate:
+      "2026-07-30",
+
+    confirmationDate:
+      "",
+
+    payoutDate:
+      "",
+
+    status:
+      "pending",
+
+    payoutStatus:
+      "not_payable",
+
+    amount: {
+      currency:
+        "USD",
+
+      grossAmount:
+        120,
+
+      commissionAmount:
+        24,
+
+      taxWithheld:
+        0,
+
+      fees:
+        0,
+
+      netAmount:
+        24,
+    },
+
+    customerCountry:
+      "United States",
+
+    statementReference:
+      "",
+
+    evidenceUrl:
+      "",
+
+    reversalReason:
+      "",
+
+    rejectionReason:
+      "",
+
+    notes:
+      "Demonstration subscription awaiting external confirmation.",
+
+    createdAt:
+      "30 Jul 2026, 12:30",
+
+    updatedAt:
+      "30 Jul 2026, 12:30",
+
+    auditHistory: [
+      {
+        id:
+          "external-earning-audit-6",
+
+        action:
+          "created",
+
+        message:
+          "External earning record created manually with Pending status.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "30 Jul 2026, 12:30",
+      },
+    ],
+  },
+
+  {
+    id: "external-earning-example-4",
+
+    programId:
+      "program-example-approved",
+
+    promotionId:
+      "external-promotion-example-1",
+
+    externalConversionId:
+      "CONV-EXAMPLE-1004",
+
+    externalOrderId:
+      "ORDER-EXAMPLE-5004",
+
+    externalPayoutId:
+      "",
+
+    eventType:
+      "sale",
+
+    source:
+      "platform_dashboard",
+
+    conversionDate:
+      "2026-07-16",
+
+    confirmationDate:
+      "2026-07-19",
+
+    payoutDate:
+      "",
+
+    status:
+      "reversed",
+
+    payoutStatus:
+      "reversed",
+
+    amount: {
+      currency:
+        "INR",
+
+      grossAmount:
+        47990,
+
+      commissionAmount:
+        2400,
+
+      taxWithheld:
+        0,
+
+      fees:
+        0,
+
+      netAmount:
+        0,
+    },
+
+    customerCountry:
+      "India",
+
+    statementReference:
+      "JUL-2026-REVERSAL-01",
+
+    evidenceUrl:
+      "https://example.com/dashboard/conversions/CONV-EXAMPLE-1004",
+
+    reversalReason:
+      "Customer order was cancelled and refunded by the external platform.",
+
+    rejectionReason:
+      "",
+
+    notes:
+      "Demonstration reversed commission retained for audit history.",
+
+    createdAt:
+      "16 Jul 2026, 11:10",
+
+    updatedAt:
+      "22 Jul 2026, 09:45",
+
+    auditHistory: [
+      {
+        id:
+          "external-earning-audit-7",
+
+        action:
+          "created",
+
+        message:
+          "External earning record created from platform dashboard data.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "16 Jul 2026, 11:10",
+      },
+
+      {
+        id:
+          "external-earning-audit-8",
+
+        action:
+          "reversed",
+
+        message:
+          "Commission reversed after the external order was cancelled.",
+
+        actor:
+          "Admin",
+
+        occurredAt:
+          "22 Jul 2026, 09:45",
+      },
+    ],
+  },
+];

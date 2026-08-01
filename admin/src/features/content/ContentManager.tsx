@@ -2,6 +2,7 @@
 
 import {
   Suspense,
+  useCallback,
   useMemo,
   useState,
 } from "react";
@@ -10,218 +11,32 @@ import {
   useSearchParams,
 } from "next/navigation";
 
+import {
+  useAdminContent,
+} from "./use-admin-content";
+
+import {
+  useContentActions,
+} from "./use-content-actions";
+
+import {
+  useContentDetails,
+} from "./use-content-details";
+
+import type {
+  AdminContentDetailsResponse,
+  AdminContentRecord,
+  RemovalReason,
+} from "./content-api.types";
+
 import styles from "./ContentManager.module.css";
 
-type ContentStatus =
-  | "active"
-  | "removed";
-
-type RemovalReason =
-  | "copyright"
-  | "publisher_request"
-  | "misleading_unsafe"
-  | "broken_unavailable"
-  | "other";
-
-interface ContentAuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface ContentRecord {
-  id: string;
-  title: string;
-  publisher: string;
-  originalUrl: string;
-
-  sourceMethod:
-    | "API"
-    | "RSS"
-    | "Embed"
-    | "Agreement"
-    | "Link-only";
-
-  status: ContentStatus;
-
-  publishedAt: string;
-  addedAt: string;
-
-  removalReason?: RemovalReason;
-  removalNote?: string;
-
-  copyrightCaseId?: string;
-  copyrightClaimant?: string;
-
-  preventReimport: boolean;
-
-  audit: ContentAuditEntry[];
-}
-
-const INITIAL_CONTENT: ContentRecord[] = [
-  {
-    id: "CNT-2003",
-
-    title:
-      "AI agents are changing software workflows",
-
-    publisher:
-      "Example Tech",
-
-    originalUrl:
-      "https://example.com/ai-agents-workflows",
-
-    sourceMethod:
-      "RSS",
-
-    status:
-      "active",
-
-    publishedAt:
-      "19 Jul 2026",
-
-    addedAt:
-      "19 Jul 2026",
-
-    preventReimport:
-      false,
-
-    audit: [
-      {
-        id:
-          "audit-2003-1",
-
-        action:
-          "Added to Poster from authorized RSS",
-
-        actor:
-          "System",
-
-        timestamp:
-          "19 Jul 2026 · 08:40",
-      },
-    ],
-  },
-
-  {
-    id: "CNT-2002",
-
-    title:
-      "New climate research explained",
-
-    publisher:
-      "Example Science",
-
-    originalUrl:
-      "https://example.com/climate-research",
-
-    sourceMethod:
-      "API",
-
-    status:
-      "active",
-
-    publishedAt:
-      "18 Jul 2026",
-
-    addedAt:
-      "18 Jul 2026",
-
-    preventReimport:
-      false,
-
-    audit: [
-      {
-        id:
-          "audit-2002-1",
-
-        action:
-          "Added to Poster from official API",
-
-        actor:
-          "System",
-
-        timestamp:
-          "18 Jul 2026 · 13:10",
-      },
-    ],
-  },
-
-  {
-    id: "CNT-2001",
-
-    title:
-      "AI regulation story",
-
-    publisher:
-      "BBC",
-
-    originalUrl:
-      "https://example.com/bbc/ai-regulation",
-
-    sourceMethod:
-      "RSS",
-
-    status:
-      "removed",
-
-    publishedAt:
-      "18 Jul 2026",
-
-    addedAt:
-      "18 Jul 2026",
-
-    removalReason:
-      "copyright",
-
-    removalNote:
-      "Removed after rights-holder request.",
-
-    copyrightCaseId:
-      "CR-1001",
-
-    copyrightClaimant:
-      "BBC",
-
-    preventReimport:
-      true,
-
-    audit: [
-      {
-        id:
-          "audit-2001-2",
-
-        action:
-          "Removed from Poster + prevent re-import",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 · 09:35",
-      },
-
-      {
-        id:
-          "audit-2001-1",
-
-        action:
-          "Copyright strike received from BBC",
-
-        actor:
-          "System",
-
-        timestamp:
-          "19 Jul 2026 · 09:20",
-      },
-    ],
-  },
-];
-
 const REMOVAL_REASONS: Array<{
-  value: RemovalReason;
-  label: string;
+  value:
+    RemovalReason;
+
+  label:
+    string;
 }> = [
   {
     value:
@@ -265,11 +80,13 @@ const REMOVAL_REASONS: Array<{
 ];
 
 function reasonLabel(
-  reason?: RemovalReason
+  reason:
+    RemovalReason |
+    null
 ): string {
   return (
     REMOVAL_REASONS.find(
-      (item) =>
+      item =>
         item.value ===
         reason
     )?.label ??
@@ -279,27 +96,57 @@ function reasonLabel(
 
 function sourceMethodLabel(
   method:
-    ContentRecord["sourceMethod"]
+    AdminContentRecord[
+      "acquisitionMethod"
+    ]
 ): string {
-  switch (method) {
-    case "API":
+  switch (
+    method
+  ) {
+    case "api":
       return "Official API";
 
-    case "RSS":
+    case "rss":
       return "Authorized RSS";
 
-    case "Embed":
+    case "embed":
       return "Official Embed/oEmbed";
 
-    case "Agreement":
+    case "agreement":
       return "Publisher Agreement";
 
-    case "Link-only":
+    case "link_only":
       return "Link-only";
   }
 }
 
-function nowLabel(): string {
+function formatDate(
+  value:
+    string |
+    null
+): string {
+  if (
+    !value
+  ) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat(
+    undefined,
+    {
+      dateStyle:
+        "medium",
+    }
+  ).format(
+    new Date(
+      value
+    )
+  );
+}
+
+function formatTimestamp(
+  value: string
+): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
@@ -310,7 +157,9 @@ function nowLabel(): string {
         "short",
     }
   ).format(
-    new Date()
+    new Date(
+      value
+    )
   );
 }
 
@@ -331,73 +180,203 @@ function ContentManagerContent() {
       "record"
     );
 
+  const contentList =
+    useAdminContent();
+
   const [
-    records,
-    setRecords,
-  ] = useState<
-    ContentRecord[]
-  >(
-    INITIAL_CONTENT
-  );
+    updatedRecords,
+    setUpdatedRecords,
+  ] =
+    useState<
+      Record<
+        string,
+        AdminContentRecord
+      >
+    >(
+      {}
+    );
+
+  const [
+    updatedDetails,
+    setUpdatedDetails,
+  ] =
+    useState<
+      Record<
+        string,
+        AdminContentDetailsResponse
+      >
+    >(
+      {}
+    );
 
   const [
     query,
     setQuery,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     filter,
     setFilter,
-  ] = useState<
-    "all" | ContentStatus
-  >(
-    "all"
-  );
+  ] =
+    useState<
+      | "all"
+      | AdminContentRecord[
+          "status"
+        ]
+    >(
+      "all"
+    );
 
   const [
     selectedId,
     setSelectedId,
-  ] = useState<
-    string | null
-  >(
-    INITIAL_CONTENT.some(
-      (record) =>
-        record.id ===
-        requestedRecordId
-    )
-      ? requestedRecordId
-      : null
-  );
+  ] =
+    useState<
+      string |
+      null
+    >(
+      requestedRecordId
+    );
 
   const [
     removeTargetId,
     setRemoveTargetId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
+  ] =
+    useState<
+      string |
+      null
+    >(
+      null
+    );
 
   const [
     removeReason,
     setRemoveReason,
-  ] = useState<
-    RemovalReason
-  >(
-    "copyright"
-  );
+  ] =
+    useState<
+      RemovalReason
+    >(
+      "copyright"
+    );
 
   const [
     removeNote,
     setRemoveNote,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     preventReimport,
     setPreventReimport,
-  ] = useState(
-    false
-  );
+  ] =
+    useState(
+      false
+    );
+
+  const records =
+    useMemo(
+      () =>
+        (
+          contentList
+            .data
+            ?.records ??
+          []
+        ).map(
+          record =>
+            updatedRecords[
+              record.id
+            ] ??
+            record
+        ),
+      [
+        contentList.data,
+        updatedRecords,
+      ]
+    );
+
+  const selectedDetails =
+    useContentDetails(
+      selectedId
+    );
+
+  const selectedRecord =
+    selectedId
+      ? updatedDetails[
+          selectedId
+        ]?.record ??
+        selectedDetails
+          .data
+          ?.record ??
+        records.find(
+          record =>
+            record.id ===
+            selectedId
+        ) ??
+        null
+      : null;
+
+  const selectedAudit =
+    selectedId
+      ? updatedDetails[
+          selectedId
+        ]?.audit ??
+        selectedDetails
+          .data
+          ?.audit ??
+        []
+      : [];
+
+  const removalRecord =
+    removeTargetId
+      ? records.find(
+          record =>
+            record.id ===
+            removeTargetId
+        ) ??
+        null
+      : null;
+
+  const handleActionCompleted =
+    useCallback(
+      (
+        details:
+          AdminContentDetailsResponse
+      ) => {
+        setUpdatedRecords(
+          current => ({
+            ...current,
+
+            [details.record.id]:
+              details.record,
+          })
+        );
+
+        setUpdatedDetails(
+          current => ({
+            ...current,
+
+            [details.record.id]:
+              details,
+          })
+        );
+
+        contentList.refresh();
+      },
+      [
+        contentList,
+      ]
+    );
+
+  const contentActions =
+    useContentActions({
+      onCompleted:
+        handleActionCompleted,
+    });
 
   const normalizedQuery =
     query
@@ -405,76 +384,48 @@ function ContentManagerContent() {
       .toLowerCase();
 
   const visibleRecords =
-    useMemo(() => {
-      return records.filter(
-        (record) => {
-          if (
-            filter !==
-              "all" &&
-            record.status !==
-              filter
-          ) {
-            return false;
-          }
-
-          if (
-            !normalizedQuery
-          ) {
-            return true;
-          }
-
-          return [
-            record.id,
-            record.title,
-            record.publisher,
-            record.originalUrl,
-            record.sourceMethod,
-            sourceMethodLabel(
-              record.sourceMethod
-            ),
-          ].some(
-            (value) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedQuery
-                )
-          );
-        }
-      );
-    }, [
-      filter,
-      normalizedQuery,
-      records,
-    ]);
-
-  const selectedRecord =
     useMemo(
       () =>
-        records.find(
-          (record) =>
-            record.id ===
-            selectedId
-        ) ?? null,
+        records.filter(
+          record => {
+            if (
+              filter !==
+                "all" &&
+              record.status !==
+                filter
+            ) {
+              return false;
+            }
 
+            if (
+              !normalizedQuery
+            ) {
+              return true;
+            }
+
+            return [
+              record.publicId,
+              record.title,
+              record.publisherName,
+              record.originalUrl,
+              record.acquisitionMethod,
+              sourceMethodLabel(
+                record.acquisitionMethod
+              ),
+            ].some(
+              value =>
+                value
+                  .toLowerCase()
+                  .includes(
+                    normalizedQuery
+                  )
+            );
+          }
+        ),
       [
+        filter,
+        normalizedQuery,
         records,
-        selectedId,
-      ]
-    );
-
-  const removalRecord =
-    useMemo(
-      () =>
-        records.find(
-          (record) =>
-            record.id ===
-            removeTargetId
-        ) ?? null,
-
-      [
-        records,
-        removeTargetId,
       ]
     );
 
@@ -486,46 +437,50 @@ function ContentManagerContent() {
 
         active:
           records.filter(
-            (record) =>
+            record =>
               record.status ===
               "active"
           ).length,
 
         removed:
           records.filter(
-            (record) =>
+            record =>
               record.status ===
               "removed"
           ).length,
       }),
-
       [
         records,
       ]
     );
 
-  const beginRemove = (
-    record:
-      ContentRecord
-  ) => {
-    setRemoveTargetId(
-      record.id
-    );
+  const beginRemove =
+    (
+      record:
+        AdminContentRecord
+    ) => {
+      setRemoveTargetId(
+        record.id
+      );
 
-    setRemoveReason(
-      record.copyrightCaseId
-        ? "copyright"
-        : "other"
-    );
-
-    setRemoveNote("");
-
-    setPreventReimport(
-      Boolean(
+      setRemoveReason(
         record.copyrightCaseId
-      )
-    );
-  };
+          ? "copyright"
+          : "other"
+      );
+
+      setRemoveNote(
+        ""
+      );
+
+      setPreventReimport(
+        Boolean(
+          record.copyrightCaseId
+        )
+      );
+
+      contentActions.clearError();
+    };
 
   const cancelRemove =
     () => {
@@ -533,133 +488,88 @@ function ContentManagerContent() {
         null
       );
 
-      setRemoveNote("");
+      setRemoveNote(
+        ""
+      );
 
       setPreventReimport(
         false
       );
+
+      contentActions.clearError();
     };
 
   const confirmRemove =
-    () => {
+    async () => {
       if (
         !removalRecord
       ) {
         return;
       }
 
-      setRecords(
-        (current) =>
-          current.map(
-            (record) => {
-              if (
-                record.id !==
-                removalRecord.id
-              ) {
-                return record;
-              }
+      const result =
+        await contentActions
+          .remove(
+            removalRecord.id,
+            {
+              expectedRowVersion:
+                removalRecord.rowVersion,
 
-              const claimant =
+              reason:
+                removeReason,
+
+              note:
+                removeNote
+                  .trim() ||
+                null,
+
+              copyrightCaseId:
                 removeReason ===
                   "copyright"
-                  ? record.copyrightClaimant
-                  : undefined;
+                  ? removalRecord
+                      .copyrightCaseId
+                  : null,
 
-              const action =
-                preventReimport
-                  ? "Removed from Poster + prevent re-import"
-                  : "Removed from Poster";
+              copyrightClaimant:
+                removeReason ===
+                  "copyright"
+                  ? removalRecord
+                      .copyrightClaimant
+                  : null,
 
-              return {
-                ...record,
-
-                status:
-                  "removed",
-
-                removalReason:
-                  removeReason,
-
-                removalNote:
-                  removeNote
-                    .trim() ||
-                  undefined,
-
-                preventReimport,
-
-                audit: [
-                  {
-                    id:
-                      `${record.id}-${Date.now()}`,
-
-                    action:
-                      claimant
-                        ? `${action} · Copyright strike by ${claimant}`
-                        : action,
-
-                    actor:
-                      "Admin",
-
-                    timestamp:
-                      nowLabel(),
-                  },
-
-                  ...record.audit,
-                ],
-              };
+              preventReimport,
             }
-          )
-      );
+          );
 
-      cancelRemove();
+      if (
+        result
+      ) {
+        cancelRemove();
+      }
     };
 
-  const restoreRecord = (
-    record:
-      ContentRecord
-  ) => {
-    setRecords(
-      (current) =>
-        current.map(
-          (item) =>
-            item.id ===
-            record.id
-              ? {
-                  ...item,
+  const restoreRecord =
+    async (
+      record:
+        AdminContentRecord
+    ) => {
+      contentActions.clearError();
 
-                  status:
-                    "active",
+      const result =
+        await contentActions
+          .restore(
+            record.id,
+            record.rowVersion
+          );
 
-                  removalReason:
-                    undefined,
-
-                  removalNote:
-                    undefined,
-
-                  preventReimport:
-                    false,
-
-                  audit: [
-                    {
-                      id:
-                        `${item.id}-${Date.now()}`,
-
-                      action:
-                        "Content restored to Poster",
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...item.audit,
-                  ],
-                }
-              : item
-        )
-    );
-  };
+      if (
+        result
+      ) {
+        setSelectedId(
+          result.record.id
+        );
+      }
+    };
 
   return (
     <div
@@ -686,10 +596,8 @@ function ContentManagerContent() {
           </h2>
 
           <p>
-            Search what Poster
-            displays, verify source
-            attribution, and remove
-            or restore content only
+            Search what Poster displays, verify source
+            attribution, and remove or restore content only
             when needed.
           </p>
         </div>
@@ -700,9 +608,9 @@ function ContentManagerContent() {
           }
         >
           <strong>
-            {
-              counts.active
-            }
+            {contentList.isLoading
+              ? "—"
+              : counts.active}
           </strong>
 
           <span>
@@ -711,9 +619,52 @@ function ContentManagerContent() {
         </div>
       </header>
 
+      {contentList.error ? (
+        <section
+          className={
+            styles.errorPanel
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Content could not be refreshed
+            </strong>
+
+            <p>
+              {contentList.error}
+
+              {contentList.data
+                ? " The last successful snapshot remains visible."
+                : ""}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              contentList.refresh
+            }
+            disabled={
+              contentList.isLoading ||
+              contentList.isRefreshing
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
+
       <section
         className={
           styles.panel
+        }
+        aria-busy={
+          contentList.isLoading ||
+          contentList.isRefreshing
         }
       >
         <div
@@ -730,245 +681,305 @@ function ContentManagerContent() {
             }
             placeholder="Search ID, title, publisher or URL..."
             aria-label="Search content"
-            onChange={(
-              event
-            ) =>
-              setQuery(
-                event.target
-                  .value
-              )
+            onChange={
+              event =>
+                setQuery(
+                  event.target
+                    .value
+                )
             }
           />
 
           <div
             className={
-              styles.filters
+              styles.toolbarActions
             }
           >
-            {(
-              [
-                [
-                  "all",
-                  "All",
-                ],
+            <button
+              type="button"
+              className={
+                styles.secondaryButton
+              }
+              onClick={
+                contentList.refresh
+              }
+              disabled={
+                contentList.isLoading ||
+                contentList.isRefreshing
+              }
+            >
+              {contentList.isRefreshing
+                ? "Refreshing…"
+                : "Refresh"}
+            </button>
 
+            <div
+              className={
+                styles.filters
+              }
+            >
+              {(
                 [
-                  "active",
-                  "Active",
-                ],
+                  [
+                    "all",
+                    "All",
+                  ],
 
-                [
-                  "removed",
-                  "Removed",
-                ],
-              ] as const
-            ).map(
-              ([
-                key,
-                label,
-              ]) => (
-                <button
-                  key={
-                    key
-                  }
-                  type="button"
-                  className={
-                    filter ===
-                    key
-                      ? styles.filterActive
-                      : styles.filter
-                  }
-                  onClick={() =>
-                    setFilter(
+                  [
+                    "active",
+                    "Active",
+                  ],
+
+                  [
+                    "removed",
+                    "Removed",
+                  ],
+                ] as const
+              ).map(
+                ([
+                  key,
+                  label,
+                ]) => (
+                  <button
+                    key={
                       key
-                    )
-                  }
-                >
-                  {
-                    label
-                  }
-
-                  <span>
-                    {
-                      counts[
-                        key
-                      ]
                     }
-                  </span>
-                </button>
-              )
-            )}
+                    type="button"
+                    className={
+                      filter ===
+                      key
+                        ? styles.filterActive
+                        : styles.filter
+                    }
+                    onClick={() =>
+                      setFilter(
+                        key
+                      )
+                    }
+                  >
+                    {label}
+
+                    <span>
+                      {
+                        counts[
+                          key
+                        ]
+                      }
+                    </span>
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
 
-        <div
-          className={
-            styles.tableWrap
-          }
-        >
-          <table
+        {contentList.isLoading &&
+        !contentList.data ? (
+          <div
             className={
-              styles.table
+              styles.empty
             }
           >
-            <thead>
-              <tr>
-                <th>
-                  Content
-                </th>
-
-                <th>
-                  Source
-                </th>
-
-                <th>
-                  Method
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleRecords.map(
-                (
-                  record
-                ) => (
-                  <tr
-                    key={
-                      record.id
-                    }
-                  >
-                    <td>
-                      <button
-                        type="button"
-                        className={
-                          styles.titleButton
-                        }
-                        onClick={() =>
-                          setSelectedId(
-                            record.id
-                          )
-                        }
-                      >
-                        {
-                          record.title
-                        }
-                      </button>
-
-                      <span
-                        className={
-                          styles.website
-                        }
-                      >
-                        {
-                          record.id
-                        }
-                      </span>
-
-                      {record.copyrightClaimant ? (
-                        <span
-                          className={
-                            styles.copyrightLink
-                          }
-                        >
-                          Copyright
-                          strike by{" "}
-                          {
-                            record.copyrightClaimant
-                          }
-                        </span>
-                      ) : null}
-                    </td>
-
-                    <td>
-                      {
-                        record.publisher
-                      }
-                    </td>
-
-                    <td>
-                      {sourceMethodLabel(
-                        record.sourceMethod
-                      )}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`${styles.status} ${
-                          record.status ===
-                          "active"
-                            ? styles.statusActive
-                            : styles.statusRemoved
-                        }`}
-                      >
-                        {
-                          record.status ===
-                          "active"
-                            ? "Active"
-                            : "Removed"
-                        }
-                      </span>
-                    </td>
-
-                    <td>
-                      {record.status ===
-                      "active" ? (
-                        <button
-                          type="button"
-                          className={
-                            styles.removeButton
-                          }
-                          onClick={() =>
-                            beginRemove(
-                              record
-                            )
-                          }
-                        >
-                          Remove
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={
-                            styles.restoreButton
-                          }
-                          onClick={() =>
-                            restoreRecord(
-                              record
-                            )
-                          }
-                        >
-                          Restore
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-
-          {visibleRecords.length ===
-          0 ? (
-            <div
+            Loading authoritative content…
+          </div>
+        ) : (
+          <div
+            className={
+              styles.tableWrap
+            }
+          >
+            <table
               className={
-                styles.empty
+                styles.table
               }
             >
-              No content found.
-            </div>
-          ) : null}
-        </div>
+              <thead>
+                <tr>
+                  <th>
+                    Content
+                  </th>
+
+                  <th>
+                    Source
+                  </th>
+
+                  <th>
+                    Method
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {visibleRecords.map(
+                  record => (
+                    <tr
+                      key={
+                        record.id
+                      }
+                    >
+                      <td>
+                        <button
+                          type="button"
+                          className={
+                            styles.titleButton
+                          }
+                          onClick={() =>
+                            setSelectedId(
+                              record.id
+                            )
+                          }
+                        >
+                          {record.title}
+                        </button>
+
+                        <span
+                          className={
+                            styles.website
+                          }
+                        >
+                          {record.publicId}
+                        </span>
+
+                        {record.copyrightClaimant ? (
+                          <span
+                            className={
+                              styles.copyrightLink
+                            }
+                          >
+                            Copyright strike by{" "}
+                            {
+                              record.copyrightClaimant
+                            }
+                          </span>
+                        ) : null}
+                      </td>
+
+                      <td>
+                        {
+                          record.publisherName
+                        }
+                      </td>
+
+                      <td>
+                        {sourceMethodLabel(
+                          record.acquisitionMethod
+                        )}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`${styles.status} ${
+                            record.status ===
+                            "active"
+                              ? styles.statusActive
+                              : styles.statusRemoved
+                          }`}
+                        >
+                          {record.status ===
+                          "active"
+                            ? "Active"
+                            : "Removed"}
+                        </span>
+                      </td>
+
+                      <td>
+                        {record.status ===
+                        "active" ? (
+                          <button
+                            type="button"
+                            className={
+                              styles.removeButton
+                            }
+                            onClick={() =>
+                              beginRemove(
+                                record
+                              )
+                            }
+                            disabled={
+                              contentActions.isRunning
+                            }
+                          >
+                            Remove
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={
+                              styles.restoreButton
+                            }
+                            onClick={() => {
+                              void restoreRecord(
+                                record
+                              );
+                            }}
+                            disabled={
+                              contentActions.isRunning ||
+                              record.preventReimport ||
+                              record.removalReason ===
+                                "copyright"
+                            }
+                            title={
+                              record.preventReimport ||
+                              record.removalReason ===
+                                "copyright"
+                                ? "Copyright or prevent-reimport content must be resolved through the Copyright workflow."
+                                : undefined
+                            }
+                          >
+                            Restore
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+
+            {visibleRecords.length ===
+            0 ? (
+              <div
+                className={
+                  styles.empty
+                }
+              >
+                No content found.
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {contentList.data ? (
+          <div
+            className={
+              styles.freshnessBar
+            }
+          >
+            <span>
+              Generated{" "}
+              {formatTimestamp(
+                contentList
+                  .data
+                  .generatedAt
+              )}
+            </span>
+
+            <span>
+              Auto-refresh every 60 seconds
+            </span>
+          </div>
+        ) : null}
       </section>
 
-      {selectedRecord ? (
+      {selectedId ? (
         <div
           className={
             styles.drawerLayer
@@ -999,14 +1010,13 @@ function ContentManagerContent() {
             >
               <div>
                 <span>
-                  {
-                    selectedRecord.id
-                  }
+                  {selectedRecord
+                    ?.publicId ??
+                    "Content"}
                 </span>
 
                 <h3>
-                  Content
-                  details
+                  Content details
                 </h3>
               </div>
 
@@ -1031,325 +1041,380 @@ function ContentManagerContent() {
                 styles.drawerBody
               }
             >
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Content
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Poster
-                      Content ID
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedRecord.id
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Title
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedRecord.title
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Publisher
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedRecord.publisher
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Original
-                      URL
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedRecord.originalUrl
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Source
-                      method
-                    </dt>
-
-                    <dd>
-                      {sourceMethodLabel(
-                        selectedRecord.sourceMethod
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Status
-                </h4>
-
+              {selectedDetails.isLoading &&
+              !selectedRecord ? (
                 <div
                   className={
-                    styles.statusGrid
+                    styles.detailState
                   }
                 >
-                  <div>
-                    <span>
-                      Current
-                    </span>
-
-                    <strong>
-                      {
-                        selectedRecord.status ===
-                        "active"
-                          ? "Active"
-                          : "Removed"
-                      }
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Prevent
-                      re-import
-                    </span>
-
-                    <strong>
-                      {
-                        selectedRecord.preventReimport
-                          ? "Yes"
-                          : "No"
-                      }
-                    </strong>
-                  </div>
+                  Loading content details…
                 </div>
+              ) : selectedDetails.error &&
+                !selectedRecord ? (
+                <div
+                  className={
+                    styles.detailState
+                  }
+                  role="alert"
+                >
+                  <strong>
+                    Content details could not be loaded
+                  </strong>
 
-                {selectedRecord.status ===
-                "removed" ? (
-                  <div
+                  <p>
+                    {
+                      selectedDetails.error
+                    }
+                  </p>
+
+                  <button
+                    type="button"
                     className={
-                      styles.removalBox
+                      styles.secondaryButton
+                    }
+                    onClick={() => {
+                      void selectedDetails
+                        .refresh();
+                    }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : selectedRecord ? (
+                <>
+                  <section
+                    className={
+                      styles.detailSection
                     }
                   >
-                    <strong>
-                      Removal:
-                    </strong>{" "}
+                    <h4>
+                      Content
+                    </h4>
 
-                    {reasonLabel(
-                      selectedRecord.removalReason
-                    )}
-
-                    {selectedRecord.copyrightClaimant ? (
-                      <span>
-                        Copyright
-                        strike by{" "}
-                        {
-                          selectedRecord.copyrightClaimant
-                        }
-
-                        {selectedRecord.copyrightCaseId
-                          ? ` · ${selectedRecord.copyrightCaseId}`
-                          : ""}
-                      </span>
-                    ) : null}
-
-                    {selectedRecord.removalNote ? (
-                      <span>
-                        {
-                          selectedRecord.removalNote
-                        }
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Dates
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Published
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedRecord.publishedAt
+                    <dl
+                      className={
+                        styles.detailList
                       }
-                    </dd>
-                  </div>
+                    >
+                      <div>
+                        <dt>
+                          Poster Content ID
+                        </dt>
 
-                  <div>
-                    <dt>
-                      Added to
-                      Poster
-                    </dt>
+                        <dd>
+                          {
+                            selectedRecord.publicId
+                          }
+                        </dd>
+                      </div>
 
-                    <dd>
-                      {
-                        selectedRecord.addedAt
+                      <div>
+                        <dt>
+                          Title
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedRecord.title
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Publisher
+                        </dt>
+
+                        <dd>
+                          {
+                            selectedRecord.publisherName
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Original URL
+                        </dt>
+
+                        <dd
+                          className={
+                            styles.breakText
+                          }
+                        >
+                          {
+                            selectedRecord.originalUrl
+                          }
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Source method
+                        </dt>
+
+                        <dd>
+                          {sourceMethodLabel(
+                            selectedRecord.acquisitionMethod
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Status
+                    </h4>
+
+                    <div
+                      className={
+                        styles.statusGrid
                       }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
+                    >
+                      <div>
+                        <span>
+                          Current
+                        </span>
 
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
+                        <strong>
+                          {selectedRecord.status ===
+                          "active"
+                            ? "Active"
+                            : "Removed"}
+                        </strong>
+                      </div>
 
-                <div
-                  className={
-                    styles.auditList
-                  }
-                >
-                  {selectedRecord.audit.map(
-                    (
-                      entry
-                    ) => (
+                      <div>
+                        <span>
+                          Prevent re-import
+                        </span>
+
+                        <strong>
+                          {selectedRecord.preventReimport
+                            ? "Yes"
+                            : "No"}
+                        </strong>
+                      </div>
+                    </div>
+
+                    {selectedRecord.status ===
+                    "removed" ? (
                       <div
-                        key={
-                          entry.id
-                        }
                         className={
-                          styles.auditItem
+                          styles.removalBox
                         }
                       >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
+                        <strong>
+                          Removal:
+                        </strong>
 
-                        <div>
-                          <strong>
+                        <span>
+                          {reasonLabel(
+                            selectedRecord.removalReason
+                          )}
+                        </span>
+
+                        {selectedRecord.copyrightClaimant ? (
+                          <span>
+                            Copyright strike by{" "}
                             {
-                              entry.action
+                              selectedRecord.copyrightClaimant
                             }
-                          </strong>
 
+                            {selectedRecord.copyrightCaseId
+                              ? ` · ${selectedRecord.copyrightCaseId}`
+                              : ""}
+                          </span>
+                        ) : null}
+
+                        {selectedRecord.removalNote ? (
                           <span>
                             {
-                              entry.actor
-                            }{" "}
-                            ·{" "}
-                            {
-                              entry.timestamp
+                              selectedRecord.removalNote
                             }
                           </span>
-                        </div>
+                        ) : null}
                       </div>
-                    )
-                  )}
-                </div>
-              </section>
+                    ) : null}
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Dates
+                    </h4>
+
+                    <dl
+                      className={
+                        styles.detailList
+                      }
+                    >
+                      <div>
+                        <dt>
+                          Published
+                        </dt>
+
+                        <dd>
+                          {formatDate(
+                            selectedRecord.publishedAt
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          Added to Poster
+                        </dt>
+
+                        <dd>
+                          {formatDate(
+                            selectedRecord.addedAt
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section
+                    className={
+                      styles.detailSection
+                    }
+                  >
+                    <h4>
+                      Audit history
+                    </h4>
+
+                    <div
+                      className={
+                        styles.auditList
+                      }
+                    >
+                      {selectedAudit.length >
+                      0 ? (
+                        selectedAudit.map(
+                          entry => (
+                            <div
+                              key={
+                                entry.id
+                              }
+                              className={
+                                styles.auditItem
+                              }
+                            >
+                              <span
+                                className={
+                                  styles.auditDot
+                                }
+                              />
+
+                              <div>
+                                <strong>
+                                  {
+                                    entry.action
+                                  }
+                                </strong>
+
+                                <span>
+                                  {
+                                    entry.actorLabel
+                                  }{" "}
+                                  ·{" "}
+                                  {formatTimestamp(
+                                    entry.occurredAt
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <div
+                          className={
+                            styles.detailState
+                          }
+                        >
+                          No audit events yet.
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                </>
+              ) : null}
             </div>
 
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              <a
+            {selectedRecord ? (
+              <div
                 className={
-                  styles.secondaryButton
+                  styles.drawerFooter
                 }
-                href={
-                  selectedRecord.originalUrl
-                }
-                target="_blank"
-                rel="noreferrer"
               >
-                Open original
-              </a>
-
-              {selectedRecord.status ===
-              "active" ? (
-                <button
-                  type="button"
+                <a
                   className={
-                    styles.dangerButton
+                    styles.secondaryButton
                   }
-                  onClick={() => {
-                    beginRemove(
-                      selectedRecord
-                    );
+                  href={
+                    selectedRecord.originalUrl
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open original
+                </a>
 
-                    setSelectedId(
-                      null
-                    );
-                  }}
-                >
-                  Remove from
-                  Poster
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={
-                    styles.primaryButton
-                  }
-                  onClick={() =>
-                    restoreRecord(
-                      selectedRecord
-                    )
-                  }
-                >
-                  Restore
-                </button>
-              )}
-            </div>
+                {selectedRecord.status ===
+                "active" ? (
+                  <button
+                    type="button"
+                    className={
+                      styles.dangerButton
+                    }
+                    onClick={() => {
+                      beginRemove(
+                        selectedRecord
+                      );
+
+                      setSelectedId(
+                        null
+                      );
+                    }}
+                    disabled={
+                      contentActions.isRunning
+                    }
+                  >
+                    Remove from Poster
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={
+                      styles.primaryButton
+                    }
+                    onClick={() => {
+                      void restoreRecord(
+                        selectedRecord
+                      );
+                    }}
+                    disabled={
+                      contentActions.isRunning ||
+                      selectedRecord.preventReimport ||
+                      selectedRecord.removalReason ===
+                        "copyright"
+                    }
+                  >
+                    Restore
+                  </button>
+                )}
+              </div>
+            ) : null}
           </aside>
         </div>
       ) : null}
@@ -1390,8 +1455,7 @@ function ContentManagerContent() {
             <h3
               id="remove-content-title"
             >
-              Remove from
-              Poster?
+              Remove from Poster?
             </h3>
 
             <p
@@ -1412,7 +1476,7 @@ function ContentManagerContent() {
               Poster Content ID:{" "}
               <strong>
                 {
-                  removalRecord.id
+                  removalRecord.publicId
                 }
               </strong>
             </p>
@@ -1423,9 +1487,8 @@ function ContentManagerContent() {
                   styles.copyrightNotice
                 }
               >
-                Copyright strike
-                by{" "}
                 <strong>
+                  Copyright strike by{" "}
                   {
                     removalRecord.copyrightClaimant
                   }
@@ -1443,17 +1506,14 @@ function ContentManagerContent() {
               }
             >
               <legend>
-                Why are you
-                removing this?
+                Removal reason
               </legend>
 
               {REMOVAL_REASONS.map(
-                (
-                  reason
-                ) => (
+                option => (
                   <label
                     key={
-                      reason.value
+                      option.value
                     }
                     className={
                       styles.reasonOption
@@ -1461,24 +1521,24 @@ function ContentManagerContent() {
                   >
                     <input
                       type="radio"
-                      name="removal-reason"
+                      name="content-removal-reason"
                       value={
-                        reason.value
+                        option.value
                       }
                       checked={
                         removeReason ===
-                        reason.value
+                        option.value
                       }
                       onChange={() =>
                         setRemoveReason(
-                          reason.value
+                          option.value
                         )
                       }
                     />
 
                     <span>
                       {
-                        reason.label
+                        option.label
                       }
                     </span>
                   </label>
@@ -1492,24 +1552,21 @@ function ContentManagerContent() {
               }
             >
               <span>
-                Note
-                (optional)
+                Internal note
               </span>
 
               <textarea
                 value={
                   removeNote
                 }
-                rows={3}
-                placeholder="Add a short internal note..."
-                onChange={(
-                  event
-                ) =>
-                  setRemoveNote(
-                    event.target
-                      .value
-                  )
+                onChange={
+                  event =>
+                    setRemoveNote(
+                      event.target
+                        .value
+                    )
                 }
+                placeholder="Optional operational context."
               />
             </label>
 
@@ -1523,29 +1580,36 @@ function ContentManagerContent() {
                 checked={
                   preventReimport
                 }
-                onChange={(
-                  event
-                ) =>
-                  setPreventReimport(
-                    event.target
-                      .checked
-                  )
+                onChange={
+                  event =>
+                    setPreventReimport(
+                      event.target
+                        .checked
+                    )
                 }
               />
 
               <span>
                 <strong>
-                  Prevent
-                  re-import
+                  Prevent re-import
                 </strong>
 
-                Do not allow
-                automated
-                ingestion to
-                bring this
-                content back.
+                Block future ingestion of this original URL.
               </span>
             </label>
+
+            {contentActions.error ? (
+              <div
+                className={
+                  styles.actionError
+                }
+                role="alert"
+              >
+                {
+                  contentActions.error
+                }
+              </div>
+            ) : null}
 
             <div
               className={
@@ -1560,6 +1624,9 @@ function ContentManagerContent() {
                 onClick={
                   cancelRemove
                 }
+                disabled={
+                  contentActions.isRunning
+                }
               >
                 Cancel
               </button>
@@ -1569,13 +1636,26 @@ function ContentManagerContent() {
                 className={
                   styles.dangerButton
                 }
-                onClick={
-                  confirmRemove
+                onClick={() => {
+                  void confirmRemove();
+                }}
+                disabled={
+                  contentActions.isRunning ||
+                  (
+                    removeReason ===
+                      "copyright" &&
+                    (
+                      !removalRecord.copyrightCaseId ||
+                      !removalRecord.copyrightClaimant
+                    )
+                  )
                 }
               >
-                {preventReimport
-                  ? "Remove + prevent re-import"
-                  : "Remove from Poster"}
+                {contentActions.isRunning
+                  ? "Removing…"
+                  : preventReimport
+                    ? "Remove + prevent re-import"
+                    : "Remove from Poster"}
               </button>
             </div>
           </div>

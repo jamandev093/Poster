@@ -1,0 +1,1664 @@
+﻿POSTER REPORTS B1 ERROR DIAGNOSTIC
+Generated: 2026-08-01 16:46:28 +05:30
+
+============================================================
+1. TYPESCRIPT ERRORS
+============================================================
+src/app.ts(471,5): error TS2304: Cannot find name 'adminReportsRoutes'.
+src/routes/admin-reports.routes.ts(592,15): error TS2345: Argument of type 'FastifyRequest<{ Params: ReportParams; Body: ReportActionBody; }, RawServerDefault, IncomingMessage, FastifySchema, FastifyTypeProviderDefault, unknown, FastifyBaseLogger, ResolveFastifyRequestType<...>>' is not assignable to parameter of type '{ authorizationContext?: { userId: string; fullName: string; }; }'.
+  Types of property 'authorizationContext' are incompatible.
+    Type 'AuthorizationContext | null' is not assignable to type '{ userId: string; fullName: string; }'.
+      Type 'null' is not assignable to type '{ userId: string; fullName: string; }'.
+src/routes/admin-reports.routes.ts(681,15): error TS2345: Argument of type 'FastifyRequest<{ Params: ReportParams; Body: ReportActionBody; }, RawServerDefault, IncomingMessage, FastifySchema, FastifyTypeProviderDefault, unknown, FastifyBaseLogger, ResolveFastifyRequestType<...>>' is not assignable to parameter of type '{ authorizationContext?: { userId: string; fullName: string; }; }'.
+  Types of property 'authorizationContext' are incompatible.
+    Type 'AuthorizationContext | null' is not assignable to type '{ userId: string; fullName: string; }'.
+      Type 'null' is not assignable to type '{ userId: string; fullName: string; }'.
+src/routes/admin-reports.routes.ts(770,15): error TS2345: Argument of type 'FastifyRequest<{ Params: ReportParams; Body: RouteCopyrightBody; }, RawServerDefault, IncomingMessage, FastifySchema, FastifyTypeProviderDefault, unknown, FastifyBaseLogger, ResolveFastifyRequestType<...>>' is not assignable to parameter of type '{ authorizationContext?: { userId: string; fullName: string; }; }'.
+  Types of property 'authorizationContext' are incompatible.
+    Type 'AuthorizationContext | null' is not assignable to type '{ userId: string; fullName: string; }'.
+      Type 'null' is not assignable to type '{ userId: string; fullName: string; }'.
+
+============================================================
+2. GIT DIFF
+============================================================
+git : warning: in the working copy of 'backend/src/app.ts', LF will be replaced by CRLF the next time Git touches it
+At line:17 char:3
++   git diff -- `
++   ~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of 'backend/src/routes/index.ts', LF will be replaced by CRLF the next time Git touches it
+diff --git a/backend/src/app.ts b/backend/src/app.ts
+index d1b61b1..d1e0cde 100644
+--- a/backend/src/app.ts
++++ b/backend/src/app.ts
+@@ -1,4 +1,4 @@
+-∩╗┐import cookie
++import cookie
+   from "@fastify/cookie";
+ 
+ import cors
+@@ -11,11 +11,32 @@ import Fastify, {
+   type FastifyInstance,
+ } from "fastify";
+ 
++import {
++  createAdminCopyrightService,
++  type AdminCopyrightService,
++} from "./application/copyright/index.js";
++
++import {
++  createAdminReportsService,
++  type AdminReportsService,
++} from "./application/reports/index.js";
+ import {
+   createAdminUserMetricsService,
+   type AdminUserMetricsService,
+ } from "./application/admin-metrics/admin-user-metrics.service.js";
+ 
++import {
++  createAdminContentService,
++  createAdminSourceService,
++  type AdminContentService,
++  type AdminSourceService,
++} from "./application/content-sources/index.js";
++
++import {
++  createAdminAudienceInsightsService,
++  type AdminAudienceInsightsService,
++} from "./application/audience-insights/admin-audience-insights.service.js";
++
+ import {
+   createAdminProfileService,
+   type AdminProfileService,
+@@ -80,14 +101,21 @@ import {
+ import {
+   adminAccessRoutes,
+   adminCommercialRequestRoutes,
++  adminCopyrightRoutes,
++  adminContentRoutes,
+   adminMetricsRoutes,
+   adminProfileRoutes,
++  adminSourceRoutes,
+   authenticationRoutes,
+   clientCommercialRequestRoutes,
+   healthRoutes,
+   type AuthenticationRoutesOptions,
+ } from "./routes/index.js";
+ 
++import {
++  adminAudienceInsightsRoutes,
++} from "./routes/admin-audience-insights.routes.js";
++
+ import {
+   createDevelopmentEmailDeliveryProvider,
+   type EmailDeliveryProvider,
+@@ -103,9 +131,24 @@ export interface BuildAppOptions {
+   adminUserMetricsService?:
+     AdminUserMetricsService;
+ 
++  adminAudienceInsightsService?:
++    AdminAudienceInsightsService;
++
++  adminContentService?:
++    AdminContentService;
++
++  adminSourceService?:
++    AdminSourceService;
++
+   adminProfileService?:
+     AdminProfileService;
+ 
++  adminCopyrightService?:
++    AdminCopyrightService;
++
++  adminReportsService?:
++    AdminReportsService;
++
+   accessTokenService?:
+     AuthenticationAccessTokenService;
+ 
+@@ -372,6 +415,71 @@ export async function buildApp(
+     }
+   );
+ 
++  await app.register(
++    adminAudienceInsightsRoutes,
++    {
++      prefix:
++        "/api/v1/admin",
++
++      service:
++        options
++          .adminAudienceInsightsService ??
++        createAdminAudienceInsightsService(),
++    }
++  );
++
++  await app.register(
++    adminContentRoutes,
++    {
++      prefix:
++        "/api/v1/admin",
++
++      service:
++        options
++          .adminContentService ??
++        createAdminContentService(),
++    }
++  );
++
++  await app.register(
++    adminSourceRoutes,
++    {
++      prefix:
++        "/api/v1/admin",
++
++      service:
++        options
++          .adminSourceService ??
++        createAdminSourceService(),
++    }
++  );
++
++  await app.register(
++    adminCopyrightRoutes,
++    {
++      prefix:
++        "/api/v1/admin",
++
++      service:
++        options
++          .adminCopyrightService ??
++        createAdminCopyrightService(),
++    }
++  );
++
++  await app.register(
++    adminReportsRoutes,
++    {
++      prefix:
++        "/api/v1/admin",
++
++      service:
++        options
++          .adminReportsService ??
++        createAdminReportsService(),
++    }
++  );
++
+   await app.register(
+     clientCommercialRequestRoutes,
+     {
+@@ -397,7 +505,6 @@ export async function buildApp(
+         createAdminCommercialRequestService(),
+     }
+   );
+-
+   app.get(
+     "/",
+     async () => ({
+@@ -414,5 +521,3 @@ export async function buildApp(
+ 
+   return app;
+ }
+-
+-
+diff --git a/backend/src/routes/index.ts b/backend/src/routes/index.ts
+index 8b63381..c64e9ba 100644
+--- a/backend/src/routes/index.ts
++++ b/backend/src/routes/index.ts
+@@ -6,8 +6,16 @@ export * from "./admin-access.routes.js";
+ 
+ export * from "./admin-metrics.routes.js";
+ 
++export * from "./admin-content.routes.js";
++
++export * from "./admin-source.routes.js";
++
+ export * from "./client-commercial-request.routes.js";
+ 
+ export * from "./admin-commercial-request.routes.js";
+ 
+ export * from "./admin-profile.routes.js";
++
++export * from "./admin-copyright.routes.js";
++
++export * from "./admin-reports.routes.js";
+\ No newline at end of file
+
+============================================================
+3. CURRENT FILE CONTENTS
+============================================================
+
+------------------------------------------------------------
+FILE: src\routes\admin-reports.routes.ts
+------------------------------------------------------------
+import type {
+  FastifyPluginAsync,
+  FastifyReply,
+} from "fastify";
+
+import {
+  ReportsApplicationError,
+  type AdminReportDetails,
+  type AdminReportSummary,
+  type AdminReportsService,
+} from "../application/reports/index.js";
+
+import type {
+  CopyrightCaseRecord,
+} from "../domains/copyright/index.js";
+
+import type {
+  AdminReportAuditEventRecord,
+  AdminReportRecord,
+} from "../domains/reports/index.js";
+
+import {
+  requirePlatformPermission,
+} from "../http/authorization-context.js";
+
+export interface AdminReportsRoutesOptions {
+  service:
+    AdminReportsService;
+}
+
+interface ReportParams {
+  reportId: string;
+}
+
+interface ReportActionBody {
+  expectedRowVersion?: unknown;
+
+  resolutionNote?: unknown;
+}
+
+interface RouteCopyrightBody
+  extends ReportActionBody {
+  copyrightCaseId?: unknown;
+}
+
+function requiredString(
+  value: unknown,
+  field: string
+): string {
+  if (
+    typeof value !== "string" ||
+    value.trim().length === 0
+  ) {
+    throw new TypeError(
+      `${field} is required.`
+    );
+  }
+
+  return value.trim();
+}
+
+function optionalString(
+  value: unknown,
+  field: string
+): string | null {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value !== "string"
+  ) {
+    throw new TypeError(
+      `${field} must be a string.`
+    );
+  }
+
+  const normalized =
+    value.trim();
+
+  return normalized.length > 0
+    ? normalized
+    : null;
+}
+
+function requiredUuid(
+  value: unknown,
+  field: string
+): string {
+  const normalized =
+    requiredString(
+      value,
+      field
+    );
+
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (
+    !uuidPattern.test(
+      normalized
+    )
+  ) {
+    throw new TypeError(
+      `${field} must be a valid UUID.`
+    );
+  }
+
+  return normalized;
+}
+
+function serializeReport(
+  record:
+    AdminReportRecord
+) {
+  return {
+    id:
+      record.id,
+
+    publicId:
+      record.publicId,
+
+    reportType:
+      record.reportType,
+
+    status:
+      record.status,
+
+    reporterName:
+      record.reporterName,
+
+    reporterReference:
+      record.reporterReference,
+
+    affectedKind:
+      record.affectedKind,
+
+    affectedRecordId:
+      record.affectedRecordId,
+
+    affectedTitle:
+      record.affectedTitle,
+
+    affectedMetadata:
+      record.affectedMetadata,
+
+    reason:
+      record.reason,
+
+    routedToCopyright:
+      record.routedToCopyright,
+
+    copyrightCaseId:
+      record.copyrightCaseId,
+
+    resolutionNote:
+      record.resolutionNote,
+
+    receivedAt:
+      record
+        .receivedAt
+        .toISOString(),
+
+    resolvedAt:
+      record
+        .resolvedAt
+        ?.toISOString() ??
+      null,
+
+    resolvedByUserId:
+      record.resolvedByUserId,
+
+    createdAt:
+      record
+        .createdAt
+        .toISOString(),
+
+    updatedAt:
+      record
+        .updatedAt
+        .toISOString(),
+
+    rowVersion:
+      record.rowVersion,
+  };
+}
+
+function serializeAudit(
+  record:
+    AdminReportAuditEventRecord
+) {
+  return {
+    id:
+      record.id,
+
+    reportId:
+      record.reportId,
+
+    action:
+      record.action,
+
+    actorUserId:
+      record.actorUserId,
+
+    actorLabel:
+      record.actorLabel,
+
+    previousStatus:
+      record.previousStatus,
+
+    resultingStatus:
+      record.resultingStatus,
+
+    metadata:
+      record.metadata,
+
+    occurredAt:
+      record
+        .occurredAt
+        .toISOString(),
+  };
+}
+
+function serializeCopyrightCase(
+  record:
+    CopyrightCaseRecord
+) {
+  return {
+    id:
+      record.id,
+
+    publicId:
+      record.publicId,
+
+    requestType:
+      record.requestType,
+
+    status:
+      record.status,
+
+    contentId:
+      record.contentId,
+
+    claimantName:
+      record.claimantName,
+
+    claimantType:
+      record.claimantType,
+
+    claimantBusinessEmail:
+      record.claimantBusinessEmail,
+
+    claimantWebsiteUrl:
+      record.claimantWebsiteUrl,
+
+    claimantReference:
+      record.claimantReference,
+
+    requestReason:
+      record.requestReason,
+
+    submittedOriginalUrl:
+      record.submittedOriginalUrl,
+
+    supportingInformation:
+      record.supportingInformation,
+
+    verificationStatus:
+      record.verificationStatus,
+
+    actionTaken:
+      record.actionTaken,
+
+    preventReimport:
+      record.preventReimport,
+
+    receivedAt:
+      record
+        .receivedAt
+        .toISOString(),
+
+    resolvedAt:
+      record
+        .resolvedAt
+        ?.toISOString() ??
+      null,
+
+    resolvedByUserId:
+      record.resolvedByUserId,
+
+    createdAt:
+      record
+        .createdAt
+        .toISOString(),
+
+    updatedAt:
+      record
+        .updatedAt
+        .toISOString(),
+
+    rowVersion:
+      record.rowVersion,
+  };
+}
+
+function serializeSummary(
+  summary:
+    AdminReportSummary
+) {
+  return {
+    report:
+      serializeReport(
+        summary.report
+      ),
+  };
+}
+
+function serializeDetails(
+  details:
+    AdminReportDetails
+) {
+  return {
+    report:
+      serializeReport(
+        details.report
+      ),
+
+    audit:
+      details
+        .audit
+        .map(
+          serializeAudit
+        ),
+
+    copyrightCase:
+      details.copyrightCase
+        ? serializeCopyrightCase(
+            details.copyrightCase
+          )
+        : null,
+  };
+}
+
+function sendApplicationError(
+  error:
+    ReportsApplicationError,
+  reply:
+    FastifyReply
+) {
+  const statusCode =
+    error.code ===
+      "REPORT_NOT_FOUND" ||
+    error.code ===
+      "REPORT_COPYRIGHT_CASE_NOT_FOUND"
+      ? 404
+      : error.code ===
+          "REPORT_COPYRIGHT_TYPE_REQUIRED" ||
+        error.code ===
+          "REPORT_COPYRIGHT_CONTENT_MISMATCH"
+        ? 422
+        : 409;
+
+  return reply
+    .status(
+      statusCode
+    )
+    .send({
+      error: {
+        code:
+          error.code,
+
+        message:
+          error.message,
+      },
+    });
+}
+
+function sendInvalidRequest(
+  error: TypeError,
+  reply:
+    FastifyReply
+) {
+  return reply
+    .status(
+      400
+    )
+    .send({
+      error: {
+        code:
+          "INVALID_REPORT_ACTION",
+
+        message:
+          error.message,
+      },
+    });
+}
+
+function getAuthorizationActor(
+  request: {
+    authorizationContext?: {
+      userId: string;
+
+      fullName: string;
+    };
+  }
+) {
+  const authorization =
+    request.authorizationContext;
+
+  if (
+    !authorization
+  ) {
+    throw new Error(
+      "Authorization context is unavailable after permission enforcement."
+    );
+  }
+
+  return {
+    actorUserId:
+      authorization.userId,
+
+    actorLabel:
+      authorization.fullName,
+  };
+}
+
+export const adminReportsRoutes:
+  FastifyPluginAsync<
+    AdminReportsRoutesOptions
+  > =
+  async (
+    app,
+    options
+  ) => {
+    app.get(
+      "/reports",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        const reports =
+          await options
+            .service
+            .list();
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            generatedAt:
+              new Date()
+                .toISOString(),
+
+            reports:
+              reports.map(
+                serializeSummary
+              ),
+          });
+      }
+    );
+
+    app.get(
+      "/reports/actionable",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        const reports =
+          await options
+            .service
+            .listActionable();
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            generatedAt:
+              new Date()
+                .toISOString(),
+
+            reports:
+              reports.map(
+                serializeSummary
+              ),
+          });
+      }
+    );
+
+    app.get<{
+      Params:
+        ReportParams;
+    }>(
+      "/reports/:reportId",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.read"
+        );
+
+        try {
+          const reportId =
+            requiredUuid(
+              request
+                .params
+                .reportId,
+              "reportId"
+            );
+
+          const details =
+            await options
+              .service
+              .getById(
+                reportId
+              );
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        ReportActionBody;
+    }>(
+      "/reports/:reportId/resolve",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .resolve({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        ReportActionBody;
+    }>(
+      "/reports/:reportId/dismiss",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .dismiss({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+
+    app.post<{
+      Params:
+        ReportParams;
+
+      Body:
+        RouteCopyrightBody;
+    }>(
+      "/reports/:reportId/route-copyright",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "reports.manage"
+        );
+
+        try {
+          const actor =
+            getAuthorizationActor(
+              request
+            );
+
+          const details =
+            await options
+              .service
+              .routeToCopyright({
+                reportId:
+                  requiredUuid(
+                    request
+                      .params
+                      .reportId,
+                    "reportId"
+                  ),
+
+                expectedRowVersion:
+                  requiredString(
+                    request.body
+                      ?.expectedRowVersion,
+                    "expectedRowVersion"
+                  ),
+
+                copyrightCaseId:
+                  requiredUuid(
+                    request.body
+                      ?.copyrightCaseId,
+                    "copyrightCaseId"
+                  ),
+
+                resolutionNote:
+                  optionalString(
+                    request.body
+                      ?.resolutionNote,
+                    "resolutionNote"
+                  ),
+
+                ...actor,
+              });
+
+          return reply
+            .status(
+              200
+            )
+            .send(
+              serializeDetails(
+                details
+              )
+            );
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              ReportsApplicationError
+          ) {
+            return sendApplicationError(
+              error,
+              reply
+            );
+          }
+
+          if (
+            error instanceof
+              TypeError
+          ) {
+            return sendInvalidRequest(
+              error,
+              reply
+            );
+          }
+
+          throw error;
+        }
+      }
+    );
+  };
+
+------------------------------------------------------------
+FILE: src\routes\index.ts
+------------------------------------------------------------
+export * from "./health.routes.js";
+
+export * from "./authentication.routes.js";
+
+export * from "./admin-access.routes.js";
+
+export * from "./admin-metrics.routes.js";
+
+export * from "./admin-content.routes.js";
+
+export * from "./admin-source.routes.js";
+
+export * from "./client-commercial-request.routes.js";
+
+export * from "./admin-commercial-request.routes.js";
+
+export * from "./admin-profile.routes.js";
+
+export * from "./admin-copyright.routes.js";
+
+export * from "./admin-reports.routes.js";
+
+------------------------------------------------------------
+FILE: src\app.ts
+------------------------------------------------------------
+import cookie
+  from "@fastify/cookie";
+
+import cors
+  from "@fastify/cors";
+
+import helmet
+  from "@fastify/helmet";
+
+import Fastify, {
+  type FastifyInstance,
+} from "fastify";
+
+import {
+  createAdminCopyrightService,
+  type AdminCopyrightService,
+} from "./application/copyright/index.js";
+
+import {
+  createAdminReportsService,
+  type AdminReportsService,
+} from "./application/reports/index.js";
+import {
+  createAdminUserMetricsService,
+  type AdminUserMetricsService,
+} from "./application/admin-metrics/admin-user-metrics.service.js";
+
+import {
+  createAdminContentService,
+  createAdminSourceService,
+  type AdminContentService,
+  type AdminSourceService,
+} from "./application/content-sources/index.js";
+
+import {
+  createAdminAudienceInsightsService,
+  type AdminAudienceInsightsService,
+} from "./application/audience-insights/admin-audience-insights.service.js";
+
+import {
+  createAdminProfileService,
+  type AdminProfileService,
+} from "./application/admin-profile/admin-profile.service.js";
+
+import {
+  createAdminCommercialRequestService,
+  type AdminCommercialRequestService,
+} from "./application/monetization/admin-commercial-request.service.js";
+
+import {
+  createClientCommercialRequestService,
+  type ClientCommercialRequestService,
+} from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createAuthorizationContextService,
+  type AuthorizationContextService,
+} from "./application/authorization/authorization-context.service.js";
+
+import {
+  createLoginSessionService,
+  type LoginSessionService,
+} from "./application/authentication/login-session.service.js";
+
+import {
+  createPasswordResetService,
+  type PasswordResetService,
+} from "./application/authentication/password-reset.service.js";
+
+import {
+  createSessionLifecycleService,
+  type SessionLifecycleService,
+} from "./application/authentication/session-lifecycle.service.js";
+
+import {
+  createSignupRegistrationService,
+  type SignupRegistrationService,
+} from "./application/authentication/signup-registration.service.js";
+
+import {
+  getEnvironment,
+} from "./config/environment.js";
+
+import {
+  createAuthenticationAccessTokenService,
+  type AuthenticationAccessTokenService,
+} from "./domains/authentication/access-token.service.js";
+
+import {
+  verifySignupEmail,
+} from "./domains/authentication/authentication.service.js";
+
+import {
+  registerAuthorizationContext,
+} from "./http/authorization-context.js";
+
+import {
+  registerErrorHandler,
+} from "./plugins/error-handler.js";
+
+import {
+  adminAccessRoutes,
+  adminCommercialRequestRoutes,
+  adminCopyrightRoutes,
+  adminContentRoutes,
+  adminMetricsRoutes,
+  adminProfileRoutes,
+  adminSourceRoutes,
+  authenticationRoutes,
+  clientCommercialRequestRoutes,
+  healthRoutes,
+  type AuthenticationRoutesOptions,
+} from "./routes/index.js";
+
+import {
+  adminAudienceInsightsRoutes,
+} from "./routes/admin-audience-insights.routes.js";
+
+import {
+  createDevelopmentEmailDeliveryProvider,
+  type EmailDeliveryProvider,
+} from "./services/email/index.js";
+
+export interface BuildAppOptions {
+  adminCommercialRequestService?:
+    AdminCommercialRequestService;
+
+  clientCommercialRequestService?:
+    ClientCommercialRequestService;
+
+  adminUserMetricsService?:
+    AdminUserMetricsService;
+
+  adminAudienceInsightsService?:
+    AdminAudienceInsightsService;
+
+  adminContentService?:
+    AdminContentService;
+
+  adminSourceService?:
+    AdminSourceService;
+
+  adminProfileService?:
+    AdminProfileService;
+
+  adminCopyrightService?:
+    AdminCopyrightService;
+
+  adminReportsService?:
+    AdminReportsService;
+
+  accessTokenService?:
+    AuthenticationAccessTokenService;
+
+  authorizationContextService?:
+    AuthorizationContextService;
+
+  emailDeliveryProvider?:
+    EmailDeliveryProvider;
+
+  signupRegistrationService?:
+    SignupRegistrationService;
+
+  verifySignupEmail?:
+    AuthenticationRoutesOptions[
+      "verifySignupEmail"
+    ];
+
+  loginSessionService?:
+    LoginSessionService;
+
+  sessionLifecycleService?:
+    SessionLifecycleService;
+
+  passwordResetService?:
+    PasswordResetService;
+}
+
+export async function buildApp(
+  options:
+    BuildAppOptions =
+    {}
+): Promise<
+  FastifyInstance
+> {
+  const environment =
+    getEnvironment();
+
+  const sessionSecret =
+    environment.SESSION_SECRET ??
+    (
+      environment.NODE_ENV ===
+        "test"
+        ? "poster-test-access-token-secret-2026-never-use-in-production"
+        : undefined
+    );
+
+  if (
+    !sessionSecret
+  ) {
+    throw new Error(
+      "SESSION_SECRET is required to issue authentication access tokens."
+    );
+  }
+
+  const app =
+    Fastify({
+      logger:
+        environment.NODE_ENV ===
+        "test"
+          ? false
+          : {
+              level:
+                environment.LOG_LEVEL,
+            },
+
+      trustProxy:
+        true,
+
+      requestIdHeader:
+        "x-request-id",
+    });
+
+  await app.register(
+    cookie
+  );
+
+  await app.register(
+    helmet,
+    {
+      global:
+        true,
+    }
+  );
+
+  const allowedOrigins =
+    new Set([
+      environment.CLIENT_WEB_ORIGIN,
+      environment.ADMIN_WEB_ORIGIN,
+    ]);
+
+  await app.register(
+    cors,
+    {
+      credentials:
+        true,
+
+      methods: [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+      ],
+
+      allowedHeaders: [
+        "accept",
+        "authorization",
+        "content-type",
+        "x-request-id",
+      ],
+
+      exposedHeaders: [
+        "x-poster-access-token",
+        "x-poster-access-token-expires-at",
+      ],
+
+      origin: (
+        origin,
+        callback
+      ) => {
+        if (
+          !origin
+        ) {
+          callback(
+            null,
+            true
+          );
+
+          return;
+        }
+
+        callback(
+          null,
+          allowedOrigins.has(
+            origin
+          )
+        );
+      },
+    }
+  );
+
+  const accessTokenService =
+    options
+      .accessTokenService ??
+    createAuthenticationAccessTokenService({
+      secret:
+        sessionSecret,
+    });
+
+  const authorizationContextService =
+    options
+      .authorizationContextService ??
+    createAuthorizationContextService({
+      accessTokenService,
+    });
+
+  registerAuthorizationContext(
+    app,
+    {
+      authorizationContextService,
+    }
+  );
+
+  registerErrorHandler(
+    app
+  );
+
+  await app.register(
+    healthRoutes,
+    {
+      prefix:
+        "/api/v1",
+    }
+  );
+
+  const emailDeliveryProvider =
+    options
+      .emailDeliveryProvider ??
+    createDevelopmentEmailDeliveryProvider({
+      nodeEnvironment:
+        environment.NODE_ENV,
+    });
+
+  const signupRegistrationService =
+    options
+      .signupRegistrationService ??
+    createSignupRegistrationService({
+      emailDeliveryProvider,
+    });
+
+  const passwordResetService =
+    options
+      .passwordResetService ??
+    createPasswordResetService({
+      emailDeliveryProvider,
+    });
+
+  await app.register(
+    authenticationRoutes,
+    {
+      prefix:
+        "/api/v1/auth",
+
+      accessTokenService,
+
+      signupRegistrationService,
+
+      verifySignupEmail:
+        options
+          .verifySignupEmail ??
+        verifySignupEmail,
+
+      loginSessionService:
+        options
+          .loginSessionService ??
+        createLoginSessionService(),
+
+      sessionLifecycleService:
+        options
+          .sessionLifecycleService ??
+        createSessionLifecycleService(),
+
+      passwordResetService,
+
+      isProduction:
+        environment.NODE_ENV ===
+        "production",
+    }
+  );
+
+  await app.register(
+    adminAccessRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+    }
+  );
+
+  await app.register(
+    adminProfileRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminProfileService ??
+        createAdminProfileService(),
+    }
+  );
+
+  await app.register(
+    adminMetricsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      userMetricsService:
+        options
+          .adminUserMetricsService ??
+        createAdminUserMetricsService(),
+    }
+  );
+
+  await app.register(
+    adminAudienceInsightsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminAudienceInsightsService ??
+        createAdminAudienceInsightsService(),
+    }
+  );
+
+  await app.register(
+    adminContentRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminContentService ??
+        createAdminContentService(),
+    }
+  );
+
+  await app.register(
+    adminSourceRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminSourceService ??
+        createAdminSourceService(),
+    }
+  );
+
+  await app.register(
+    adminCopyrightRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCopyrightService ??
+        createAdminCopyrightService(),
+    }
+  );
+
+  await app.register(
+    adminReportsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminReportsService ??
+        createAdminReportsService(),
+    }
+  );
+
+  await app.register(
+    clientCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/client",
+
+      service:
+        options
+          .clientCommercialRequestService ??
+        createClientCommercialRequestService(),
+    }
+  );
+
+  await app.register(
+    adminCommercialRequestRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminCommercialRequestService ??
+        createAdminCommercialRequestService(),
+    }
+  );
+  app.get(
+    "/",
+    async () => ({
+      service:
+        "Poster Backend",
+
+      status:
+        "running",
+
+      apiVersion:
+        "v1",
+    })
+  );
+
+  return app;
+}
+
+
+============================================================
+4. CURRENT TEST RESULT
+============================================================
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mF:/Project/Poster/backend[39m
+
+ [32mΓ£ô[39m admin-reports.service.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 16:46:36
+[2m   Duration [22m 591ms[2m (transform 171ms, setup 0ms, import 309ms, tests 19ms, environment 0ms)[22m
+
+
+============================================================
+5. MIGRATION STATUS
+============================================================
+
+> poster-backend@0.1.0 db:migrate:status
+> tsx src/database/migrate.ts --status
+
+Poster database migration status
+{
+  "available": 13,
+  "applied": 13,
+  "pending": 0,
+  "pendingMigrations": []
+}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   Suspense,
@@ -9,8 +9,8 @@ import {
 import CampaignsPanel from "./CampaignsPanel";
 
 import {
-  createMockCommercialRequestGateway,
-} from "./requests/commercial-request.mock-service";
+  createApiCommercialRequestGateway,
+} from "./requests/commercial-request-api-gateway";
 
 import CommercialRequestsPanel from "./requests/CommercialRequestsPanel";
 
@@ -34,7 +34,7 @@ export default function MonetizationManager() {
   const requestGateway =
     useMemo(
       () =>
-        createMockCommercialRequestGateway(),
+        createApiCommercialRequestGateway(),
       []
     );
 
