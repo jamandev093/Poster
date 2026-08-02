@@ -181,3 +181,8 @@ backups/
 /frontend/dist/
 /frontend/build/
 /frontend/.next/
+
+# A17+ local sweep packets
+/A17*.txt
+/A18*.txt
+/A19*.txt
