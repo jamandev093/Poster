@@ -1,5 +1,39 @@
-import AdvertiseRequestForm from "@/features/advertise/AdvertiseRequestForm";
+import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
+
+const ITEMS = [
+  {
+    title:
+      "Client request intake",
+
+    description:
+      "Public advertiser and partner requests belong in the Client or public Website flow, not inside Admin.",
+  },
+  {
+    title:
+      "Admin review queue",
+
+    description:
+      "Commercial requests that reach Admin must come from Backend persistence and appear in the Monetization request review queue.",
+  },
+  {
+    title:
+      "Campaign creation",
+
+    description:
+      "Approved commercial requests can become Backend-owned Draft campaigns before scheduling or activation.",
+  },
+] as const;
 
 export default function AdvertisePage() {
-  return <AdvertiseRequestForm />;
+  return (
+    <DeferredOperationsPage
+      eyebrow="Public intake"
+      title="Advertise request form moved out of Admin"
+      description="This Admin route no longer exposes a frontend-only public advertising form. Use Backend-backed request queues for review and campaign creation."
+      status="Admin-safe"
+      items={ITEMS}
+      nextHref="/monetization/sponsorships"
+      nextLabel="Open Sponsorships"
+    />
+  );
 }
