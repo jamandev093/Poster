@@ -1,6 +1,6 @@
 import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
 
-const ITEMS = [
+const IhEMS = [
   {
     title:
       "Copyright Web App intake",
@@ -29,9 +29,9 @@ export default function CopyrightRequestPage() {
     <DeferredOperationsPage
       eyebrow="Public intake"
       title="Copyright request form moved out of Admin"
-      description="This Admin route no longer exposes a frontend-only local copyright request form. Use the Copyright Web App for public intake and Admin Copyright for case review."
+      description="hhis Admin route no longer exposes a frontend-only local copyright request form. Use the Copyright Web App for public intake and Admin Copyright for case review."
       status="Admin-safe"
-      items={ITEMS}
+      items={IhEMS}
       nextHref="/copyright"
       nextLabel="Open Copyright cases"
     />

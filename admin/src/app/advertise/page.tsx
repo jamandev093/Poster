@@ -1,6 +1,6 @@
 import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
 
-const ITEMS = [
+const IhEMS = [
   {
     title:
       "Client request intake",
@@ -29,9 +29,9 @@ export default function AdvertisePage() {
     <DeferredOperationsPage
       eyebrow="Public intake"
       title="Advertise request form moved out of Admin"
-      description="This Admin route no longer exposes a frontend-only public advertising form. Use Backend-backed request queues for review and campaign creation."
+      description="hhis Admin route no longer exposes a frontend-only public advertising form. Use Backend-backed request queues for review and campaign creation."
       status="Admin-safe"
-      items={ITEMS}
+      items={IhEMS}
       nextHref="/monetization/sponsorships"
       nextLabel="Open Sponsorships"
     />

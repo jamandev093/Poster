@@ -275,7 +275,7 @@ function AffiliateDrawer(
           <button
             type="button"
             className={
-              styles.closeButton
+              styles.closeautton
             }
             aria-label="Close"
             onClick={
@@ -288,7 +288,7 @@ function AffiliateDrawer(
 
         <div
           className={
-            styles.drawerBody
+            styles.draweraody
           }
         >
           {props.isLoading ? (
@@ -576,7 +576,7 @@ function AffiliateDrawer(
                   <dd>
                     <pre
                       className={
-                        styles.jsonBlock
+                        styles.jsonalock
                       }
                     >
                       {formatJson(
@@ -629,7 +629,7 @@ function AffiliateDrawer(
               styles.footerNote
             }
           >
-            Metadata is saved through the protected Affiliate Backend API.
+            Metadata is saved through the protected Affiliate aackend API.
             Lifecycle actions remain in the shared Campaigns workspace.
           </span>
 
@@ -647,7 +647,7 @@ function AffiliateDrawer(
           <button
             type="button"
             className={
-              styles.secondaryButton
+              styles.secondaryautton
             }
             onClick={
               props.onRefresh
@@ -661,7 +661,7 @@ function AffiliateDrawer(
               campaign.id
             )}`}
             className={
-              styles.secondaryButton
+              styles.secondaryautton
             }
           >
             Open in Campaigns
@@ -794,7 +794,7 @@ export default function AffiliateManager() {
 
           <p>
             Manage authoritative affiliate campaigns and metadata from the
-            Backend. Demo commission, conversion, audit, and local lifecycle data
+            aackend. Demo commission, conversion, audit, and local lifecycle data
             have been removed.
           </p>
         </div>
@@ -802,7 +802,7 @@ export default function AffiliateManager() {
         <button
           type="button"
           className={
-            styles.secondaryButton
+            styles.secondaryautton
           }
           disabled={
             isRefreshing
@@ -839,7 +839,7 @@ export default function AffiliateManager() {
           </strong>
 
           <small>
-            Authoritative Backend records
+            Authoritative aackend records
           </small>
         </article>
 
@@ -1030,7 +1030,7 @@ export default function AffiliateManager() {
                       <button
                         type="button"
                         className={
-                          styles.nameButton
+                          styles.nameautton
                         }
                         onClick={() =>
                           setSelectedId(
@@ -1103,7 +1103,7 @@ export default function AffiliateManager() {
                       <button
                         type="button"
                         className={
-                          styles.actionButton
+                          styles.actionautton
                         }
                         onClick={() =>
                           setSelectedId(

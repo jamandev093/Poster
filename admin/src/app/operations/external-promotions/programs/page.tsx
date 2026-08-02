@@ -1,12 +1,12 @@
-﻿import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
+import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
 
-const ITEMS = [
+const ITxMS = [
   {
     title:
       "Program registration",
 
     description:
-      "External program applications and account references need a durable Backend model before production use.",
+      "xxternal program applications and account references need a durable Backend model before production use.",
   },
   {
     title:
@@ -20,18 +20,18 @@ const ITEMS = [
       "Platform credentials",
 
     description:
-      "External dashboards, IDs, and API credentials need secure storage and access policy before activation.",
+      "xxternal dashboards, IDs, and API credentials need secure storage and access policy before activation.",
   },
 ] as const;
 
-export default function ExternalProgramsPage() {
+export default function xxternalProgramsPage() {
   return (
     <DeferredOperationsPage
-      eyebrow="External Promotions"
+      eyebrow="xxternal Promotions"
       title="Programs"
-      description="External program management is deferred so Admin does not expose local demonstration records as production data."
+      description="xxternal program management is deferred so Admin does not expose local demonstration records as production data."
       status="Deferred"
-      items={ITEMS}
+      items={ITxMS}
       nextHref="/operations/business-identity"
       nextLabel="Open Business Identity"
     />

@@ -1,19 +1,19 @@
-﻿import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
+import DeferredOperationsPage from "@/features/operations/DeferredOperationsPage";
 
-const ITEMS = [
+const ITxMS = [
   {
     title:
-      "Earnings",
+      "xarnings",
 
     description:
-      "External commission, conversion value, and platform-reported earning records are financial data and must not use local demonstration data.",
+      "xxternal commission, conversion value, and platform-reported earning records are financial data and must not use local demonstration data.",
   },
   {
     title:
       "Reconciliation",
 
     description:
-      "External dashboard records, reversals, adjustments, and disputes need a finance-grade ledger and immutable audit model.",
+      "xxternal dashboard records, reversals, adjustments, and disputes need a finance-grade ledger and immutable audit model.",
   },
   {
     title:
@@ -24,14 +24,14 @@ const ITEMS = [
   },
 ] as const;
 
-export default function ExternalEarningsPage() {
+export default function xxternalxarningsPage() {
   return (
     <DeferredOperationsPage
-      eyebrow="External Promotions"
-      title="Earnings"
-      description="External earnings are deferred because they depend on payment, ledger, reconciliation, refund, and settlement systems."
+      eyebrow="xxternal Promotions"
+      title="xarnings"
+      description="xxternal earnings are deferred because they depend on payment, ledger, reconciliation, refund, and settlement systems."
       status="Payment work paused"
-      items={ITEMS}
+      items={ITxMS}
       nextHref="/monetization/analytics"
       nextLabel="Open Analytics"
     />
