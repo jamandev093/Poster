@@ -165,3 +165,11 @@ backups/
 
 # Local tool rules
 .clinerules
+
+# Remaining root-level local audit/inspection packets
+/A13*.txt
+/A14*.txt
+/A15*.txt
+/A16*.txt
+/MONETIZATION_*.txt
+/POST_COMMIT_REMAINING_GIT_STATUS.txt
