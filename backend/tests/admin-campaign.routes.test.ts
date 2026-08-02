@@ -166,14 +166,31 @@ function createServiceMocks() {
         CAMPAIGN
       );
 
+  const updateOperations =
+    vi.fn()
+      .mockResolvedValue(
+        CAMPAIGN
+      );
+
+  const transition =
+    vi.fn()
+      .mockResolvedValue(
+        CAMPAIGN
+      );
+
+  const service = {
+    list,
+    get,
+    updateOperations,
+    transition,
+  } satisfies AdminCampaignService;
+
   return {
     list,
     get,
-
-    service: {
-      list,
-      get,
-    } as AdminCampaignService,
+    updateOperations,
+    transition,
+    service,
   };
 }
 

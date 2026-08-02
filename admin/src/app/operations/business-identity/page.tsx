@@ -1,5 +1,7 @@
-﻿import BusinessIdentityManager from "@/features/operations/business-identity/BusinessIdentityManager";
+import BusinessIdentityManager from "../../../features/operations/BusinessIdentityManager";
 
 export default function BusinessIdentityPage() {
-  return <BusinessIdentityManager />;
+  return (
+    <BusinessIdentityManager />
+  );
 }

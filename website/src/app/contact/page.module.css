@@ -137,3 +137,14 @@
       24px;
   }
 }
+.unavailableContact {
+  display: inline-block;
+
+  margin-top: 14px;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 650;
+}

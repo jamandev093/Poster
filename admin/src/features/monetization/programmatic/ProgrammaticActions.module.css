@@ -1,0 +1,207 @@
+.actions {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.secondaryButton {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.errorText {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.modalLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(15 23 42 / 0.38);
+}
+
+.modal {
+  position: relative;
+  z-index: 1;
+  width: min(780px, 100%);
+  max-height: min(86vh, 840px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 24px 70px rgb(15 23 42 / 0.22);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalHeader span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modalHeader h3 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field,
+.fullField {
+  display: grid;
+  gap: 6px;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.field label,
+.fullField label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.field input,
+.field select,
+.fullField input,
+.fullField select,
+.fullField textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.field input,
+.field select,
+.fullField input,
+.fullField select {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.fullField textarea {
+  min-height: 96px;
+  padding: 10px;
+  resize: vertical;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+}
+
+.helpText {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.formError {
+  border: 1px solid rgb(220 38 38 / 0.24);
+  border-radius: 12px;
+  background: rgb(220 38 38 / 0.08);
+  color: var(--danger);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 760px) {
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalLayer {
+    padding: 12px;
+  }
+}

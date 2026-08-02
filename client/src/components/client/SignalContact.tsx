@@ -1,13 +1,10 @@
 "use client";
 
+import {
+  usePublicBusinessIdentity,
+} from "@/features/business-identity";
+
 import styles from "./SignalContact.module.css";
-
-const SIGNAL_URL =
-  process.env.NEXT_PUBLIC_SIGNAL_CONTACT_URL?.trim() ?? "";
-
-const SIGNAL_LABEL =
-  process.env.NEXT_PUBLIC_SIGNAL_CONTACT_LABEL?.trim() ||
-  "Contact on Signal";
 
 function SignalIcon() {
   return (
@@ -22,45 +19,96 @@ function SignalIcon() {
   );
 }
 
-export default function SignalContact() {
-  if (!SIGNAL_URL) {
-    return (
-      <div
-        className={styles.contactDisabled}
-        aria-disabled="true"
-        title="Signal support is currently unavailable."
-      >
-        <span className={styles.icon}>
-          <SignalIcon />
-        </span>
-
-        <span className={styles.content}>
-          <strong>Contact on Signal</strong>
-          <small>Direct support</small>
-        </span>
-
-        <span className={styles.unavailable}>
-          —
-        </span>
-      </div>
-    );
+function DisabledSignalContact(
+  props: {
+    title:
+      string;
   }
-
+) {
   return (
-    <a
-      href={SIGNAL_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={styles.contact}
-      aria-label={`${SIGNAL_LABEL} — opens Signal in a new tab`}
+    <div
+      className={styles.contactDisabled}
+      aria-disabled="true"
+      title={props.title}
     >
       <span className={styles.icon}>
         <SignalIcon />
       </span>
 
       <span className={styles.content}>
-        <strong>{SIGNAL_LABEL}</strong>
-        <small>Direct support</small>
+        <strong>
+          Contact on Signal
+        </strong>
+
+        <small>
+          Direct support
+        </small>
+      </span>
+
+      <span className={styles.unavailable}>
+        —
+      </span>
+    </div>
+  );
+}
+
+export default function SignalContact() {
+  const {
+    identity,
+    isLoading,
+  } =
+    usePublicBusinessIdentity();
+
+  const signalUrl =
+    identity?.signalUrl?.trim() ??
+    "";
+
+  const signalLabel =
+    identity?.signalLabel?.trim() ||
+    "Contact on Signal";
+
+  if (
+    isLoading
+  ) {
+    return (
+      <DisabledSignalContact
+        title="Loading official Signal contact from Poster Business Identity."
+      />
+    );
+  }
+
+  if (
+    !signalUrl
+  ) {
+    return (
+      <DisabledSignalContact
+        title="Signal support is currently unavailable."
+      />
+    );
+  }
+
+  return (
+    <a
+      href={signalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.contact}
+      aria-label={`${signalLabel} — opens Signal in a new tab`}
+    >
+      <span className={styles.icon}>
+        <SignalIcon />
+      </span>
+
+      <span className={styles.content}>
+        <strong>
+          {
+            signalLabel
+          }
+        </strong>
+
+        <small>
+          Direct support
+        </small>
       </span>
 
       <span

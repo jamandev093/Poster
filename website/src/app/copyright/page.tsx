@@ -1,26 +1,69 @@
+import {
+  getPublicBusinessIdentity,
+} from "../../features/business-identity";
+
 import styles from "./page.module.css";
 
 export const metadata = {
-  title: "Copyright & Rights",
+  title:
+    "Copyright & Rights",
 
   description:
     "Report copyright concerns, understand Poster’s verification process, and learn what actions may follow a rights claim.",
 
   alternates: {
-    canonical: "/copyright",
+    canonical:
+      "/copyright",
   },
 
   openGraph: {
-    title: "Copyright & Rights",
+    title:
+      "Copyright & Rights",
 
     description:
       "Submit a copyright concern, provide supporting evidence, and understand Poster’s claim-review process.",
 
-    url: "/copyright",
+    url:
+      "/copyright",
   },
 };
 
-export default function CopyrightPage() {
+function CopyrightPortalAction(
+  props: {
+    url:
+      string | null | undefined;
+  }
+) {
+  if (
+    !props.url
+  ) {
+    return (
+      <span className={styles.portalDisabled}>
+        Copyright Portal destination is loading from Poster Business Identity.
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={
+        props.url
+      }
+      className={styles.portalAction}
+    >
+      Open Copyright Portal →
+    </a>
+  );
+}
+
+export default async function CopyrightPage() {
+  const identity =
+    await getPublicBusinessIdentity();
+
+  const copyrightPortalUrl =
+    identity?.copyrightPortalUrl ??
+    null;
+
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
@@ -57,12 +100,11 @@ export default function CopyrightPage() {
             dedicated portal.
           </p>
 
-          <a
-            href="https://copyright.getpostar.com"
-            className={styles.portalAction}
-          >
-            Open Copyright Portal →
-          </a>
+          <CopyrightPortalAction
+            url={
+              copyrightPortalUrl
+            }
+          />
         </aside>
       </section>
 
@@ -272,12 +314,11 @@ export default function CopyrightPage() {
             </p>
           </div>
 
-          <a
-            href="https://copyright.getpostar.com"
-            className={styles.portalAction}
-          >
-            Open Copyright Portal →
-          </a>
+          <CopyrightPortalAction
+            url={
+              copyrightPortalUrl
+            }
+          />
         </aside>
       </section>
     </div>

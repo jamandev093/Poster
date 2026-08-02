@@ -92,7 +92,11 @@ const CAMPAIGN:
 
 function createDependencies() {
   const listCampaigns =
-    vi.fn()
+    vi.fn<
+      AdminCampaignServiceDependencies[
+        "listCampaigns"
+      ]
+    >()
       .mockResolvedValue({
         items: [
           CAMPAIGN,
@@ -109,14 +113,65 @@ function createDependencies() {
       });
 
   const findCampaign =
-    vi.fn()
+    vi.fn<
+      AdminCampaignServiceDependencies[
+        "findCampaign"
+      ]
+    >()
       .mockResolvedValue(
         CAMPAIGN
+      );
+
+  const updateCampaign =
+    vi.fn<
+      AdminCampaignServiceDependencies[
+        "updateCampaign"
+      ]
+    >();
+
+  const transitionCampaign =
+    vi.fn<
+      AdminCampaignServiceDependencies[
+        "transitionCampaign"
+      ]
+    >();
+
+  const createAuditEntry =
+    vi.fn<
+      AdminCampaignServiceDependencies[
+        "createAuditEntry"
+      ]
+    >()
+      .mockResolvedValue(
+        undefined
+      );
+
+  const executor =
+    {} as never;
+
+  const runTransaction:
+    AdminCampaignServiceDependencies[
+      "runTransaction"
+    ] =
+      async operation =>
+        await operation(
+          executor
+        );
+
+  const now =
+    () =>
+      new Date(
+        "2026-08-02T04:30:00.000Z"
       );
 
   const dependencies = {
     listCampaigns,
     findCampaign,
+    updateCampaign,
+    transitionCampaign,
+    createAuditEntry,
+    runTransaction,
+    now,
   } satisfies
     AdminCampaignServiceDependencies;
 
@@ -124,6 +179,9 @@ function createDependencies() {
     dependencies,
     listCampaigns,
     findCampaign,
+    updateCampaign,
+    transitionCampaign,
+    createAuditEntry,
   };
 }
 

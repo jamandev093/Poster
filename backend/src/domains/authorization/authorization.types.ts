@@ -42,6 +42,8 @@ export const PLATFORM_PERMISSIONS = [
   "monetization.campaigns.read",
   "monetization.campaigns.manage",
   "monetization.analytics.read",
+  "operations.business_identity.read",
+  "operations.business_identity.manage",
   "audit.read",
 ] as const;
 

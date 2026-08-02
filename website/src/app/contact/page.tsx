@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import {
+  getPublicBusinessIdentity,
+} from "../../features/business-identity";
+
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -9,20 +13,73 @@ export const metadata = {
     "Contact Poster about general questions, publisher relationships, advertising, copyright, or rights concerns.",
 
   alternates: {
-    canonical: "/contact",
+    canonical:
+      "/contact",
   },
 
   openGraph: {
-    title: "Contact Poster",
+    title:
+      "Contact Poster",
 
     description:
       "Find the correct contact path for general, publisher, advertising, and copyright enquiries.",
 
-    url: "/contact",
+    url:
+      "/contact",
   },
 };
 
-export default function ContactPage() {
+function EmailLink(
+  props: {
+    email:
+      string | null | undefined;
+
+    fallback:
+      string;
+  }
+) {
+  if (
+    !props.email
+  ) {
+    return (
+      <span className={styles.unavailableContact}>
+        {
+          props.fallback
+        }
+      </span>
+    );
+  }
+
+  return (
+    <a href={`mailto:${props.email}`}>
+      {
+        props.email
+      }
+    </a>
+  );
+}
+
+export default async function ContactPage() {
+  const identity =
+    await getPublicBusinessIdentity();
+
+  const generalEmail =
+    identity?.supportEmail ??
+    identity?.officialBusinessEmail;
+
+  const publisherEmail =
+    identity?.publisherRelationsEmail ??
+    identity?.supportEmail ??
+    identity?.officialBusinessEmail;
+
+  const advertisingEmail =
+    identity?.advertisingEmail ??
+    null;
+
+  const copyrightEmail =
+    identity?.copyrightEmail ??
+    null;
+
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
@@ -43,69 +100,107 @@ export default function ContactPage() {
 
       <section className={styles.contacts}>
         <article>
-          <span>General</span>
+          <span>
+            General
+          </span>
 
           <div>
-            <h2>General questions</h2>
+            <h2>
+              General questions
+            </h2>
 
             <p>
               Questions about Poster, the product, or the company.
             </p>
 
-            <a href="mailto:hello@getpostar.com">
-              hello@getpostar.com
-            </a>
+            <EmailLink
+              email={
+                generalEmail
+              }
+              fallback="Official contact is loading from Poster Business Identity."
+            />
           </div>
         </article>
 
         <article>
-          <span>Publishers</span>
+          <span>
+            Publishers
+          </span>
 
           <div>
-            <h2>Publisher and source enquiries</h2>
+            <h2>
+              Publisher and source enquiries
+            </h2>
 
             <p>
               Questions about attribution, sources,
               corrections, or publisher relationships.
             </p>
 
-            <a href="mailto:publishers@getpostar.com">
-              publishers@getpostar.com
-            </a>
+            <EmailLink
+              email={
+                publisherEmail
+              }
+              fallback="Publisher contact is loading from Poster Business Identity."
+            />
           </div>
         </article>
 
         <article>
-          <span>Advertising</span>
+          <span>
+            Advertising
+          </span>
 
           <div>
-            <h2>Sponsorship and affiliate enquiries</h2>
+            <h2>
+              Sponsorship and affiliate enquiries
+            </h2>
 
             <p>
               Learn about commercial opportunities or continue
               to the Advertiser Portal.
             </p>
 
-            <Link href="/advertisers">
-              Advertising information →
-            </Link>
+            {advertisingEmail ? (
+              <a href={`mailto:${advertisingEmail}`}>
+                {
+                  advertisingEmail
+                }
+              </a>
+            ) : (
+              <Link href="/advertisers">
+                Advertising information →
+              </Link>
+            )}
           </div>
         </article>
 
         <article>
-          <span>Copyright</span>
+          <span>
+            Copyright
+          </span>
 
           <div>
-            <h2>Copyright and rights concerns</h2>
+            <h2>
+              Copyright and rights concerns
+            </h2>
 
             <p>
               Use Poster&apos;s dedicated copyright and rights
               process for formal claims and related requests.
             </p>
 
-            <Link href="/copyright">
-              Copyright &amp; Rights →
-            </Link>
+            {copyrightEmail ? (
+              <a href={`mailto:${copyrightEmail}`}>
+                {
+                  copyrightEmail
+                }
+              </a>
+            ) : (
+              <Link href="/copyright">
+                Copyright &amp; Rights →
+              </Link>
+            )}
           </div>
         </article>
       </section>

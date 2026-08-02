@@ -836,3 +836,112 @@
     width: 100%;
   }
 }
+.actionGroup {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.noActions {
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.reasonField {
+  display: grid;
+  gap: 7px;
+
+  margin-top: 16px;
+}
+
+.reasonField > span {
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reasonField textarea {
+  width: 100%;
+
+  resize: vertical;
+
+  padding: 11px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  color: var(--text);
+
+  background: var(--card);
+
+  outline: none;
+
+  font: inherit;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+.reasonField textarea:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgb(91 134 229 / 0.1);
+}
+
+.reasonField textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.fieldError {
+  margin: 7px 0 0 !important;
+
+  color: var(--danger) !important;
+
+  font-size: 11px !important;
+}
+
+.actionError {
+  margin-top: 12px;
+
+  padding: 10px 12px;
+
+  border: 1px solid
+    rgb(220 38 38 / 0.2);
+
+  border-radius: 10px;
+
+  color: var(--danger);
+
+  background:
+    rgb(220 38 38 / 0.06);
+
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.secondaryButton:disabled,
+.primaryButton:disabled,
+.dangerButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 680px) {
+  .actionGroup {
+    width: 100%;
+
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actionGroup > * {
+    width: 100%;
+  }
+}

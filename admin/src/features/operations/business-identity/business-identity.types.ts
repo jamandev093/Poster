@@ -1,81 +1,128 @@
-﻿export type BusinessIdentitySection =
-  | "company"
-  | "publisher"
-  | "properties"
-  | "compliance"
-  | "payout"
-  | "application-kit";
+export interface BusinessIdentity {
+  key:
+    "official";
 
-export type ReadinessStatus =
-  | "complete"
-  | "incomplete"
-  | "not-applicable";
+  publicBrandName:
+    string;
 
-export interface BusinessCompanyProfile {
-  brandName: string;
-  legalBusinessName: string;
-  businessType: string;
-  foundedYear: string;
-  country: string;
-  businessEmail: string;
-  businessPhone: string;
-  websiteUrl: string;
-  appUrl: string;
-  shortDescription: string;
-  detailedDescription: string;
+  legalBusinessName:
+    string | null;
+
+  websiteUrl:
+    string;
+
+  officialBusinessEmail:
+    string;
+
+  supportEmail:
+    string | null;
+
+  publisherRelationsEmail:
+    string | null;
+
+  advertisingEmail:
+    string | null;
+
+  copyrightEmail:
+    string | null;
+
+  signalUrl:
+    string | null;
+
+  signalLabel:
+    string | null;
+
+  copyrightPortalUrl:
+    string | null;
+
+  clientPortalUrl:
+    string | null;
+
+  socialLinks:
+    Record<string, unknown>;
+
+  updatedByUserId:
+    string | null;
+
+  createdAt:
+    string;
+
+  updatedAt:
+    string;
+
+  rowVersion:
+    string;
 }
 
-export interface PublisherProfile {
-  contentCategories: string;
-  audienceDescription: string;
-  primaryCountries: string;
-  languages: string;
-  promotionMethods: string;
-  trafficSources: string;
-  estimatedMonthlyReach: string;
+export interface BusinessIdentityResponse {
+  identity:
+    BusinessIdentity;
 }
 
-export interface BusinessProperty {
-  id: string;
-  name: string;
-  type:
-    | "website"
-    | "mobile_app"
-    | "web_app"
-    | "other";
-  url: string;
-  status:
-    | "active"
-    | "planned"
-    | "inactive";
-  approvedForPromotion: boolean;
+export interface UpdateBusinessIdentityRequest {
+  publicBrandName:
+    string;
+
+  legalBusinessName:
+    string | null;
+
+  websiteUrl:
+    string;
+
+  officialBusinessEmail:
+    string;
+
+  supportEmail:
+    string | null;
+
+  publisherRelationsEmail:
+    string | null;
+
+  advertisingEmail:
+    string | null;
+
+  copyrightEmail:
+    string | null;
+
+  signalUrl:
+    string | null;
+
+  signalLabel:
+    string | null;
+
+  copyrightPortalUrl:
+    string | null;
+
+  clientPortalUrl:
+    string | null;
+
+  socialLinks:
+    Record<string, unknown>;
+
+  expectedRowVersion:
+    string;
 }
 
-export interface ComplianceProfile {
-  affiliateDisclosure: string;
-  privacyPolicyUrl: string;
-  termsUrl: string;
-  contactUrl: string;
-  copyrightPolicyUrl: string;
-  trafficIntegrityStatement: string;
-  prohibitedCategories: string;
+export interface BusinessIdentityApiIssue {
+  path:
+    string;
+
+  message:
+    string;
 }
 
-export interface PayoutReadiness {
-  legalEntityStatus: ReadinessStatus;
-  taxIdentityStatus: ReadinessStatus;
-  gstStatus: ReadinessStatus;
-  bankAccountStatus: ReadinessStatus;
-  beneficiaryName: string;
-  defaultCurrency: string;
-  internalNotes: string;
-}
+export interface BusinessIdentityApiErrorBody {
+  error?: {
+    code?:
+      string;
 
-export interface BusinessIdentityRecord {
-  company: BusinessCompanyProfile;
-  publisher: PublisherProfile;
-  properties: BusinessProperty[];
-  compliance: ComplianceProfile;
-  payout: PayoutReadiness;
-  updatedAt: string;
+    message?:
+      string;
+
+    requestId?:
+      string;
+
+    details?:
+      BusinessIdentityApiIssue[];
+  };
 }

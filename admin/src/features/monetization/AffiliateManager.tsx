@@ -1,682 +1,772 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+
+import AffiliateMetadataAction from "./affiliate/AffiliateMetadataAction";
+
 import {
   useMemo,
   useState,
 } from "react";
 
+import type {
+  AffiliateCampaign,
+  AffiliateCampaignStatus,
+  AffiliateDetailResponse,
+} from "./affiliate";
+
+import {
+  countAffiliateStatuses,
+  filterAffiliateCampaigns,
+  formatAffiliateDate,
+  formatAffiliatePlacement,
+  formatAffiliateStatus,
+  formatAffiliateTimestamp,
+  getAffiliateErrorMessage,
+  useAffiliateCampaigns,
+  useAffiliateDetail,
+} from "./affiliate";
+
 import styles from "./AffiliateManager.module.css";
 
-type AffiliateStatus =
-  | "scheduled"
-  | "active"
-  | "paused"
-  | "ended";
+type StatusFilter =
+  | "all"
+  | AffiliateCampaignStatus;
 
-type Placement =
-  | "Home"
-  | "Search"
-  | "Trending";
+const STATUS_FILTERS: {
+  key:
+    StatusFilter;
 
-interface AuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface AffiliateRecord {
-  id: string;
-
-  name: string;
-  partner: string;
-
-  destinationUrl: string;
-
-  placement: Placement;
-
-  status: AffiliateStatus;
-
-  startAt: string;
-  endAt?: string;
-
-  impressions: number;
-  clicks: number;
-  conversions: number;
-
-  commissionEarned: number;
-
-  audit: AuditEntry[];
-}
-
-const INITIAL_AFFILIATES: AffiliateRecord[] = [
+  label:
+    string;
+}[] = [
   {
-    id: "CMP-3002",
+    key:
+      "all",
 
-    name:
-      "Learning Partner Offer",
-
-    partner:
-      "Example Learning",
-
-    destinationUrl:
-      "https://example.com/learning-offer",
-
-    placement:
-      "Search",
-
-    status:
-      "active",
-
-    startAt:
-      "16 Jul 2026",
-
-    endAt:
-      "31 Jul 2026",
-
-    impressions:
-      82000,
-
-    clicks:
-      3400,
-
-    conversions:
-      164,
-
-    commissionEarned:
-      82000,
-
-    audit: [
-      {
-        id:
-          "affiliate-3002-2",
-
-        action:
-          "Affiliate conversion tracking active",
-
-        actor:
-          "System",
-
-        timestamp:
-          "20 Jul 2026 Â· 09:10",
-      },
-
-      {
-        id:
-          "affiliate-3002-1",
-
-        action:
-          "Affiliate campaign activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "16 Jul 2026 Â· 10:30",
-      },
-    ],
+    label:
+      "All",
   },
 
   {
-    id: "CMP-3020",
+    key:
+      "draft",
 
-    name:
-      "Professional Certification Offer",
-
-    partner:
-      "Example Academy",
-
-    destinationUrl:
-      "https://example.org/certification",
-
-    placement:
-      "Home",
-
-    status:
-      "paused",
-
-    startAt:
-      "12 Jul 2026",
-
-    endAt:
-      "05 Aug 2026",
-
-    impressions:
-      46800,
-
-    clicks:
-      1860,
-
-    conversions:
-      92,
-
-    commissionEarned:
-      41400,
-
-    audit: [
-      {
-        id:
-          "affiliate-3020-2",
-
-        action:
-          "Affiliate campaign paused for offer review",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 Â· 15:20",
-      },
-
-      {
-        id:
-          "affiliate-3020-1",
-
-        action:
-          "Affiliate campaign activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "12 Jul 2026 Â· 11:00",
-      },
-    ],
+    label:
+      "Draft",
   },
 
   {
-    id: "CMP-3021",
-
-    name:
-      "Career Skills Course",
-
-    partner:
-      "Example Skills",
-
-    destinationUrl:
-      "https://example.net/career-skills",
-
-    placement:
-      "Trending",
-
-    status:
+    key:
       "scheduled",
 
-    startAt:
-      "26 Jul 2026",
+    label:
+      "Scheduled",
+  },
 
-    endAt:
-      "15 Aug 2026",
+  {
+    key:
+      "active",
 
-    impressions:
-      0,
+    label:
+      "Active",
+  },
 
-    clicks:
-      0,
+  {
+    key:
+      "paused",
 
-    conversions:
-      0,
+    label:
+      "Paused",
+  },
 
-    commissionEarned:
-      0,
+  {
+    key:
+      "ended",
 
-    audit: [
-      {
-        id:
-          "affiliate-3021-1",
+    label:
+      "Ended",
+  },
 
-        action:
-          "Affiliate campaign scheduled",
+  {
+    key:
+      "disabled",
 
-        actor:
-          "Admin",
-
-        timestamp:
-          "20 Jul 2026 Â· 11:45",
-      },
-    ],
+    label:
+      "Disabled",
   },
 ];
 
-function statusLabel(
-  status: AffiliateStatus
+function statusClassName(
+  status:
+    AffiliateCampaignStatus
 ): string {
-  switch (status) {
-    case "scheduled":
-      return "Scheduled";
-
+  switch (
+    status
+  ) {
     case "active":
-      return "Active";
+      return `${styles.status} ${styles.statusActive}`;
 
     case "paused":
-      return "Paused";
+      return `${styles.status} ${styles.statusPaused}`;
+
+    case "scheduled":
+      return `${styles.status} ${styles.statusScheduled}`;
+
+    case "draft":
+      return `${styles.status} ${styles.statusDraft}`;
+
+    case "disabled":
+      return `${styles.status} ${styles.statusDisabled}`;
 
     case "ended":
-      return "Ended";
+      return `${styles.status} ${styles.statusEnded}`;
   }
 }
 
-function formatNumber(
-  value: number
+function formatPlacements(
+  campaign:
+    AffiliateCampaign
 ): string {
-  return new Intl.NumberFormat(
-    "en-IN"
-  ).format(value);
+  return campaign
+    .placements
+    .map(
+      formatAffiliatePlacement
+    )
+    .join(
+      ", "
+    );
 }
 
-function formatMoney(
-  value: number
+function formatSchedule(
+  campaign:
+    AffiliateCampaign
 ): string {
-  return new Intl.NumberFormat(
-    "en-IN",
-    {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }
-  ).format(value);
+  return `${formatAffiliateDate(
+    campaign.scheduledStartDate
+  )} - ${formatAffiliateDate(
+    campaign.scheduledEndDate
+  )}`;
 }
 
-function calculateCtr(
-  clicks: number,
-  impressions: number
+function formatCommissionModel(
+  value:
+    string
+): string {
+  switch (
+    value
+  ) {
+    case "cpa":
+      return "CPA";
+
+    case "cpc":
+      return "CPC";
+
+    case "revenue_share":
+      return "Revenue share";
+
+    case "flat_fee":
+      return "Flat fee";
+
+    case "hybrid":
+      return "Hybrid";
+
+    default:
+      return value;
+  }
+}
+
+function formatJson(
+  value:
+    Record<
+      string,
+      unknown
+    >
 ): string {
   if (
-    impressions ===
+    Object.keys(
+      value
+    ).length ===
     0
   ) {
-    return "0.00%";
+    return "Not set";
   }
 
-  return `${(
-    (
-      clicks /
-      impressions
-    ) *
-    100
-  ).toFixed(2)}%`;
-}
-
-function conversionRate(
-  conversions: number,
-  clicks: number
-): string {
-  if (
-    clicks ===
-    0
-  ) {
-    return "0.00%";
-  }
-
-  return `${(
-    (
-      conversions /
-      clicks
-    ) *
-    100
-  ).toFixed(2)}%`;
-}
-
-function revenuePerClick(
-  commission: number,
-  clicks: number
-): string {
-  if (
-    clicks ===
-    0
-  ) {
-    return formatMoney(0);
-  }
-
-  return formatMoney(
-    commission /
-      clicks
+  return JSON.stringify(
+    value,
+    null,
+    2
   );
 }
 
-function nowLabel(): string {
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      dateStyle:
-        "medium",
+function AffiliateDrawer(
+  props: {
+    campaign:
+      AffiliateCampaign;
 
-      timeStyle:
-        "short",
-    }
-  ).format(
-    new Date()
+    detail:
+      AffiliateDetailResponse | null;
+
+    isLoading:
+      boolean;
+
+    error:
+      unknown;
+
+    onClose:
+      () => void;
+
+    onRefresh:
+      () => void;
+
+    onSaved:
+      () => void;
+  }
+) {
+  const campaign =
+    props.detail?.campaign ??
+    props.campaign;
+
+  const metadata =
+    props.detail?.metadata ??
+    null;
+
+  return (
+    <div
+      className={
+        styles.drawerLayer
+      }
+    >
+      <button
+        type="button"
+        className={
+          styles.backdrop
+        }
+        aria-label="Close affiliate details"
+        onClick={
+          props.onClose
+        }
+      />
+
+      <aside
+        className={
+          styles.drawer
+        }
+      >
+        <div
+          className={
+            styles.drawerHeader
+          }
+        >
+          <div>
+            <span>
+              {
+                campaign.campaignReference
+              }
+            </span>
+
+            <h3>
+              {
+                campaign.name
+              }
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.closeButton
+            }
+            aria-label="Close"
+            onClick={
+              props.onClose
+            }
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          className={
+            styles.drawerBody
+          }
+        >
+          {props.isLoading ? (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Loading affiliate metadata...
+            </div>
+          ) : props.error ? (
+            <div
+              className={
+                styles.empty
+              }
+              role="alert"
+            >
+              {getAffiliateErrorMessage(
+                props.error
+              )}
+            </div>
+          ) : null}
+
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Affiliate campaign
+            </h4>
+
+            <dl
+              className={
+                styles.detailList
+              }
+            >
+              <div>
+                <dt>
+                  Campaign ID
+                </dt>
+
+                <dd>
+                  {
+                    campaign.id
+                  }
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Reference
+                </dt>
+
+                <dd>
+                  {
+                    campaign.campaignReference
+                  }
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Placement
+                </dt>
+
+                <dd>
+                  {formatPlacements(
+                    campaign
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Status
+                </dt>
+
+                <dd>
+                  {formatAffiliateStatus(
+                    campaign.status
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Schedule
+                </dt>
+
+                <dd>
+                  {formatSchedule(
+                    campaign
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Readiness
+                </dt>
+
+                <dd>
+                  {
+                    campaign.readinessStatus
+                  }
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Commercial status
+                </dt>
+
+                <dd>
+                  {
+                    campaign.commercialStatus
+                  }
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Delivery eligible
+                </dt>
+
+                <dd>
+                  {campaign.deliveryEligible
+                    ? "Yes"
+                    : "No"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Campaign row version
+                </dt>
+
+                <dd>
+                  {
+                    campaign.rowVersion
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Affiliate metadata
+            </h4>
+
+            {metadata ? (
+              <dl
+                className={
+                  styles.detailList
+                }
+              >
+                <div>
+                  <dt>
+                    Partner
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.partnerName
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Offer
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.offerName
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Disclosure
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.disclosure
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Destination
+                  </dt>
+
+                  <dd
+                    className={
+                      styles.breakText
+                    }
+                  >
+                    {
+                      metadata.destinationUrl
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Commission model
+                  </dt>
+
+                  <dd>
+                    {formatCommissionModel(
+                      metadata.commissionModel
+                    )}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Tracking status
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.trackingStatus
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Tracking URL
+                  </dt>
+
+                  <dd
+                    className={
+                      styles.breakText
+                    }
+                  >
+                    {
+                      metadata.trackingUrl ??
+                      "Not configured"
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Payout readiness
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.payoutReadinessStatus
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Metadata row version
+                  </dt>
+
+                  <dd>
+                    {
+                      metadata.rowVersion
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>
+                    Commission terms
+                  </dt>
+
+                  <dd>
+                    <pre
+                      className={
+                        styles.jsonBlock
+                      }
+                    >
+                      {formatJson(
+                        metadata.commissionTerms
+                      )}
+                    </pre>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p
+                className={
+                  styles.integrityNote
+                }
+              >
+                No affiliate metadata is configured for this campaign yet.
+                Create/edit metadata will be connected in A14E2.
+              </p>
+            )}
+          </section>
+
+          <section
+            className={
+              styles.detailSection
+            }
+          >
+            <h4>
+              Commercial integrity
+            </h4>
+
+            <p
+              className={
+                styles.integrityNote
+              }
+            >
+              Affiliate commission and conversion value are commercial analytics
+              only. They must not alter Poster&apos;s organic knowledge, search,
+              trending, or recommendation ranking.
+            </p>
+          </section>
+        </div>
+
+        <div
+          className={
+            styles.drawerFooter
+          }
+        >
+          <span
+            className={
+              styles.footerNote
+            }
+          >
+            Metadata is saved through the protected Affiliate Backend API.
+            Lifecycle actions remain in the shared Campaigns workspace.
+          </span>
+
+          {props.detail ? (
+            <AffiliateMetadataAction
+              detail={
+                props.detail
+              }
+              onSaved={() =>
+                props.onSaved()
+              }
+            />
+          ) : null}
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              props.onRefresh
+            }
+          >
+            Refresh
+          </button>
+
+          <Link
+            href={`/monetization/campaigns?record=${encodeURIComponent(
+              campaign.id
+            )}`}
+            className={
+              styles.secondaryButton
+            }
+          >
+            Open in Campaigns
+          </Link>
+        </div>
+      </aside>
+    </div>
   );
 }
 
 export default function AffiliateManager() {
-  const [
-    affiliates,
-    setAffiliates,
-  ] = useState<
-    AffiliateRecord[]
-  >(
-    INITIAL_AFFILIATES
-  );
+  const {
+    campaigns,
+    isLoading,
+    isRefreshing,
+    error,
+    refresh,
+  } =
+    useAffiliateCampaigns();
 
   const [
     query,
     setQuery,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     filter,
     setFilter,
-  ] = useState<
-    "all" |
-      AffiliateStatus
-  >(
-    "all"
-  );
+  ] =
+    useState<
+      StatusFilter
+    >(
+      "all"
+    );
 
   const [
     selectedId,
     setSelectedId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const [
-    endTargetId,
-    setEndTargetId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const normalizedQuery =
-    query
-      .trim()
-      .toLowerCase();
-
-  const visibleAffiliates =
-    useMemo(() => {
-      return affiliates.filter(
-        (
-          affiliate
-        ) => {
-          if (
-            filter !==
-              "all" &&
-            affiliate.status !==
-              filter
-          ) {
-            return false;
-          }
-
-          if (
-            !normalizedQuery
-          ) {
-            return true;
-          }
-
-          return [
-            affiliate.id,
-            affiliate.name,
-            affiliate.partner,
-            affiliate.placement,
-          ].some(
-            (
-              value
-            ) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedQuery
-                )
-          );
-        }
-      );
-    }, [
-      affiliates,
-      filter,
-      normalizedQuery,
-    ]);
-
-  const selectedAffiliate =
-    useMemo(
-      () =>
-        affiliates.find(
-          (
-            affiliate
-          ) =>
-            affiliate.id ===
-            selectedId
-        ) ?? null,
-
-      [
-        affiliates,
-        selectedId,
-      ]
+  ] =
+    useState<
+      string | null
+    >(
+      null
     );
 
-  const endTarget =
+  const {
+    detail,
+    isLoading:
+      detailLoading,
+    error:
+      detailError,
+    refresh:
+      refreshDetail,
+  } =
+    useAffiliateDetail(
+      selectedId
+    );
+
+  const visibleCampaigns =
     useMemo(
       () =>
-        affiliates.find(
-          (
-            affiliate
-          ) =>
-            affiliate.id ===
-            endTargetId
-        ) ?? null,
+        filterAffiliateCampaigns(
+          campaigns,
+          {
+            query,
 
+            status:
+              filter,
+          }
+        ),
       [
-        affiliates,
-        endTargetId,
+        campaigns,
+        filter,
+        query,
       ]
     );
 
   const counts =
     useMemo(
-      () => ({
-        all:
-          affiliates.length,
-
-        scheduled:
-          affiliates.filter(
-            (
-              affiliate
-            ) =>
-              affiliate.status ===
-              "scheduled"
-          ).length,
-
-        active:
-          affiliates.filter(
-            (
-              affiliate
-            ) =>
-              affiliate.status ===
-              "active"
-          ).length,
-
-        paused:
-          affiliates.filter(
-            (
-              affiliate
-            ) =>
-              affiliate.status ===
-              "paused"
-          ).length,
-
-        ended:
-          affiliates.filter(
-            (
-              affiliate
-            ) =>
-              affiliate.status ===
-              "ended"
-          ).length,
-      }),
-
+      () =>
+        countAffiliateStatuses(
+          campaigns
+        ),
       [
-        affiliates,
+        campaigns,
       ]
     );
 
-  const totalCommission =
+  const selectedCampaign =
     useMemo(
       () =>
-        affiliates.reduce(
-          (
-            total,
-            affiliate
-          ) =>
-            total +
-            affiliate.commissionEarned,
-          0
-        ),
-
+        campaigns.find(
+          campaign =>
+            campaign.id ===
+            selectedId
+        ) ??
+        null,
       [
-        affiliates,
+        campaigns,
+        selectedId,
       ]
     );
-
-  const totalConversions =
-    useMemo(
-      () =>
-        affiliates.reduce(
-          (
-            total,
-            affiliate
-          ) =>
-            total +
-            affiliate.conversions,
-          0
-        ),
-
-      [
-        affiliates,
-      ]
-    );
-
-  const updateStatus = (
-    id: string,
-
-    status:
-      AffiliateStatus,
-
-    action: string
-  ) => {
-    setAffiliates(
-      (
-        current
-      ) =>
-        current.map(
-          (
-            affiliate
-          ) =>
-            affiliate.id ===
-            id
-              ? {
-                  ...affiliate,
-
-                  status,
-
-                  audit: [
-                    {
-                      id:
-                        `${affiliate.id}-${Date.now()}`,
-
-                      action,
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...affiliate.audit,
-                  ],
-                }
-              : affiliate
-        )
-    );
-  };
-
-  const pauseCampaign = (
-    affiliate:
-      AffiliateRecord
-  ) => {
-    if (
-      affiliate.status !==
-      "active"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      affiliate.id,
-      "paused",
-      "Affiliate campaign paused"
-    );
-  };
-
-  const resumeCampaign = (
-    affiliate:
-      AffiliateRecord
-  ) => {
-    if (
-      affiliate.status !==
-      "paused"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      affiliate.id,
-      "active",
-      "Affiliate campaign resumed"
-    );
-  };
-
-  const requestEnd = (
-    affiliate:
-      AffiliateRecord
-  ) => {
-    if (
-      affiliate.status !==
-        "active" &&
-      affiliate.status !==
-        "paused"
-    ) {
-      return;
-    }
-
-    setEndTargetId(
-      affiliate.id
-    );
-  };
-
-  const confirmEnd =
-    () => {
-      if (
-        !endTarget
-      ) {
-        return;
-      }
-
-      updateStatus(
-        endTarget.id,
-        "ended",
-        "Affiliate campaign ended"
-      );
-
-      setEndTargetId(
-        null
-      );
-    };
 
   return (
     <div
@@ -703,14 +793,28 @@ export default function AffiliateManager() {
           </h2>
 
           <p>
-            Manage approved affiliate
-            partnerships and understand
-            clicks, conversions, and
-            commission performance while
-            keeping commercial incentives
-            separate from organic ranking.
+            Manage authoritative affiliate campaigns and metadata from the
+            Backend. Demo commission, conversion, audit, and local lifecycle data
+            have been removed.
           </p>
         </div>
+
+        <button
+          type="button"
+          className={
+            styles.secondaryButton
+          }
+          disabled={
+            isRefreshing
+          }
+          onClick={() =>
+            void refresh()
+          }
+        >
+          {isRefreshing
+            ? "Refreshing..."
+            : "Refresh"}
+        </button>
       </header>
 
       <section
@@ -725,7 +829,27 @@ export default function AffiliateManager() {
           }
         >
           <span>
-            Active campaigns
+            Total affiliate campaigns
+          </span>
+
+          <strong>
+            {
+              counts.all
+            }
+          </strong>
+
+          <small>
+            Authoritative Backend records
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Active
           </span>
 
           <strong>
@@ -735,7 +859,7 @@ export default function AffiliateManager() {
           </strong>
 
           <small>
-            Approved offers currently running
+            Currently running affiliate placements
           </small>
         </article>
 
@@ -745,40 +869,41 @@ export default function AffiliateManager() {
           }
         >
           <span>
-            Conversions
+            Scheduled
           </span>
 
           <strong>
-            {formatNumber(
-              totalConversions
-            )}
+            {
+              counts.scheduled
+            }
           </strong>
 
           <small>
-            Demonstration conversion data
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.summaryCard
-          }
-        >
-          <span>
-            Commission earned
-          </span>
-
-          <strong>
-            {formatMoney(
-              totalCommission
-            )}
-          </strong>
-
-          <small>
-            Demonstration affiliate revenue
+            Waiting for configured start date
           </small>
         </article>
       </section>
+
+      {error ? (
+        <section
+          className={
+            styles.note
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Affiliate campaigns could not be loaded.
+            </strong>
+
+            <p>
+              {getAffiliateErrorMessage(
+                error
+              )}
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <section
         className={
@@ -797,14 +922,11 @@ export default function AffiliateManager() {
             value={
               query
             }
-            placeholder="Search campaign ID, partner or offer..."
+            placeholder="Search campaign ID, reference, offer, placement, or status..."
             aria-label="Search affiliate campaigns"
-            onChange={(
-              event
-            ) =>
+            onChange={event =>
               setQuery(
-                event.target
-                  .value
+                event.target.value
               )
             }
           />
@@ -814,63 +936,33 @@ export default function AffiliateManager() {
               styles.filters
             }
           >
-            {(
-              [
-                [
-                  "all",
-                  "All",
-                ],
-
-                [
-                  "scheduled",
-                  "Scheduled",
-                ],
-
-                [
-                  "active",
-                  "Active",
-                ],
-
-                [
-                  "paused",
-                  "Paused",
-                ],
-
-                [
-                  "ended",
-                  "Ended",
-                ],
-              ] as const
-            ).map(
-              ([
-                key,
-                label,
-              ]) => (
+            {STATUS_FILTERS.map(
+              item => (
                 <button
                   key={
-                    key
+                    item.key
                   }
                   type="button"
                   className={
                     filter ===
-                    key
+                    item.key
                       ? styles.filterActive
                       : styles.filter
                   }
                   onClick={() =>
                     setFilter(
-                      key
+                      item.key
                     )
                   }
                 >
                   {
-                    label
+                    item.label
                   }
 
                   <span>
                     {
                       counts[
-                        key
+                        item.key
                       ]
                     }
                   </span>
@@ -897,35 +989,27 @@ export default function AffiliateManager() {
                 </th>
 
                 <th>
-                  Partner
-                </th>
-
-                <th>
                   Placement
                 </th>
 
                 <th>
-                  CTR
-                </th>
-
-                <th>
-                  Conversions
-                </th>
-
-                <th>
-                  Conversion rate
-                </th>
-
-                <th>
-                  Commission
-                </th>
-
-                <th>
-                  Revenue / click
+                  Schedule
                 </th>
 
                 <th>
                   Status
+                </th>
+
+                <th>
+                  Readiness
+                </th>
+
+                <th>
+                  Commercial status
+                </th>
+
+                <th>
+                  Updated
                 </th>
 
                 <th>
@@ -935,13 +1019,11 @@ export default function AffiliateManager() {
             </thead>
 
             <tbody>
-              {visibleAffiliates.map(
-                (
-                  affiliate
-                ) => (
+              {visibleCampaigns.map(
+                campaign => (
                   <tr
                     key={
-                      affiliate.id
+                      campaign.id
                     }
                   >
                     <td>
@@ -952,12 +1034,12 @@ export default function AffiliateManager() {
                         }
                         onClick={() =>
                           setSelectedId(
-                            affiliate.id
+                            campaign.id
                           )
                         }
                       >
                         {
-                          affiliate.name
+                          campaign.name
                         }
                       </button>
 
@@ -967,106 +1049,93 @@ export default function AffiliateManager() {
                         }
                       >
                         {
-                          affiliate.id
+                          campaign.campaignReference
                         }
+                        {" · Affiliate"}
                       </span>
                     </td>
 
                     <td>
-                      {
-                        affiliate.partner
-                      }
-                    </td>
-
-                    <td>
-                      {
-                        affiliate.placement
-                      }
-                    </td>
-
-                    <td>
-                      {calculateCtr(
-                        affiliate.clicks,
-                        affiliate.impressions
+                      {formatPlacements(
+                        campaign
                       )}
                     </td>
 
                     <td>
-                      {formatNumber(
-                        affiliate.conversions
-                      )}
-                    </td>
-
-                    <td>
-                      {conversionRate(
-                        affiliate.conversions,
-                        affiliate.clicks
-                      )}
-                    </td>
-
-                    <td>
-                      {formatMoney(
-                        affiliate.commissionEarned
-                      )}
-                    </td>
-
-                    <td>
-                      {revenuePerClick(
-                        affiliate.commissionEarned,
-                        affiliate.clicks
+                      {formatSchedule(
+                        campaign
                       )}
                     </td>
 
                     <td>
                       <span
-                        className={`${styles.status} ${
-                          affiliate.status ===
-                          "active"
-                            ? styles.statusActive
-                            : affiliate.status ===
-                              "paused"
-                            ? styles.statusPaused
-                            : affiliate.status ===
-                              "scheduled"
-                            ? styles.statusScheduled
-                            : styles.statusEnded
-                        }`}
+                        className={
+                          statusClassName(
+                            campaign.status
+                          )
+                        }
                       >
-                        {statusLabel(
-                          affiliate.status
+                        {formatAffiliateStatus(
+                          campaign.status
                         )}
                       </span>
                     </td>
 
                     <td>
-  <button
-    type="button"
-    className={
-      styles.actionButton
-    }
-    onClick={() =>
-      setSelectedId(
-        affiliate.id
-      )
-    }
-  >
-    View
-  </button>
-</td>
+                      {
+                        campaign.readinessStatus
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        campaign.commercialStatus
+                      }
+                    </td>
+
+                    <td>
+                      {formatAffiliateTimestamp(
+                        campaign.updatedAt
+                      )}
+                    </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className={
+                          styles.actionButton
+                        }
+                        onClick={() =>
+                          setSelectedId(
+                            campaign.id
+                          )
+                        }
+                      >
+                        View
+                      </button>
+                    </td>
                   </tr>
                 )
               )}
             </tbody>
           </table>
 
-          {visibleAffiliates.length ===
+          {isLoading ? (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Loading affiliate campaigns...
+            </div>
+          ) : visibleCampaigns.length ===
           0 ? (
             <div
               className={
                 styles.empty
               }
             >
-              No affiliate campaigns found.
+              No authoritative affiliate campaigns found.
             </div>
           ) : null}
         </div>
@@ -1083,553 +1152,40 @@ export default function AffiliateManager() {
           </strong>
 
           <p>
-            Commission amount, conversion value, or partner
-            payment must not increase a result&apos;s organic
-            ranking. Affiliate placements remain separately
-            selected and clearly disclosed.
+            Commission amount, conversion value, or partner payment must not
+            increase a result&apos;s organic ranking. Affiliate placements
+            remain separately selected and clearly disclosed.
           </p>
         </div>
       </section>
 
-      {selectedAffiliate ? (
-        <div
-          className={
-            styles.drawerLayer
+      {selectedCampaign ? (
+        <AffiliateDrawer
+          campaign={
+            selectedCampaign
           }
-        >
-          <button
-            type="button"
-            className={
-              styles.backdrop
-            }
-            aria-label="Close affiliate details"
-            onClick={() =>
-              setSelectedId(
-                null
-              )
-            }
-          />
-
-          <aside
-            className={
-              styles.drawer
-            }
-          >
-            <div
-              className={
-                styles.drawerHeader
-              }
-            >
-              <div>
-                <span>
-                  {
-                    selectedAffiliate.id
-                  }
-                </span>
-
-                <h3>
-                  {
-                    selectedAffiliate.name
-                  }
-                </h3>
-              </div>
-
-              <button
-                type="button"
-                className={
-                  styles.closeButton
-                }
-                aria-label="Close"
-                onClick={() =>
-                  setSelectedId(
-                    null
-                  )
-                }
-              >
-                Ã—
-              </button>
-            </div>
-
-            <div
-              className={
-                styles.drawerBody
-              }
-            >
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Affiliate offer
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Campaign ID
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedAffiliate.id
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Partner
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedAffiliate.partner
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Disclosure
-                    </dt>
-
-                    <dd>
-                      Affiliate Â· Poster may earn a commission
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Placement
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedAffiliate.placement
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Status
-                    </dt>
-
-                    <dd>
-                      {statusLabel(
-                        selectedAffiliate.status
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Start
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedAffiliate.startAt
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      End
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedAffiliate.endAt ??
-                        "No fixed end"
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Destination
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedAffiliate.destinationUrl
-                      }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Performance
-                </h4>
-
-                <div
-                  className={
-                    styles.metrics
-                  }
-                >
-                  <div>
-                    <span>
-                      Impressions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedAffiliate.impressions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Clicks
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedAffiliate.clicks
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      CTR
-                    </span>
-
-                    <strong>
-                      {calculateCtr(
-                        selectedAffiliate.clicks,
-                        selectedAffiliate.impressions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedAffiliate.conversions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversion rate
-                    </span>
-
-                    <strong>
-                      {conversionRate(
-                        selectedAffiliate.conversions,
-                        selectedAffiliate.clicks
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Commission earned
-                    </span>
-
-                    <strong>
-                      {formatMoney(
-                        selectedAffiliate.commissionEarned
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Revenue / click
-                    </span>
-
-                    <strong>
-                      {revenuePerClick(
-                        selectedAffiliate.commissionEarned,
-                        selectedAffiliate.clicks
-                      )}
-                    </strong>
-                  </div>
-                </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Commercial integrity
-                </h4>
-
-                <p
-                  className={
-                    styles.integrityNote
-                  }
-                >
-                  Affiliate commission and conversion value
-                  are commercial analytics only. They must
-                  not alter Poster&apos;s organic knowledge,
-                  search, trending, or recommendation ranking.
-                </p>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
-
-                <div
-                  className={
-                    styles.auditList
-                  }
-                >
-                  {selectedAffiliate.audit.map(
-                    (
-                      entry
-                    ) => (
-                      <div
-                        key={
-                          entry.id
-                        }
-                        className={
-                          styles.auditItem
-                        }
-                      >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
-
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
-
-                          <span>
-                            {
-                              entry.actor
-                            }
-                            {" Â· "}
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-            </div>
-
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              <Link
-                href={`/monetization/campaigns?record=${encodeURIComponent(
-                  selectedAffiliate.id
-                )}`}
-                className={
-                  styles.secondaryButton
-                }
-              >
-                Open in Campaigns
-              </Link>
-
-              {selectedAffiliate.status ===
-              "active" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.secondaryButton
-                    }
-                    onClick={() =>
-                      pauseCampaign(
-                        selectedAffiliate
-                      )
-                    }
-                  >
-                    Pause
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedAffiliate
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedAffiliate.status ===
-                "paused" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.primaryButton
-                    }
-                    onClick={() =>
-                      resumeCampaign(
-                        selectedAffiliate
-                      )
-                    }
-                  >
-                    Resume
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedAffiliate
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </aside>
-        </div>
-      ) : null}
-
-      {endTarget ? (
-        <div
-          className={
-            styles.confirmLayer
+          detail={
+            detail
           }
-        >
-          <button
-            type="button"
-            className={
-              styles.confirmBackdrop
-            }
-            aria-label="Cancel end affiliate campaign"
-            onClick={() =>
-              setEndTargetId(
-                null
-              )
-            }
-          />
-
-          <div
-            className={
-              styles.confirmDialog
-            }
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="end-affiliate-title"
-          >
-            <span
-              className={
-                styles.confirmEyebrow
-              }
-            >
-              Affiliate action
-            </span>
-
-            <h3
-              id="end-affiliate-title"
-            >
-              End this affiliate campaign?
-            </h3>
-
-            <p>
-              <strong>
-                {
-                  endTarget.id
-                }
-              </strong>
-              {" Â· "}
-              {
-                endTarget.name
-              }
-            </p>
-
-            <p
-              className={
-                styles.confirmWarning
-              }
-            >
-              Ending preserves the campaign,
-              conversion, commission, and audit
-              history as a historical record.
-            </p>
-
-            <div
-              className={
-                styles.confirmActions
-              }
-            >
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={() =>
-                  setEndTargetId(
-                    null
-                  )
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className={
-                  styles.dangerButton
-                }
-                onClick={
-                  confirmEnd
-                }
-              >
-                End campaign
-              </button>
-            </div>
-          </div>
-        </div>
+          isLoading={
+            detailLoading
+          }
+          error={
+            detailError
+          }
+          onClose={() =>
+            setSelectedId(
+              null
+            )
+          }
+          onRefresh={() =>
+            void refreshDetail()
+          }
+          onSaved={() => {
+            void refreshDetail();
+            void refresh();
+          }}
+        />
       ) : null}
     </div>
   );

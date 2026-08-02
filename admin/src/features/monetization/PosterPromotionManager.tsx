@@ -1,876 +1,737 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+
+import PosterPromotionCreateAction from "./poster-promotion/PosterPromotionCreateAction";
+import PosterPromotionEditAction from "./poster-promotion/PosterPromotionEditAction";
+
 import {
   useMemo,
   useState,
 } from "react";
 
-import PosterPromotionCreateAction from "./poster-promotion/PosterPromotionCreateAction";
-import PosterPromotionEditAction from "./poster-promotion/PosterPromotionEditAction";
-
 import type {
-  PosterPromotionDraft,
-} from "./poster-promotion/poster-promotion.types";
+  PosterPromotionApiStatus,
+  PosterPromotionCampaign,
+  PosterPromotionDetailResponse,
+} from "./poster-promotion";
+
+import {
+  countPosterPromotionStatuses,
+  filterPosterPromotionCampaigns,
+  formatPosterPromotionDate,
+  formatPosterPromotionStatus,
+  formatPosterPromotionTimestamp,
+  getPosterPromotionErrorMessage,
+
+  mapPosterPromotionPlacementToUi,
+  usePosterPromotionDetail,
+  usePosterPromotions,
+} from "./poster-promotion";
 
 import styles from "./PosterPromotionManager.module.css";
 
-type PromotionStatus =
-  | "draft"
-  | "scheduled"
-  | "active"
-  | "paused"
-  | "ended";
+type StatusFilter =
+  | "all"
+  | PosterPromotionApiStatus;
 
-type Placement =
-  | "Home"
-  | "Search"
-  | "Trending";
+const STATUS_FILTERS: {
+  key:
+    StatusFilter;
 
-interface AuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface PosterPromotionRecord {
-  id: string;
-
-  name: string;
-  purpose: string;
-
-  destinationUrl: string;
-
-  creative?:
-    PosterPromotionDraft["creative"];
-
-  placements: Placement[];
-
-  status: PromotionStatus;
-
-  startAt: string;
-  endAt?: string;
-
-  impressions: number;
-  clicks: number;
-  conversions: number;
-
-  audit: AuditEntry[];
-}
-
-const INITIAL_PROMOTIONS: PosterPromotionRecord[] = [
+  label:
+    string;
+}[] = [
   {
-    id: "CMP-3003",
+    key:
+      "all",
 
-    name:
-      "Poster Premium Discovery",
-
-    purpose:
-      "Introduce users to Poster Premium Discovery and measure interest in the enhanced discovery experience.",
-
-    destinationUrl:
-      "https://poster.example/premium-discovery",
-
-    placements: [
-
-      "Home",
-
-    ],
-
-    status:
-      "paused",
-
-    startAt:
-      "15 Jul 2026",
-
-    impressions:
-      124500,
-
-    clicks:
-      4210,
-
-    conversions:
-      840,
-
-    audit: [
-      {
-        id:
-          "promotion-3003-2",
-
-        action:
-          "Poster promotion paused",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 Â· 08:40",
-      },
-
-      {
-        id:
-          "promotion-3003-1",
-
-        action:
-          "Poster promotion activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "15 Jul 2026 Â· 09:00",
-      },
-    ],
+    label:
+      "All",
   },
 
   {
-    id: "CMP-3004",
+    key:
+      "draft",
 
-    name:
-      "Career Growth Collection",
+    label:
+      "Draft",
+  },
 
-    purpose:
-      "Promote a curated Poster knowledge collection focused on professional learning and career development.",
-
-    destinationUrl:
-      "https://poster.example/career-growth",
-
-    placements: [
-
-      "Home",
-
-    ],
-
-    status:
+  {
+    key:
       "scheduled",
 
-    startAt:
-      "25 Jul 2026",
+    label:
+      "Scheduled",
+  },
 
-    endAt:
-      "10 Aug 2026",
+  {
+    key:
+      "active",
 
-    impressions:
-      0,
+    label:
+      "Active",
+  },
 
-    clicks:
-      0,
+  {
+    key:
+      "paused",
 
-    conversions:
-      0,
+    label:
+      "Paused",
+  },
 
-    audit: [
-      {
-        id:
-          "promotion-3004-1",
+  {
+    key:
+      "ended",
 
-        action:
-          "Poster promotion scheduled",
+    label:
+      "Ended",
+  },
 
-        actor:
-          "Admin",
+  {
+    key:
+      "disabled",
 
-        timestamp:
-          "19 Jul 2026 Â· 14:10",
-      },
-    ],
+    label:
+      "Disabled",
   },
 ];
 
-function statusLabel(
-  status: PromotionStatus
+const POSTER_ORGANIZATION_ID =
+  process.env.NEXT_PUBLIC_POSTER_ORGANIZATION_ID ??
+  "";
+
+function statusClassName(
+  status:
+    PosterPromotionApiStatus
 ): string {
-  switch (status) {
-    case "draft":
-      return "Draft";
-
-    case "scheduled":
-      return "Scheduled";
-
+  switch (
+    status
+  ) {
     case "active":
-      return "Active";
+      return `${styles.status} ${styles.statusActive}`;
 
     case "paused":
-      return "Paused";
+      return `${styles.status} ${styles.statusPaused}`;
+
+    case "scheduled":
+      return `${styles.status} ${styles.statusScheduled}`;
+
+    case "draft":
+      return `${styles.status} ${styles.statusDraft}`;
+
+    case "disabled":
+      return `${styles.status} ${styles.statusDisabled}`;
 
     case "ended":
-      return "Ended";
+      return `${styles.status} ${styles.statusEnded}`;
   }
 }
 
-function formatNumber(
-  value: number
+function formatPlacements(
+  campaign:
+    PosterPromotionCampaign
 ): string {
-  return new Intl.NumberFormat(
-    "en-IN"
-  ).format(value);
+  return campaign
+    .placements
+    .map(
+      mapPosterPromotionPlacementToUi
+    )
+    .join(
+      ", "
+    );
 }
 
-function calculateCtr(
-  clicks: number,
-  impressions: number
+function formatSchedule(
+  campaign:
+    PosterPromotionCampaign
 ): string {
-  if (
-    impressions ===
-    0
-  ) {
-    return "0.00%";
+  return `${formatPosterPromotionDate(
+    campaign.scheduledStartDate
+  )} - ${formatPosterPromotionDate(
+    campaign.scheduledEndDate
+  )}`;
+}
+
+function renderDetailValue(
+  value:
+    string | null | undefined
+): string {
+  return value && value.trim()
+    ? value
+    : "Not set";
+}
+
+function PosterPromotionDrawer(
+  props: {
+    selectedId:
+      string;
+
+    selectedCampaign:
+      PosterPromotionCampaign | null;
+
+    detail:
+      PosterPromotionDetailResponse | null;
+
+    isLoading:
+      boolean;
+
+    error:
+      unknown;
+
+    onClose:
+      () => void;
+
+    onRefresh:
+      () => void;
+
+    onUpdated:
+      () => void;
   }
+) {
+  const title =
+    props.detail?.campaign.name ??
+    props.selectedCampaign?.name ??
+    props.selectedId;
 
-  return `${(
-    (
-      clicks /
-      impressions
-    ) *
-    100
-  ).toFixed(2)}%`;
-}
+  return (
+    <div
+      className={
+        styles.drawerLayer
+      }
+    >
+      <button
+        type="button"
+        className={
+          styles.backdrop
+        }
+        aria-label="Close Poster promotion details"
+        onClick={
+          props.onClose
+        }
+      />
 
-function conversionRate(
-  conversions: number,
-  clicks: number
-): string {
-  if (
-    clicks ===
-    0
-  ) {
-    return "0.00%";
-  }
+      <aside
+        className={
+          styles.drawer
+        }
+      >
+        <div
+          className={
+            styles.drawerHeader
+          }
+        >
+          <div>
+            <span>
+              {
+                props.detail?.campaign.campaignReference ??
+                props.selectedCampaign?.campaignReference ??
+                props.selectedId
+              }
+            </span>
 
-  return `${(
-    (
-      conversions /
-      clicks
-    ) *
-    100
-  ).toFixed(2)}%`;
-}
+            <h3>
+              {
+                title
+              }
+            </h3>
+          </div>
 
-function nowLabel(): string {
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      dateStyle:
-        "medium",
+          <button
+            type="button"
+            className={
+              styles.closeButton
+            }
+            aria-label="Close"
+            onClick={
+              props.onClose
+            }
+          >
+            ×
+          </button>
+        </div>
 
-      timeStyle:
-        "short",
-    }
-  ).format(
-    new Date()
+        <div
+          className={
+            styles.drawerBody
+          }
+        >
+          {props.isLoading ? (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Loading Poster Promotion details...
+            </div>
+          ) : props.error ? (
+            <div
+              className={
+                styles.empty
+              }
+              role="alert"
+            >
+              {getPosterPromotionErrorMessage(
+                props.error
+              )}
+            </div>
+          ) : props.detail ? (
+            <>
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Promotion
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Campaign ID
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.campaign.id
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Campaign reference
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.campaign.campaignReference
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Disclosure
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.disclosure
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Purpose
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.purpose
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Placement
+                    </dt>
+
+                    <dd>
+                      {formatPlacements(
+                        props.detail.campaign
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Status
+                    </dt>
+
+                    <dd>
+                      {formatPosterPromotionStatus(
+                        props.detail.campaign.status
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Schedule
+                    </dt>
+
+                    <dd>
+                      {formatSchedule(
+                        props.detail.campaign
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Destination
+                    </dt>
+
+                    <dd
+                      className={
+                        styles.breakText
+                      }
+                    >
+                      {
+                        props.detail.creative.destinationUrl
+                      }
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Creative
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Headline
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.headline
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Body
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.body
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Call to action
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.callToAction
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Media
+                    </dt>
+
+                    <dd>
+                      {props.detail.creative.media
+                        ? `${props.detail.creative.media.fileName} · ${props.detail.creative.media.type}`
+                        : "No persisted media"}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Backend state
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Campaign row version
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.campaign.rowVersion
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Creative row version
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.creative.rowVersion
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Readiness
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.campaign.readinessStatus
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Commercial status
+                    </dt>
+
+                    <dd>
+                      {
+                        props.detail.campaign.commercialStatus
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Delivery eligible
+                    </dt>
+
+                    <dd>
+                      {props.detail.campaign.deliveryEligible
+                        ? "Yes"
+                        : "No"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Updated
+                    </dt>
+
+                    <dd>
+                      {formatPosterPromotionTimestamp(
+                        props.detail.campaign.updatedAt
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Discovery integrity
+                </h4>
+
+                <p
+                  className={
+                    styles.integrityNote
+                  }
+                >
+                  Poster-controlled promotion remains a separate disclosed
+                  placement. It must not silently replace or manipulate organic
+                  knowledge, search, trending, or recommendation rankings.
+                </p>
+              </section>
+            </>
+          ) : (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Poster Promotion details were not found.
+            </div>
+          )}
+        </div>
+
+        <div
+          className={
+            styles.drawerFooter
+          }
+        >
+          <span
+            className={
+              styles.footerNote
+            }
+          >
+            Create and edit actions connect in A13D3 after persisted media
+            handling is blocked safely.
+          </span>
+
+          {props.detail ? (
+            <PosterPromotionEditAction
+              detail={
+                props.detail
+              }
+              disabled={
+                props.detail.campaign.status ===
+                  "ended" ||
+                props.detail.campaign.status ===
+                  "disabled"
+              }
+              onUpdated={() => {
+                props.onUpdated();
+              }}
+            />
+          ) : null}
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            onClick={
+              props.onRefresh
+            }
+          >
+            Refresh
+          </button>
+
+          <Link
+            href={`/monetization/campaigns?record=${encodeURIComponent(
+              props.selectedId
+            )}`}
+            className={
+              styles.secondaryButton
+            }
+          >
+            Open in Campaigns
+          </Link>
+        </div>
+      </aside>
+    </div>
   );
 }
 
 export default function PosterPromotionManager() {
-  const [
-    promotions,
-    setPromotions,
-  ] = useState<
-    PosterPromotionRecord[]
-  >(
-    INITIAL_PROMOTIONS
-  );
+  const {
+    campaigns,
+    isLoading,
+    isRefreshing,
+    error,
+    refresh,
+  } =
+    usePosterPromotions();
 
   const [
     query,
     setQuery,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     filter,
     setFilter,
-  ] = useState<
-    "all" |
-      PromotionStatus
-  >(
-    "all"
-  );
+  ] =
+    useState<
+      StatusFilter
+    >(
+      "all"
+    );
 
   const [
     selectedId,
     setSelectedId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const [
-    endTargetId,
-    setEndTargetId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const normalizedQuery =
-    query
-      .trim()
-      .toLowerCase();
-
-  const visiblePromotions =
-    useMemo(() => {
-      return promotions.filter(
-        (
-          promotion
-        ) => {
-          if (
-            filter !==
-              "all" &&
-            promotion.status !==
-              filter
-          ) {
-            return false;
-          }
-
-          if (
-            !normalizedQuery
-          ) {
-            return true;
-          }
-
-          return [
-            promotion.id,
-            promotion.name,
-            promotion.purpose,
-            promotion.placements.join(
-              " "
-            ),
-          ].some(
-            (
-              value
-            ) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedQuery
-                )
-          );
-        }
-      );
-    }, [
-      promotions,
-      filter,
-      normalizedQuery,
-    ]);
-
-  const selectedPromotion =
-    useMemo(
-      () =>
-        promotions.find(
-          (
-            promotion
-          ) =>
-            promotion.id ===
-            selectedId
-        ) ?? null,
-
-      [
-        promotions,
-        selectedId,
-      ]
+  ] =
+    useState<
+      string | null
+    >(
+      null
     );
 
-  const endTarget =
+  const {
+    detail,
+    isLoading:
+      detailLoading,
+    error:
+      detailError,
+    refresh:
+      refreshDetail,
+  } =
+    usePosterPromotionDetail(
+      selectedId
+    );
+
+  const visibleCampaigns =
     useMemo(
       () =>
-        promotions.find(
-          (
-            promotion
-          ) =>
-            promotion.id ===
-            endTargetId
-        ) ?? null,
+        filterPosterPromotionCampaigns(
+          campaigns,
+          {
+            query,
 
+            status:
+              filter,
+          }
+        ),
       [
-        promotions,
-        endTargetId,
+        campaigns,
+        filter,
+        query,
       ]
     );
 
   const counts =
     useMemo(
-      () => ({
-        all:
-          promotions.length,
-
-        draft:
-          promotions.filter(
-            (
-              promotion
-            ) =>
-              promotion.status ===
-              "draft"
-          ).length,
-
-        scheduled:
-          promotions.filter(
-            (
-              promotion
-            ) =>
-              promotion.status ===
-              "scheduled"
-          ).length,
-
-        active:
-          promotions.filter(
-            (
-              promotion
-            ) =>
-              promotion.status ===
-              "active"
-          ).length,
-
-        paused:
-          promotions.filter(
-            (
-              promotion
-            ) =>
-              promotion.status ===
-              "paused"
-          ).length,
-
-        ended:
-          promotions.filter(
-            (
-              promotion
-            ) =>
-              promotion.status ===
-              "ended"
-          ).length,
-      }),
-
+      () =>
+        countPosterPromotionStatuses(
+          campaigns
+        ),
       [
-        promotions,
+        campaigns,
       ]
     );
 
-  const totalImpressions =
+  const selectedCampaign =
     useMemo(
       () =>
-        promotions.reduce(
-          (
-            total,
-            promotion
-          ) =>
-            total +
-            promotion.impressions,
-          0
-        ),
-
+        campaigns.find(
+          campaign =>
+            campaign.id ===
+            selectedId
+        ) ??
+        null,
       [
-        promotions,
+        campaigns,
+        selectedId,
       ]
     );
-
-  const totalClicks =
-    useMemo(
-      () =>
-        promotions.reduce(
-          (
-            total,
-            promotion
-          ) =>
-            total +
-            promotion.clicks,
-          0
-        ),
-
-      [
-        promotions,
-      ]
-    );
-
-  const totalConversions =
-    useMemo(
-      () =>
-        promotions.reduce(
-          (
-            total,
-            promotion
-          ) =>
-            total +
-            promotion.conversions,
-          0
-        ),
-
-      [
-        promotions,
-      ]
-    );
-  const createPromotion = (
-    draft:
-      PosterPromotionDraft,
-
-    status:
-      "draft" | "scheduled"
-  ) => {
-    const timestamp =
-      Date.now();
-
-    const nextId =
-      `CMP-${timestamp
-        .toString()
-        .slice(
-          -6
-        )}`;
-
-    const action =
-      status ===
-      "draft"
-        ? "Poster promotion draft created"
-        : "Poster promotion scheduled";
-
-    const promotion:
-      PosterPromotionRecord = {
-      id:
-        nextId,
-
-      name:
-        draft.name.trim(),
-
-      purpose:
-        draft.purpose.trim(),
-
-      destinationUrl:
-        draft.creative.destinationUrl.trim(),
-
-      creative: {
-        ...draft.creative,
-
-        headline:
-          draft.creative.headline.trim(),
-
-        body:
-          draft.creative.body.trim(),
-
-        callToAction:
-          draft.creative.callToAction.trim(),
-
-        destinationUrl:
-          draft.creative.destinationUrl.trim(),
-
-        media:
-          draft.creative.media
-            ? {
-                ...draft.creative.media,
-              }
-            : null,
-      },
-
-      placements: [
-        ...draft.placements,
-      ],
-
-      status,
-
-      startAt:
-        draft.startAt,
-
-      endAt:
-        draft.endAt ||
-        undefined,
-
-      impressions:
-        0,
-
-      clicks:
-        0,
-
-      conversions:
-        0,
-
-      audit: [
-        {
-          id:
-            `${nextId}-${timestamp}`,
-
-          action,
-
-          actor:
-            "Admin",
-
-          timestamp:
-            nowLabel(),
-        },
-      ],
-    };
-
-    setPromotions(
-      (
-        current
-      ) => [
-        promotion,
-        ...current,
-      ]
-    );
-
-    setSelectedId(
-      promotion.id
-    );
-  };
-
-  const promotionToDraft = (
-    promotion:
-      PosterPromotionRecord
-  ): PosterPromotionDraft => {
-    return {
-      name:
-        promotion.name,
-
-      purpose:
-        promotion.purpose,
-
-      placements: [
-        ...promotion.placements,
-      ],
-
-      startAt:
-        promotion.startAt,
-
-      endAt:
-        promotion.endAt ??
-        "",
-
-      creative:
-        promotion.creative
-          ? {
-              ...promotion.creative,
-
-              media:
-                promotion.creative.media
-                  ? {
-                      ...promotion.creative.media,
-                    }
-                  : null,
-            }
-          : {
-              headline:
-                promotion.name,
-
-              body:
-                promotion.purpose,
-
-              callToAction:
-                "Explore",
-
-              destinationUrl:
-                promotion.destinationUrl,
-
-              media:
-                null,
-            },
-    };
-  };
-
-  const updatePromotion = (
-    promotionId:
-      string,
-
-    draft:
-      PosterPromotionDraft
-  ) => {
-    const timestamp =
-      Date.now();
-
-    setPromotions(
-      (
-        current
-      ) =>
-        current.map(
-          (
-            promotion
-          ) =>
-            promotion.id ===
-            promotionId
-              ? {
-                  ...promotion,
-
-                  name:
-                    draft.name.trim(),
-
-                  purpose:
-                    draft.purpose.trim(),
-
-                  destinationUrl:
-                    draft.creative.destinationUrl.trim(),
-
-                  placements: [
-                    ...draft.placements,
-                  ],
-
-                  startAt:
-                    draft.startAt,
-
-                  endAt:
-                    draft.endAt ||
-                    undefined,
-
-                  creative: {
-                    ...draft.creative,
-
-                    headline:
-                      draft.creative.headline.trim(),
-
-                    body:
-                      draft.creative.body.trim(),
-
-                    callToAction:
-                      draft.creative.callToAction.trim(),
-
-                    destinationUrl:
-                      draft.creative.destinationUrl.trim(),
-
-                    media:
-                      draft.creative.media
-                        ? {
-                            ...draft.creative.media,
-                          }
-                        : null,
-                  },
-
-                  audit: [
-                    {
-                      id:
-                        `${promotion.id}-${timestamp}`,
-
-                      action:
-                        "Poster promotion details updated",
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...promotion.audit,
-                  ],
-                }
-              : promotion
-        )
-    );
-  };
-
-  const updateStatus = (
-    id: string,
-
-    status:
-      PromotionStatus,
-
-    action: string
-  ) => {
-    setPromotions(
-      (
-        current
-      ) =>
-        current.map(
-          (
-            promotion
-          ) =>
-            promotion.id ===
-            id
-              ? {
-                  ...promotion,
-
-                  status,
-
-                  audit: [
-                    {
-                      id:
-                        `${promotion.id}-${Date.now()}`,
-
-                      action,
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...promotion.audit,
-                  ],
-                }
-              : promotion
-        )
-    );
-  };
-
-  const pausePromotion = (
-    promotion:
-      PosterPromotionRecord
-  ) => {
-    if (
-      promotion.status !==
-      "active"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      promotion.id,
-      "paused",
-      "Poster promotion paused"
-    );
-  };
-
-  const resumePromotion = (
-    promotion:
-      PosterPromotionRecord
-  ) => {
-    if (
-      promotion.status !==
-      "paused"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      promotion.id,
-      "active",
-      "Poster promotion resumed"
-    );
-  };
-
-  const requestEnd = (
-    promotion:
-      PosterPromotionRecord
-  ) => {
-    if (
-      promotion.status !==
-        "active" &&
-      promotion.status !==
-        "paused"
-    ) {
-      return;
-    }
-
-    setEndTargetId(
-      promotion.id
-    );
-  };
-
-  const confirmEnd =
-    () => {
-      if (
-        !endTarget
-      ) {
-        return;
-      }
-
-      updateStatus(
-        endTarget.id,
-        "ended",
-        "Poster promotion ended"
-      );
-
-      setEndTargetId(
-        null
-      );
-    };
 
   return (
     <div
@@ -884,7 +745,6 @@ export default function PosterPromotionManager() {
         }
       >
         <div>
-
           <div
             className={
               styles.eyebrow
@@ -898,21 +758,47 @@ export default function PosterPromotionManager() {
           </h2>
 
           <p>
-            Manage campaigns created
-            and controlled by Poster
-            itself, including product,
-            collection, learning, and
-            strategic discovery
-            promotions.
+            Manage authoritative Poster-owned campaigns from the Backend. Demo
+            records, local audit history, and fake performance metrics have
+            been removed.
           </p>
-        
         </div>
 
-        <PosterPromotionCreateAction
-          onCreate={
-            createPromotion
-          }
-        />
+          <div
+            className={
+              styles.headerActions
+            }
+          >
+            <PosterPromotionCreateAction
+              organizationId={
+                POSTER_ORGANIZATION_ID
+              }
+              onCreated={record => {
+                setSelectedId(
+                  record.campaign.id
+                );
+
+                void refresh();
+              }}
+            />
+
+            <button
+              type="button"
+              className={
+                styles.secondaryButton
+              }
+              disabled={
+                isRefreshing
+              }
+              onClick={() =>
+                void refresh()
+              }
+            >
+              {isRefreshing
+                ? "Refreshing..."
+                : "Refresh"}
+            </button>
+          </div>
       </header>
 
       <section
@@ -927,7 +813,47 @@ export default function PosterPromotionManager() {
           }
         >
           <span>
-            Active promotions
+            Total promotions
+          </span>
+
+          <strong>
+            {
+              counts.all
+            }
+          </strong>
+
+          <small>
+            Authoritative Backend campaigns
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Scheduled
+          </span>
+
+          <strong>
+            {
+              counts.scheduled
+            }
+          </strong>
+
+          <small>
+            Waiting for configured start date
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Active
           </span>
 
           <strong>
@@ -937,7 +863,7 @@ export default function PosterPromotionManager() {
           </strong>
 
           <small>
-            Poster-controlled campaigns running
+            Running Poster-controlled placements
           </small>
         </article>
 
@@ -947,60 +873,41 @@ export default function PosterPromotionManager() {
           }
         >
           <span>
-            Impressions
+            Drafts
           </span>
 
           <strong>
-            {formatNumber(
-              totalImpressions
-            )}
+            {
+              counts.draft
+            }
           </strong>
 
           <small>
-            Demonstration exposure data
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.summaryCard
-          }
-        >
-          <span>
-            Clicks
-          </span>
-
-          <strong>
-            {formatNumber(
-              totalClicks
-            )}
-          </strong>
-
-          <small>
-            Demonstration engagement
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.summaryCard
-          }
-        >
-          <span>
-            Conversions
-          </span>
-
-          <strong>
-            {formatNumber(
-              totalConversions
-            )}
-          </strong>
-
-          <small>
-            Goal completions
+            Saved before scheduling
           </small>
         </article>
       </section>
+
+      {error ? (
+        <section
+          className={
+            styles.note
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Poster Promotions could not be loaded.
+            </strong>
+
+            <p>
+              {getPosterPromotionErrorMessage(
+                error
+              )}
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <section
         className={
@@ -1019,14 +926,11 @@ export default function PosterPromotionManager() {
             value={
               query
             }
-            placeholder="Search campaign ID or promotion..."
+            placeholder="Search campaign ID, reference, promotion, or placement..."
             aria-label="Search Poster promotions"
-            onChange={(
-              event
-            ) =>
+            onChange={event =>
               setQuery(
-                event.target
-                  .value
+                event.target.value
               )
             }
           />
@@ -1036,68 +940,33 @@ export default function PosterPromotionManager() {
               styles.filters
             }
           >
-            {(
-              [
-                [
-                  "all",
-                  "All",
-                ],
-
-                [
-                  "draft",
-                  "Draft",
-                ],
-
-                [
-                  "scheduled",
-                  "Scheduled",
-                ],
-
-                [
-                  "active",
-                  "Active",
-                ],
-
-                [
-                  "paused",
-                  "Paused",
-                ],
-
-                [
-                  "ended",
-                  "Ended",
-                ],
-              ] as const
-            ).map(
-              ([
-                key,
-                label,
-              ]) => (
+            {STATUS_FILTERS.map(
+              item => (
                 <button
                   key={
-                    key
+                    item.key
                   }
                   type="button"
                   className={
                     filter ===
-                    key
+                    item.key
                       ? styles.filterActive
                       : styles.filter
                   }
                   onClick={() =>
                     setFilter(
-                      key
+                      item.key
                     )
                   }
                 >
                   {
-                    label
+                    item.label
                   }
 
                   <span>
                     {
                       counts[
-                        key
+                        item.key
                       ]
                     }
                   </span>
@@ -1132,23 +1001,15 @@ export default function PosterPromotionManager() {
                 </th>
 
                 <th>
-                  Impressions
-                </th>
-
-                <th>
-                  Clicks
-                </th>
-
-                <th>
-                  CTR
-                </th>
-
-                <th>
-                  Conversions
-                </th>
-
-                <th>
                   Status
+                </th>
+
+                <th>
+                  Readiness
+                </th>
+
+                <th>
+                  Updated
                 </th>
 
                 <th>
@@ -1158,13 +1019,11 @@ export default function PosterPromotionManager() {
             </thead>
 
             <tbody>
-              {visiblePromotions.map(
-                (
-                  promotion
-                ) => (
+              {visibleCampaigns.map(
+                campaign => (
                   <tr
                     key={
-                      promotion.id
+                      campaign.id
                     }
                   >
                     <td>
@@ -1175,12 +1034,12 @@ export default function PosterPromotionManager() {
                         }
                         onClick={() =>
                           setSelectedId(
-                            promotion.id
+                            campaign.id
                           )
                         }
                       >
                         {
-                          promotion.name
+                          campaign.name
                         }
                       </button>
 
@@ -1190,108 +1049,87 @@ export default function PosterPromotionManager() {
                         }
                       >
                         {
-                          promotion.id
+                          campaign.campaignReference
                         }
-                        {" Â· Promoted by Poster"}
+                        {" · Promoted by Poster"}
                       </span>
                     </td>
 
                     <td>
-                      {
-                        promotion.placements.join(
-                          ", "
-                        )
-                      }
-                    </td>
-
-                    <td>
-                      {
-                        promotion.startAt
-                      }
-
-                      {promotion.endAt
-                        ? ` â†’ ${promotion.endAt}`
-                        : ""}
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        promotion.impressions
+                      {formatPlacements(
+                        campaign
                       )}
                     </td>
 
                     <td>
-                      {formatNumber(
-                        promotion.clicks
-                      )}
-                    </td>
-
-                    <td>
-                      {calculateCtr(
-                        promotion.clicks,
-                        promotion.impressions
-                      )}
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        promotion.conversions
+                      {formatSchedule(
+                        campaign
                       )}
                     </td>
 
                     <td>
                       <span
-                        className={`${styles.status} ${
-                          promotion.status ===
-                          "active"
-                            ? styles.statusActive
-                            : promotion.status ===
-                              "paused"
-                            ? styles.statusPaused
-                            : promotion.status ===
-                              "scheduled"
-                            ? styles.statusScheduled
-                            : promotion.status ===
-                              "draft"
-                            ? styles.statusDraft
-                            : styles.statusEnded
-                        }`}
+                        className={
+                          statusClassName(
+                            campaign.status
+                          )
+                        }
                       >
-                        {statusLabel(
-                          promotion.status
+                        {formatPosterPromotionStatus(
+                          campaign.status
                         )}
                       </span>
                     </td>
 
                     <td>
-  <button
-    type="button"
-    className={
-      styles.actionButton
-    }
-    onClick={() =>
-      setSelectedId(
-        promotion.id
-      )
-    }
-  >
-    View
-  </button>
-</td>
+                      {renderDetailValue(
+                        campaign.readinessStatus
+                      )}
+                    </td>
+
+                    <td>
+                      {formatPosterPromotionTimestamp(
+                        campaign.updatedAt
+                      )}
+                    </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className={
+                          styles.actionButton
+                        }
+                        onClick={() =>
+                          setSelectedId(
+                            campaign.id
+                          )
+                        }
+                      >
+                        View
+                      </button>
+                    </td>
                   </tr>
                 )
               )}
             </tbody>
           </table>
 
-          {visiblePromotions.length ===
+          {isLoading ? (
+            <div
+              className={
+                styles.empty
+              }
+            >
+              Loading Poster Promotions...
+            </div>
+          ) : visibleCampaigns.length ===
           0 ? (
             <div
               className={
                 styles.empty
               }
             >
-              No Poster promotions found.
+              No authoritative Poster Promotions found.
             </div>
           ) : null}
         </div>
@@ -1308,663 +1146,44 @@ export default function PosterPromotionManager() {
           </strong>
 
           <p>
-            These campaigns use the disclosure
-            â€œPromoted by Posterâ€. They remain
-            separate from organic ranking and
-            should not be disguised as ordinary
-            recommendations.
+            These campaigns use the disclosure “Promoted by Poster”. They remain
+            separate from organic ranking and should not be disguised as
+            ordinary recommendations.
           </p>
         </div>
       </section>
 
-      {selectedPromotion ? (
-        <div
-          className={
-            styles.drawerLayer
+      {selectedId ? (
+        <PosterPromotionDrawer
+          selectedId={
+            selectedId
           }
-        >
-          <button
-            type="button"
-            className={
-              styles.backdrop
-            }
-            aria-label="Close Poster promotion details"
-            onClick={() =>
-              setSelectedId(
-                null
-              )
-            }
-          />
-
-          <aside
-            className={
-              styles.drawer
-            }
-          >
-            <div
-              className={
-                styles.drawerHeader
-              }
-            >
-              <div>
-                <span>
-                  {
-                    selectedPromotion.id
-                  }
-                </span>
-
-                <h3>
-                  {
-                    selectedPromotion.name
-                  }
-                </h3>
-              </div>
-
-              <button
-                type="button"
-                className={
-                  styles.closeButton
-                }
-                aria-label="Close"
-                onClick={() =>
-                  setSelectedId(
-                    null
-                  )
-                }
-              >
-                Ã—
-              </button>
-            </div>
-
-            <div
-              className={
-                styles.drawerBody
-              }
-            >
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Promotion
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Campaign ID
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.id
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Disclosure
-                    </dt>
-
-                    <dd>
-                      Promoted by Poster
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Purpose
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.purpose
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Placement
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.placements.join(
-                          ", "
-                        )
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Status
-                    </dt>
-
-                    <dd>
-                      {statusLabel(
-                        selectedPromotion.status
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Start
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.startAt
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      End
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.endAt ??
-                        "No fixed end"
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Destination
-                    </dt>
-
-                    <dd
-                      className={
-                        styles.breakText
-                      }
-                    >
-                      {
-                        selectedPromotion.destinationUrl
-                      }
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Creative
-                </h4>
-
-                <dl
-                  className={
-                    styles.detailList
-                  }
-                >
-                  <div>
-                    <dt>
-                      Headline
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.creative?.headline ??
-                        selectedPromotion.name
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Body
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.creative?.body ??
-                        selectedPromotion.purpose
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Call to action
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedPromotion.creative?.callToAction ??
-                        "Explore"
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Media
-                    </dt>
-
-                    <dd>
-                      {selectedPromotion.creative?.media
-                        ? `${selectedPromotion.creative.media.fileName} · ${selectedPromotion.creative.media.type}`
-                        : "No uploaded media"}
-                    </dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Performance
-                </h4>
-
-                <div
-                  className={
-                    styles.metrics
-                  }
-                >
-                  <div>
-                    <span>
-                      Impressions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedPromotion.impressions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Clicks
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedPromotion.clicks
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      CTR
-                    </span>
-
-                    <strong>
-                      {calculateCtr(
-                        selectedPromotion.clicks,
-                        selectedPromotion.impressions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedPromotion.conversions
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversion rate
-                    </span>
-
-                    <strong>
-                      {conversionRate(
-                        selectedPromotion.conversions,
-                        selectedPromotion.clicks
-                      )}
-                    </strong>
-                  </div>
-                </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Discovery integrity
-                </h4>
-
-                <p
-                  className={
-                    styles.integrityNote
-                  }
-                >
-                  Poster-controlled promotion
-                  remains a separate commercial
-                  placement. It must not silently
-                  replace or manipulate organic
-                  knowledge, search, trending, or
-                  recommendation rankings.
-                </p>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Audit history
-                </h4>
-
-                <div
-                  className={
-                    styles.auditList
-                  }
-                >
-                  {selectedPromotion.audit.map(
-                    (
-                      entry
-                    ) => (
-                      <div
-                        key={
-                          entry.id
-                        }
-                        className={
-                          styles.auditItem
-                        }
-                      >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
-
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
-
-                          <span>
-                            {
-                              entry.actor
-                            }
-                            {" Â· "}
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-            </div>
-
-            <div
-              className={
-                styles.drawerFooter
-              }
-            >
-              <PosterPromotionEditAction
-                initialDraft={
-                  promotionToDraft(
-                    selectedPromotion
-                  )
-                }
-                disabled={
-                  selectedPromotion.status ===
-                  "ended"
-                }
-                onSave={(
-                  draft
-                ) =>
-                  updatePromotion(
-                    selectedPromotion.id,
-                    draft
-                  )
-                }
-              />
-
-              <Link
-                href={`/monetization/campaigns?record=${encodeURIComponent(
-                  selectedPromotion.id
-                )}`}
-                className={
-                  styles.secondaryButton
-                }
-              >
-                Open in Campaigns
-              </Link>
-
-              {selectedPromotion.status ===
-              "active" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.secondaryButton
-                    }
-                    onClick={() =>
-                      pausePromotion(
-                        selectedPromotion
-                      )
-                    }
-                  >
-                    Pause
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedPromotion
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedPromotion.status ===
-                "paused" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.primaryButton
-                    }
-                    onClick={() =>
-                      resumePromotion(
-                        selectedPromotion
-                      )
-                    }
-                  >
-                    Resume
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedPromotion
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedPromotion.status ===
-                "scheduled" ? (
-                <span
-                  className={
-                    styles.footerNote
-                  }
-                >
-                  Scheduled campaigns begin according
-                  to their configured start date.
-                </span>
-              ) : selectedPromotion.status ===
-                "draft" ? (
-                <span
-                  className={
-                    styles.footerNote
-                  }
-                >
-                  Draft promotions can be edited before
-                  they are scheduled.
-                </span>
-              ) : (
-                <span
-                  className={
-                    styles.footerNote
-                  }
-                >
-                  Ended campaigns remain historical
-                  records and cannot be edited.
-                </span>
-              )}
-            </div>
-          </aside>
-        </div>
-      ) : null}
-
-      {endTarget ? (
-        <div
-          className={
-            styles.confirmLayer
+          selectedCampaign={
+            selectedCampaign
           }
-        >
-          <button
-            type="button"
-            className={
-              styles.confirmBackdrop
-            }
-            aria-label="Cancel end Poster promotion"
-            onClick={() =>
-              setEndTargetId(
-                null
-              )
-            }
-          />
-
-          <div
-            className={
-              styles.confirmDialog
-            }
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="end-promotion-title"
-          >
-            <span
-              className={
-                styles.confirmEyebrow
-              }
-            >
-              Poster Promotion
-            </span>
-
-            <h3
-              id="end-promotion-title"
-            >
-              End this promotion?
-            </h3>
-
-            <p>
-              <strong>
-                {
-                  endTarget.id
-                }
-              </strong>
-              {" Â· "}
-              {
-                endTarget.name
-              }
-            </p>
-
-            <p
-              className={
-                styles.confirmWarning
-              }
-            >
-              Ending preserves campaign
-              performance and audit history
-              as a historical record.
-            </p>
-
-            <div
-              className={
-                styles.confirmActions
-              }
-            >
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={() =>
-                  setEndTargetId(
-                    null
-                  )
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className={
-                  styles.dangerButton
-                }
-                onClick={
-                  confirmEnd
-                }
-              >
-                End promotion
-              </button>
-            </div>
-          </div>
-        </div>
+          detail={
+            detail
+          }
+          isLoading={
+            detailLoading
+          }
+          error={
+            detailError
+          }
+          onClose={() =>
+            setSelectedId(
+              null
+            )
+          }
+          onRefresh={() =>
+            void refreshDetail()
+          }
+          onUpdated={() => {
+            void refreshDetail();
+            void refresh();
+          }}
+        />
       ) : null}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

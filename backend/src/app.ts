@@ -1,3 +1,27 @@
+import {
+  createPublicBusinessIdentityService,
+} from "./application/business-identity/index.js";
+
+import {
+  publicBusinessIdentityRoutes,
+} from "./routes/public-business-identity.routes.js";
+import {
+  createAdminBusinessIdentityService,
+} from "./application/business-identity/index.js";
+
+import {
+  adminBusinessIdentityRoutes,
+} from "./routes/admin-business-identity.routes.js";
+import {
+  createAdminProgrammaticService,
+} from "./application/monetization/index.js";
+
+import {
+  adminProgrammaticRoutes,
+} from "./routes/admin-programmatic.routes.js";
+import {
+  adminAffiliateRoutes,
+} from "./routes/admin-affiliate.routes.js";
 import cookie
   from "@fastify/cookie";
 
@@ -51,8 +75,12 @@ import {
 import {
   createAdminAnalyticsService,
   createAdminCampaignService,
+  createAdminAffiliateService,
+  createProductionAdminPosterPromotionService,
   type AdminAnalyticsService,
   type AdminCampaignService,
+  type AdminAffiliateService,
+  type AdminPosterPromotionService,
 } from "./application/monetization/index.js";
 
 import {
@@ -134,6 +162,10 @@ import {
 } from "./routes/admin-audience-insights.routes.js";
 
 import {
+  adminPosterPromotionRoutes,
+} from "./routes/admin-poster-promotion.routes.js";
+
+import {
   createDevelopmentEmailDeliveryProvider,
   type EmailDeliveryProvider,
 } from "./services/email/index.js";
@@ -142,6 +174,12 @@ export interface BuildAppOptions {
     AdminAnalyticsService;
   adminCampaignService?:
     AdminCampaignService;
+
+  adminAffiliateService?:
+    AdminAffiliateService;
+
+  adminPosterPromotionService?:
+    AdminPosterPromotionService;
 
   adminCommercialRequestService?:
     AdminCommercialRequestService;
@@ -556,6 +594,32 @@ export async function buildApp(
   );
 
   await app.register(
+    adminAffiliateRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminAffiliateService ??
+        createAdminAffiliateService(),
+    }
+  );
+
+  await app.register(
+    adminPosterPromotionRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminPosterPromotionService ??
+        createProductionAdminPosterPromotionService(),
+    }
+  );
+
+  await app.register(
     adminCommercialRequestRoutes,
     {
       prefix:
@@ -579,6 +643,42 @@ export async function buildApp(
       apiVersion:
         "v1",
     })
+  );
+
+
+  await app.register(
+    adminProgrammaticRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        createAdminProgrammaticService(),
+    }
+  );
+
+
+  await app.register(
+    adminBusinessIdentityRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        createAdminBusinessIdentityService(),
+    }
+  );
+
+
+  await app.register(
+    publicBusinessIdentityRoutes,
+    {
+      prefix:
+        "/api/v1",
+
+      service:
+        createPublicBusinessIdentityService(),
+    }
   );
 
   return app;

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -7,22 +7,43 @@ import {
 import PosterPromotionEditor from "./PosterPromotionEditor";
 
 import type {
+  PosterPromotionDetailResponse,
+  PosterPromotionSaveMode,
+} from "./poster-promotion.api-types";
+
+import type {
   PosterPromotionDraft,
 } from "./poster-promotion.types";
+
+import {
+  getPosterPromotionErrorMessage,
+} from "./poster-promotion.errors";
+
+import {
+  mapPosterPromotionDetailToDraft,
+} from "./poster-promotion.mappers";
+
+import {
+  mapDraftToUpdatePosterPromotionRequest,
+} from "./poster-promotion.request-mappers";
+
+import {
+  updatePosterPromotion,
+} from "./poster-promotion.service";
 
 import styles from "./PosterPromotionEditAction.module.css";
 
 interface PosterPromotionEditActionProps {
-  initialDraft:
-    PosterPromotionDraft;
+  detail:
+    PosterPromotionDetailResponse;
 
   disabled?:
     boolean;
 
-  onSave:
+  onUpdated:
     (
-      draft:
-        PosterPromotionDraft
+      record:
+        PosterPromotionDetailResponse
     ) => void;
 }
 
@@ -38,18 +59,71 @@ export default function PosterPromotionEditAction(
       false
     );
 
-  const savePromotion = (
-    draft:
-      PosterPromotionDraft
-  ) => {
-    props.onSave(
-      draft
-    );
-
-    setEditorOpen(
+  const [
+    isSaving,
+    setIsSaving,
+  ] =
+    useState(
       false
     );
-  };
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState<
+      string | null
+    >(
+      null
+    );
+
+  const savePromotion =
+    async (
+      draft:
+        PosterPromotionDraft,
+      mode:
+        PosterPromotionSaveMode
+    ) => {
+      setIsSaving(
+        true
+      );
+
+      setErrorMessage(
+        null
+      );
+
+      try {
+        const updated =
+          await updatePosterPromotion(
+            props.detail.campaign.id,
+            mapDraftToUpdatePosterPromotionRequest(
+              draft,
+              props.detail,
+              mode
+            )
+          );
+
+        props.onUpdated(
+          updated
+        );
+
+        setEditorOpen(
+          false
+        );
+      } catch (
+        error
+      ) {
+        setErrorMessage(
+          getPosterPromotionErrorMessage(
+            error
+          )
+        );
+      } finally {
+        setIsSaving(
+          false
+        );
+      }
+    };
 
   return (
     <>
@@ -59,33 +133,65 @@ export default function PosterPromotionEditAction(
           styles.editButton
         }
         disabled={
-          props.disabled
+          props.disabled ||
+          isSaving
         }
-        onClick={() =>
+        onClick={() => {
+          setErrorMessage(
+            null
+          );
+
           setEditorOpen(
             true
-          )
-        }
+          );
+        }}
       >
-        Edit promotion
+        {isSaving
+          ? "Saving..."
+          : "Edit promotion"}
       </button>
+
+      {errorMessage ? (
+        <span
+          role="alert"
+          style={{
+            color:
+              "var(--danger)",
+
+            fontSize:
+              12,
+          }}
+        >
+          {
+            errorMessage
+          }
+        </span>
+      ) : null}
 
       {editorOpen ? (
         <PosterPromotionEditor
           mode="edit"
           initialDraft={
-            props.initialDraft
+            mapPosterPromotionDetailToDraft(
+              props.detail
+            )
           }
           onClose={() =>
             setEditorOpen(
               false
             )
           }
-          onSaveDraft={
-            savePromotion
+          onSaveDraft={draft =>
+            void savePromotion(
+              draft,
+              "draft"
+            )
           }
-          onSchedule={
-            savePromotion
+          onSchedule={draft =>
+            void savePromotion(
+              draft,
+              "schedule"
+            )
           }
         />
       ) : null}

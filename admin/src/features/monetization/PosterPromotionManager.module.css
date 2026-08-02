@@ -625,3 +625,22 @@
     width: 100%;
   }
 }
+
+.statusDraft {
+  color: var(--text-secondary);
+  background: var(--surface);
+}
+
+.statusDisabled {
+  color: var(--danger);
+  background:
+    rgb(220 38 38 / 0.08);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}

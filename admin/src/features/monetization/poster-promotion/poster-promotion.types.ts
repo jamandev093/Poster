@@ -15,6 +15,9 @@ export type PosterPromotionMediaType =
   | "video";
 
 export interface PosterPromotionMedia {
+  assetId?:
+    string;
+
   type:
     PosterPromotionMediaType;
 
@@ -155,4 +158,3 @@ export const EMPTY_POSTER_PROMOTION_DRAFT:
       null,
   },
 };
-

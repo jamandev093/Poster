@@ -1,135 +1,164 @@
 "use client";
 
-import type {
-  CSSProperties,
-} from "react";
+import {
+  usePublicBusinessIdentity,
+} from "@/features/business-identity";
+
+import styles from "./signalcontact.module.css";
+
+type SignalContactVariant =
+  | "sidebar";
 
 interface SignalContactProps {
-  variant?: "sidebar" | "card";
+  variant?:
+    SignalContactVariant;
 }
 
-const SIGNAL_CONTACT_URL =
-  process.env
-    .NEXT_PUBLIC_SIGNAL_CONTACT_URL
-    ?.trim() ?? "";
+function SignalIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={styles.iconSvg}
+    >
+      <path d="M12 4.5c-4.7 0-8.5 3.1-8.5 7s3.8 7 8.5 7c1.1 0 2.2-.2 3.2-.5l4 1.4-1.2-3.3c1.6-1.2 2.5-2.8 2.5-4.6 0-3.9-3.8-7-8.5-7Z" />
+      <path d="M8.5 11.5h7" />
+    </svg>
+  );
+}
 
-const SIGNAL_CONTACT_LABEL =
-  process.env
-    .NEXT_PUBLIC_SIGNAL_CONTACT_LABEL
-    ?.trim() ||
-  "Contact us on Signal";
+function createClassName(
+  base:
+    string,
+  variant?:
+    SignalContactVariant
+): string {
+  return [
+    base,
+    variant === "sidebar"
+      ? styles.sidebar
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
 
-export default function SignalContact({
-  variant = "card",
-}: SignalContactProps) {
-  const isSidebar =
-    variant === "sidebar";
+function DisabledSignalContact(
+  props: {
+    title:
+      string;
 
-  const containerStyle:
-    CSSProperties =
-    isSidebar
-      ? {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 7,
-          marginTop: 14,
-          paddingTop: 14,
-          borderTop:
-            "1px solid #E2E8F0",
+    variant?:
+      SignalContactVariant;
+  }
+) {
+  return (
+    <div
+      className={createClassName(
+        styles.contactDisabled,
+        props.variant
+      )}
+      aria-disabled="true"
+      title={props.title}
+    >
+      <span className={styles.icon}>
+        <SignalIcon />
+      </span>
+
+      <span className={styles.content}>
+        <strong>
+          Contact on Signal
+        </strong>
+
+        <small>
+          Rights support
+        </small>
+      </span>
+
+      <span className={styles.unavailable}>
+        —
+      </span>
+    </div>
+  );
+}
+
+export default function SignalContact(
+  props:
+    SignalContactProps
+) {
+  const {
+    identity,
+    isLoading,
+  } =
+    usePublicBusinessIdentity();
+
+  const signalUrl =
+    identity?.signalUrl?.trim() ??
+    "";
+
+  const signalLabel =
+    identity?.signalLabel?.trim() ||
+    "Contact on Signal";
+
+  if (
+    isLoading
+  ) {
+    return (
+      <DisabledSignalContact
+        variant={
+          props.variant
         }
-      : {
-          display: "flex",
-          alignItems: "center",
-          justifyContent:
-            "space-between",
-          gap: 20,
-          flexWrap: "wrap",
-          padding: 20,
-          border:
-            "1px solid #E2E8F0",
-          borderRadius: 10,
-          background: "#FFFFFF",
-        };
+        title="Loading official Signal contact from Poster Business Identity."
+      />
+    );
+  }
 
-  const titleStyle:
-    CSSProperties = {
-    color: "#0F172A",
-    fontSize: isSidebar
-      ? 13
-      : 15,
-    lineHeight: isSidebar
-      ? "19px"
-      : "22px",
-    fontWeight: 700,
-  };
-
-  const descriptionStyle:
-    CSSProperties = {
-    margin: 0,
-    color: "#64748B",
-    fontSize: isSidebar
-      ? 12
-      : 13,
-    lineHeight: isSidebar
-      ? "18px"
-      : "20px",
-  };
-
-  const linkStyle:
-    CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 38,
-    padding: "8px 13px",
-    border: "1px solid #C9DAFA",
-    borderRadius: 8,
-    background: "#F8FAFF",
-    color: "#285CC4",
-    fontSize: 13,
-    lineHeight: "19px",
-    fontWeight: 650,
-    textDecoration: "none",
-  };
+  if (
+    !signalUrl
+  ) {
+    return (
+      <DisabledSignalContact
+        variant={
+          props.variant
+        }
+        title="Signal support is currently unavailable."
+      />
+    );
+  }
 
   return (
-    <div style={containerStyle}>
-      <div>
-        <div style={titleStyle}>
-          Need help?
-        </div>
-
-        <p style={descriptionStyle}>
-          Contact Copyright Support on
-          Signal. Include your claim
-          reference when asking about a
-          submitted request.
-        </p>
-      </div>
-
-      {SIGNAL_CONTACT_URL ? (
-        <a
-          href={SIGNAL_CONTACT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={linkStyle}
-        >
-          {SIGNAL_CONTACT_LABEL}
-        </a>
-      ) : (
-        <span
-          aria-disabled="true"
-          style={{
-            ...linkStyle,
-            cursor: "not-allowed",
-            background: "#F8FAFC",
-            color: "#94A3B8",
-          }}
-        >
-          Signal contact setup pending
-        </span>
+    <a
+      href={signalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={createClassName(
+        styles.contact,
+        props.variant
       )}
-    </div>
+      aria-label={`${signalLabel} — opens Signal in a new tab`}
+    >
+      <span className={styles.icon}>
+        <SignalIcon />
+      </span>
+
+      <span className={styles.content}>
+        <strong>
+          {
+            signalLabel
+          }
+        </strong>
+
+        <small>
+          Rights support
+        </small>
+      </span>
+
+      <span
+        className={styles.arrow}
+        aria-hidden="true"
+      >
+        ↗
+      </span>
+    </a>
   );
 }

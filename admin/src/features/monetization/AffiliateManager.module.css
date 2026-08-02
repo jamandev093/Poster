@@ -610,3 +610,45 @@
     width: 100%;
   }
 }
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.statusDraft {
+  color: var(--text-secondary);
+  background: var(--surface);
+}
+
+.statusDisabled {
+  color: var(--danger);
+  background:
+    rgb(220 38 38 / 0.08);
+}
+
+.footerNote {
+  margin-right: auto;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.breakText {
+  overflow-wrap: anywhere;
+}
+
+.jsonBlock {
+  max-width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: pre-wrap;
+}

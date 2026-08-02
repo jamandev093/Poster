@@ -4,6 +4,14 @@ import type {
 } from "fastify";
 
 import {
+  CampaignOperationsError,
+} from "../application/monetization/campaign-operations.errors.js";
+import {
+  PosterPromotionError,
+} from "../application/monetization/poster-promotion.errors.js";
+
+
+import {
   AuthenticationDomainError,
 } from "../domains/authentication/authentication.errors.js";
 
@@ -23,6 +31,27 @@ interface ApiErrorResponse {
     details?:
       readonly ApiValidationIssue[];
   };
+}
+
+function getCampaignOperationsStatusCode(
+  error:
+    CampaignOperationsError
+): number {
+  switch (
+    error.code
+  ) {
+    case "CAMPAIGN_OPERATION_INVALID":
+      return 400;
+
+    case "CAMPAIGN_NOT_FOUND":
+      return 404;
+
+    case "CAMPAIGN_VERSION_CONFLICT":
+    case "CAMPAIGN_TRANSITION_NOT_ALLOWED":
+    case "CAMPAIGN_TERMINAL":
+    case "CAMPAIGN_NOT_READY":
+      return 409;
+  }
 }
 
 export function registerErrorHandler(
@@ -108,6 +137,108 @@ export function registerErrorHandler(
 
       if (
         error instanceof
+        CampaignOperationsError
+      ) {
+        const statusCode =
+          getCampaignOperationsStatusCode(
+            error
+          );
+
+        request.log.info(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster campaign operation was rejected."
+        );
+
+        const response:
+          ApiErrorResponse = {
+          error: {
+            code:
+              error.code,
+
+            message:
+              error.message,
+
+            requestId:
+              request.id,
+
+            ...(error.issues.length > 0
+              ? {
+                  details:
+                    error.issues.map(
+                      issue => ({
+                        path:
+                          issue.field,
+
+                        message:
+                          issue.message,
+                      })
+                    ),
+                }
+              : {}),
+          },
+        };
+
+        return reply
+          .status(
+            statusCode
+          )
+          .send(
+            response
+          );
+      }
+
+      if (
+        error instanceof
+        PosterPromotionError
+      ) {
+        request.log.info(
+          {
+            code:
+              error.code,
+
+            requestId:
+              request.id,
+          },
+          "Poster Promotion operation was rejected."
+        );
+
+        const response:
+          ApiErrorResponse = {
+          error: {
+            code:
+              error.code,
+
+            message:
+              error.message,
+
+            requestId:
+              request.id,
+
+            ...(error.issues.length > 0
+              ? {
+                  details:
+                    error.issues,
+                }
+              : {}),
+          },
+        };
+
+        return reply
+          .status(
+            error.statusCode
+          )
+          .send(
+            response
+          );
+      }
+      if (
+        error instanceof
         AuthenticationDomainError
       ) {
         request.log.warn(
@@ -123,17 +254,17 @@ export function registerErrorHandler(
 
         const response:
           ApiErrorResponse = {
-            error: {
-              code:
-                error.code,
+          error: {
+            code:
+              error.code,
 
-              message:
-                error.publicMessage,
+            message:
+              error.publicMessage,
 
-              requestId:
-                request.id,
-            },
-          };
+            requestId:
+              request.id,
+          },
+        };
 
         return reply
           .status(

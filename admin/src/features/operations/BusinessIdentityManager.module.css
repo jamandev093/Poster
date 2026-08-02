@@ -1,0 +1,231 @@
+.page {
+  display: grid;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.eyebrow,
+.cardLabel {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h2,
+.panel h3 {
+  margin: 4px 0 0;
+  color: var(--text);
+}
+
+.header h2 {
+  font-size: 28px;
+  line-height: 36px;
+}
+
+.header p,
+.policyBanner p,
+.errorPanel p,
+.auditNote,
+.fullField span {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.secondaryButton {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.policyBanner,
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 0.04);
+}
+
+.policyBanner {
+  padding: 18px 20px;
+}
+
+.policyBanner strong {
+  color: var(--text);
+}
+
+.panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.versionBox {
+  min-width: 120px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 10px 12px;
+  text-align: right;
+}
+
+.versionBox span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.versionBox strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field,
+.fullField {
+  display: grid;
+  gap: 6px;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.field label,
+.fullField label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.field input,
+.fullField textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.field input {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.fullField textarea {
+  min-height: 120px;
+  padding: 10px;
+  resize: vertical;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+}
+
+.errorPanel {
+  border: 1px solid rgb(220 38 38 / 0.22);
+  border-radius: 14px;
+  background: rgb(220 38 38 / 0.08);
+  padding: 14px 16px;
+}
+
+.errorPanel strong {
+  color: var(--danger);
+}
+
+.successPanel {
+  border: 1px solid rgb(22 163 74 / 0.22);
+  border-radius: 14px;
+  background: rgb(22 163 74 / 0.08);
+  color: rgb(21 128 61);
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.empty {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  padding: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+@media (max-width: 820px) {
+  .header,
+  .panelHeader,
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .versionBox {
+    text-align: left;
+  }
+}

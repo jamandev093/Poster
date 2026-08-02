@@ -34,6 +34,8 @@ const PLATFORM_ROLE_PERMISSION_MAP:
       "monetization.campaigns.read",
       "monetization.campaigns.manage",
       "monetization.analytics.read",
+      "operations.business_identity.read",
+      "operations.business_identity.manage",
     ],
 
     content_moderator: [

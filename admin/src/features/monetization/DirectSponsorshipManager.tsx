@@ -1,337 +1,179 @@
-﻿"use client";
+"use client";
+
+import Link from "next/link";
 
 import {
   useMemo,
   useState,
 } from "react";
 
-import Link from "next/link";
+import {
+  DirectSponsorshipActions,
+  filterDirectSponsorships,
+  findDirectSponsorship,
+  formatDirectSponsorshipDate,
+  formatDirectSponsorshipPlacements,
+  formatDirectSponsorshipStatus,
+  getDirectSponsorshipCounts,
+  useDirectSponsorships,
+  type DirectSponsorshipStatus,
+} from "./direct-sponsorship";
 
 import styles from "./DirectSponsorshipManager.module.css";
 
-type SponsorshipStatus =
-  | "scheduled"
-  | "active"
-  | "paused"
-  | "ended";
-
-type Placement =
-  | "Home"
-  | "Search"
-  | "Trending";
-
-interface AuditEntry {
-  id: string;
-  action: string;
-  actor: string;
-  timestamp: string;
-}
-
-interface SponsorshipRecord {
-  id: string;
-
-  name: string;
-  advertiser: string;
-
-  destinationUrl: string;
-
-  placement: Placement;
-
-  status: SponsorshipStatus;
-
-  startAt: string;
-  endAt: string;
-
-  contractValue: number;
-
-  deliveryTarget: number;
-  delivered: number;
-
-  clicks: number;
-  conversions: number;
-
-  audit: AuditEntry[];
-}
-
-const INITIAL_SPONSORSHIPS: SponsorshipRecord[] = [
-  {
-    id: "CMP-3001",
-
-    name:
-      "Cloud Skills Direct Sponsorship",
-
-    advertiser:
-      "Example Cloud",
-
-    destinationUrl:
-      "https://example.com/cloud-skills",
-
-    placement:
-      "Trending",
-
-    status:
-      "active",
-
-    startAt:
-      "17 Jul 2026",
-
-    endAt:
-      "31 Jul 2026",
-
-    contractValue:
-      500000,
-
-    deliveryTarget:
-      1000000,
-
-    delivered:
-      728000,
-
-    clicks:
-      18240,
-
-    conversions:
-      620,
-
-    audit: [
-      {
-        id:
-          "sponsor-3001-2",
-
-        action:
-          "Delivery reached 70% of contracted target",
-
-        actor:
-          "System",
-
-        timestamp:
-          "20 Jul 2026 Â· 09:15",
-      },
-
-      {
-        id:
-          "sponsor-3001-1",
-
-        action:
-          "Direct sponsorship activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "17 Jul 2026 Â· 12:15",
-      },
-    ],
-  },
-
-  {
-    id: "CMP-3010",
-
-    name:
-      "Professional Learning Campaign",
-
-    advertiser:
-      "Example University",
-
-    destinationUrl:
-      "https://example.edu/professional-learning",
-
-    placement:
-      "Home",
-
-    status:
-      "scheduled",
-
-    startAt:
-      "25 Jul 2026",
-
-    endAt:
-      "15 Aug 2026",
-
-    contractValue:
-      320000,
-
-    deliveryTarget:
-      600000,
-
-    delivered:
-      0,
-
-    clicks:
-      0,
-
-    conversions:
-      0,
-
-    audit: [
-      {
-        id:
-          "sponsor-3010-1",
-
-        action:
-          "Direct sponsorship scheduled",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 Â· 14:40",
-      },
-    ],
-  },
-
-  {
-    id: "CMP-3011",
-
-    name:
-      "Developer Certification Campaign",
-
-    advertiser:
-      "Example Academy",
-
-    destinationUrl:
-      "https://example.org/developer-certification",
-
-    placement:
-      "Search",
-
-    status:
-      "paused",
-
-    startAt:
-      "10 Jul 2026",
-
-    endAt:
-      "30 Jul 2026",
-
-    contractValue:
-      210000,
-
-    deliveryTarget:
-      420000,
-
-    delivered:
-      188000,
-
-    clicks:
-      4860,
-
-    conversions:
-      210,
-
-    audit: [
-      {
-        id:
-          "sponsor-3011-2",
-
-        action:
-          "Campaign paused for advertiser review",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "19 Jul 2026 Â· 16:05",
-      },
-
-      {
-        id:
-          "sponsor-3011-1",
-
-        action:
-          "Direct sponsorship activated",
-
-        actor:
-          "Admin",
-
-        timestamp:
-          "10 Jul 2026 Â· 08:00",
-      },
-    ],
-  },
-];
-
-function statusLabel(
-  status: SponsorshipStatus
+type StatusFilter =
+  | "all"
+  | DirectSponsorshipStatus;
+
+const STATUS_FILTERS:
+  readonly {
+    key:
+      StatusFilter;
+
+    label:
+      string;
+  }[] = [
+    {
+      key:
+        "all",
+
+      label:
+        "All",
+    },
+
+    {
+      key:
+        "draft",
+
+      label:
+        "Draft",
+    },
+
+    {
+      key:
+        "scheduled",
+
+      label:
+        "Scheduled",
+    },
+
+    {
+      key:
+        "active",
+
+      label:
+        "Active",
+    },
+
+    {
+      key:
+        "paused",
+
+      label:
+        "Paused",
+    },
+
+    {
+      key:
+        "ended",
+
+      label:
+        "Ended",
+    },
+
+    {
+      key:
+        "disabled",
+
+      label:
+        "Disabled",
+    },
+  ];
+
+function statusClass(
+  status:
+    DirectSponsorshipStatus
 ): string {
-  switch (status) {
-    case "scheduled":
-      return "Scheduled";
-
+  switch (
+    status
+  ) {
     case "active":
-      return "Active";
+      return styles.statusActive;
 
     case "paused":
-      return "Paused";
+      return styles.statusPaused;
 
+    case "scheduled":
+      return styles.statusScheduled;
+
+    case "draft":
     case "ended":
-      return "Ended";
+    case "disabled":
+      return styles.statusEnded;
   }
 }
 
-function formatNumber(
-  value: number
+function readinessLabel(
+  status:
+    string
 ): string {
-  return new Intl.NumberFormat(
-    "en-IN"
-  ).format(value);
-}
-
-function formatMoney(
-  value: number
-): string {
-  return new Intl.NumberFormat(
-    "en-IN",
-    {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }
-  ).format(value);
-}
-
-function calculateCtr(
-  clicks: number,
-  impressions: number
-): string {
-  if (
-    impressions ===
-    0
+  switch (
+    status
   ) {
-    return "0.00%";
-  }
+    case "ready":
+      return "Ready";
 
-  return `${(
-    (
-      clicks /
-      impressions
-    ) *
-    100
-  ).toFixed(2)}%`;
+    case "pending_setup":
+      return "Pending setup";
+
+    case "blocked":
+      return "Blocked";
+
+    default:
+      return status;
+  }
 }
 
-function deliveryProgress(
-  delivered: number,
-  target: number
-): number {
+function commercialStatusLabel(
+  status:
+    string
+): string {
+  return status
+    .split(
+      "_"
+    )
+    .map(
+      part =>
+        part.length > 0
+          ? part[0]
+              .toUpperCase() +
+            part.slice(
+              1
+            )
+          : part
+    )
+    .join(
+      " "
+    );
+}
+
+function formatTimestamp(
+  value:
+    string
+): string {
+  const date =
+    new Date(
+      value
+    );
+
   if (
-    target ===
-    0
+    !Number.isFinite(
+      date.getTime()
+    )
   ) {
-    return 0;
+    return value;
   }
 
-  return Math.min(
-    100,
-    (
-      delivered /
-      target
-    ) *
-      100
-  );
-}
-
-function nowLabel(): string {
   return new Intl.DateTimeFormat(
     undefined,
     {
@@ -342,338 +184,123 @@ function nowLabel(): string {
         "short",
     }
   ).format(
-    new Date()
+    date
   );
 }
 
 export default function DirectSponsorshipManager() {
-  const [
-    sponsorships,
-    setSponsorships,
-  ] = useState<
-    SponsorshipRecord[]
-  >(
-    INITIAL_SPONSORSHIPS
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    isRefreshing,
+    refresh,
+  } =
+    useDirectSponsorships();
 
   const [
     query,
     setQuery,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
   const [
     filter,
     setFilter,
-  ] = useState<
-    "all" |
-      SponsorshipStatus
-  >(
-    "all"
-  );
+  ] =
+    useState<
+      StatusFilter
+    >(
+      "all"
+    );
 
   const [
     selectedId,
     setSelectedId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const [
-    endTargetId,
-    setEndTargetId,
-  ] = useState<
-    string | null
-  >(
-    null
-  );
-
-  const normalizedQuery =
-    query
-      .trim()
-      .toLowerCase();
-
-  const visibleSponsorships =
-    useMemo(() => {
-      return sponsorships.filter(
-        (
-          sponsorship
-        ) => {
-          if (
-            filter !==
-              "all" &&
-            sponsorship.status !==
-              filter
-          ) {
-            return false;
-          }
-
-          if (
-            !normalizedQuery
-          ) {
-            return true;
-          }
-
-          return [
-            sponsorship.id,
-            sponsorship.name,
-            sponsorship.advertiser,
-            sponsorship.placement,
-          ].some(
-            (
-              value
-            ) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedQuery
-                )
-          );
-        }
-      );
-    }, [
-      sponsorships,
-      filter,
-      normalizedQuery,
-    ]);
-
-  const selectedSponsorship =
-    useMemo(
-      () =>
-        sponsorships.find(
-          (
-            sponsorship
-          ) =>
-            sponsorship.id ===
-            selectedId
-        ) ?? null,
-
-      [
-        sponsorships,
-        selectedId,
-      ]
+  ] =
+    useState<
+      string |
+      null
+    >(
+      null
     );
 
-  const endTarget =
+  const campaigns =
     useMemo(
       () =>
-        sponsorships.find(
-          (
-            sponsorship
-          ) =>
-            sponsorship.id ===
-            endTargetId
-        ) ?? null,
-
+        data?.items ??
+        [],
       [
-        sponsorships,
-        endTargetId,
+        data?.items,
       ]
     );
 
   const counts =
     useMemo(
-      () => ({
-        all:
-          sponsorships.length,
-
-        scheduled:
-          sponsorships.filter(
-            (
-              sponsorship
-            ) =>
-              sponsorship.status ===
-              "scheduled"
-          ).length,
-
-        active:
-          sponsorships.filter(
-            (
-              sponsorship
-            ) =>
-              sponsorship.status ===
-              "active"
-          ).length,
-
-        paused:
-          sponsorships.filter(
-            (
-              sponsorship
-            ) =>
-              sponsorship.status ===
-              "paused"
-          ).length,
-
-        ended:
-          sponsorships.filter(
-            (
-              sponsorship
-            ) =>
-              sponsorship.status ===
-              "ended"
-          ).length,
-      }),
-
-      [
-        sponsorships,
-      ]
-    );
-
-  const updateStatus = (
-    id: string,
-    status: SponsorshipStatus,
-    action: string
-  ) => {
-    setSponsorships(
-      (
-        current
-      ) =>
-        current.map(
-          (
-            sponsorship
-          ) =>
-            sponsorship.id ===
-            id
-              ? {
-                  ...sponsorship,
-
-                  status,
-
-                  audit: [
-                    {
-                      id:
-                        `${sponsorship.id}-${Date.now()}`,
-
-                      action,
-
-                      actor:
-                        "Admin",
-
-                      timestamp:
-                        nowLabel(),
-                    },
-
-                    ...sponsorship.audit,
-                  ],
-                }
-              : sponsorship
-        )
-    );
-  };
-
-  const pauseCampaign = (
-    sponsorship:
-      SponsorshipRecord
-  ) => {
-    if (
-      sponsorship.status !==
-      "active"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      sponsorship.id,
-      "paused",
-      "Direct sponsorship paused"
-    );
-  };
-
-  const resumeCampaign = (
-    sponsorship:
-      SponsorshipRecord
-  ) => {
-    if (
-      sponsorship.status !==
-      "paused"
-    ) {
-      return;
-    }
-
-    updateStatus(
-      sponsorship.id,
-      "active",
-      "Direct sponsorship resumed"
-    );
-  };
-
-  const requestEnd = (
-    sponsorship:
-      SponsorshipRecord
-  ) => {
-    if (
-      sponsorship.status !==
-        "active" &&
-      sponsorship.status !==
-        "paused"
-    ) {
-      return;
-    }
-
-    setEndTargetId(
-      sponsorship.id
-    );
-  };
-
-  const confirmEnd =
-    () => {
-      if (
-        !endTarget
-      ) {
-        return;
-      }
-
-      updateStatus(
-        endTarget.id,
-        "ended",
-        "Direct sponsorship ended"
-      );
-
-      setEndTargetId(
-        null
-      );
-    };
-
-  const activeContractValue =
-    useMemo(
       () =>
-        sponsorships
-          .filter(
-            (
-              sponsorship
-            ) =>
-              sponsorship.status ===
-              "active"
-          )
-          .reduce(
-            (
-              total,
-              sponsorship
-            ) =>
-              total +
-              sponsorship.contractValue,
-            0
-          ),
-      [
-        sponsorships,
-      ]
-    );
-
-  const totalDelivered =
-    useMemo(
-      () =>
-        sponsorships.reduce(
-          (
-            total,
-            sponsorship
-          ) =>
-            total +
-            sponsorship.delivered,
-          0
+        getDirectSponsorshipCounts(
+          campaigns
         ),
       [
-        sponsorships,
+        campaigns,
+      ]
+    );
+
+  const visibleCampaigns =
+    useMemo(
+      () =>
+        filterDirectSponsorships(
+          campaigns,
+          {
+            query,
+            status:
+              filter,
+          }
+        ),
+      [
+        campaigns,
+        filter,
+        query,
+      ]
+    );
+
+  const selectedCampaign =
+    useMemo(
+      () =>
+        findDirectSponsorship(
+          campaigns,
+          selectedId
+        ),
+      [
+        campaigns,
+        selectedId,
+      ]
+    );
+
+  const deliveryEligibleCount =
+    useMemo(
+      () =>
+        campaigns.filter(
+          campaign =>
+            campaign.deliveryEligible
+        ).length,
+      [
+        campaigns,
+      ]
+    );
+
+  const readyCount =
+    useMemo(
+      () =>
+        campaigns.filter(
+          campaign =>
+            campaign.readinessStatus ===
+            "ready"
+        ).length,
+      [
+        campaigns,
       ]
     );
 
@@ -702,13 +329,29 @@ export default function DirectSponsorshipManager() {
           </h2>
 
           <p>
-            Track advertiser campaigns,
-            contracted delivery, placement,
-            performance, and campaign status
-            without introducing a self-service
-            advertising marketplace.
+            Review and operate manually approved
+            Direct Sponsorship campaigns using
+            authoritative Backend campaign records.
           </p>
         </div>
+
+        <button
+          type="button"
+          className={
+            styles.secondaryButton
+          }
+          disabled={
+            isLoading ||
+            isRefreshing
+          }
+          onClick={
+            refresh
+          }
+        >
+          {isRefreshing
+            ? "Refreshing…"
+            : "Refresh"}
+        </button>
       </header>
 
       <section
@@ -716,6 +359,10 @@ export default function DirectSponsorshipManager() {
           styles.summaryGrid
         }
         aria-label="Direct sponsorship summary"
+        aria-busy={
+          isLoading ||
+          isRefreshing
+        }
       >
         <article
           className={
@@ -723,7 +370,27 @@ export default function DirectSponsorshipManager() {
           }
         >
           <span>
-            Active sponsorships
+            Direct sponsorships
+          </span>
+
+          <strong>
+            {
+              campaigns.length
+            }
+          </strong>
+
+          <small>
+            Authoritative campaign records
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Active
           </span>
 
           <strong>
@@ -733,7 +400,7 @@ export default function DirectSponsorshipManager() {
           </strong>
 
           <small>
-            Currently running
+            Campaigns currently active
           </small>
         </article>
 
@@ -743,40 +410,67 @@ export default function DirectSponsorshipManager() {
           }
         >
           <span>
-            Active contract value
+            Delivery eligible
           </span>
 
           <strong>
-            {formatMoney(
-              activeContractValue
-            )}
+            {
+              deliveryEligibleCount
+            }
           </strong>
 
           <small>
-            Demonstration contract values
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.summaryCard
-          }
-        >
-          <span>
-            Total delivered
-          </span>
-
-          <strong>
-            {formatNumber(
-              totalDelivered
-            )}
-          </strong>
-
-          <small>
-            Contracted impressions delivered
+            {
+              readyCount
+            }
+            {" ready for operation"}
           </small>
         </article>
       </section>
+
+      {error ? (
+        <section
+          className={
+            styles.note
+          }
+          role="alert"
+        >
+          <div>
+            <strong>
+              Direct sponsorship data could not be refreshed.
+            </strong>
+
+            <p>
+              {
+                error
+              }
+            </p>
+
+            {campaigns.length >
+            0 ? (
+              <p>
+                The last successfully loaded
+                campaign snapshot remains visible.
+              </p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.secondaryButton
+            }
+            disabled={
+              isRefreshing
+            }
+            onClick={
+              refresh
+            }
+          >
+            Retry
+          </button>
+        </section>
+      ) : null}
 
       <section
         className={
@@ -795,14 +489,16 @@ export default function DirectSponsorshipManager() {
             value={
               query
             }
-            placeholder="Search campaign ID, advertiser or campaign..."
+            placeholder="Search campaign reference, name, organization or placement…"
             aria-label="Search direct sponsorships"
+            disabled={
+              isLoading
+            }
             onChange={(
               event
             ) =>
               setQuery(
-                event.target
-                  .value
+                event.target.value
               )
             }
           />
@@ -811,64 +507,38 @@ export default function DirectSponsorshipManager() {
             className={
               styles.filters
             }
+            aria-label="Filter direct sponsorships by status"
           >
-            {(
-              [
-                [
-                  "all",
-                  "All",
-                ],
-
-                [
-                  "scheduled",
-                  "Scheduled",
-                ],
-
-                [
-                  "active",
-                  "Active",
-                ],
-
-                [
-                  "paused",
-                  "Paused",
-                ],
-
-                [
-                  "ended",
-                  "Ended",
-                ],
-              ] as const
-            ).map(
-              ([
-                key,
-                label,
-              ]) => (
+            {STATUS_FILTERS.map(
+              option => (
                 <button
                   key={
-                    key
+                    option.key
                   }
                   type="button"
                   className={
                     filter ===
-                    key
+                    option.key
                       ? styles.filterActive
                       : styles.filter
                   }
+                  disabled={
+                    isLoading
+                  }
                   onClick={() =>
                     setFilter(
-                      key
+                      option.key
                     )
                   }
                 >
                   {
-                    label
+                    option.label
                   }
 
                   <span>
                     {
                       counts[
-                        key
+                        option.key
                       ]
                     }
                   </span>
@@ -882,198 +552,210 @@ export default function DirectSponsorshipManager() {
           className={
             styles.tableWrap
           }
+          aria-busy={
+            isLoading ||
+            isRefreshing
+          }
         >
-          <table
-            className={
-              styles.table
-            }
-          >
-            <thead>
-              <tr>
-                <th>
-                  Campaign
-                </th>
-
-                <th>
-                  Advertiser
-                </th>
-
-                <th>
-                  Placement
-                </th>
-
-                <th>
-                  Delivery
-                </th>
-
-                <th>
-                  Contract
-                </th>
-
-                <th>
-                  CTR
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visibleSponsorships.map(
-                (
-                  sponsorship
-                ) => {
-                  const progress =
-                    deliveryProgress(
-                      sponsorship.delivered,
-                      sponsorship.deliveryTarget
-                    );
-
-                  return (
-                    <tr
-                      key={
-                        sponsorship.id
-                      }
-                    >
-                      <td>
-                        <button
-                          type="button"
-                          className={
-                            styles.nameButton
-                          }
-                          onClick={() =>
-                            setSelectedId(
-                              sponsorship.id
-                            )
-                          }
-                        >
-                          {
-                            sponsorship.name
-                          }
-                        </button>
-
-                        <span
-                          className={
-                            styles.secondaryText
-                          }
-                        >
-                          {
-                            sponsorship.id
-                          }
-                        </span>
-                      </td>
-
-                      <td>
-                        {
-                          sponsorship.advertiser
-                        }
-                      </td>
-
-                      <td>
-                        {
-                          sponsorship.placement
-                        }
-                      </td>
-
-                      <td>
-                        <strong
-                          className={
-                            styles.deliveryPrimary
-                          }
-                        >
-                          {progress.toFixed(
-                            0
-                          )}
-                          %
-                        </strong>
-
-                        <span
-                          className={
-                            styles.secondaryText
-                          }
-                        >
-                          {formatNumber(
-                            sponsorship.delivered
-                          )}
-                          {" / "}
-                          {formatNumber(
-                            sponsorship.deliveryTarget
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-                        {formatMoney(
-                          sponsorship.contractValue
-                        )}
-                      </td>
-
-                      <td>
-                        {calculateCtr(
-                          sponsorship.clicks,
-                          sponsorship.delivered
-                        )}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`${styles.status} ${
-                            sponsorship.status ===
-                            "active"
-                              ? styles.statusActive
-                              : sponsorship.status ===
-                                "paused"
-                              ? styles.statusPaused
-                              : sponsorship.status ===
-                                "scheduled"
-                              ? styles.statusScheduled
-                              : styles.statusEnded
-                          }`}
-                        >
-                          {statusLabel(
-                            sponsorship.status
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-  <button
-    type="button"
-    className={
-      styles.actionButton
-    }
-    onClick={() =>
-      setSelectedId(
-        sponsorship.id
-      )
-    }
-  >
-    View
-  </button>
-</td>
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-
-          {visibleSponsorships.length ===
-          0 ? (
+          {isLoading ? (
             <div
               className={
                 styles.empty
               }
+              role="status"
             >
-              No direct sponsorships found.
+              Loading authoritative Direct Sponsorship campaigns…
             </div>
-          ) : null}
+          ) : (
+            <>
+              <table
+                className={
+                  styles.table
+                }
+              >
+                <thead>
+                  <tr>
+                    <th>
+                      Campaign
+                    </th>
+
+                    <th>
+                      Organization
+                    </th>
+
+                    <th>
+                      Placement
+                    </th>
+
+                    <th>
+                      Schedule
+                    </th>
+
+                    <th>
+                      Readiness
+                    </th>
+
+                    <th>
+                      Commercial
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {visibleCampaigns.map(
+                    campaign => (
+                      <tr
+                        key={
+                          campaign.id
+                        }
+                      >
+                        <td>
+                          <button
+                            type="button"
+                            className={
+                              styles.nameButton
+                            }
+                            onClick={() =>
+                              setSelectedId(
+                                campaign.id
+                              )
+                            }
+                          >
+                            {
+                              campaign.name
+                            }
+                          </button>
+
+                          <span
+                            className={
+                              styles.secondaryText
+                            }
+                          >
+                            {
+                              campaign.campaignReference
+                            }
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={
+                              styles.breakText
+                            }
+                          >
+                            {
+                              campaign.organizationId
+                            }
+                          </span>
+                        </td>
+
+                        <td>
+                          {formatDirectSponsorshipPlacements(
+                            campaign.placements
+                          )}
+                        </td>
+
+                        <td>
+                          <strong
+                            className={
+                              styles.deliveryPrimary
+                            }
+                          >
+                            {formatDirectSponsorshipDate(
+                              campaign.scheduledStartDate
+                            )}
+                          </strong>
+
+                          <span
+                            className={
+                              styles.secondaryText
+                            }
+                          >
+                            to{" "}
+                            {formatDirectSponsorshipDate(
+                              campaign.scheduledEndDate
+                            )}
+                          </span>
+                        </td>
+
+                        <td>
+                          {readinessLabel(
+                            campaign.readinessStatus
+                          )}
+                        </td>
+
+                        <td>
+                          {commercialStatusLabel(
+                            campaign.commercialStatus
+                          )}
+                        </td>
+
+                        <td>
+                          <span
+                            className={`${styles.status} ${statusClass(
+                              campaign.status
+                            )}`}
+                          >
+                            {formatDirectSponsorshipStatus(
+                              campaign.status
+                            )}
+                          </span>
+
+                          <span
+                            className={
+                              styles.secondaryText
+                            }
+                          >
+                            {campaign.deliveryEligible
+                              ? "Delivery eligible"
+                              : "Not delivery eligible"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className={
+                              styles.actionButton
+                            }
+                            onClick={() =>
+                              setSelectedId(
+                                campaign.id
+                              )
+                            }
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+
+              {visibleCampaigns.length ===
+              0 ? (
+                <div
+                  className={
+                    styles.empty
+                  }
+                >
+                  {campaigns.length ===
+                  0
+                    ? "No authoritative Direct Sponsorship campaigns exist yet."
+                    : "No Direct Sponsorship campaigns match the current search and status filter."}
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
       </section>
 
@@ -1084,19 +766,20 @@ export default function DirectSponsorshipManager() {
       >
         <div>
           <strong>
-            Poster manually approves every direct sponsorship.
+            Poster manually approves every Direct Sponsorship.
           </strong>
 
           <p>
             Advertisers cannot publish campaigns
-            automatically. Contract value or commercial
-            payment must never influence organic
-            recommendation ranking.
+            automatically. Financial values are
+            intentionally excluded until the Wallet,
+            billing, settlement, and ledger systems
+            are implemented.
           </p>
         </div>
       </section>
 
-      {selectedSponsorship ? (
+      {selectedCampaign ? (
         <div
           className={
             styles.drawerLayer
@@ -1119,6 +802,7 @@ export default function DirectSponsorshipManager() {
             className={
               styles.drawer
             }
+            aria-label="Direct Sponsorship details"
           >
             <div
               className={
@@ -1128,13 +812,13 @@ export default function DirectSponsorshipManager() {
               <div>
                 <span>
                   {
-                    selectedSponsorship.id
+                    selectedCampaign.campaignReference
                   }
                 </span>
 
                 <h3>
                   {
-                    selectedSponsorship.name
+                    selectedCampaign.name
                   }
                 </h3>
               </div>
@@ -1151,7 +835,7 @@ export default function DirectSponsorshipManager() {
                   )
                 }
               >
-                Ã—
+                ×
               </button>
             </div>
 
@@ -1166,7 +850,7 @@ export default function DirectSponsorshipManager() {
                 }
               >
                 <h4>
-                  Sponsorship
+                  Campaign identity
                 </h4>
 
                 <dl
@@ -1176,92 +860,19 @@ export default function DirectSponsorshipManager() {
                 >
                   <div>
                     <dt>
-                      Campaign ID
+                      Campaign reference
                     </dt>
 
                     <dd>
                       {
-                        selectedSponsorship.id
+                        selectedCampaign.campaignReference
                       }
                     </dd>
                   </div>
 
                   <div>
                     <dt>
-                      Advertiser
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSponsorship.advertiser
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Disclosure
-                    </dt>
-
-                    <dd>
-                      Sponsored by{" "}
-                      {
-                        selectedSponsorship.advertiser
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Placement
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSponsorship.placement
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Status
-                    </dt>
-
-                    <dd>
-                      {statusLabel(
-                        selectedSponsorship.status
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Start
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSponsorship.startAt
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      End
-                    </dt>
-
-                    <dd>
-                      {
-                        selectedSponsorship.endAt
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Destination
+                      Internal campaign ID
                     </dt>
 
                     <dd
@@ -1270,8 +881,53 @@ export default function DirectSponsorshipManager() {
                       }
                     >
                       {
-                        selectedSponsorship.destinationUrl
+                        selectedCampaign.id
                       }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Organization ID
+                    </dt>
+
+                    <dd
+                      className={
+                        styles.breakText
+                      }
+                    >
+                      {
+                        selectedCampaign.organizationId
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Source request
+                    </dt>
+
+                    <dd
+                      className={
+                        styles.breakText
+                      }
+                    >
+                      {
+                        selectedCampaign.sourceRequestId ??
+                        "Internal campaign"
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Origin
+                    </dt>
+
+                    <dd>
+                      {commercialStatusLabel(
+                        selectedCampaign.origin
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -1283,7 +939,7 @@ export default function DirectSponsorshipManager() {
                 }
               >
                 <h4>
-                  Contract & delivery
+                  Operations
                 </h4>
 
                 <div
@@ -1293,159 +949,49 @@ export default function DirectSponsorshipManager() {
                 >
                   <div>
                     <span>
-                      Contract value
+                      Status
                     </span>
 
                     <strong>
-                      {formatMoney(
-                        selectedSponsorship.contractValue
+                      {formatDirectSponsorshipStatus(
+                        selectedCampaign.status
                       )}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Delivery target
+                      Readiness
                     </span>
 
                     <strong>
-                      {formatNumber(
-                        selectedSponsorship.deliveryTarget
+                      {readinessLabel(
+                        selectedCampaign.readinessStatus
                       )}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Delivered
+                      Commercial
                     </span>
 
                     <strong>
-                      {formatNumber(
-                        selectedSponsorship.delivered
+                      {commercialStatusLabel(
+                        selectedCampaign.commercialStatus
                       )}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Remaining
+                      Delivery
                     </span>
 
                     <strong>
-                      {formatNumber(
-                        Math.max(
-                          0,
-                          selectedSponsorship.deliveryTarget -
-                            selectedSponsorship.delivered
-                        )
-                      )}
-                    </strong>
-                  </div>
-                </div>
-
-                <div
-                  className={
-                    styles.progressBlock
-                  }
-                >
-                  <div
-                    className={
-                      styles.progressHeader
-                    }
-                  >
-                    <span>
-                      Delivery progress
-                    </span>
-
-                    <strong>
-                      {deliveryProgress(
-                        selectedSponsorship.delivered,
-                        selectedSponsorship.deliveryTarget
-                      ).toFixed(
-                        1
-                      )}
-                      %
-                    </strong>
-                  </div>
-
-                  <div
-                    className={
-                      styles.progressTrack
-                    }
-                  >
-                    <span
-                      style={{
-                        width: `${deliveryProgress(
-                          selectedSponsorship.delivered,
-                          selectedSponsorship.deliveryTarget
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section
-                className={
-                  styles.detailSection
-                }
-              >
-                <h4>
-                  Performance
-                </h4>
-
-                <div
-                  className={
-                    styles.metrics
-                  }
-                >
-                  <div>
-                    <span>
-                      Impressions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedSponsorship.delivered
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Clicks
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedSponsorship.clicks
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      CTR
-                    </span>
-
-                    <strong>
-                      {calculateCtr(
-                        selectedSponsorship.clicks,
-                        selectedSponsorship.delivered
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Conversions
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        selectedSponsorship.conversions
-                      )}
+                      {selectedCampaign.deliveryEligible
+                        ? "Eligible"
+                        : "Not eligible"}
                     </strong>
                   </div>
                 </div>
@@ -1457,53 +1003,118 @@ export default function DirectSponsorshipManager() {
                 }
               >
                 <h4>
-                  Audit history
+                  Placement and schedule
                 </h4>
 
-                <div
+                <dl
                   className={
-                    styles.auditList
+                    styles.detailList
                   }
                 >
-                  {selectedSponsorship.audit.map(
-                    (
-                      entry
-                    ) => (
-                      <div
-                        key={
-                          entry.id
-                        }
-                        className={
-                          styles.auditItem
-                        }
-                      >
-                        <span
-                          className={
-                            styles.auditDot
-                          }
-                        />
+                  <div>
+                    <dt>
+                      Placements
+                    </dt>
 
-                        <div>
-                          <strong>
-                            {
-                              entry.action
-                            }
-                          </strong>
+                    <dd>
+                      {formatDirectSponsorshipPlacements(
+                        selectedCampaign.placements
+                      )}
+                    </dd>
+                  </div>
 
-                          <span>
-                            {
-                              entry.actor
-                            }
-                            {" Â· "}
-                            {
-                              entry.timestamp
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
+                  <div>
+                    <dt>
+                      Scheduled start
+                    </dt>
+
+                    <dd>
+                      {formatDirectSponsorshipDate(
+                        selectedCampaign.scheduledStartDate
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Scheduled end
+                    </dt>
+
+                    <dd>
+                      {formatDirectSponsorshipDate(
+                        selectedCampaign.scheduledEndDate
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className={
+                  styles.detailSection
+                }
+              >
+                <h4>
+                  Record metadata
+                </h4>
+
+                <dl
+                  className={
+                    styles.detailList
+                  }
+                >
+                  <div>
+                    <dt>
+                      Created
+                    </dt>
+
+                    <dd>
+                      {formatTimestamp(
+                        selectedCampaign.createdAt
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Last updated
+                    </dt>
+
+                    <dd>
+                      {formatTimestamp(
+                        selectedCampaign.updatedAt
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Created by
+                    </dt>
+
+                    <dd
+                      className={
+                        styles.breakText
+                      }
+                    >
+                      {
+                        selectedCampaign.createdByUserId
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Row version
+                    </dt>
+
+                    <dd>
+                      {
+                        selectedCampaign.rowVersion
+                      }
+                    </dd>
+                  </div>
+                </dl>
               </section>
             </div>
 
@@ -1514,7 +1125,7 @@ export default function DirectSponsorshipManager() {
             >
               <Link
                 href={`/monetization/campaigns?record=${encodeURIComponent(
-                  selectedSponsorship.id
+                  selectedCampaign.id
                 )}`}
                 className={
                   styles.secondaryButton
@@ -1523,170 +1134,16 @@ export default function DirectSponsorshipManager() {
                 Open in Campaigns
               </Link>
 
-              {selectedSponsorship.status ===
-              "active" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.secondaryButton
-                    }
-                    onClick={() =>
-                      pauseCampaign(
-                        selectedSponsorship
-                      )
-                    }
-                  >
-                    Pause
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedSponsorship
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : selectedSponsorship.status ===
-                "paused" ? (
-                <>
-                  <button
-                    type="button"
-                    className={
-                      styles.primaryButton
-                    }
-                    onClick={() =>
-                      resumeCampaign(
-                        selectedSponsorship
-                      )
-                    }
-                  >
-                    Resume
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      styles.dangerButton
-                    }
-                    onClick={() =>
-                      requestEnd(
-                        selectedSponsorship
-                      )
-                    }
-                  >
-                    End campaign
-                  </button>
-                </>
-              ) : null}
+              <DirectSponsorshipActions
+                campaign={
+                  selectedCampaign
+                }
+                refresh={
+                  refresh
+                }
+              />
             </div>
           </aside>
-        </div>
-      ) : null}
-
-      {endTarget ? (
-        <div
-          className={
-            styles.confirmLayer
-          }
-        >
-          <button
-            type="button"
-            className={
-              styles.confirmBackdrop
-            }
-            aria-label="Cancel end sponsorship"
-            onClick={() =>
-              setEndTargetId(
-                null
-              )
-            }
-          />
-
-          <div
-            className={
-              styles.confirmDialog
-            }
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="end-sponsorship-title"
-          >
-            <span
-              className={
-                styles.confirmEyebrow
-              }
-            >
-              Sponsorship action
-            </span>
-
-            <h3
-              id="end-sponsorship-title"
-            >
-              End this sponsorship?
-            </h3>
-
-            <p>
-              <strong>
-                {
-                  endTarget.id
-                }
-              </strong>
-              {" Â· "}
-              {
-                endTarget.name
-              }
-            </p>
-
-            <p
-              className={
-                styles.confirmWarning
-              }
-            >
-              Ending preserves the
-              sponsorship and delivery
-              history as a permanent
-              campaign record.
-            </p>
-
-            <div
-              className={
-                styles.confirmActions
-              }
-            >
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={() =>
-                  setEndTargetId(
-                    null
-                  )
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className={
-                  styles.dangerButton
-                }
-                onClick={
-                  confirmEnd
-                }
-              >
-                End sponsorship
-              </button>
-            </div>
-          </div>
         </div>
       ) : null}
     </div>

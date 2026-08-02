@@ -412,3 +412,27 @@
 
 
 }
+.portalDisabled {
+  display: inline-flex;
+
+  min-height: 46px;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 24px;
+
+  padding:
+    11px
+    17px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 650;
+}

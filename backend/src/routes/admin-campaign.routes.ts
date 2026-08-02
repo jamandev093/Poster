@@ -13,8 +13,10 @@ import type {
 } from "../application/monetization/index.js";
 
 import {
+  CAMPAIGN_READINESS_STATUSES,
   CAMPAIGN_STATUSES,
   CAMPAIGN_TYPES,
+  MONETIZATION_PLACEMENTS,
   type MonetizationCampaignRecord,
 } from "../domains/monetization/index.js";
 
@@ -25,6 +27,15 @@ import {
 import {
   ApiRequestValidationError,
 } from "../http/request-validation.js";
+
+const TRANSITION_ACTIONS = [
+  "schedule",
+  "activate",
+  "pause",
+  "resume",
+  "end",
+  "disable",
+] as const;
 
 const ListCampaignsQuerySchema =
   z
@@ -85,6 +96,111 @@ const CampaignParamsSchema =
         z
           .string()
           .uuid(),
+    })
+    .strict();
+
+const CampaignOperationsBodySchema =
+  z
+    .object({
+      expectedRowVersion:
+        z
+          .string()
+          .regex(
+            /^(0|[1-9]\d*)$/
+          ),
+
+      name:
+        z
+          .string()
+          .trim()
+          .min(
+            3
+          )
+          .max(
+            160
+          ),
+
+      placements:
+        z
+          .array(
+            z.enum(
+              MONETIZATION_PLACEMENTS
+            )
+          )
+          .min(
+            1
+          )
+          .max(
+            3
+          ),
+
+      scheduledStartDate:
+        z
+          .string()
+          .regex(
+            /^\d{4}-\d{2}-\d{2}$/
+          ),
+
+      scheduledEndDate:
+        z
+          .string()
+          .regex(
+            /^\d{4}-\d{2}-\d{2}$/
+          ),
+
+      readinessStatus:
+        z.enum(
+          CAMPAIGN_READINESS_STATUSES
+        ),
+
+      reason:
+        z
+          .string()
+          .trim()
+          .min(
+            1
+          )
+          .max(
+            1000
+          )
+          .nullable()
+          .optional()
+          .default(
+            null
+          ),
+    })
+    .strict();
+
+const CampaignTransitionBodySchema =
+  z
+    .object({
+      expectedRowVersion:
+        z
+          .string()
+          .regex(
+            /^(0|[1-9]\d*)$/
+          ),
+
+      action:
+        z.enum(
+          TRANSITION_ACTIONS
+        ),
+
+      reason:
+        z
+          .string()
+          .trim()
+          .min(
+            1
+          )
+          .max(
+            1000
+          )
+          .nullable()
+          .optional()
+          .default(
+            null
+          ),
     })
     .strict();
 
@@ -271,6 +387,136 @@ export const adminCampaignRoutes:
             reply
           );
         }
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            campaign:
+              serializeCampaign(
+                campaign
+              ),
+          });
+      }
+    );
+
+    app.patch(
+      "/monetization/campaigns/:campaignId/operations",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requirePlatformPermission(
+            request,
+            "monetization.campaigns.manage"
+          );
+
+        const params =
+          parseRequestValue(
+            CampaignParamsSchema,
+            request.params,
+            "params"
+          );
+
+        const body =
+          parseRequestValue(
+            CampaignOperationsBodySchema,
+            request.body,
+            "body"
+          );
+
+        const campaign =
+          await options
+            .service
+            .updateOperations({
+              campaignId:
+                params.campaignId,
+
+              actorUserId:
+                authorization.userId,
+
+              expectedRowVersion:
+                body.expectedRowVersion,
+
+              name:
+                body.name,
+
+              placements:
+                body.placements,
+
+              scheduledStartDate:
+                body.scheduledStartDate,
+
+              scheduledEndDate:
+                body.scheduledEndDate,
+
+              readinessStatus:
+                body.readinessStatus,
+
+              reason:
+                body.reason,
+            });
+
+        return reply
+          .status(
+            200
+          )
+          .send({
+            campaign:
+              serializeCampaign(
+                campaign
+              ),
+          });
+      }
+    );
+
+    app.post(
+      "/monetization/campaigns/:campaignId/transitions",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requirePlatformPermission(
+            request,
+            "monetization.campaigns.manage"
+          );
+
+        const params =
+          parseRequestValue(
+            CampaignParamsSchema,
+            request.params,
+            "params"
+          );
+
+        const body =
+          parseRequestValue(
+            CampaignTransitionBodySchema,
+            request.body,
+            "body"
+          );
+
+        const campaign =
+          await options
+            .service
+            .transition({
+              campaignId:
+                params.campaignId,
+
+              actorUserId:
+                authorization.userId,
+
+              expectedRowVersion:
+                body.expectedRowVersion,
+
+              action:
+                body.action,
+
+              reason:
+                body.reason,
+            });
 
         return reply
           .status(

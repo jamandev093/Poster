@@ -18,6 +18,12 @@ import type {
   MonetizationPlacement,
 } from "./commercial.types.js";
 
+import type {
+  CampaignMutationOutcome,
+  TransitionCampaignRecordInput,
+  UpdateCampaignRecordInput,
+} from "./campaign-operations.types.js";
+
 interface MonetizationCampaignDatabaseRow
   extends QueryResultRow {
   id: string;
@@ -97,6 +103,41 @@ function mapOptionalCampaignRow(
     : null;
 }
 
+async function resolveCampaignMutationOutcome(
+  campaignId: string,
+  updatedRow: MonetizationCampaignDatabaseRow | undefined,
+  executor?: DatabaseQueryExecutor
+): Promise<CampaignMutationOutcome> {
+  const updated =
+    mapOptionalCampaignRow(
+      updatedRow
+    );
+
+  if (updated) {
+    return {
+      status: "updated",
+      campaign: updated,
+    };
+  }
+
+  const current =
+    await findMonetizationCampaignById(
+      campaignId,
+      executor
+    );
+
+  if (!current) {
+    return {
+      status: "not_found",
+    };
+  }
+
+  return {
+    status: "conflict",
+    campaign: current,
+  };
+}
+
 export async function findCampaignBySourceRequestId(
   requestId: string,
   executor?: DatabaseQueryExecutor
@@ -116,7 +157,9 @@ export async function findCampaignBySourceRequestId(
       executor
     );
 
-  return mapOptionalCampaignRow(result.rows[0]);
+  return mapOptionalCampaignRow(
+    result.rows[0]
+  );
 }
 
 export async function createDraftCampaignFromCommercialRequest(
@@ -190,7 +233,9 @@ export async function createDraftCampaignFromCommercialRequest(
     );
 
   const created =
-    mapOptionalCampaignRow(result.rows[0]);
+    mapOptionalCampaignRow(
+      result.rows[0]
+    );
 
   if (created) {
     return created;
@@ -210,6 +255,7 @@ export async function createDraftCampaignFromCommercialRequest(
 
   return existing;
 }
+
 export interface ListMonetizationCampaignsInput {
   organizationId?:
     string |
@@ -241,13 +287,10 @@ export interface MonetizationCampaignListResult {
 
 export async function findMonetizationCampaignById(
   campaignId: string,
-  executor?:
-    DatabaseQueryExecutor
+  executor?: DatabaseQueryExecutor
 ): Promise<MonetizationCampaignRecord | null> {
   const result =
-    await executeDatabaseQuery<
-      MonetizationCampaignDatabaseRow
-    >(
+    await executeDatabaseQuery<MonetizationCampaignDatabaseRow>(
       `
         SELECT
           ${CAMPAIGN_COLUMNS}
@@ -267,10 +310,8 @@ export async function findMonetizationCampaignById(
 }
 
 export async function listMonetizationCampaigns(
-  input:
-    ListMonetizationCampaignsInput,
-  executor?:
-    DatabaseQueryExecutor
+  input: ListMonetizationCampaignsInput,
+  executor?: DatabaseQueryExecutor
 ): Promise<MonetizationCampaignListResult> {
   const result =
     await executeDatabaseQuery<
@@ -352,4 +393,102 @@ export async function listMonetizationCampaigns(
     offset:
       input.offset,
   };
+}
+
+export async function updateMonetizationCampaignOperations(
+  input: UpdateCampaignRecordInput,
+  executor?: DatabaseQueryExecutor
+): Promise<CampaignMutationOutcome> {
+  const result =
+    await executeDatabaseQuery<MonetizationCampaignDatabaseRow>(
+      `
+        UPDATE app.monetization_campaigns
+        SET
+          name = $3,
+          placements = $4::text[],
+          scheduled_start_date = $5::date,
+          scheduled_end_date = $6::date,
+          readiness_status = $7,
+          delivery_eligible = (
+            status = 'active'
+            AND $7 = 'ready'
+            AND commercial_status IN (
+              'approved',
+              'funded'
+            )
+            AND CURRENT_DATE BETWEEN
+              $5::date
+              AND $6::date
+          )
+        WHERE id = $1::uuid
+          AND row_version = $2::bigint
+          AND status NOT IN (
+            'ended',
+            'disabled'
+          )
+        RETURNING
+          ${CAMPAIGN_COLUMNS}
+      `,
+      [
+        input.campaignId,
+        input.expectedRowVersion,
+        input.name.trim(),
+        [...input.placements],
+        input.scheduledStartDate,
+        input.scheduledEndDate,
+        input.readinessStatus,
+      ],
+      executor
+    );
+
+  return await resolveCampaignMutationOutcome(
+    input.campaignId,
+    result.rows[0],
+    executor
+  );
+}
+
+export async function transitionMonetizationCampaignStatus(
+  input: TransitionCampaignRecordInput,
+  executor?: DatabaseQueryExecutor
+): Promise<CampaignMutationOutcome> {
+  const result =
+    await executeDatabaseQuery<MonetizationCampaignDatabaseRow>(
+      `
+        UPDATE app.monetization_campaigns
+        SET
+          status = $3,
+          delivery_eligible = (
+            $3 = 'active'
+            AND readiness_status = 'ready'
+            AND commercial_status IN (
+              'approved',
+              'funded'
+            )
+            AND CURRENT_DATE BETWEEN
+              scheduled_start_date
+              AND scheduled_end_date
+          )
+        WHERE id = $1::uuid
+          AND row_version = $2::bigint
+          AND status NOT IN (
+            'ended',
+            'disabled'
+          )
+        RETURNING
+          ${CAMPAIGN_COLUMNS}
+      `,
+      [
+        input.campaignId,
+        input.expectedRowVersion,
+        input.targetStatus,
+      ],
+      executor
+    );
+
+  return await resolveCampaignMutationOutcome(
+    input.campaignId,
+    result.rows[0],
+    executor
+  );
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -7,22 +7,36 @@ import {
 import PosterPromotionEditor from "./PosterPromotionEditor";
 
 import type {
+  PosterPromotionDetailResponse,
+  PosterPromotionSaveMode,
+} from "./poster-promotion.api-types";
+
+import type {
   PosterPromotionDraft,
-  PosterPromotionStatus,
 } from "./poster-promotion.types";
+
+import {
+  createPosterPromotion,
+} from "./poster-promotion.service";
+
+import {
+  getPosterPromotionErrorMessage,
+} from "./poster-promotion.errors";
+
+import {
+  mapDraftToCreatePosterPromotionRequest,
+} from "./poster-promotion.request-mappers";
 
 import styles from "./PosterPromotionCreateAction.module.css";
 
 interface PosterPromotionCreateActionProps {
-  onCreate:
+  organizationId:
+    string;
+
+  onCreated:
     (
-      draft:
-        PosterPromotionDraft,
-      status:
-        Extract<
-          PosterPromotionStatus,
-          "draft" | "scheduled"
-        >
+      record:
+        PosterPromotionDetailResponse
     ) => void;
 }
 
@@ -38,21 +52,80 @@ export default function PosterPromotionCreateAction(
       false
     );
 
-  const completeCreation = (
-    draft:
-      PosterPromotionDraft,
-    status:
-      "draft" | "scheduled"
-  ) => {
-    props.onCreate(
-      draft,
-      status
-    );
-
-    setEditorOpen(
+  const [
+    isSaving,
+    setIsSaving,
+  ] =
+    useState(
       false
     );
-  };
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState<
+      string | null
+    >(
+      null
+    );
+
+  const completeCreation =
+    async (
+      draft:
+        PosterPromotionDraft,
+      mode:
+        PosterPromotionSaveMode
+    ) => {
+      if (
+        !props.organizationId
+      ) {
+        setErrorMessage(
+          "Set NEXT_PUBLIC_POSTER_ORGANIZATION_ID before creating Poster Promotions."
+        );
+
+        return;
+      }
+
+      setIsSaving(
+        true
+      );
+
+      setErrorMessage(
+        null
+      );
+
+      try {
+        const created =
+          await createPosterPromotion(
+            mapDraftToCreatePosterPromotionRequest(
+              draft,
+              props.organizationId,
+              mode
+            )
+          );
+
+        props.onCreated(
+          created
+        );
+
+        setEditorOpen(
+          false
+        );
+      } catch (
+        error
+      ) {
+        setErrorMessage(
+          getPosterPromotionErrorMessage(
+            error
+          )
+        );
+      } finally {
+        setIsSaving(
+          false
+        );
+      }
+    };
 
   return (
     <>
@@ -61,14 +134,52 @@ export default function PosterPromotionCreateAction(
         className={
           styles.createButton
         }
-        onClick={() =>
+        disabled={
+          isSaving ||
+          !props.organizationId
+        }
+        title={
+          props.organizationId
+            ? undefined
+            : "Set NEXT_PUBLIC_POSTER_ORGANIZATION_ID to enable creation."
+        }
+        onClick={() => {
+          setErrorMessage(
+            null
+          );
+
           setEditorOpen(
             true
-          )
-        }
+          );
+        }}
       >
-        Create promotion
+        {isSaving
+          ? "Saving..."
+          : "Create promotion"}
       </button>
+
+      {errorMessage ? (
+        <span
+          role="alert"
+          style={{
+            display:
+              "block",
+
+            marginTop:
+              8,
+
+            color:
+              "var(--danger)",
+
+            fontSize:
+              12,
+          }}
+        >
+          {
+            errorMessage
+          }
+        </span>
+      ) : null}
 
       {editorOpen ? (
         <PosterPromotionEditor
@@ -78,20 +189,16 @@ export default function PosterPromotionCreateAction(
               false
             )
           }
-          onSaveDraft={(
-            draft
-          ) =>
-            completeCreation(
+          onSaveDraft={draft =>
+            void completeCreation(
               draft,
               "draft"
             )
           }
-          onSchedule={(
-            draft
-          ) =>
-            completeCreation(
+          onSchedule={draft =>
+            void completeCreation(
               draft,
-              "scheduled"
+              "schedule"
             )
           }
         />
