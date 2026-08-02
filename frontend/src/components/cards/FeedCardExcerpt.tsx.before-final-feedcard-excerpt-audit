@@ -1,0 +1,194 @@
+import React, {
+  useMemo,
+  useState,
+} from "react";
+import {
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+} from "react-native";
+
+import {
+  Spacing,
+  Typography,
+} from "../../theme";
+import useTheme from "../../theme/useTheme";
+
+type Props = {
+  summary?: string | null;
+};
+
+const COLLAPSED_WORD_LIMIT = 20;
+const EXPANDED_WORD_LIMIT = 50;
+
+function splitSummary(
+  value: unknown
+): {
+  collapsed: string;
+  full: string;
+  canExpand: boolean;
+} {
+  const cleanValue =
+    typeof value === "string"
+      ? value
+          .trim()
+          .replace(/\s+/g, " ")
+      : "";
+
+  if (!cleanValue) {
+    return {
+      collapsed: "",
+      full: "",
+      canExpand: false,
+    };
+  }
+
+  const words =
+    cleanValue.split(" ");
+
+  const limitedWords =
+    words.slice(
+      0,
+      EXPANDED_WORD_LIMIT
+    );
+
+  const full =
+    limitedWords.join(" ");
+
+  if (
+    limitedWords.length <=
+    COLLAPSED_WORD_LIMIT
+  ) {
+    return {
+      collapsed: full,
+      full,
+      canExpand: false,
+    };
+  }
+
+  return {
+    collapsed:
+      limitedWords
+        .slice(
+          0,
+          COLLAPSED_WORD_LIMIT
+        )
+        .join(" "),
+
+    full:
+      words.length >
+      EXPANDED_WORD_LIMIT
+        ? `${full}…`
+        : full,
+
+    canExpand: true,
+  };
+}
+
+export default function FeedCardExcerpt({
+  summary,
+}: Props) {
+  const { colors } =
+    useTheme();
+
+  const [
+    expanded,
+    setExpanded,
+  ] = useState(false);
+
+  const {
+    collapsed,
+    full,
+    canExpand,
+  } = useMemo(
+    () =>
+      splitSummary(
+        summary
+      ),
+    [summary]
+  );
+
+  if (!full) {
+    return null;
+  }
+
+  const handleToggle =
+    (
+      event:
+        GestureResponderEvent
+    ) => {
+      event.stopPropagation();
+
+      setExpanded(
+        (currentValue) =>
+          !currentValue
+      );
+    };
+
+  return (
+    <Text
+      style={[
+        styles.summary,
+        {
+          color:
+            colors.textSecondary,
+        },
+      ]}
+    >
+      {expanded || !canExpand
+        ? full
+        : `${collapsed}…`}
+
+      {canExpand ? (
+        <Text
+          accessibilityRole="button"
+          accessibilityLabel={
+            expanded
+              ? "Show less article summary"
+              : "Show more article summary"
+          }
+          style={[
+            styles.moreText,
+            {
+              color:
+                colors.primary,
+            },
+          ]}
+          onPress={
+            handleToggle
+          }
+        >
+          {expanded
+            ? " See less"
+            : " See more"}
+        </Text>
+      ) : null}
+    </Text>
+  );
+}
+
+const styles =
+  StyleSheet.create({
+    summary: {
+      ...Typography.body,
+
+      paddingHorizontal:
+        Spacing.screen,
+
+      paddingBottom:
+        Spacing.lg,
+
+      lineHeight: 23,
+
+      includeFontPadding:
+        false,
+    },
+
+    moreText: {
+      ...Typography.body,
+
+      fontWeight: "700",
+
+      lineHeight: 23,
+    },
+  });

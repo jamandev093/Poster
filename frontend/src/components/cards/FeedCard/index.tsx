@@ -1,0 +1,149 @@
+import React, {
+  useCallback,
+  useState,
+} from "react";
+import {
+  View,
+} from "react-native";
+
+import FeedCardContainer from "../FeedCardContainer";
+import FeedCardHeader from "../FeedCardHeader";
+import FeedCardMedia from "../FeedCardMedia";
+import FeedCardTitle from "../FeedCardTitle";
+import FeedCardExcerpt from "../FeedCardExcerpt";
+import FeedCardActions from "../FeedCardActions";
+
+import FeedbackBottomSheet from "../feedback/FeedbackBottomSheet";
+import {
+  FeedbackReason,
+} from "../feedback/feedbackReasons";
+
+import {
+  FeedCardProps,
+} from "../feedCard.types";
+
+import styles from "./styles";
+
+const EMPTY_ACTION = () => {};
+
+export default function FeedCard({
+  article,
+  onPress,
+  onWorthReading = EMPTY_ACTION,
+  onHelpful = EMPTY_ACTION,
+  onShare = EMPTY_ACTION,
+  onBookmark = EMPTY_ACTION,
+  onFeedback = EMPTY_ACTION,
+}: FeedCardProps) {
+  const [
+    feedbackVisible,
+    setFeedbackVisible,
+  ] = useState(false);
+
+  const openFeedback =
+    useCallback(() => {
+      setFeedbackVisible(true);
+    }, []);
+
+  const closeFeedback =
+    useCallback(() => {
+      setFeedbackVisible(false);
+    }, []);
+
+  const handleFeedback =
+    useCallback(
+      (reason: FeedbackReason) => {
+        setFeedbackVisible(false);
+
+        onFeedback(reason);
+      },
+      [onFeedback]
+    );
+
+  return (
+    <>
+      <FeedCardContainer
+        onPress={onPress}
+      >
+        <FeedCardHeader
+          publisher={
+            article.publisher
+          }
+          website={
+            article.publisherUrl
+          }
+          publishedAt={
+            article.publishedAt
+          }
+          addedAt={
+            article.discoveredAt
+          }
+          verified={
+            article.verified
+          }
+          sponsored={
+            article.sponsored
+          }
+        />
+
+        <FeedCardMedia
+          image={article.image}
+        />
+
+        <View style={styles.body}>
+          <FeedCardTitle
+            title={article.title}
+          />
+
+          <FeedCardExcerpt
+            summary={
+              article.summary
+            }
+          />
+        </View>
+
+        <FeedCardActions
+          initialRecommended={
+            article.recommended ??
+            false
+          }
+          initialHelpful={
+            article.helpful ??
+            false
+          }
+          initialBookmarked={
+            article.bookmarked ??
+            false
+          }
+          onWorthReading={
+            onWorthReading
+          }
+          onHelpful={
+            onHelpful
+          }
+          onShare={
+            onShare
+          }
+          onBookmark={
+            onBookmark
+          }
+          onFeedback={
+            openFeedback
+          }
+        />
+      </FeedCardContainer>
+
+      <FeedbackBottomSheet
+        visible={
+          feedbackVisible
+        }
+        onClose={
+          closeFeedback
+        }
+        onSelect={
+          handleFeedback
+        }
+      />
+    </>
+  );
+}

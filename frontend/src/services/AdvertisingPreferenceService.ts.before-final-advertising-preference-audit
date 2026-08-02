@@ -1,0 +1,165 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import {
+  STORAGE_KEYS,
+} from "../constants/storage";
+
+function parseBoolean(
+  value: string | null,
+  fallback: boolean
+): boolean {
+  if (value === "true") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  return fallback;
+}
+
+function parseStringArray(
+  value: string | null
+): string[] {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed: unknown =
+      JSON.parse(value);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        parsed.filter(
+          (item): item is string =>
+            typeof item === "string" &&
+            item.trim().length > 0
+        )
+      )
+    );
+  } catch {
+    return [];
+  }
+}
+
+export default class AdvertisingPreferenceService {
+  static async getPersonalizedAdsEnabled(): Promise<boolean> {
+    try {
+      const value =
+        await AsyncStorage.getItem(
+          STORAGE_KEYS.PERSONALIZED_ADS
+        );
+
+      return parseBoolean(
+        value,
+        false
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  static async setPersonalizedAdsEnabled(
+    enabled: boolean
+  ): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.PERSONALIZED_ADS,
+      String(enabled)
+    );
+  }
+
+  static async getHiddenItemIds(): Promise<
+    string[]
+  > {
+    try {
+      const value =
+        await AsyncStorage.getItem(
+          STORAGE_KEYS.HIDDEN_MONETIZATION_ITEMS
+        );
+
+      return parseStringArray(value);
+    } catch {
+      return [];
+    }
+  }
+
+  static async isItemHidden(
+    itemId: string
+  ): Promise<boolean> {
+    const hiddenItemIds =
+      await AdvertisingPreferenceService.getHiddenItemIds();
+
+    return hiddenItemIds.includes(
+      itemId
+    );
+  }
+
+  static async hideItem(
+    itemId: string
+  ): Promise<void> {
+    const normalizedItemId =
+      itemId.trim();
+
+    if (!normalizedItemId) {
+      return;
+    }
+
+    const hiddenItemIds =
+      await AdvertisingPreferenceService.getHiddenItemIds();
+
+    const nextHiddenItemIds =
+      Array.from(
+        new Set([
+          ...hiddenItemIds,
+          normalizedItemId,
+        ])
+      );
+
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.HIDDEN_MONETIZATION_ITEMS,
+      JSON.stringify(
+        nextHiddenItemIds
+      )
+    );
+  }
+
+  static async unhideItem(
+    itemId: string
+  ): Promise<void> {
+    const hiddenItemIds =
+      await AdvertisingPreferenceService.getHiddenItemIds();
+
+    const nextHiddenItemIds =
+      hiddenItemIds.filter(
+        (currentItemId) =>
+          currentItemId !== itemId
+      );
+
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.HIDDEN_MONETIZATION_ITEMS,
+      JSON.stringify(
+        nextHiddenItemIds
+      )
+    );
+  }
+
+  static async clearHiddenItems(): Promise<void> {
+    await AsyncStorage.removeItem(
+      STORAGE_KEYS.HIDDEN_MONETIZATION_ITEMS
+    );
+  }
+
+  static async reset(): Promise<void> {
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.PERSONALIZED_ADS,
+      STORAGE_KEYS.HIDDEN_MONETIZATION_ITEMS,
+      STORAGE_KEYS.MONETIZATION_FEEDBACK,
+    ]);
+  }
+}

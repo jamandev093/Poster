@@ -1,0 +1,365 @@
+import React, {
+  useCallback,
+  useState,
+} from "react";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import {
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+
+import PrimaryButton from "../../components/buttons/PrimaryButton";
+
+import {
+  RootStackParamList,
+} from "../../navigation/AppNavigator";
+
+import {
+  Icons,
+  Radius,
+  Spacing,
+  Typography,
+} from "../../theme";
+import useTheme from "../../theme/useTheme";
+
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "OnboardingComplete"
+>;
+
+interface CompletedStep {
+  id: string;
+  title: string;
+}
+
+const COMPLETED_STEPS: CompletedStep[] = [
+  {
+    id: "account",
+    title: "Account created",
+  },
+  {
+    id: "email",
+    title: "Email verified",
+  },
+  {
+    id: "username",
+    title: "Username created",
+  },
+  {
+    id: "interests",
+    title: "Interests selected",
+  },
+];
+
+export default function OnboardingCompleteScreen({
+  navigation,
+}: Props) {
+  const { colors } = useTheme();
+
+  const [entering, setEntering] =
+    useState(false);
+
+  const handleContinue =
+    useCallback(() => {
+      if (entering) {
+        return;
+      }
+
+      setEntering(true);
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Main",
+        },
+      ],
+    });
+  }, [
+    entering,
+    navigation,
+  ]);
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            colors.background,
+        },
+      ]}
+    >
+      <ScrollView
+        bounces={false}
+        showsVerticalScrollIndicator={
+          false
+        }
+        contentContainerStyle={
+          styles.scrollContent
+        }
+      >
+        <View
+          style={
+            styles.content
+          }
+        >
+          <View
+            style={[
+              styles.successIcon,
+              {
+                backgroundColor:
+                  colors.success,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="check"
+              size={40}
+              color={colors.onPrimary}
+            />
+          </View>
+
+          <Text
+            style={[
+              styles.eyebrow,
+              {
+                color:
+                  colors.success,
+              },
+            ]}
+          >
+            SETUP COMPLETE
+          </Text>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            Your account is ready
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                color:
+                  colors.textSecondary,
+              },
+            ]}
+          >
+            You can now start exploring
+            and saving content from the
+            topics you selected.
+          </Text>
+
+          <View
+            style={[
+              styles.summary,
+              {
+                borderColor:
+                  colors.border,
+              },
+            ]}
+          >
+            {COMPLETED_STEPS.map(
+              (
+                step,
+                index
+              ) => (
+                <View
+                  key={step.id}
+                >
+                  <View
+                    style={
+                      styles.stepRow
+                    }
+                  >
+                    <MaterialCommunityIcons
+                      name="check-circle"
+                      size={Icons.md}
+                      color={
+                        colors.success
+                      }
+                    />
+
+                    <Text
+                      style={[
+                        styles.stepTitle,
+                        {
+                          color:
+                            colors.text,
+                        },
+                      ]}
+                    >
+                      {step.title}
+                    </Text>
+                  </View>
+
+                  {index <
+                  COMPLETED_STEPS.length -
+                    1 ? (
+                    <View
+                      style={[
+                        styles.separator,
+                        {
+                          backgroundColor:
+                            colors.border,
+                        },
+                      ]}
+                    />
+                  ) : null}
+                </View>
+              )
+            )}
+          </View>
+        </View>
+
+        <View
+          style={
+            styles.footer
+          }
+        >
+          <PrimaryButton
+            title="Continue"
+            loading={entering}
+            disabled={entering}
+            onPress={
+              handleContinue
+            }
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+
+    justifyContent:
+      "space-between",
+
+    paddingHorizontal:
+      Spacing.screen,
+
+    paddingTop:
+      Spacing.xxxl,
+
+    paddingBottom:
+      Spacing.xxl,
+  },
+
+  content: {
+    alignItems: "center",
+  },
+
+  successIcon: {
+    width: 88,
+
+    height: 88,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    borderRadius:
+      Radius.round,
+  },
+
+  eyebrow: {
+    ...Typography.small,
+
+    fontWeight: "800",
+
+    letterSpacing: 1,
+
+    marginTop:
+      Spacing.xl,
+  },
+
+  title: {
+    ...Typography.title,
+
+    textAlign: "center",
+
+    marginTop:
+      Spacing.sm,
+  },
+
+  subtitle: {
+    ...Typography.body,
+
+    maxWidth: 340,
+
+    textAlign: "center",
+
+    lineHeight: 23,
+
+    marginTop:
+      Spacing.md,
+  },
+
+  summary: {
+    width: "100%",
+
+    borderTopWidth:
+      StyleSheet.hairlineWidth,
+
+    borderBottomWidth:
+      StyleSheet.hairlineWidth,
+
+    marginTop:
+      Spacing.xxxl,
+  },
+
+  stepRow: {
+    minHeight: 58,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    paddingHorizontal:
+      Spacing.sm,
+  },
+
+  stepTitle: {
+    ...Typography.caption,
+
+    fontWeight: "700",
+
+    marginLeft:
+      Spacing.md,
+  },
+
+  separator: {
+    height:
+      StyleSheet.hairlineWidth,
+
+    marginLeft: 44,
+  },
+
+  footer: {
+    width: "100%",
+
+    marginTop:
+      Spacing.xxxl,
+  },
+});

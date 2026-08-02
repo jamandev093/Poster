@@ -1,0 +1,271 @@
+import React, {
+  useCallback,
+} from "react";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import AdActions from "./AdActions";
+import AdCallToAction from "./AdCallToAction";
+import AdCardShell from "./AdCardShell";
+import AdDisclosure from "./AdDisclosure";
+import AdMedia from "./AdMedia";
+
+import {
+  DirectSponsoredCampaign,
+  MonetizationMediaItem,
+} from "./ad.types";
+
+import useTheme from "../../theme/useTheme";
+
+import {
+  Spacing,
+  Typography,
+} from "../../theme";
+
+interface DirectSponsoredCardProps {
+  campaign:
+    DirectSponsoredCampaign;
+
+  onPress?: (
+    destinationUrl: string
+  ) => void;
+
+  onReport?: () => void;
+}
+
+export default function DirectSponsoredCard({
+  campaign,
+  onPress,
+  onReport,
+}: DirectSponsoredCardProps) {
+  const { colors } = useTheme();
+
+  const openUrl =
+    useCallback(
+      async (
+        destinationUrl: string
+      ) => {
+        try {
+          const supported =
+            await Linking.canOpenURL(
+              destinationUrl
+            );
+
+          if (supported) {
+            await Linking.openURL(
+              destinationUrl
+            );
+          }
+        } catch {
+          // TODO:
+          // Route through shared user feedback.
+        }
+      },
+      []
+    );
+
+  const handleOpen =
+    useCallback(
+      async (
+        destinationUrl:
+          string
+      ) => {
+        if (onPress) {
+          onPress(
+            destinationUrl
+          );
+
+          return;
+        }
+
+        await openUrl(
+          destinationUrl
+        );
+      },
+      [
+        onPress,
+        openUrl,
+      ]
+    );
+
+  const handleMediaPress =
+    useCallback(
+      (
+        mediaItem:
+          MonetizationMediaItem
+      ) => {
+        const destinationUrl =
+          mediaItem.destinationUrl ??
+          campaign.destinationUrl;
+
+        void handleOpen(
+          destinationUrl
+        );
+      },
+      [
+        campaign.destinationUrl,
+        handleOpen,
+      ]
+    );
+
+  return (
+    <AdCardShell>
+      <View style={styles.header}>
+        <AdDisclosure
+          type="direct"
+          advertiserName={
+            campaign.advertiserName
+          }
+        />
+
+        <View
+          style={
+            styles.advertiserContainer
+          }
+        >
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.advertiserName,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            {campaign.advertiserName}
+          </Text>
+
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.advertiserDomain,
+              {
+                color:
+                  colors.textSecondary,
+              },
+            ]}
+          >
+            {campaign.advertiserDomain}
+          </Text>
+        </View>
+      </View>
+
+      <AdMedia
+        imageUrl={
+          campaign.imageUrl
+        }
+        mediaItems={
+          campaign.mediaItems
+        }
+        accessibilityLabel={
+          campaign.title
+        }
+        onMediaPress={
+          handleMediaPress
+        }
+      />
+
+      <View style={styles.content}>
+        <Text
+          accessibilityRole="header"
+          style={[
+            styles.title,
+            {
+              color: colors.text,
+            },
+          ]}
+        >
+          {campaign.title}
+        </Text>
+
+        {campaign.description ? (
+          <Text
+            style={[
+              styles.description,
+              {
+                color:
+                  colors.textSecondary,
+              },
+            ]}
+          >
+            {campaign.description}
+          </Text>
+        ) : null}
+      </View>
+
+      <AdActions
+        itemId={campaign.id}
+        title={campaign.title}
+        destinationUrl={
+          campaign.destinationUrl
+        }
+        onReport={onReport}
+      />
+
+      <AdCallToAction
+        label={
+          campaign.callToAction
+        }
+        accessibilityLabel={`${campaign.callToAction}: ${campaign.title}`}
+        onPress={() => {
+          void handleOpen(
+            campaign.destinationUrl
+          );
+        }}
+      />
+    </AdCardShell>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal:
+      Spacing.screen,
+
+    paddingBottom:
+      Spacing.md,
+  },
+
+  advertiserContainer: {
+    marginTop:
+      Spacing.md,
+  },
+
+  advertiserName: {
+    ...Typography.body,
+
+    fontWeight: "800",
+  },
+
+  advertiserDomain: {
+    ...Typography.small,
+
+    marginTop:
+      Spacing.xs,
+  },
+
+  content: {
+    paddingHorizontal:
+      Spacing.screen,
+
+    paddingTop:
+      Spacing.lg,
+  },
+
+  title: {
+    ...Typography.headline,
+
+    fontWeight: "800",
+  },
+
+  description: {
+    ...Typography.body,
+
+    marginTop:
+      Spacing.sm,
+  },
+});

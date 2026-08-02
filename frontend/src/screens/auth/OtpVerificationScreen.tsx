@@ -1,0 +1,1020 @@
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  KeyboardAvoidingView,
+  NativeSyntheticEvent,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputKeyPressEventData,
+  View,
+} from "react-native";
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import {
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+
+import PrimaryButton from "../../components/buttons/PrimaryButton";
+
+import {
+  RootStackParamList,
+} from "../../navigation/AppNavigator";
+
+import {
+  Icons,
+  Radius,
+  Spacing,
+  Typography,
+} from "../../theme";
+import useTheme from "../../theme/useTheme";
+
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "OtpVerification"
+>;
+
+const OTP_LENGTH = 6;
+const RESEND_SECONDS = 60;
+
+function createEmptyOtp(): string[] {
+  return Array.from(
+    {
+      length: OTP_LENGTH,
+    },
+    () => ""
+  );
+}
+
+export default function OtpVerificationScreen({
+  navigation,
+  route,
+}: Props) {
+  const { colors } = useTheme();
+
+  const email =
+    route.params?.email ??
+    "your email address";
+
+  const [otp, setOtp] =
+    useState<string[]>(
+      createEmptyOtp
+    );
+
+  const [
+    focusedIndex,
+    setFocusedIndex,
+  ] = useState<number | null>(0);
+
+  const [seconds, setSeconds] =
+    useState(RESEND_SECONDS);
+
+  const [verifying, setVerifying] =
+    useState(false);
+
+  const [resending, setResending] =
+    useState(false);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [success, setSuccess] =
+    useState(false);
+
+  const inputs =
+    useRef<Array<TextInput | null>>(
+      []
+    );
+
+  const requestInFlightRef =
+    useRef(false);
+
+  const resendFocusTimerRef =
+    useRef<ReturnType<
+      typeof setTimeout
+    > | null>(null);
+
+  const completedCode =
+    otp.join("");
+
+  const codeComplete =
+    completedCode.length ===
+      OTP_LENGTH &&
+    otp.every(
+      (character) =>
+        character.length === 1
+    );
+
+  const unavailable =
+    verifying || resending;
+
+  useEffect(() => {
+    if (seconds <= 0) {
+      return;
+    }
+
+    const timer =
+      setTimeout(() => {
+        setSeconds(
+          (current) =>
+            Math.max(
+              current - 1,
+              0
+            )
+        );
+      }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [seconds]);
+
+  useEffect(() => {
+    const timer =
+      setTimeout(() => {
+        inputs.current[0]?.focus();
+      }, 250);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (
+        resendFocusTimerRef.current
+      ) {
+        clearTimeout(
+          resendFocusTimerRef.current
+        );
+
+        resendFocusTimerRef.current =
+          null;
+      }
+    };
+  }, []);
+
+  const focusInput =
+    useCallback(
+      (index: number) => {
+        inputs.current[index]?.focus();
+      },
+      []
+    );
+
+  const clearStatus =
+    useCallback(() => {
+      setError(null);
+      setSuccess(false);
+    }, []);
+
+  const updateSingleDigit =
+    useCallback(
+      (
+        value: string,
+        index: number
+      ) => {
+        clearStatus();
+
+        const numericValue =
+          value.replace(
+            /\D/g,
+            ""
+          );
+
+        if (!numericValue) {
+          setOtp((current) => {
+            const next = [
+              ...current,
+            ];
+
+            next[index] = "";
+
+            return next;
+          });
+
+          return;
+        }
+
+        if (
+          numericValue.length > 1
+        ) {
+          const pastedDigits =
+            numericValue
+              .slice(
+                0,
+                OTP_LENGTH
+              )
+              .split("");
+
+          const next =
+            createEmptyOtp();
+
+          pastedDigits.forEach(
+            (
+              digit,
+              digitIndex
+            ) => {
+              next[digitIndex] =
+                digit;
+            }
+          );
+
+          setOtp(next);
+
+          const nextFocusIndex =
+            Math.min(
+              pastedDigits.length,
+              OTP_LENGTH - 1
+            );
+
+          focusInput(
+            nextFocusIndex
+          );
+
+          if (
+            pastedDigits.length ===
+            OTP_LENGTH
+          ) {
+            inputs.current[
+              OTP_LENGTH - 1
+            ]?.blur();
+
+            setFocusedIndex(
+              null
+            );
+          }
+
+          return;
+        }
+
+        setOtp((current) => {
+          const next = [
+            ...current,
+          ];
+
+          next[index] =
+            numericValue[0];
+
+          return next;
+        });
+
+        if (
+          index <
+          OTP_LENGTH - 1
+        ) {
+          focusInput(
+            index + 1
+          );
+        } else {
+          inputs.current[
+            index
+          ]?.blur();
+
+          setFocusedIndex(
+            null
+          );
+        }
+      },
+      [
+        clearStatus,
+        focusInput,
+      ]
+    );
+
+  const handleKeyPress =
+    useCallback(
+      (
+        event:
+          NativeSyntheticEvent<TextInputKeyPressEventData>,
+        index: number
+      ) => {
+        if (
+          event.nativeEvent.key !==
+          "Backspace"
+        ) {
+          return;
+        }
+
+        clearStatus();
+
+        if (otp[index]) {
+          setOtp((current) => {
+            const next = [
+              ...current,
+            ];
+
+            next[index] = "";
+
+            return next;
+          });
+
+          return;
+        }
+
+        if (index > 0) {
+          setOtp((current) => {
+            const next = [
+              ...current,
+            ];
+
+            next[index - 1] =
+              "";
+
+            return next;
+          });
+
+          focusInput(
+            index - 1
+          );
+        }
+      },
+      [
+        clearStatus,
+        focusInput,
+        otp,
+      ]
+    );
+
+  const handleVerify =
+    useCallback(async () => {
+      if (
+        requestInFlightRef.current
+      ) {
+        return;
+      }
+
+      if (!codeComplete) {
+        setError(
+          "Enter the complete 6-digit code."
+        );
+
+        return;
+      }
+
+      requestInFlightRef.current =
+        true;
+
+      setVerifying(true);
+      setError(null);
+      setSuccess(false);
+
+      try {
+        // TODO:
+        // await AuthService.verifyOtp({
+        //   email,
+        //   code: completedCode,
+        // });
+
+        setSuccess(true);
+
+        navigation.replace(
+          "Username"
+        );
+      } catch {
+        setError(
+          "The code is incorrect or expired."
+        );
+      } finally {
+        requestInFlightRef.current =
+          false;
+
+        setVerifying(false);
+      }
+    }, [
+      codeComplete,
+      completedCode,
+      email,
+      navigation,
+    ]);
+
+  const handleResend =
+    useCallback(async () => {
+      if (
+        requestInFlightRef.current ||
+        seconds > 0
+      ) {
+        return;
+      }
+
+      requestInFlightRef.current =
+        true;
+
+      setResending(true);
+      setError(null);
+      setSuccess(false);
+
+      try {
+        // TODO:
+        // await AuthService.resendOtp({
+        //   email,
+        // });
+
+        setOtp(
+          createEmptyOtp()
+        );
+
+        setSeconds(
+          RESEND_SECONDS
+        );
+
+        if (
+          resendFocusTimerRef.current
+        ) {
+          clearTimeout(
+            resendFocusTimerRef.current
+          );
+        }
+
+        resendFocusTimerRef.current =
+          setTimeout(() => {
+            focusInput(0);
+
+            setFocusedIndex(0);
+
+            resendFocusTimerRef.current =
+              null;
+          }, 100);
+      } catch {
+        setError(
+          "Could not resend the code. Try again."
+        );
+      } finally {
+        requestInFlightRef.current =
+          false;
+
+        setResending(false);
+      }
+    }, [
+      email,
+      focusInput,
+      seconds,
+    ]);
+
+  const getInputBorderColor =
+    useCallback(
+      (
+        value: string,
+        index: number
+      ) => {
+        if (error) {
+          return colors.danger;
+        }
+
+        if (success) {
+          return colors.success;
+        }
+
+        if (
+          focusedIndex === index
+        ) {
+          return colors.primary;
+        }
+
+        if (value) {
+          return colors.primary;
+        }
+
+        return colors.border;
+      },
+      [
+        colors.border,
+        colors.danger,
+        colors.primary,
+        colors.success,
+        error,
+        focusedIndex,
+        success,
+      ]
+    );
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            colors.background,
+        },
+      ]}
+    >
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
+      >
+        <View
+          style={
+            styles.content
+          }
+        >
+          <View
+            style={
+              styles.navigationRow
+            }
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              hitSlop={Spacing.sm}
+              style={({ pressed }) => [
+                styles.backButton,
+                {
+                  backgroundColor:
+                    colors.surface,
+
+                  borderColor:
+                    colors.border,
+
+                  opacity: pressed
+                    ? 0.62
+                    : 1,
+                },
+              ]}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={Icons.md}
+                color={colors.icon}
+              />
+            </Pressable>
+
+            <Text
+              style={[
+                styles.headerTitle,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              Verify email
+            </Text>
+
+            <View
+              style={
+                styles.headerPlaceholder
+              }
+            />
+          </View>
+
+          <View
+            style={
+              styles.introduction
+            }
+          >
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              Enter verification code
+            </Text>
+
+            <Text
+              style={[
+                styles.subtitle,
+                {
+                  color:
+                    colors.textSecondary,
+                },
+              ]}
+            >
+              We sent a 6-digit code to
+            </Text>
+
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.email,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              {email}
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change email address"
+              disabled={unavailable}
+              hitSlop={Spacing.sm}
+              style={({ pressed }) => [
+                styles.changeEmailButton,
+                {
+                  opacity: pressed
+                    ? 0.62
+                    : 1,
+                },
+              ]}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            >
+              <Text
+                style={[
+                  styles.changeEmailText,
+                  {
+                    color:
+                      colors.primary,
+                  },
+                ]}
+              >
+                Change email
+              </Text>
+            </Pressable>
+          </View>
+
+          <View
+            style={
+              styles.otpRow
+            }
+          >
+            {otp.map(
+              (value, index) => (
+                <TextInput
+                  key={index}
+                  ref={(reference) => {
+                    inputs.current[index] =
+                      reference;
+                  }}
+                  accessibilityLabel={`Verification code digit ${
+                    index + 1
+                  }`}
+                  value={value}
+                  editable={!unavailable}
+                  keyboardType="number-pad"
+                  textContentType={
+                    index === 0
+                      ? "oneTimeCode"
+                      : "none"
+                  }
+                  autoComplete={
+                    index === 0
+                      ? "sms-otp"
+                      : "off"
+                  }
+                  maxLength={
+                    index === 0
+                      ? OTP_LENGTH
+                      : 1
+                  }
+                  selectTextOnFocus
+                  textAlign="center"
+                  style={[
+                    styles.otpInput,
+                    {
+                      color:
+                        colors.text,
+
+                      backgroundColor:
+                        colors.surface,
+
+                      borderColor:
+                        getInputBorderColor(
+                          value,
+                          index
+                        ),
+                    },
+                  ]}
+                  onFocus={() => {
+                    setFocusedIndex(
+                      index
+                    );
+                  }}
+                  onBlur={() => {
+                    setFocusedIndex(
+                      null
+                    );
+                  }}
+                  onKeyPress={(
+                    event
+                  ) => {
+                    handleKeyPress(
+                      event,
+                      index
+                    );
+                  }}
+                  onChangeText={(
+                    text
+                  ) => {
+                    updateSingleDigit(
+                      text,
+                      index
+                    );
+                  }}
+                  onSubmitEditing={
+                    index ===
+                    OTP_LENGTH - 1
+                      ? handleVerify
+                      : undefined
+                  }
+                />
+              )
+            )}
+          </View>
+
+          {error ? (
+            <Text
+              accessibilityLiveRegion="polite"
+              style={[
+                styles.statusText,
+                {
+                  color: colors.danger,
+                },
+              ]}
+            >
+              {error}
+            </Text>
+          ) : null}
+
+          <View
+            style={
+              styles.verifyButton
+            }
+          >
+            <PrimaryButton
+              title="Verify"
+              loading={verifying}
+              disabled={
+                !codeComplete ||
+                resending
+              }
+              onPress={
+                handleVerify
+              }
+            />
+          </View>
+
+          <View
+            style={
+              styles.resendArea
+            }
+          >
+            {seconds > 0 ? (
+              <Text
+                style={[
+                  styles.resendTimer,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                Resend code in{" "}
+                {seconds}s
+              </Text>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Resend verification code"
+                disabled={unavailable}
+                hitSlop={Spacing.sm}
+                style={({ pressed }) => [
+                  styles.resendButton,
+                  {
+                    opacity: pressed
+                      ? 0.62
+                      : 1,
+                  },
+                ]}
+                onPress={() => {
+                  void handleResend();
+                }}
+              >
+                <Text
+                  style={[
+                    styles.resendText,
+                    {
+                      color:
+                        colors.primary,
+                    },
+                  ]}
+                >
+                  {resending
+                    ? "Sending..."
+                    : "Resend code"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
+  flex: {
+    flex: 1,
+  },
+
+  content: {
+    flex: 1,
+
+    paddingHorizontal:
+      Spacing.screen,
+
+    paddingTop:
+      Spacing.md,
+  },
+
+  navigationRow: {
+    minHeight: 46,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent:
+      "space-between",
+  },
+
+  backButton: {
+    width: 42,
+
+    height: 42,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    borderWidth:
+      StyleSheet.hairlineWidth,
+
+    borderRadius:
+      Radius.md,
+  },
+
+  headerTitle: {
+    ...Typography.headline,
+
+    fontWeight: "800",
+
+    textAlign: "center",
+  },
+
+  headerPlaceholder: {
+    width: 42,
+  },
+
+  introduction: {
+    alignItems: "center",
+
+    marginTop:
+      Spacing.xxxl,
+  },
+
+  title: {
+    ...Typography.title,
+
+    fontSize: 30,
+
+    lineHeight: 36,
+
+    textAlign: "center",
+  },
+
+  subtitle: {
+    ...Typography.body,
+
+    textAlign: "center",
+
+    marginTop:
+      Spacing.md,
+  },
+
+  email: {
+    ...Typography.body,
+
+    maxWidth: "100%",
+
+    fontWeight: "800",
+
+    textAlign: "center",
+
+    marginTop:
+      Spacing.xs,
+  },
+
+  changeEmailButton: {
+    minHeight: 36,
+
+    justifyContent: "center",
+
+    paddingHorizontal:
+      Spacing.md,
+
+    marginTop:
+      Spacing.xs,
+  },
+
+  changeEmailText: {
+    ...Typography.small,
+
+    fontWeight: "800",
+  },
+
+  otpRow: {
+    width: "100%",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+
+    marginTop:
+      Spacing.xxxl,
+  },
+
+  otpInput: {
+    width: "14.4%",
+
+    maxWidth: 54,
+
+    minWidth: 42,
+
+    height: 58,
+
+    borderWidth: 1.5,
+
+    borderRadius:
+      Radius.md,
+
+    fontSize: 23,
+
+    fontWeight: "800",
+
+    padding: 0,
+  },
+
+  statusText: {
+    ...Typography.small,
+
+    fontWeight: "700",
+
+    textAlign: "center",
+
+    marginTop:
+      Spacing.md,
+  },
+
+  verifyButton: {
+    marginTop:
+      Spacing.xxl,
+  },
+
+  resendArea: {
+    minHeight: 44,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    marginTop:
+      Spacing.md,
+  },
+
+  resendTimer: {
+    ...Typography.small,
+
+    fontWeight: "600",
+  },
+
+  resendButton: {
+    minHeight: 40,
+
+    justifyContent: "center",
+
+    paddingHorizontal:
+      Spacing.lg,
+  },
+
+  resendText: {
+    ...Typography.caption,
+
+    fontWeight: "800",
+  },
+});

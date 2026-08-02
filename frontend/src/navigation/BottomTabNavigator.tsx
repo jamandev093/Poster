@@ -1,0 +1,164 @@
+import React from "react";
+import {
+  StyleSheet,
+} from "react-native";
+import {
+  createBottomTabNavigator,
+} from "@react-navigation/bottom-tabs";
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+
+import useTheme from "../theme/useTheme";
+import {
+  Icons,
+  Spacing,
+  Typography,
+} from "../theme";
+
+import HomeScreen from "../screens/home/HomeScreen";
+import SearchScreen from "../screens/search/SearchScreen";
+import TrendingScreen from "../screens/trending/TrendingScreen";
+import ProfileScreen from "../screens/profile/ProfileScreen";
+
+export type MainTabParamList = {
+  Home: undefined;
+  Search: undefined;
+  Trending: undefined;
+  Profile: undefined;
+};
+
+type TabIconName = React.ComponentProps<
+  typeof MaterialCommunityIcons
+>["name"];
+
+interface TabIconConfig {
+  active: TabIconName;
+  inactive: TabIconName;
+}
+
+const TAB_ICONS: Record<
+  keyof MainTabParamList,
+  TabIconConfig
+> = {
+  Home: {
+    active: "home",
+    inactive: "home-outline",
+  },
+
+  Search: {
+    active: "magnify",
+    inactive: "magnify",
+  },
+
+  Trending: {
+    active: "fire",
+    inactive: "fire",
+  },
+
+  Profile: {
+    active: "account",
+    inactive: "account-outline",
+  },
+};
+
+const TAB_BAR_HEIGHT = 64;
+
+const Tab =
+  createBottomTabNavigator<MainTabParamList>();
+
+export default function BottomTabNavigator() {
+  const { colors } = useTheme();
+
+  return (
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={({ route }) => {
+        const iconConfig =
+          TAB_ICONS[route.name];
+
+        return {
+          headerShown: false,
+
+          tabBarHideOnKeyboard: true,
+
+          tabBarActiveTintColor:
+            colors.primary,
+
+          tabBarInactiveTintColor:
+            colors.textSecondary,
+
+          tabBarLabelStyle:
+            styles.label,
+
+          tabBarStyle: [
+            styles.tabBar,
+            {
+              backgroundColor:
+                colors.card,
+
+              borderTopColor:
+                colors.border,
+            },
+          ],
+
+          tabBarIcon: ({
+            color,
+            focused,
+          }) => (
+            <MaterialCommunityIcons
+              name={
+                focused
+                  ? iconConfig.active
+                  : iconConfig.inactive
+              }
+              size={Icons.lg}
+              color={color}
+            />
+          ),
+        };
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+      />
+
+      <Tab.Screen
+        name="Trending"
+        component={TrendingScreen}
+      />
+
+      <Tab.Screen
+        name="Search"
+        component={SearchScreen}
+      />
+
+      
+
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+      />
+    </Tab.Navigator>
+  );
+}
+
+const styles = StyleSheet.create({
+  tabBar: {
+    minHeight: TAB_BAR_HEIGHT,
+
+    borderTopWidth:
+      StyleSheet.hairlineWidth,
+
+    paddingTop: Spacing.sm,
+
+    paddingBottom: Spacing.sm,
+  },
+
+  label: {
+    ...Typography.small,
+
+    fontWeight: "600",
+  },
+});

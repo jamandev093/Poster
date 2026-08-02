@@ -1,0 +1,414 @@
+import React, {
+  ForwardedRef,
+  ReactElement,
+  forwardRef,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import {
+  FlatList,
+  FlatListProps,
+  ListRenderItem,
+  ViewToken,
+} from "react-native";
+
+import {
+  MonetizationPlacement,
+} from "../ads";
+
+import {
+  FeedbackReason,
+} from "../cards/feedback/feedbackReasons";
+
+import FeedEntryRenderer from "./FeedEntryRenderer";
+import MonetizationFeedbackController from "./MonetizationFeedbackController";
+
+import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";
+import MonetizationService from "../../services/MonetizationService";
+
+import {
+  Article,
+} from "../../types/article";
+
+import {
+  FeedEntry,
+} from "../../types/feedEntry";
+
+interface ArticleActions {
+  onPress: (
+    article: Article
+  ) => void;
+
+  onBookmark: (
+    article: Article
+  ) => void;
+
+  onShare: (
+    article: Article
+  ) => void;
+
+  onWorthReading: (
+    article: Article
+  ) => void;
+
+  onHelpful: (
+    article: Article
+  ) => void;
+
+  onFeedback: (
+    article: Article,
+    reason: FeedbackReason
+  ) => void;
+}
+
+interface MonetizationActions {
+  onPromotionPress?: (
+    promotionId: string
+  ) => void;
+
+  onSponsoredPress?: (
+    campaignId: string
+  ) => void;
+}
+
+interface MonetizedFeedProps
+  extends Omit<
+    FlatListProps<FeedEntry>,
+    | "data"
+    | "renderItem"
+    | "keyExtractor"
+    | "onViewableItemsChanged"
+    | "viewabilityConfig"
+  > {
+  articles: Article[];
+
+  placement:
+    MonetizationPlacement;
+
+  query?: string;
+
+  topic?: string;
+
+  articleActions:
+    ArticleActions;
+
+  monetizationActions?:
+    MonetizationActions;
+}
+
+function recordEntryImpression(
+  entry: FeedEntry
+): void {
+  switch (entry.type) {
+    case "poster_promotion":
+      void MonetizationAnalyticsService.recordImpression(
+        {
+          itemId:
+            entry.promotion.id,
+
+          monetizationType:
+            entry.promotion.type,
+
+          placement:
+            entry.promotion
+              .placement,
+        }
+      );
+
+      break;
+
+    case "poster_affiliate":
+      void MonetizationAnalyticsService.recordImpression(
+        {
+          itemId:
+            entry.promotion.id,
+
+          monetizationType:
+            entry.promotion.type,
+
+          placement:
+            entry.promotion
+              .placement,
+
+          advertiserName:
+            entry.promotion
+              .partnerName,
+        }
+      );
+
+      break;
+
+    case "direct_sponsorship":
+      void MonetizationAnalyticsService.recordImpression(
+        {
+          itemId:
+            entry.campaign.id,
+
+          monetizationType:
+            entry.campaign.type,
+
+          placement:
+            entry.campaign
+              .placement,
+
+          campaignId:
+            entry.campaign
+              .campaignId,
+
+          advertiserName:
+            entry.campaign
+              .advertiserName,
+        }
+      );
+
+      break;
+
+    case "google_native_ad":
+      // Google impression events will
+      // be managed by the Google SDK.
+      break;
+
+    case "article":
+      break;
+
+    default:
+      break;
+  }
+}
+
+function MonetizedFeedComponent(
+  {
+    articles,
+    placement,
+    query,
+    topic,
+    articleActions,
+    monetizationActions,
+    ...flatListProps
+  }: MonetizedFeedProps,
+  ref:
+    ForwardedRef<
+      FlatList<FeedEntry>
+    >
+): ReactElement {
+  const entries =
+    useMemo(() => {
+      return MonetizationService.composeFeed({
+        articles,
+        placement,
+        query,
+        topic,
+      });
+    }, [
+      articles,
+      placement,
+      query,
+      topic,
+    ]);
+
+  const viewabilityConfig =
+    useRef({
+      itemVisiblePercentThreshold: 60,
+
+      minimumViewTime: 1000,
+    }).current;
+
+  const handleViewableItemsChanged =
+    useRef(
+      ({
+        changed,
+      }: {
+        changed:
+          ViewToken<FeedEntry>[];
+      }) => {
+        changed.forEach(
+          (viewToken) => {
+            if (
+              !viewToken.isViewable ||
+              !viewToken.item
+            ) {
+              return;
+            }
+
+            recordEntryImpression(
+              viewToken.item
+            );
+          }
+        );
+      }
+    ).current;
+
+  return (
+    <MonetizationFeedbackController>
+      {(openReport) => {
+        const renderItem:
+          ListRenderItem<FeedEntry> =
+          ({ item }) => {
+            const openPromotionReport =
+              () => {
+                if (
+                  item.type !==
+                    "poster_promotion" &&
+                  item.type !==
+                    "poster_affiliate"
+                ) {
+                  return;
+                }
+
+                const promotion =
+                  item.promotion;
+
+                openReport({
+                  itemId:
+                    promotion.id,
+
+                  title:
+                    "Tell us about this promotion",
+
+                  onSubmit: (
+                    reason
+                  ) => {
+                    void MonetizationAnalyticsService.recordReport(
+                      {
+                        itemId:
+                          promotion.id,
+
+                        monetizationType:
+                          promotion.type,
+
+                        placement:
+                          promotion.placement,
+
+                        advertiserName:
+                          promotion.type ===
+                          "poster_affiliate"
+                            ? promotion.partnerName
+                            : undefined,
+
+                        reportReason:
+                          reason.id,
+                      }
+                    );
+                  },
+                });
+              };
+
+            const openSponsoredReport =
+              () => {
+                if (
+                  item.type !==
+                  "direct_sponsorship"
+                ) {
+                  return;
+                }
+
+                const campaign =
+                  item.campaign;
+
+                openReport({
+                  itemId:
+                    campaign.id,
+
+                  title:
+                    "Tell us about this sponsored content",
+
+                  onSubmit: (
+                    reason
+                  ) => {
+                    void MonetizationAnalyticsService.recordReport(
+                      {
+                        itemId:
+                          campaign.id,
+
+                        monetizationType:
+                          campaign.type,
+
+                        placement:
+                          campaign.placement,
+
+                        campaignId:
+                          campaign.campaignId,
+
+                        advertiserName:
+                          campaign.advertiserName,
+
+                        reportReason:
+                          reason.id,
+                      }
+                    );
+                  },
+                });
+              };
+
+            return (
+              <FeedEntryRenderer
+                entry={item}
+                onArticlePress={
+                  articleActions.onPress
+                }
+                onArticleBookmark={
+                  articleActions.onBookmark
+                }
+                onArticleShare={
+                  articleActions.onShare
+                }
+                onArticleWorthReading={
+                  articleActions.onWorthReading
+                }
+                onArticleHelpful={
+                  articleActions.onHelpful
+                }
+                onArticleFeedback={
+                  articleActions.onFeedback
+                }
+                onPromotionPress={
+                  monetizationActions
+                    ?.onPromotionPress
+                }
+                onPromotionReport={
+                  openPromotionReport
+                }
+                onSponsoredPress={
+                  monetizationActions
+                    ?.onSponsoredPress
+                }
+                onSponsoredReport={
+                  openSponsoredReport
+                }
+              />
+            );
+          };
+
+        return (
+          <FlatList
+            {...flatListProps}
+            ref={ref}
+            data={entries}
+            keyExtractor={(item) =>
+              item.id
+            }
+            renderItem={renderItem}
+            viewabilityConfig={
+              viewabilityConfig
+            }
+            onViewableItemsChanged={
+              handleViewableItemsChanged
+            }
+          />
+        );
+      }}
+    </MonetizationFeedbackController>
+  );
+}
+
+const MonetizedFeed =
+  forwardRef<
+    FlatList<FeedEntry>,
+    MonetizedFeedProps
+  >(MonetizedFeedComponent);
+
+MonetizedFeed.displayName =
+  "MonetizedFeed";
+
+export default MonetizedFeed;

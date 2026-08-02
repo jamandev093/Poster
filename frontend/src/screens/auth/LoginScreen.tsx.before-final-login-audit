@@ -1,0 +1,895 @@
+import React, {
+  useCallback,
+  useState,
+} from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import {
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+
+import PrimaryButton from "../../components/buttons/PrimaryButton";
+import SocialButton from "../../components/buttons/SocialButton";
+import Card from "../../components/cards/Card";
+import Divider from "../../components/common/Divider";
+import Logo from "../../components/common/Logo";
+import Input from "../../components/forms/Input";
+
+import {
+  RootStackParamList,
+} from "../../navigation/AppNavigator";
+
+import {
+  Icons,
+  Radius,
+  Spacing,
+  Typography,
+} from "../../theme";
+import useTheme from "../../theme/useTheme";
+
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "Login"
+>;
+
+interface LoginErrors {
+  email?: string;
+
+  password?: string;
+
+  form?: string;
+}
+
+const EMAIL_PATTERN =
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function LoginScreen({
+  navigation,
+}: Props) {
+  const { colors } = useTheme();
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [
+    passwordVisible,
+    setPasswordVisible,
+  ] = useState(false);
+
+  const [
+    rememberAccount,
+    setRememberAccount,
+  ] = useState(true);
+
+  const [errors, setErrors] =
+    useState<LoginErrors>({});
+
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
+
+  const [
+    googleLoading,
+    setGoogleLoading,
+  ] = useState(false);
+
+  const normalizedEmail =
+    email
+      .trim()
+      .toLowerCase();
+
+  const clearError =
+    useCallback(
+      (
+        field:
+          keyof LoginErrors
+      ) => {
+        setErrors(
+          (current) => {
+            if (
+              !current[field] &&
+              !current.form
+            ) {
+              return current;
+            }
+
+            return {
+              ...current,
+
+              [field]:
+                undefined,
+
+              form:
+                undefined,
+            };
+          }
+        );
+      },
+      []
+    );
+
+  const validate =
+    useCallback(() => {
+      const nextErrors:
+        LoginErrors = {};
+
+      if (!normalizedEmail) {
+        nextErrors.email =
+          "Enter your email address.";
+      } else if (
+        !EMAIL_PATTERN.test(
+          normalizedEmail
+        )
+      ) {
+        nextErrors.email =
+          "Enter a valid email address.";
+      }
+
+      if (!password) {
+        nextErrors.password =
+          "Enter your password.";
+      }
+
+      setErrors(nextErrors);
+
+      return (
+        Object.keys(
+          nextErrors
+        ).length === 0
+      );
+    }, [
+      normalizedEmail,
+      password,
+    ]);
+
+  const handleLogin =
+    useCallback(async () => {
+      if (!validate()) {
+        return;
+      }
+
+      setSubmitting(true);
+      setErrors({});
+
+      try {
+        // TODO:
+        // Connect to AuthService when
+        // backend authentication exists.
+        //
+        // await AuthService.login({
+        //   email: normalizedEmail,
+        //   password,
+        //   rememberAccount,
+        // });
+
+        navigation.replace(
+          "Main"
+        );
+      } catch {
+        setErrors({
+          form:
+            "We couldn't sign you in. Check your details and try again.",
+        });
+      } finally {
+        setSubmitting(false);
+      }
+    }, [
+      navigation,
+      normalizedEmail,
+      password,
+      rememberAccount,
+      validate,
+    ]);
+
+  const handleGoogleLogin =
+    useCallback(async () => {
+      setGoogleLoading(true);
+      setErrors({});
+
+      try {
+        // TODO:
+        // Add Google authentication
+        // through AuthService.
+        //
+        // await AuthService.socialLogin(
+        //   "google"
+        // );
+
+        navigation.replace(
+          "Main"
+        );
+      } catch {
+        setErrors({
+          form:
+            "We couldn't continue with Google. Please try again.",
+        });
+      } finally {
+        setGoogleLoading(false);
+      }
+    }, [navigation]);
+
+  const unavailable =
+    submitting ||
+    googleLoading;
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            colors.background,
+        },
+      ]}
+    >
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={
+            false
+          }
+          bounces={false}
+          contentContainerStyle={
+            styles.scrollContent
+          }
+        >
+          <View
+            style={
+              styles.brandSection
+            }
+          >
+            <View
+              style={
+                styles.brandRow
+              }
+            >
+              <View
+                style={[
+                  styles.brandIcon,
+                  {
+                    backgroundColor:
+                      colors.surface,
+
+                    borderColor:
+                      colors.border,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="lock-open-outline"
+                  size={32}
+                  color={colors.primary}
+                />
+              </View>
+
+              <Logo compact />
+            </View>
+
+            <Text
+              style={[
+                styles.eyebrow,
+                {
+                  color:
+                    colors.primary,
+                },
+              ]}
+            >
+              WELCOME BACK
+            </Text>
+
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              Sign in to Poster
+            </Text>
+
+            <Text
+              style={[
+                styles.description,
+                {
+                  color:
+                    colors.textSecondary,
+                },
+              ]}
+            >
+              Continue discovering,
+              organizing and saving
+              knowledge personalized for
+              you.
+            </Text>
+          </View>
+
+          <Card style={styles.card}>
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              Account access
+            </Text>
+
+            <Text
+              style={[
+                styles.cardDescription,
+                {
+                  color:
+                    colors.textSecondary,
+                },
+              ]}
+            >
+              Enter the credentials
+              associated with your Poster
+              account.
+            </Text>
+
+            {errors.form ? (
+              <View
+                accessibilityLiveRegion="polite"
+                style={[
+                  styles.formMessage,
+                  {
+                    backgroundColor:
+                      colors.surface,
+
+                    borderColor:
+                      colors.danger,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="alert-circle-outline"
+                  size={Icons.md}
+                  color={colors.danger}
+                />
+
+                <Text
+                  style={[
+                    styles.formMessageText,
+                    {
+                      color:
+                        colors.danger,
+                    },
+                  ]}
+                >
+                  {errors.form}
+                </Text>
+              </View>
+            ) : null}
+
+            <Input
+              label="Email address"
+              placeholder="you@example.com"
+              leftIcon="email-outline"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              value={email}
+              error={errors.email}
+              editable={!unavailable}
+              onChangeText={(value) => {
+                setEmail(value);
+
+                clearError(
+                  "email"
+                );
+              }}
+            />
+
+            <View
+              style={
+                styles.inputGap
+              }
+            />
+
+            <Input
+              label="Password"
+              placeholder="Enter your password"
+              leftIcon="lock-outline"
+              rightIcon={
+                passwordVisible
+                  ? "eye-off-outline"
+                  : "eye-outline"
+              }
+              rightIconAccessibilityLabel={
+                passwordVisible
+                  ? "Hide password"
+                  : "Show password"
+              }
+              secureTextEntry={
+                !passwordVisible
+              }
+              textContentType="password"
+              autoComplete="password"
+              returnKeyType="done"
+              value={password}
+              error={errors.password}
+              editable={!unavailable}
+              onRightIconPress={() => {
+                setPasswordVisible(
+                  (current) =>
+                    !current
+                );
+              }}
+              onSubmitEditing={
+                handleLogin
+              }
+              onChangeText={(value) => {
+                setPassword(value);
+
+                clearError(
+                  "password"
+                );
+              }}
+            />
+
+            <View
+              style={
+                styles.accountOptions
+              }
+            >
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityLabel="Remember this account"
+                accessibilityState={{
+                  checked:
+                    rememberAccount,
+                }}
+                disabled={unavailable}
+                hitSlop={Spacing.sm}
+                style={({ pressed }) => [
+                  styles.rememberButton,
+                  {
+                    opacity: pressed
+                      ? 0.62
+                      : 1,
+                  },
+                ]}
+                onPress={() => {
+                  setRememberAccount(
+                    (current) =>
+                      !current
+                  );
+                }}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      backgroundColor:
+                        rememberAccount
+                          ? colors.primary
+                          : colors.surface,
+
+                      borderColor:
+                        rememberAccount
+                          ? colors.primary
+                          : colors.border,
+                    },
+                  ]}
+                >
+                  {rememberAccount ? (
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={Icons.xs}
+                      color={
+                        colors.onPrimary
+                      }
+                    />
+                  ) : null}
+                </View>
+
+                <Text
+                  style={[
+                    styles.rememberText,
+                    {
+                      color:
+                        colors.textSecondary,
+                    },
+                  ]}
+                >
+                  Remember me
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Forgot password"
+                disabled={unavailable}
+                hitSlop={Spacing.sm}
+                style={({ pressed }) => [
+                  styles.forgotButton,
+                  {
+                    opacity: pressed
+                      ? 0.62
+                      : 1,
+                  },
+                ]}
+                onPress={() => {
+                  navigation.navigate(
+                    "ForgotPassword"
+                  );
+                }}
+              >
+                <Text
+                  style={[
+                    styles.forgotText,
+                    {
+                      color:
+                        colors.primary,
+                    },
+                  ]}
+                >
+                  Forgot password?
+                </Text>
+              </Pressable>
+            </View>
+
+            <PrimaryButton
+              title="Sign In"
+              loading={submitting}
+              disabled={
+                googleLoading
+              }
+              onPress={
+                handleLogin
+              }
+            />
+
+            <View
+              style={
+                styles.dividerGap
+              }
+            />
+
+            <Divider label="OR" />
+
+            <View
+              style={
+                styles.dividerGap
+              }
+            />
+
+            <SocialButton
+              provider="google"
+              disabled={unavailable}
+              loading={googleLoading}
+              onPress={
+                handleGoogleLogin
+              }
+            />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Create a new account"
+              disabled={unavailable}
+              style={({ pressed }) => [
+                styles.signupButton,
+                {
+                  opacity: pressed
+                    ? 0.62
+                    : 1,
+                },
+              ]}
+              onPress={() => {
+                navigation.navigate(
+                  "Signup"
+                );
+              }}
+            >
+              <Text
+                style={[
+                  styles.signupPrompt,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                New to Poster?
+              </Text>
+
+              <Text
+                style={[
+                  styles.signupAction,
+                  {
+                    color:
+                      colors.primary,
+                  },
+                ]}
+              >
+                Create Account
+              </Text>
+            </Pressable>
+          </Card>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles =
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+
+    flex: {
+      flex: 1,
+    },
+
+    scrollContent: {
+      flexGrow: 1,
+
+      paddingHorizontal:
+        Spacing.screen,
+
+      paddingTop:
+        Spacing.sm,
+
+      paddingBottom:
+        Spacing.xl,
+    },
+
+    brandSection: {
+      alignItems: "center",
+
+      marginBottom:
+        Spacing.xxl,
+    },
+
+    brandRow: {
+      flexDirection: "row",
+
+      alignItems: "center",
+
+      justifyContent: "center",
+    },
+
+    brandIcon: {
+      width: 68,
+
+      height: 68,
+
+      alignItems: "center",
+
+      justifyContent: "center",
+
+      borderWidth:
+        StyleSheet.hairlineWidth,
+
+      borderRadius:
+        Radius.round,
+
+      marginRight:
+        Spacing.md,
+    },
+
+    eyebrow: {
+      ...Typography.small,
+
+      fontWeight: "800",
+
+      letterSpacing: 1,
+
+      marginTop:
+        Spacing.lg,
+    },
+
+    title: {
+      ...Typography.title,
+
+      fontSize: 32,
+
+      lineHeight: 39,
+
+      textAlign: "center",
+
+      marginTop:
+        Spacing.sm,
+    },
+
+    description: {
+      ...Typography.body,
+
+      maxWidth: 340,
+
+      lineHeight: 23,
+
+      textAlign: "center",
+
+      marginTop:
+        Spacing.sm,
+
+      paddingHorizontal:
+        Spacing.sm,
+    },
+
+    card: {
+      paddingVertical:
+        Spacing.xxl,
+    },
+
+    cardTitle: {
+      ...Typography.headline,
+
+      fontWeight: "800",
+    },
+
+    cardDescription: {
+      ...Typography.small,
+
+      lineHeight: 19,
+
+      marginTop:
+        Spacing.xs,
+
+      marginBottom:
+        Spacing.xl,
+    },
+
+    formMessage: {
+      flexDirection: "row",
+
+      alignItems: "flex-start",
+
+      borderWidth:
+        StyleSheet.hairlineWidth,
+
+      borderRadius:
+        Radius.md,
+
+      padding:
+        Spacing.md,
+
+      marginBottom:
+        Spacing.lg,
+    },
+
+    formMessageText: {
+      ...Typography.small,
+
+      flex: 1,
+
+      lineHeight: 18,
+
+      marginLeft:
+        Spacing.sm,
+    },
+
+    inputGap: {
+      height:
+        Spacing.lg,
+    },
+
+    accountOptions: {
+      minHeight: 48,
+
+      flexDirection: "row",
+
+      alignItems: "center",
+
+      justifyContent:
+        "space-between",
+
+      marginTop:
+        Spacing.sm,
+
+      marginBottom:
+        Spacing.md,
+    },
+
+    rememberButton: {
+      minHeight: 44,
+
+      flexDirection: "row",
+
+      alignItems: "center",
+    },
+
+    checkbox: {
+      width: 22,
+
+      height: 22,
+
+      alignItems: "center",
+
+      justifyContent: "center",
+
+      borderWidth: 1.5,
+
+      borderRadius:
+        Radius.sm,
+    },
+
+    rememberText: {
+      ...Typography.small,
+
+      fontWeight: "600",
+
+      marginLeft:
+        Spacing.sm,
+    },
+
+    forgotButton: {
+      minHeight: 44,
+
+      justifyContent:
+        "center",
+
+      paddingLeft:
+        Spacing.md,
+    },
+
+    forgotText: {
+      ...Typography.small,
+
+      fontWeight: "700",
+    },
+
+    dividerGap: {
+      height:
+        Spacing.lg,
+    },
+
+    signupButton: {
+      minHeight: 50,
+
+      flexDirection: "row",
+
+      alignItems: "center",
+
+      justifyContent:
+        "center",
+
+      flexWrap: "wrap",
+
+      marginTop:
+        Spacing.lg,
+    },
+
+    signupPrompt: {
+      ...Typography.body,
+    },
+
+    signupAction: {
+      ...Typography.body,
+
+      fontWeight: "700",
+
+      marginLeft:
+        Spacing.xs,
+    },
+  });

@@ -1,0 +1,613 @@
+import {
+  MonetizationItem,
+  MonetizationPlacement,
+} from "../components/ads";
+
+import {
+  MONETIZATION_CONFIG,
+  isMonetizationPlacementEnabled,
+} from "../constants/monetization";
+
+import {
+  findInterestTopicByName,
+  getInterestTopicById,
+  getRelatedInterestTopics,
+  resolveInterestTopic,
+} from "../data/interests";
+
+import {
+  directSponsoredCampaign,
+  googleNativeAdPlaceholder,
+  posterAffiliatePromotion,
+  posterPromotion,
+} from "../data/mockMonetization";
+
+import {
+  Article,
+} from "../types/article";
+import {
+  FeedEntry,
+} from "../types/feedEntry";
+
+import buildFeedEntries from "../utils/buildFeedEntries";
+
+interface GetEligibleItemsOptions {
+  placement:
+    MonetizationPlacement;
+
+  query?: string;
+
+  /**
+   * Accepts a canonical topic ID,
+   * canonical topic name, alias,
+   * category label, or legacy value.
+   */
+  topic?: string;
+}
+
+interface ComposeFeedOptions
+  extends GetEligibleItemsOptions {
+  articles: Article[];
+}
+
+function normalizeText(
+  value?: string
+): string {
+  return (
+    value
+      ?.trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase() ?? ""
+  );
+}
+
+function createUniqueValues(
+  values:
+    readonly (
+      | string
+      | undefined
+    )[]
+): string[] {
+  const seen =
+    new Set<string>();
+
+  const result:
+    string[] = [];
+
+  values.forEach((value) => {
+    const normalizedValue =
+      value
+        ?.trim()
+        .replace(/\s+/g, " ");
+
+    if (!normalizedValue) {
+      return;
+    }
+
+    const comparisonKey =
+      normalizedValue.toLowerCase();
+
+    if (
+      seen.has(
+        comparisonKey
+      )
+    ) {
+      return;
+    }
+
+    seen.add(
+      comparisonKey
+    );
+
+    result.push(
+      normalizedValue
+    );
+  });
+
+  return result;
+}
+
+function tokenizeValues(
+  values: readonly string[]
+): string[] {
+  const tokens =
+    values.flatMap((value) =>
+      normalizeText(value)
+        .split(/\s+/)
+        .filter(
+          (token) =>
+            token.length >= 2
+        )
+    );
+
+  return createUniqueValues(
+    tokens
+  );
+}
+
+function resolveTaxonomyContext(
+  topicValue?: string
+): string[] {
+  const normalizedTopic =
+    topicValue?.trim();
+
+  if (!normalizedTopic) {
+    return [];
+  }
+
+  const topic =
+    getInterestTopicById(
+      normalizedTopic
+    ) ??
+    findInterestTopicByName(
+      normalizedTopic
+    );
+
+  if (!topic) {
+    return [
+      normalizedTopic,
+    ];
+  }
+
+  const resolvedTopic =
+    resolveInterestTopic(
+      topic
+    );
+
+  const relatedTopics =
+    getRelatedInterestTopics(
+      topic.id,
+      4
+    );
+
+  return createUniqueValues([
+    topic.id,
+    topic.slug,
+    topic.name,
+    topic.description,
+
+    ...(topic.aliases ?? []),
+
+    ...(topic.searchKeywords ??
+      []),
+
+    resolvedTopic?.category.name,
+    resolvedTopic?.domain.name,
+
+    ...relatedTopics.map(
+      (relatedTopic) =>
+        relatedTopic.name
+    ),
+
+    ...relatedTopics.flatMap(
+      (relatedTopic) =>
+        relatedTopic.aliases ??
+        []
+    ),
+  ]);
+}
+
+function createContextValues(
+  query?: string,
+  topic?: string
+): string[] {
+  return createUniqueValues([
+    query,
+    topic,
+
+    ...resolveTaxonomyContext(
+      topic
+    ),
+  ]);
+}
+
+function parseOptionalTimestamp(
+  value?: string
+): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const timestamp =
+    Date.parse(value);
+
+  return Number.isFinite(
+    timestamp
+  )
+    ? timestamp
+    : undefined;
+}
+
+function isCurrentlyActive(
+  item: MonetizationItem
+): boolean {
+  if (
+    item.type ===
+    "google_native_ad"
+  ) {
+    return (
+      item.status !== "failed" &&
+      item.status !== "no_fill"
+    );
+  }
+
+  if (
+    item.status !== "active"
+  ) {
+    return false;
+  }
+
+  const hasStartAt =
+    Boolean(item.startAt);
+
+  const hasEndAt =
+    Boolean(item.endAt);
+
+  const startTimestamp =
+    parseOptionalTimestamp(
+      item.startAt
+    );
+
+  const endTimestamp =
+    parseOptionalTimestamp(
+      item.endAt
+    );
+
+  if (
+    hasStartAt &&
+    startTimestamp === undefined
+  ) {
+    return false;
+  }
+
+  if (
+    hasEndAt &&
+    endTimestamp === undefined
+  ) {
+    return false;
+  }
+
+  if (
+    startTimestamp !== undefined &&
+    endTimestamp !== undefined &&
+    endTimestamp <
+      startTimestamp
+  ) {
+    return false;
+  }
+
+  const now =
+    Date.now();
+
+  if (
+    startTimestamp !== undefined &&
+    startTimestamp > now
+  ) {
+    return false;
+  }
+
+  if (
+    endTimestamp !== undefined &&
+    endTimestamp < now
+  ) {
+    return false;
+  }
+
+  return true;
+}
+function createItemSearchText(
+  item: MonetizationItem
+): string {
+  switch (item.type) {
+    case "google_native_ad":
+      /*
+       * Google supplies native-ad content
+       * dynamically. Poster does not inspect
+       * local title or description fields.
+       */
+      return "";
+
+    case "direct_sponsorship":
+      return normalizeText(
+        [
+          item.title,
+          item.description,
+          item.advertiserName,
+        ]
+          .filter(
+            (
+              value
+            ): value is string =>
+              typeof value ===
+                "string" &&
+              value.trim().length >
+                0
+          )
+          .join(" ")
+      );
+
+    case "poster_affiliate":
+      return normalizeText(
+        [
+          item.title,
+          item.description,
+          item.partnerName,
+        ]
+          .filter(
+            (
+              value
+            ): value is string =>
+              typeof value ===
+                "string" &&
+              value.trim().length >
+                0
+          )
+          .join(" ")
+      );
+
+    case "poster_promotion":
+      return normalizeText(
+        [
+          item.title,
+          item.description,
+        ]
+          .filter(
+            (
+              value
+            ): value is string =>
+              typeof value ===
+                "string" &&
+              value.trim().length >
+                0
+          )
+          .join(" ")
+      );
+
+    default:
+      return "";
+  }
+}
+
+function isRelevantToContext(
+  item: MonetizationItem,
+  query?: string,
+  topic?: string
+): boolean {
+  /*
+   * Google controls native-ad targeting.
+   * Poster does not duplicate Google's
+   * relevance system locally.
+   */
+  if (
+    item.type ===
+    "google_native_ad"
+  ) {
+    return true;
+  }
+
+  const contextValues =
+    createContextValues(
+      query,
+      topic
+    );
+
+  if (
+    contextValues.length === 0
+  ) {
+    return true;
+  }
+
+  const searchableText =
+    createItemSearchText(
+      item
+    );
+
+  if (!searchableText) {
+    return false;
+  }
+
+  const normalizedPhrases =
+    contextValues
+      .map(normalizeText)
+      .filter(Boolean);
+
+  const phraseMatch =
+    normalizedPhrases.some(
+      (phrase) =>
+        phrase.length >= 3 &&
+        searchableText.includes(
+          phrase
+        )
+    );
+
+  if (phraseMatch) {
+    return true;
+  }
+
+  const contextTokens =
+    tokenizeValues(
+      contextValues
+    );
+
+  return contextTokens.some(
+    (token) =>
+      searchableText.includes(
+        token
+      )
+  );
+}
+
+function getCandidateItems(): MonetizationItem[] {
+  const candidates:
+    MonetizationItem[] = [];
+
+  if (
+    MONETIZATION_CONFIG
+      .directSponsorshipsEnabled
+  ) {
+    candidates.push(
+      directSponsoredCampaign
+    );
+  }
+
+  if (
+    MONETIZATION_CONFIG
+      .affiliatePromotionsEnabled
+  ) {
+    candidates.push(
+      posterAffiliatePromotion
+    );
+  }
+
+  if (
+    MONETIZATION_CONFIG
+      .googleAdsEnabled
+  ) {
+    candidates.push(
+      googleNativeAdPlaceholder
+    );
+  }
+
+  if (
+    MONETIZATION_CONFIG
+      .posterPromotionsEnabled
+  ) {
+    candidates.push(
+      posterPromotion
+    );
+  }
+
+  return candidates;
+}
+
+export default class MonetizationService {
+  static getEligibleItems({
+    placement,
+    query,
+    topic,
+  }: GetEligibleItemsOptions): MonetizationItem[] {
+    if (
+      !isMonetizationPlacementEnabled(
+        placement
+      )
+    ) {
+      return [];
+    }
+
+    return getCandidateItems().filter(
+      (item) =>
+        item.placement ===
+          placement &&
+        isCurrentlyActive(item) &&
+        isRelevantToContext(
+          item,
+          query,
+          topic
+        )
+    );
+  }
+
+  static composeFeed({
+    articles,
+    placement,
+    query,
+    topic,
+  }: ComposeFeedOptions): FeedEntry[] {
+    if (
+      articles.length === 0 ||
+      !isMonetizationPlacementEnabled(
+        placement
+      )
+    ) {
+      return buildFeedEntries({
+        articles,
+        placement,
+        maximumMonetizedItems:
+          0,
+      });
+    }
+
+    const eligibleItems =
+      MonetizationService.getEligibleItems(
+        {
+          placement,
+          query,
+          topic,
+        }
+      );
+
+    const directCampaign =
+      eligibleItems.find(
+        (item) =>
+          item.type ===
+          "direct_sponsorship"
+      );
+
+    const affiliatePromotion =
+      eligibleItems.find(
+        (item) =>
+          item.type ===
+          "poster_affiliate"
+      );
+
+    const googleAd =
+      eligibleItems.find(
+        (item) =>
+          item.type ===
+          "google_native_ad"
+      );
+
+    const selectedPosterPromotion =
+      eligibleItems.find(
+        (item) =>
+          item.type ===
+          "poster_promotion"
+      );
+
+    const placementConfig =
+      MONETIZATION_CONFIG
+        .placements[placement];
+
+    return buildFeedEntries({
+      articles,
+
+      placement,
+
+      directCampaign:
+        directCampaign?.type ===
+        "direct_sponsorship"
+          ? directCampaign
+          : undefined,
+
+      affiliatePromotion:
+        affiliatePromotion?.type ===
+        "poster_affiliate"
+          ? affiliatePromotion
+          : undefined,
+
+      googleAd:
+        googleAd?.type ===
+        "google_native_ad"
+          ? googleAd
+          : undefined,
+
+      posterPromotion:
+        selectedPosterPromotion?.type ===
+        "poster_promotion"
+          ? selectedPosterPromotion
+          : undefined,
+
+      organicItemsBeforeFirstMonetized:
+        placementConfig
+          .organicItemsBeforeFirstMonetized,
+
+      organicItemsBetweenMonetized:
+        placementConfig
+          .organicItemsBetweenMonetized,
+
+      maximumMonetizedItems:
+        placementConfig
+          .maximumMonetizedItems,
+    });
+  }
+}

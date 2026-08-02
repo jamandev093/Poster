@@ -1,0 +1,1184 @@
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import {
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import {
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+
+import PrimaryButton from "../../components/buttons/PrimaryButton";
+import SocialButton from "../../components/buttons/SocialButton";
+import Divider from "../../components/common/Divider";
+
+import {
+  RootStackParamList,
+} from "../../navigation/AppNavigator";
+
+import {
+  Icons,
+  Radius,
+  Spacing,
+  Typography,
+} from "../../theme";
+import useTheme from "../../theme/useTheme";
+
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  "Signup"
+>;
+
+interface SignupErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  terms?: string;
+  form?: string;
+}
+
+interface CompactInputProps {
+  label: string;
+  value: string;
+  placeholder: string;
+  leftIcon:
+    React.ComponentProps<
+      typeof MaterialCommunityIcons
+    >["name"];
+
+  secureTextEntry?: boolean;
+  rightIcon?:
+    React.ComponentProps<
+      typeof MaterialCommunityIcons
+    >["name"];
+
+  rightIconAccessibilityLabel?: string;
+
+  keyboardType?:
+    | "default"
+    | "email-address";
+
+  autoCapitalize?:
+    | "none"
+    | "sentences"
+    | "words"
+    | "characters";
+
+  autoCorrect?: boolean;
+
+  textContentType?:
+    | "name"
+    | "emailAddress"
+    | "newPassword"
+    | "password";
+
+  autoComplete?:
+    | "name"
+    | "email"
+    | "new-password"
+    | "password";
+
+  returnKeyType?:
+    | "next"
+    | "done";
+
+  editable?: boolean;
+
+  validationState?:
+    | "neutral"
+    | "valid"
+    | "invalid";
+
+  error?: string;
+
+  onChangeText: (
+    value: string
+  ) => void;
+
+  onSubmitEditing?: () => void;
+
+  onRightIconPress?: () => void;
+}
+
+const EMAIL_PATTERN =
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const MINIMUM_PASSWORD_LENGTH = 8;
+
+function CompactInput({
+  label,
+  value,
+  placeholder,
+  leftIcon,
+  secureTextEntry = false,
+  rightIcon,
+  rightIconAccessibilityLabel,
+  keyboardType = "default",
+  autoCapitalize = "sentences",
+  autoCorrect = true,
+  textContentType,
+  autoComplete,
+  returnKeyType = "next",
+  editable = true,
+  validationState = "neutral",
+  error,
+  onChangeText,
+  onSubmitEditing,
+  onRightIconPress,
+}: CompactInputProps) {
+  const { colors } = useTheme();
+
+  const borderColor =
+    validationState === "valid"
+      ? colors.success
+      : validationState ===
+          "invalid"
+      ? colors.danger
+      : colors.border;
+
+  const iconColor =
+    validationState === "valid"
+      ? colors.success
+      : validationState ===
+          "invalid"
+      ? colors.danger
+      : colors.icon;
+
+  return (
+    <View style={styles.inputGroup}>
+      <Text
+        style={[
+          styles.inputLabel,
+          {
+            color: colors.text,
+          },
+        ]}
+      >
+        {label}
+      </Text>
+
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor:
+              colors.surface,
+
+            borderColor,
+          },
+        ]}
+      >
+        <MaterialCommunityIcons
+          name={leftIcon}
+          size={Icons.md}
+          color={iconColor}
+        />
+
+        <TextInput
+          value={value}
+          placeholder={placeholder}
+          placeholderTextColor={
+            colors.placeholder
+          }
+          secureTextEntry={
+            secureTextEntry
+          }
+          keyboardType={keyboardType}
+          autoCapitalize={
+            autoCapitalize
+          }
+          autoCorrect={autoCorrect}
+          textContentType={
+            textContentType
+          }
+          autoComplete={autoComplete}
+          returnKeyType={
+            returnKeyType
+          }
+          editable={editable}
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+            },
+          ]}
+          onChangeText={
+            onChangeText
+          }
+          onSubmitEditing={
+            onSubmitEditing
+          }
+        />
+
+        {validationState ===
+        "valid" ? (
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={Icons.md}
+            color={colors.success}
+          />
+        ) : rightIcon &&
+          onRightIconPress ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              rightIconAccessibilityLabel
+            }
+            hitSlop={Spacing.sm}
+            style={
+              styles.inputAction
+            }
+            onPress={
+              onRightIconPress
+            }
+          >
+            <MaterialCommunityIcons
+              name={rightIcon}
+              size={Icons.md}
+              color={colors.icon}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+
+      {error ? (
+        <Text
+          style={[
+            styles.errorText,
+            {
+              color: colors.danger,
+            },
+          ]}
+        >
+          {error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+export default function SignupScreen({
+  navigation,
+}: Props) {
+  const { colors } = useTheme();
+
+  const [name, setName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [
+    passwordVisible,
+    setPasswordVisible,
+  ] = useState(false);
+
+  const [
+    confirmPasswordVisible,
+    setConfirmPasswordVisible,
+  ] = useState(false);
+
+  const [
+    termsAccepted,
+    setTermsAccepted,
+  ] = useState(false);
+
+  const [errors, setErrors] =
+    useState<SignupErrors>({});
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [
+    socialProvider,
+    setSocialProvider,
+  ] = useState<
+    "google" | null
+  >(null);
+
+  const normalizedName =
+    name.trim();
+
+  const normalizedEmail =
+    email.trim().toLowerCase();
+
+  const nameIsValid =
+    normalizedName.length >= 2;
+
+  const emailIsValid =
+    EMAIL_PATTERN.test(
+      normalizedEmail
+    );
+
+  const passwordIsValid =
+    useMemo(() => {
+      return (
+        password.length >=
+          MINIMUM_PASSWORD_LENGTH &&
+        /[A-Za-z]/.test(
+          password
+        ) &&
+        /\d/.test(password)
+      );
+    }, [password]);
+
+  const passwordsMatch =
+    confirmPassword.length > 0 &&
+    password ===
+      confirmPassword;
+
+  const passwordValidationState =
+    useMemo<
+      "neutral" | "valid" | "invalid"
+    >(() => {
+      if (!password) {
+        return "neutral";
+      }
+
+      return passwordIsValid
+        ? "valid"
+        : "invalid";
+    }, [
+      password,
+      passwordIsValid,
+    ]);
+
+  const confirmValidationState =
+    useMemo<
+      "neutral" | "valid" | "invalid"
+    >(() => {
+      if (!confirmPassword) {
+        return "neutral";
+      }
+
+      return passwordsMatch
+        ? "valid"
+        : "invalid";
+    }, [
+      confirmPassword,
+      passwordsMatch,
+    ]);
+
+  const unavailable =
+    submitting ||
+    socialProvider !== null;
+
+  const validate =
+    useCallback(() => {
+      const nextErrors:
+        SignupErrors = {};
+
+      if (!nameIsValid) {
+        nextErrors.name =
+          "Enter your full name.";
+      }
+
+      if (!emailIsValid) {
+        nextErrors.email =
+          "Enter a valid email address.";
+      }
+
+      if (!passwordIsValid) {
+        nextErrors.password =
+          "Use at least 8 characters with a letter and number.";
+      }
+
+      if (!passwordsMatch) {
+        nextErrors.confirmPassword =
+          "Passwords do not match.";
+      }
+
+      if (!termsAccepted) {
+        nextErrors.terms =
+          "Accept the Terms and Privacy Policy.";
+      }
+
+      setErrors(nextErrors);
+
+      return (
+        Object.keys(
+          nextErrors
+        ).length === 0
+      );
+    }, [
+      emailIsValid,
+      nameIsValid,
+      passwordIsValid,
+      passwordsMatch,
+      termsAccepted,
+    ]);
+
+  const handleSignup =
+    useCallback(async () => {
+      if (!validate()) {
+        return;
+      }
+
+      setSubmitting(true);
+      setErrors({});
+
+      try {
+        // TODO:
+        // POST /auth/signup
+        //
+        // await AuthService.signup({
+        //   name: normalizedName,
+        //   email: normalizedEmail,
+        //   password,
+        // });
+
+        navigation.navigate(
+          "OtpVerification",
+          {
+            email:
+              normalizedEmail,
+          }
+        );
+      } catch {
+        setErrors({
+          form:
+            "We couldn't create your account. Please try again.",
+        });
+      } finally {
+        setSubmitting(false);
+      }
+    }, [
+      navigation,
+      normalizedEmail,
+      normalizedName,
+      password,
+      validate,
+    ]);
+
+  const handleGoogleSignup =
+    useCallback(async () => {
+      setSocialProvider(
+        "google"
+      );
+
+      setErrors({});
+
+      try {
+        // TODO:
+        // Implement Google signup
+        // through AuthService.
+
+        navigation.replace(
+          "Username"
+        );
+      } catch {
+        setErrors({
+          form:
+            "We couldn't continue with Google. Please try again.",
+        });
+      } finally {
+        setSocialProvider(
+          null
+        );
+      }
+    }, [navigation]);
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            colors.background,
+        },
+      ]}
+    >
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={
+            false
+          }
+          bounces={false}
+          contentContainerStyle={
+            styles.content
+          }
+        >
+          <View
+            style={
+              styles.navigationRow
+            }
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              hitSlop={Spacing.sm}
+              style={({ pressed }) => [
+                styles.backButton,
+                {
+                  backgroundColor:
+                    colors.surface,
+
+                  borderColor:
+                    colors.border,
+
+                  opacity: pressed
+                    ? 0.62
+                    : 1,
+                },
+              ]}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={Icons.md}
+                color={colors.icon}
+              />
+            </Pressable>
+
+            <Text
+              style={[
+                styles.headerTitle,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              Create account
+            </Text>
+
+            <View
+              style={
+                styles.headerPlaceholder
+              }
+            />
+          </View>
+
+          {errors.form ? (
+            <View
+              accessibilityLiveRegion="polite"
+              style={[
+                styles.formMessage,
+                {
+                  backgroundColor:
+                    colors.surface,
+
+                  borderColor:
+                    colors.danger,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={Icons.sm}
+                color={colors.danger}
+              />
+
+              <Text
+                style={[
+                  styles.formMessageText,
+                  {
+                    color:
+                      colors.danger,
+                  },
+                ]}
+              >
+                {errors.form}
+              </Text>
+            </View>
+          ) : null}
+
+          <CompactInput
+            label="Full name"
+            placeholder="Enter your full name"
+            leftIcon="account-outline"
+            value={name}
+            textContentType="name"
+            autoComplete="name"
+            autoCapitalize="words"
+            returnKeyType="next"
+            editable={!unavailable}
+            error={errors.name}
+            validationState={
+              name.length === 0
+                ? "neutral"
+                : nameIsValid
+                ? "valid"
+                : "invalid"
+            }
+            onChangeText={(value) => {
+              setName(value);
+
+              if (errors.name) {
+                setErrors(
+                  (current) => ({
+                    ...current,
+                    name: undefined,
+                  })
+                );
+              }
+            }}
+          />
+
+          <CompactInput
+            label="Email"
+            placeholder="you@example.com"
+            leftIcon="email-outline"
+            value={email}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+            editable={!unavailable}
+            error={errors.email}
+            validationState={
+              email.length === 0
+                ? "neutral"
+                : emailIsValid
+                ? "valid"
+                : "invalid"
+            }
+            onChangeText={(value) => {
+              setEmail(value);
+
+              if (errors.email) {
+                setErrors(
+                  (current) => ({
+                    ...current,
+                    email: undefined,
+                  })
+                );
+              }
+            }}
+          />
+
+          <CompactInput
+            label="Password"
+            placeholder="Create password"
+            leftIcon="lock-outline"
+            value={password}
+            secureTextEntry={
+              !passwordVisible
+            }
+            rightIcon={
+              passwordVisible
+                ? "eye-off-outline"
+                : "eye-outline"
+            }
+            rightIconAccessibilityLabel={
+              passwordVisible
+                ? "Hide password"
+                : "Show password"
+            }
+            textContentType="newPassword"
+            autoComplete="new-password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+            editable={!unavailable}
+            error={errors.password}
+            validationState={
+              passwordValidationState
+            }
+            onRightIconPress={() => {
+              setPasswordVisible(
+                (current) =>
+                  !current
+              );
+            }}
+            onChangeText={(value) => {
+              setPassword(value);
+
+              if (errors.password) {
+                setErrors(
+                  (current) => ({
+                    ...current,
+                    password:
+                      undefined,
+                  })
+                );
+              }
+            }}
+          />
+
+          <CompactInput
+            label="Re-enter password"
+            placeholder="Re-enter password"
+            leftIcon="lock-check-outline"
+            value={confirmPassword}
+            secureTextEntry={
+              !confirmPasswordVisible
+            }
+            rightIcon={
+              confirmPasswordVisible
+                ? "eye-off-outline"
+                : "eye-outline"
+            }
+            rightIconAccessibilityLabel={
+              confirmPasswordVisible
+                ? "Hide confirmation password"
+                : "Show confirmation password"
+            }
+            textContentType="newPassword"
+            autoComplete="new-password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            editable={!unavailable}
+            error={
+              errors.confirmPassword
+            }
+            validationState={
+              confirmValidationState
+            }
+            onRightIconPress={() => {
+              setConfirmPasswordVisible(
+                (current) =>
+                  !current
+              );
+            }}
+            onSubmitEditing={() => {
+              void handleSignup();
+            }}
+            onChangeText={(value) => {
+              setConfirmPassword(
+                value
+              );
+
+              if (
+                errors.confirmPassword
+              ) {
+                setErrors(
+                  (current) => ({
+                    ...current,
+                    confirmPassword:
+                      undefined,
+                  })
+                );
+              }
+            }}
+          />
+
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityLabel="Accept Terms of Service and Privacy Policy"
+            accessibilityState={{
+              checked:
+                termsAccepted,
+            }}
+            disabled={unavailable}
+            style={
+              styles.termsRow
+            }
+            onPress={() => {
+              setTermsAccepted(
+                (current) =>
+                  !current
+              );
+
+              if (errors.terms) {
+                setErrors(
+                  (current) => ({
+                    ...current,
+                    terms: undefined,
+                  })
+                );
+              }
+            }}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                {
+                  backgroundColor:
+                    termsAccepted
+                      ? colors.primary
+                      : colors.surface,
+
+                  borderColor:
+                    errors.terms
+                      ? colors.danger
+                      : termsAccepted
+                      ? colors.primary
+                      : colors.border,
+                },
+              ]}
+            >
+              {termsAccepted ? (
+                <MaterialCommunityIcons
+                  name="check"
+                  size={Icons.sm}
+                  color={
+                    colors.onPrimary
+                  }
+                />
+              ) : null}
+            </View>
+
+            <Text
+              style={[
+                styles.termsText,
+                {
+                  color:
+                    errors.terms
+                      ? colors.danger
+                      : colors.textSecondary,
+                },
+              ]}
+            >
+              I agree to Poster&apos;s{" "}
+              <Text
+                style={{
+                  color:
+                    colors.primary,
+                  fontWeight: "700",
+                }}
+              >
+                Terms
+              </Text>{" "}
+              and{" "}
+              <Text
+                style={{
+                  color:
+                    colors.primary,
+                  fontWeight: "700",
+                }}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+          </Pressable>
+
+          <PrimaryButton
+            title="Create Account"
+            loading={submitting}
+            disabled={
+              socialProvider !== null
+            }
+            onPress={
+              handleSignup
+            }
+          />
+
+          <View
+            style={
+              styles.dividerContainer
+            }
+          >
+            <Divider label="OR" />
+          </View>
+
+          <SocialButton
+            provider="google"
+            disabled={unavailable}
+            loading={
+              socialProvider ===
+              "google"
+            }
+            onPress={() => {
+              void handleGoogleSignup();
+            }}
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sign in to an existing account"
+            disabled={unavailable}
+            style={({ pressed }) => [
+              styles.signInButton,
+              {
+                opacity: pressed
+                  ? 0.62
+                  : 1,
+              },
+            ]}
+            onPress={() => {
+              navigation.navigate(
+                "Login"
+              );
+            }}
+          >
+            <Text
+              style={[
+                styles.signInPrompt,
+                {
+                  color:
+                    colors.textSecondary,
+                },
+              ]}
+            >
+              Already have an account?
+            </Text>
+
+            <Text
+              style={[
+                styles.signInAction,
+                {
+                  color:
+                    colors.primary,
+                },
+              ]}
+            >
+              Sign In
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
+  flex: {
+    flex: 1,
+  },
+
+  content: {
+    flexGrow: 1,
+
+    justifyContent: "center",
+
+    paddingHorizontal:
+      Spacing.screen,
+
+    paddingTop:
+      Spacing.md,
+
+    paddingBottom:
+      Spacing.lg,
+  },
+
+  navigationRow: {
+    minHeight: 46,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent:
+      "space-between",
+
+    marginBottom:
+      Spacing.lg,
+  },
+
+  backButton: {
+    width: 42,
+
+    height: 42,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    borderWidth:
+      StyleSheet.hairlineWidth,
+
+    borderRadius:
+      Radius.md,
+  },
+
+  headerTitle: {
+    ...Typography.headline,
+
+    fontWeight: "800",
+
+    textAlign: "center",
+  },
+
+  headerPlaceholder: {
+    width: 42,
+  },
+
+  formMessage: {
+    minHeight: 42,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    borderWidth:
+      StyleSheet.hairlineWidth,
+
+    borderRadius:
+      Radius.md,
+
+    paddingHorizontal:
+      Spacing.md,
+
+    marginBottom:
+      Spacing.sm,
+  },
+
+  formMessageText: {
+    ...Typography.small,
+
+    flex: 1,
+
+    marginLeft:
+      Spacing.sm,
+  },
+
+  inputGroup: {
+    marginBottom:
+      Spacing.md,
+  },
+
+  inputLabel: {
+    ...Typography.caption,
+
+    fontWeight: "700",
+
+    marginBottom:
+      Spacing.xs,
+  },
+
+  inputContainer: {
+    minHeight: 52,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    borderWidth: 1,
+
+    borderRadius:
+      Radius.lg,
+
+    paddingHorizontal:
+      Spacing.md,
+  },
+
+  input: {
+    flex: 1,
+
+    minHeight: 50,
+
+    ...Typography.body,
+
+    paddingHorizontal:
+      Spacing.md,
+
+    paddingVertical: 0,
+  },
+
+  inputAction: {
+    width: 34,
+
+    height: 42,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+  },
+
+  errorText: {
+    ...Typography.small,
+
+    marginTop:
+      Spacing.xs,
+  },
+
+  termsRow: {
+    minHeight: 38,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginBottom:
+      Spacing.md,
+  },
+
+  checkbox: {
+    width: 24,
+
+    height: 24,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    borderWidth: 1,
+
+    borderRadius:
+      Radius.xs,
+
+    flexShrink: 0,
+  },
+
+  termsText: {
+    ...Typography.small,
+
+    flex: 1,
+
+    lineHeight: 18,
+
+    marginLeft:
+      Spacing.sm,
+  },
+
+  dividerContainer: {
+    marginVertical:
+      Spacing.md,
+  },
+
+
+  signInButton: {
+    minHeight: 40,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    marginTop:
+      Spacing.md,
+  },
+
+  signInPrompt: {
+    ...Typography.small,
+  },
+
+  signInAction: {
+    ...Typography.small,
+
+    fontWeight: "800",
+
+    marginLeft:
+      Spacing.xs,
+  },
+});
