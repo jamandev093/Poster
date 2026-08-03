@@ -179,12 +179,19 @@
   color: #047857;
 }
 
+.statusMessage,
 .errorMessage,
 .successMessage {
   margin: 0;
   padding: 12px 14px;
   border-radius: 10px;
   line-height: 1.5;
+}
+
+.statusMessage {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1e3a8a;
 }
 
 .errorMessage {

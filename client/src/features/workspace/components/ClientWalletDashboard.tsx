@@ -483,6 +483,9 @@ export default function ClientWalletDashboard() {
                   wallet={
                     fundingPanelWallet
                   }
+                  onFundingComplete={
+                    refresh
+                  }
                 />
               ) : (
                 <div

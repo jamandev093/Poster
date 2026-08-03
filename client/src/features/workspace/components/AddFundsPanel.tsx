@@ -3,11 +3,20 @@
 import {
   useMemo,
   useState,
+  type FormEvent,
 } from "react";
 
 import {
   createWalletFundingOrder,
 } from "../services/wallet-funding.service";
+
+import {
+  openRazorpayCheckout,
+} from "../services/razorpay-checkout.service";
+
+import {
+  verifyWalletFundingPayment,
+} from "../services/wallet-payment-verification.service";
 
 import {
   majorToMinorAmount,
@@ -28,9 +37,18 @@ import type {
 
 import styles from "./AddFundsPanel.module.css";
 
+type SubmissionStep =
+  | "idle"
+  | "creating_order"
+  | "checkout"
+  | "verifying";
+
 interface AddFundsPanelProps {
   wallet:
     AdvertiserWallet;
+
+  onFundingComplete?:
+    () => Promise<void> | void;
 }
 
 function minorToInputValue(
@@ -43,8 +61,39 @@ function minorToInputValue(
   );
 }
 
+function getErrorMessage(
+  error:
+    unknown
+): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Wallet funding could not be completed.";
+}
+
+function getSubmitLabel(
+  step:
+    SubmissionStep
+): string {
+  switch (step) {
+    case "creating_order":
+      return "Creating secure order...";
+
+    case "checkout":
+      return "Opening Razorpay...";
+
+    case "verifying":
+      return "Verifying payment...";
+
+    case "idle":
+      return "Continue with Razorpay";
+  }
+}
+
 export default function AddFundsPanel({
   wallet,
+  onFundingComplete,
 }: AddFundsPanelProps) {
   const [
     amountInput,
@@ -59,20 +108,18 @@ export default function AddFundsPanel({
     );
 
   const [
-    isSubmitting,
-    setIsSubmitting,
+    submissionStep,
+    setSubmissionStep,
   ] =
-    useState(
-      false
+    useState<SubmissionStep>(
+      "idle"
     );
 
   const [
     errorMessage,
     setErrorMessage,
   ] =
-    useState<
-      string | null
-    >(
+    useState<string | null>(
       null
     );
 
@@ -80,9 +127,15 @@ export default function AddFundsPanel({
     successMessage,
     setSuccessMessage,
   ] =
-    useState<
-      string | null
-    >(
+    useState<string | null>(
+      null
+    );
+
+  const [
+    statusMessage,
+    setStatusMessage,
+  ] =
+    useState<string | null>(
       null
     );
 
@@ -117,6 +170,10 @@ export default function AddFundsPanel({
       .availableMinor +
     amountMinor;
 
+  const isSubmitting =
+    submissionStep !==
+    "idle";
+
   function selectPreset(
     presetAmountMinor:
       number
@@ -134,11 +191,15 @@ export default function AddFundsPanel({
     setSuccessMessage(
       null
     );
+
+    setStatusMessage(
+      null
+    );
   }
 
   async function handleSubmit(
     event:
-      React.FormEvent<HTMLFormElement>
+      FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
 
@@ -150,9 +211,11 @@ export default function AddFundsPanel({
       null
     );
 
-    if (
-      validationMessage
-    ) {
+    setStatusMessage(
+      null
+    );
+
+    if (validationMessage) {
       setErrorMessage(
         validationMessage
       );
@@ -160,54 +223,97 @@ export default function AddFundsPanel({
       return;
     }
 
-    setIsSubmitting(
-      true
-    );
-
     try {
+      setSubmissionStep(
+        "creating_order"
+      );
+
+      setStatusMessage(
+        "Creating a secure Razorpay Wallet funding order..."
+      );
+
       const order =
-        await createWalletFundingOrder(
-          {
-            walletId:
-              wallet.id,
+        await createWalletFundingOrder({
+          walletId:
+            wallet.id,
 
-            organizationId:
-              wallet.organizationId,
+          organizationId:
+            wallet.organizationId,
 
-            currency:
-              wallet.currency,
+          currency:
+            wallet.currency,
 
-            amountMinor,
-          }
+          amountMinor,
+        });
+
+      setSubmissionStep(
+        "checkout"
+      );
+
+      setStatusMessage(
+        "Opening Razorpay Checkout..."
+      );
+
+      const checkoutResult =
+        await openRazorpayCheckout(
+          order
         );
 
-      setSuccessMessage(
-        `Funding order ${order.fundingOrderId} is ready for secure Razorpay Checkout.`
+      setSubmissionStep(
+        "verifying"
       );
 
-      /*
-       * The next batch will open Razorpay Checkout using:
-       *
-       * - order.providerOrderId;
-       * - order.publicKeyId;
-       * - order.amountMinor;
-       * - order.currency.
-       *
-       * The browser callback will not credit the Wallet.
-       * Backend verification and Razorpay webhook processing
-       * remain authoritative.
-       */
-    } catch (
-      error
-    ) {
+      setStatusMessage(
+        "Verifying payment with Poster Backend..."
+      );
+
+      const verification =
+        await verifyWalletFundingPayment({
+          fundingOrderId:
+            order.fundingOrderId,
+
+          providerOrderId:
+            checkoutResult.providerOrderId,
+
+          providerPaymentId:
+            checkoutResult.providerPaymentId,
+
+          providerSignature:
+            checkoutResult.providerSignature,
+
+          amountMinor:
+            order.amountMinor,
+
+          currency:
+            order.currency,
+        });
+
+      if (onFundingComplete) {
+        await onFundingComplete();
+      }
+
+      setSuccessMessage(
+        verification.replay
+          ? "This payment was already verified. Wallet data has been refreshed."
+          : "Payment verified by Poster Backend. Wallet data has been refreshed."
+      );
+
+      setStatusMessage(
+        null
+      );
+    } catch (error) {
+      setStatusMessage(
+        null
+      );
+
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Wallet funding could not be started."
+        getErrorMessage(
+          error
+        )
       );
     } finally {
-      setIsSubmitting(
-        false
+      setSubmissionStep(
+        "idle"
       );
     }
   }
@@ -218,6 +324,9 @@ export default function AddFundsPanel({
         styles.panel
       }
       aria-labelledby="add-funds-title"
+      aria-busy={
+        isSubmitting
+      }
     >
       <div
         className={
@@ -264,6 +373,9 @@ export default function AddFundsPanel({
           className={
             styles.presetFieldset
           }
+          disabled={
+            isSubmitting
+          }
         >
           <legend>
             Choose an amount
@@ -275,9 +387,7 @@ export default function AddFundsPanel({
             }
           >
             {WALLET_FUNDING_PRESET_AMOUNTS_MINOR.map(
-              (
-                presetAmountMinor
-              ) => {
+              presetAmountMinor => {
                 const selected =
                   presetAmountMinor ===
                   amountMinor;
@@ -297,10 +407,11 @@ export default function AddFundsPanel({
                       selected
                     }
                     onClick={
-                      () =>
+                      () => {
                         selectPreset(
                           presetAmountMinor
-                        )
+                        );
+                      }
                     }
                   >
                     {formatMoneyMinor(
@@ -328,9 +439,7 @@ export default function AddFundsPanel({
               styles.moneyInput
             }
           >
-            <span
-              aria-hidden="true"
-            >
+            <span aria-hidden="true">
               
             </span>
 
@@ -344,9 +453,7 @@ export default function AddFundsPanel({
               value={
                 amountInput
               }
-              onChange={(
-                event
-              ) => {
+              onChange={event => {
                 setAmountInput(
                   event.target.value
                 );
@@ -358,8 +465,15 @@ export default function AddFundsPanel({
                 setSuccessMessage(
                   null
                 );
+
+                setStatusMessage(
+                  null
+                );
               }}
               aria-describedby="wallet-funding-help"
+              disabled={
+                isSubmitting
+              }
               required
             />
           </div>
@@ -407,7 +521,7 @@ export default function AddFundsPanel({
             }
           >
             <span>
-              Balance after verified payment
+              Balance after Backend verification
             </span>
 
             <strong>
@@ -418,6 +532,17 @@ export default function AddFundsPanel({
             </strong>
           </div>
         </div>
+
+        {statusMessage ? (
+          <p
+            className={
+              styles.statusMessage
+            }
+            role="status"
+          >
+            {statusMessage}
+          </p>
+        ) : null}
 
         {errorMessage ? (
           <p
@@ -458,14 +583,15 @@ export default function AddFundsPanel({
               )
             }
           >
-            {isSubmitting
-              ? "Preparing secure checkout…"
-              : "Continue with Razorpay"}
+            {getSubmitLabel(
+              submissionStep
+            )}
           </button>
 
           <p>
-            Wallet funds are credited only after Backend
-            verification and a valid Razorpay webhook.
+            Browser payment callbacks are submitted to
+            Poster Backend for signature verification. Razorpay
+            webhooks remain the final reconciliation source.
           </p>
         </div>
       </form>
