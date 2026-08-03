@@ -33,6 +33,7 @@ import helmet
 
 import Fastify, {
   type FastifyInstance,
+  type FastifyRequest,
 } from "fastify";
 
 import {
@@ -92,6 +93,11 @@ import {
   createClientCommercialRequestService,
   type ClientCommercialRequestService,
 } from "./application/monetization/client-commercial-request.service.js";
+
+import {
+  createProductionWalletFundingService,
+  type WalletFundingService,
+} from "./application/payments/index.js";
 
 import {
   createAuthorizationContextService,
@@ -158,6 +164,11 @@ import {
 } from "./routes/index.js";
 
 import {
+  ClientWalletRouteAuthenticationError,
+  createClientWalletRoutes,
+  type ClientWalletRouteActor,
+} from "./routes/client-wallet.routes.js";
+import {
   adminAudienceInsightsRoutes,
 } from "./routes/admin-audience-insights.routes.js";
 
@@ -186,6 +197,9 @@ export interface BuildAppOptions {
 
   clientCommercialRequestService?:
     ClientCommercialRequestService;
+
+  walletFundingService?:
+    WalletFundingService;
 
   adminUserMetricsService?:
     AdminUserMetricsService;
@@ -238,6 +252,43 @@ export interface BuildAppOptions {
     PasswordResetService;
 }
 
+const CLIENT_WALLET_ORGANIZATION_ROLES =
+  new Set<string>([
+    "owner",
+    "admin",
+    "finance",
+  ]);
+
+async function authenticateClientWalletRequest(
+  request: FastifyRequest
+): Promise<ClientWalletRouteActor> {
+  const context =
+    request.authorizationContext;
+
+  if (!context) {
+    throw new ClientWalletRouteAuthenticationError();
+  }
+
+  const membership =
+    context.organizationMemberships.find(
+      candidate =>
+        CLIENT_WALLET_ORGANIZATION_ROLES.has(
+          candidate.role
+        )
+    );
+
+  if (!membership) {
+    throw new ClientWalletRouteAuthenticationError();
+  }
+
+  return {
+    userId:
+      context.userId,
+
+    organizationId:
+      membership.organizationId,
+  };
+}
 export async function buildApp(
   options:
     BuildAppOptions =
@@ -567,6 +618,18 @@ export async function buildApp(
         createClientCommercialRequestService(),
     }
   );
+  await app.register(
+    createClientWalletRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletRequest,
+
+      walletFundingService:
+        options
+          .walletFundingService ??
+        createProductionWalletFundingService(),
+    })
+  );
+
 
   await app.register(
     adminAnalyticsRoutes,
