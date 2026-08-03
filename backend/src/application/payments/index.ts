@@ -5,3 +5,5 @@ export * from "./wallet-crediting.errors.js";
 export * from "./wallet-crediting.service.js";
 export * from "./wallet-crediting.production.js";
 export * from "./client-wallet-read.service.js";
+export * from "./client-wallet-read.repository.js";
+export * from "./client-wallet-read.production.js";

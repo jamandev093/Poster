@@ -188,6 +188,38 @@ export interface ClientWalletReadService {
   ) => Promise<ClientWalletReadCampaignAllocation[]>;
 }
 
+export interface ClientWalletReadServiceDependencies {
+  findWallet: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadWallet | null>;
+
+  listFundingOrders: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadFundingOrder[]>;
+
+  listLedgerEntries: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadLedgerEntry[]>;
+
+  listPayments: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadPayment[]>;
+
+  listInvoices: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadInvoice[]>;
+
+  listRefunds: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadRefund[]>;
+
+  listCampaignAllocations: (
+    input: ClientWalletReadRequest
+  ) => Promise<ClientWalletReadCampaignAllocation[]>;
+
+  now: () => Date;
+}
+
 export class ClientWalletReadValidationError extends Error {
   readonly code =
     "client_wallet_read_validation_failed";
@@ -198,4 +230,159 @@ export class ClientWalletReadValidationError extends Error {
     super(message);
     this.name = "ClientWalletReadValidationError";
   }
+}
+
+function normalizeReadRequest(
+  input: ClientWalletReadRequest
+): ClientWalletReadRequest {
+  const organizationId =
+    input.organizationId.trim();
+
+  if (organizationId.length === 0) {
+    throw new ClientWalletReadValidationError(
+      "organizationId is required."
+    );
+  }
+
+  if (
+    !Number.isSafeInteger(input.limit) ||
+    input.limit < 1 ||
+    input.limit > 100
+  ) {
+    throw new ClientWalletReadValidationError(
+      "limit must be between 1 and 100."
+    );
+  }
+
+  return {
+    organizationId,
+    limit:
+      input.limit,
+  };
+}
+
+export function createClientWalletReadService(
+  dependencies: ClientWalletReadServiceDependencies
+): ClientWalletReadService {
+  return {
+    async getOverview(
+      input
+    ) {
+      const request =
+        normalizeReadRequest(
+          input
+        );
+
+      const [
+        wallet,
+        fundingOrders,
+        ledgerEntries,
+        payments,
+        invoices,
+        refunds,
+        campaignAllocations,
+      ] =
+        await Promise.all([
+          dependencies.findWallet(
+            request
+          ),
+
+          dependencies.listFundingOrders(
+            request
+          ),
+
+          dependencies.listLedgerEntries(
+            request
+          ),
+
+          dependencies.listPayments(
+            request
+          ),
+
+          dependencies.listInvoices(
+            request
+          ),
+
+          dependencies.listRefunds(
+            request
+          ),
+
+          dependencies.listCampaignAllocations(
+            request
+          ),
+        ]);
+
+      return {
+        wallet,
+        fundingOrders,
+        ledgerEntries,
+        payments,
+        invoices,
+        refunds,
+        campaignAllocations,
+        generatedAt:
+          dependencies.now().toISOString(),
+      };
+    },
+
+    async listFundingOrders(
+      input
+    ) {
+      return await dependencies.listFundingOrders(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+
+    async listLedgerEntries(
+      input
+    ) {
+      return await dependencies.listLedgerEntries(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+
+    async listPayments(
+      input
+    ) {
+      return await dependencies.listPayments(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+
+    async listInvoices(
+      input
+    ) {
+      return await dependencies.listInvoices(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+
+    async listRefunds(
+      input
+    ) {
+      return await dependencies.listRefunds(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+
+    async listCampaignAllocations(
+      input
+    ) {
+      return await dependencies.listCampaignAllocations(
+        normalizeReadRequest(
+          input
+        )
+      );
+    },
+  };
 }
