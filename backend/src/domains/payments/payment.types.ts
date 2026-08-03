@@ -1,8 +1,16 @@
-﻿export const PAYMENT_CURRENCY_CODES = ["INR"] as const;
+export const PAYMENT_CURRENCY_CODES = ["INR"] as const;
 export type PaymentCurrencyCode = (typeof PAYMENT_CURRENCY_CODES)[number];
 
 export const PAYMENT_PROVIDERS = ["razorpay"] as const;
 export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
+
+export const WALLET_STATUSES = [
+  "active",
+  "frozen",
+  "closed",
+] as const;
+
+export type WalletStatus = (typeof WALLET_STATUSES)[number];
 
 export const WALLET_FUNDING_ORDER_STATUSES = [
   "created",
@@ -44,9 +52,44 @@ export const LEDGER_ENTRY_DIRECTIONS = [
 export type LedgerEntryDirection =
   (typeof LEDGER_ENTRY_DIRECTIONS)[number];
 
+export const LEDGER_ENTRY_STATUSES = [
+  "pending",
+  "posted",
+  "voided",
+  "reversed",
+] as const;
+
+export type LedgerEntryStatus =
+  (typeof LEDGER_ENTRY_STATUSES)[number];
+
 export interface PaymentValidationError {
   field: string;
   message: string;
+}
+
+export interface MoneyAmount {
+  minorUnits: bigint;
+  currency: PaymentCurrencyCode;
+}
+
+export interface AdvertiserWalletRecord {
+  id: string;
+  organizationId: string;
+  currency: PaymentCurrencyCode;
+  status: WalletStatus;
+  availableBalance: MoneyAmount;
+  reservedBalance: MoneyAmount;
+  totalCredited: MoneyAmount;
+  totalSpent: MoneyAmount;
+  totalRefunded: MoneyAmount;
+  createdAt: Date;
+  updatedAt: Date;
+  rowVersion: string;
+}
+
+export interface CreateAdvertiserWalletInput {
+  organizationId: string;
+  currency: PaymentCurrencyCode;
 }
 
 export interface CreateWalletFundingOrderInput {
@@ -75,4 +118,35 @@ export interface CreateLedgerEntryInput {
   paymentId?: string | null;
   refundId?: string | null;
   providerReference?: string | null;
+}
+
+export interface CreateAdvertiserWalletLedgerEntryInput
+  extends CreateLedgerEntryInput {
+  fundingOrderId?: string | null;
+  allocationId?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AdvertiserWalletLedgerEntryRecord {
+  id: string;
+  organizationId: string;
+  walletId: string;
+  fundingOrderId: string | null;
+  campaignId: string | null;
+  allocationId: string | null;
+  invoiceId: string | null;
+  paymentId: string | null;
+  refundId: string | null;
+  entryType: LedgerEntryType;
+  direction: LedgerEntryDirection;
+  status: LedgerEntryStatus;
+  amount: MoneyAmount;
+  balanceBefore: MoneyAmount;
+  balanceAfter: MoneyAmount;
+  idempotencyKey: string;
+  providerReference: string | null;
+  metadata: Record<string, unknown>;
+  createdByUserId: string;
+  createdAt: Date;
+  rowVersion: string;
 }
