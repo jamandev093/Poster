@@ -103,8 +103,12 @@ import {
 
 import {
   createRazorpayPaymentSignatureVerifier,
+  createRazorpayWebhookVerifier,
+  RazorpayWebhookValidationError,
   type RazorpayPaymentSignatureVerifier,
+  type RazorpayWebhookVerifier,
   type VerifyRazorpayPaymentSignatureInput,
+  type VerifyRazorpayWebhookSignatureInput,
 } from "./integrations/payments/index.js";
 import {
   createAuthorizationContextService,
@@ -180,6 +184,10 @@ import {
   createClientWalletPaymentRoutes,
   type ClientWalletPaymentRouteActor,
 } from "./routes/client-wallet-payment.routes.js";
+
+import {
+  createRazorpayWebhookRoutes,
+} from "./routes/razorpay-webhook.routes.js";
 import {
   adminAudienceInsightsRoutes,
 } from "./routes/admin-audience-insights.routes.js";
@@ -217,6 +225,12 @@ export interface BuildAppOptions {
 
   razorpayPaymentSignatureVerifier?:
     RazorpayPaymentSignatureVerifier;
+
+  razorpayWebhookVerifier?:
+    RazorpayWebhookVerifier;
+
+  paymentWebhookSystemActorUserId?:
+    string;
 
   adminUserMetricsService?:
     AdminUserMetricsService;
@@ -370,6 +384,105 @@ function createRuntimeRazorpayPaymentSignatureVerifier(
     },
   };
 }
+const CAPTURED_JSON_RAW_BODY =
+  Symbol("capturedJsonRawBody");
+
+type RequestWithCapturedJsonRawBody =
+  FastifyRequest & {
+    [CAPTURED_JSON_RAW_BODY]?:
+      string | Buffer;
+  };
+
+function registerJsonBodyRawCapture(
+  app: FastifyInstance
+): void {
+  app.removeContentTypeParser(
+    "application/json"
+  );
+
+  app.addContentTypeParser(
+    "application/json",
+    {
+      parseAs:
+        "buffer",
+    },
+    (
+      request,
+      body,
+      done
+    ) => {
+      (
+        request as RequestWithCapturedJsonRawBody
+      )[CAPTURED_JSON_RAW_BODY] =
+        body;
+
+      try {
+        done(
+          null,
+          JSON.parse(
+            body.toString("utf8")
+          ) as unknown
+        );
+      } catch (error) {
+        done(
+          error as Error,
+          undefined
+        );
+      }
+    }
+  );
+}
+
+async function readCapturedJsonRawBody(
+  request: FastifyRequest
+): Promise<string | Buffer> {
+  const rawBody =
+    (
+      request as RequestWithCapturedJsonRawBody
+    )[CAPTURED_JSON_RAW_BODY];
+
+  if (rawBody === undefined) {
+    throw new RazorpayWebhookValidationError(
+      "Raw Razorpay webhook body was not captured."
+    );
+  }
+
+  return rawBody;
+}
+
+function createRuntimeRazorpayWebhookVerifier(
+  webhookSecret:
+    string | undefined
+): RazorpayWebhookVerifier {
+  const createVerifier =
+    () =>
+      createRazorpayWebhookVerifier({
+        webhookSecret:
+          webhookSecret ?? "",
+      });
+
+  return {
+    verifyWebhookSignature(
+      input:
+        VerifyRazorpayWebhookSignatureInput
+    ) {
+      return createVerifier()
+        .verifyWebhookSignature(
+          input
+        );
+    },
+
+    assertWebhookSignature(
+      input:
+        VerifyRazorpayWebhookSignatureInput
+    ) {
+      return createVerifier()
+        .assertWebhookSignature(
+          input
+        );
+    },
+  };
+}
 export async function buildApp(
   options:
     BuildAppOptions =
@@ -415,7 +528,9 @@ export async function buildApp(
         "x-request-id",
     });
 
-  await app.register(
+
+  registerJsonBodyRawCapture(app);
+await app.register(
     adminSystemStatusRoutes,
     {
       prefix:
@@ -728,6 +843,31 @@ export async function buildApp(
         createProductionWalletCreditingService(),
     })
   );
+  await app.register(
+    createRazorpayWebhookRoutes({
+      webhookVerifier:
+        options
+          .razorpayWebhookVerifier ??
+        createRuntimeRazorpayWebhookVerifier(
+          process.env.RAZORPAY_WEBHOOK_SECRET
+        ),
+
+      walletCreditingService:
+        options
+          .walletCreditingService ??
+        createProductionWalletCreditingService(),
+
+      readRawBody:
+        readCapturedJsonRawBody,
+
+      systemActorUserId:
+        options
+          .paymentWebhookSystemActorUserId ??
+        process.env.POSTER_SYSTEM_USER_ID ??
+        "",
+    })
+  );
+
 
 
 
