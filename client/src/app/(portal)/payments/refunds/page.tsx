@@ -1,68 +1,21 @@
 import type {
-  OrganizationId,
-} from "@/features/workspace/advertising/advertising.types";
+  Metadata,
+} from "next";
 
-import {
-  RefundsDashboardPanel,
-} from "@/features/workspace/components";
+import ClientWalletRecordsPage from "@/features/workspace/components/ClientWalletRecordsPage";
 
-import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
+export const metadata: Metadata = {
+  title:
+    "Refunds | Poster Client",
 
-function normalizeOrganizationId(
-  value:
-    string
-): OrganizationId {
-  const normalized =
-    value.trim();
+  description:
+    "Review authoritative Poster Client Wallet and payment records from the Backend.",
+};
 
-  if (
-    !normalized.startsWith(
-      "ORG-"
-    )
-  ) {
-    throw new Error(
-      `Invalid organization ID: ${value}`
-    );
-  }
-
-  return normalized as
-    OrganizationId;
-}
-
-export default function RefundsPage() {
-  const organization =
-    getCurrentOrganization();
-
+export default function Page() {
   return (
-    <>
-      <header className="pageHeader">
-        <div>
-          <div className="pageEyebrow">
-            Payment adjustments
-          </div>
-
-          <h1 className="pageTitle">
-            Refunds
-          </h1>
-
-          <p className="pageDescription">
-            Review refund requests, approval amounts,
-            processing status, provider references, and
-            completed refunds.
-          </p>
-        </div>
-      </header>
-
-      <RefundsDashboardPanel
-        currency="INR"
-        organizationId={
-          normalizeOrganizationId(
-            organization.id
-          )
-        }
-      />
-    </>
+    <ClientWalletRecordsPage
+      view="refunds"
+    />
   );
 }

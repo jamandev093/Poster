@@ -1,70 +1,21 @@
-﻿import {
-  PaymentDashboardPanel,
-} from "@/features/workspace/components";
-
 import type {
-  OrganizationId,
-} from "@/features/workspace/advertising/advertising.types";
+  Metadata,
+} from "next";
 
-import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
+import ClientWalletRecordsPage from "@/features/workspace/components/ClientWalletRecordsPage";
 
-function normalizeOrganizationId(
-  value:
-    string
-): OrganizationId {
-  const normalized =
-    value.trim();
+export const metadata: Metadata = {
+  title:
+    "Payments | Poster Client",
 
-  if (
-    !normalized.startsWith(
-      "ORG-"
-    )
-  ) {
-    throw new Error(
-      `Invalid organization ID: ${value}`
-    );
-  }
+  description:
+    "Review authoritative Poster Client Wallet and payment records from the Backend.",
+};
 
-  return normalized as
-    OrganizationId;
-}
-
-export default function PaymentsPage() {
-  const organization =
-    getCurrentOrganization();
-
-  const organizationId =
-    normalizeOrganizationId(
-      organization.id
-    );
-
+export default function Page() {
   return (
-    <>
-      <header className="pageHeader">
-        <div>
-          <div className="pageEyebrow">
-            Campaign funding
-          </div>
-
-          <h1 className="pageTitle">
-            Payments
-          </h1>
-
-          <p className="pageDescription">
-            Review verified payments, campaign balances, finalized spend,
-            refunds, and settlement records.
-          </p>
-        </div>
-      </header>
-
-      <PaymentDashboardPanel
-        currency="INR"
-        organizationId={
-          organizationId
-        }
-      />
-    </>
+    <ClientWalletRecordsPage
+      view="payments"
+    />
   );
 }

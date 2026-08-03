@@ -1,67 +1,21 @@
 import type {
-  OrganizationId,
-} from "@/features/workspace/advertising/advertising.types";
+  Metadata,
+} from "next";
 
-import {
-  InvoicesDashboardPanel,
-} from "@/features/workspace/components";
+import ClientWalletRecordsPage from "@/features/workspace/components/ClientWalletRecordsPage";
 
-import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
+export const metadata: Metadata = {
+  title:
+    "Invoices | Poster Client",
 
-function normalizeOrganizationId(
-  value:
-    string
-): OrganizationId {
-  const normalized =
-    value.trim();
+  description:
+    "Review authoritative Poster Client Wallet and payment records from the Backend.",
+};
 
-  if (
-    !normalized.startsWith(
-      "ORG-"
-    )
-  ) {
-    throw new Error(
-      `Invalid organization ID: ${value}`
-    );
-  }
-
-  return normalized as
-    OrganizationId;
-}
-
-export default function InvoicesPage() {
-  const organization =
-    getCurrentOrganization();
-
+export default function Page() {
   return (
-    <>
-      <header className="pageHeader">
-        <div>
-          <div className="pageEyebrow">
-            Billing documents
-          </div>
-
-          <h1 className="pageTitle">
-            Invoices
-          </h1>
-
-          <p className="pageDescription">
-            Review invoice status, payment obligations, due
-            dates, and invoice documents.
-          </p>
-        </div>
-      </header>
-
-      <InvoicesDashboardPanel
-        currency="INR"
-        organizationId={
-          normalizeOrganizationId(
-            organization.id
-          )
-        }
-      />
-    </>
+    <ClientWalletRecordsPage
+      view="invoices"
+    />
   );
 }
