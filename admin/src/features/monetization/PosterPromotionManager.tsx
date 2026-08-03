@@ -758,7 +758,7 @@ export default function PosterPromotionManager() {
           </h2>
 
           <p>
-            Manage authoritative Poster-owned campaigns from the Backend. Demo
+            Manage authoritative Poster-owned campaigns from the Backend. Financial
             records, local audit history, and fake performance metrics have
             been removed.
           </p>

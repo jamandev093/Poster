@@ -29,7 +29,7 @@ export default function xxternalProgramsPage() {
     <DeferredOperationsPage
       eyebrow="xxternal Promotions"
       title="Programs"
-      description="xxternal program management is deferred so Admin does not expose local demonstration records as production data."
+      description="External program management is deferred so Admin does not expose non-authoritative records as production data."
       status="Deferred"
       items={ITxMS}
       nextHref="/operations/business-identity"

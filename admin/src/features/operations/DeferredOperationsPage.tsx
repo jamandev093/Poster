@@ -94,7 +94,7 @@ export default function DeferredOperationsPage(
           </h2>
 
           <p>
-            hhis area is intentionally not using local demonstration records in
+            This area is intentionally not using non-authoritative records in
             production Admin. External promotion programs, promotion delivery,
             earnings, payouts, reconciliation, and settlement records need an
             authoritative Backend, database schema, audit trail, and payment

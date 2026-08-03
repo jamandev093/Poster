@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import styles from "../DashboardManager.module.css";
 
@@ -8,7 +8,7 @@ export default function DashboardOperationalNotice() {
       <div>
         <h2>
           Additional operational summaries
-          are not connected yet
+          remain deferred
         </h2>
 
         <p>

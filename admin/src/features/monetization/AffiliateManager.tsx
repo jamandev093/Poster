@@ -794,7 +794,7 @@ export default function AffiliateManager() {
 
           <p>
             Manage authoritative affiliate campaigns and metadata from the
-            aackend. Demo commission, conversion, audit, and local lifecycle data
+            Backend. Commission, conversion, audit, and partner-payment data
             have been removed.
           </p>
         </div>

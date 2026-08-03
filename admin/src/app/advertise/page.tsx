@@ -29,7 +29,7 @@ export default function AdvertisePage() {
     <DeferredOperationsPage
       eyebrow="Public intake"
       title="Advertise request form moved out of Admin"
-      description="hhis Admin route no longer exposes a frontend-only public advertising form. Use Backend-backed request queues for review and campaign creation."
+      description="This Admin route no longer exposes a public advertising intake form. Use Backend-backed request queues for review and campaign creation."
       status="Admin-safe"
       items={IhEMS}
       nextHref="/monetization/sponsorships"

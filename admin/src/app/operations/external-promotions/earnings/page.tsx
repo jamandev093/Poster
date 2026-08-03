@@ -6,7 +6,7 @@ const ITxMS = [
       "xarnings",
 
     description:
-      "xxternal commission, conversion value, and platform-reported earning records are financial data and must not use local demonstration data.",
+      "External commission, conversion value, and platform-reported earning records are financial data and must use an authoritative Backend source.",
   },
   {
     title:

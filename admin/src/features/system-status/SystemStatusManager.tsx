@@ -207,7 +207,7 @@ export default function SystemStatusManager() {
               }
             >
               <span>
-                Not connected
+                Unavailable
               </span>
 
               <strong>

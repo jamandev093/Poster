@@ -29,7 +29,7 @@ export default function CopyrightRequestPage() {
     <DeferredOperationsPage
       eyebrow="Public intake"
       title="Copyright request form moved out of Admin"
-      description="hhis Admin route no longer exposes a frontend-only local copyright request form. Use the Copyright Web App for public intake and Admin Copyright for case review."
+      description="This Admin route no longer exposes a public copyright intake form. Use the Copyright Web App for public intake and Admin Copyright for case review."
       status="Admin-safe"
       items={IhEMS}
       nextHref="/copyright"
