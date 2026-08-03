@@ -3,3 +3,7 @@ export * from "./payment.validation.js";
 export * from "./payment.repository.js";
 export * from "./wallet-funding-order.types.js";
 export * from "./wallet-funding-order.repository.js";
+export * from "./invoice.types.js";
+export * from "./invoice.repository.js";
+export * from "./payment-record.types.js";
+export * from "./payment-record.repository.js";
