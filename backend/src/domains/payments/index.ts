@@ -9,3 +9,5 @@ export * from "./payment-record.types.js";
 export * from "./payment-record.repository.js";
 export * from "./refund.types.js";
 export * from "./refund.repository.js";
+export * from "./campaign-wallet-allocation.types.js";
+export * from "./campaign-wallet-allocation.repository.js";
