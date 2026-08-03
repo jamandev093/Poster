@@ -95,10 +95,17 @@ import {
 } from "./application/monetization/client-commercial-request.service.js";
 
 import {
+  createProductionWalletCreditingService,
   createProductionWalletFundingService,
+  type WalletCreditingService,
   type WalletFundingService,
 } from "./application/payments/index.js";
 
+import {
+  createRazorpayPaymentSignatureVerifier,
+  type RazorpayPaymentSignatureVerifier,
+  type VerifyRazorpayPaymentSignatureInput,
+} from "./integrations/payments/index.js";
 import {
   createAuthorizationContextService,
   type AuthorizationContextService,
@@ -169,6 +176,11 @@ import {
   type ClientWalletRouteActor,
 } from "./routes/client-wallet.routes.js";
 import {
+  ClientWalletPaymentRouteAuthenticationError,
+  createClientWalletPaymentRoutes,
+  type ClientWalletPaymentRouteActor,
+} from "./routes/client-wallet-payment.routes.js";
+import {
   adminAudienceInsightsRoutes,
 } from "./routes/admin-audience-insights.routes.js";
 
@@ -200,6 +212,11 @@ export interface BuildAppOptions {
 
   walletFundingService?:
     WalletFundingService;
+  walletCreditingService?:
+    WalletCreditingService;
+
+  razorpayPaymentSignatureVerifier?:
+    RazorpayPaymentSignatureVerifier;
 
   adminUserMetricsService?:
     AdminUserMetricsService;
@@ -287,6 +304,70 @@ async function authenticateClientWalletRequest(
 
     organizationId:
       membership.organizationId,
+  };
+}
+async function authenticateClientWalletPaymentRequest(
+  request: FastifyRequest
+): Promise<ClientWalletPaymentRouteActor> {
+  const context =
+    request.authorizationContext;
+
+  if (!context) {
+    throw new ClientWalletPaymentRouteAuthenticationError();
+  }
+
+  const membership =
+    context.organizationMemberships.find(
+      candidate =>
+        CLIENT_WALLET_ORGANIZATION_ROLES.has(
+          candidate.role
+        )
+    );
+
+  if (!membership) {
+    throw new ClientWalletPaymentRouteAuthenticationError();
+  }
+
+  return {
+    userId:
+      context.userId,
+
+    organizationId:
+      membership.organizationId,
+  };
+}
+
+function createRuntimeRazorpayPaymentSignatureVerifier(
+  keySecret:
+    string | undefined
+): RazorpayPaymentSignatureVerifier {
+  const createVerifier =
+    () =>
+      createRazorpayPaymentSignatureVerifier({
+        keySecret:
+          keySecret ?? "",
+      });
+
+  return {
+    verifyPaymentSignature(
+      input:
+        VerifyRazorpayPaymentSignatureInput
+    ) {
+      return createVerifier()
+        .verifyPaymentSignature(
+          input
+        );
+    },
+
+    assertPaymentSignature(
+      input:
+        VerifyRazorpayPaymentSignatureInput
+    ) {
+      return createVerifier()
+        .assertPaymentSignature(
+          input
+        );
+    },
   };
 }
 export async function buildApp(
@@ -629,6 +710,25 @@ export async function buildApp(
         createProductionWalletFundingService(),
     })
   );
+  await app.register(
+    createClientWalletPaymentRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletPaymentRequest,
+
+      signatureVerifier:
+        options
+          .razorpayPaymentSignatureVerifier ??
+        createRuntimeRazorpayPaymentSignatureVerifier(
+          environment.RAZORPAY_KEY_SECRET
+        ),
+
+      walletCreditingService:
+        options
+          .walletCreditingService ??
+        createProductionWalletCreditingService(),
+    })
+  );
+
 
 
   await app.register(
