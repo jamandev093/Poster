@@ -95,8 +95,10 @@ import {
 } from "./application/monetization/client-commercial-request.service.js";
 
 import {
+  createProductionClientWalletReadService,
   createProductionWalletCreditingService,
   createProductionWalletFundingService,
+  type ClientWalletReadService,
   type WalletCreditingService,
   type WalletFundingService,
 } from "./application/payments/index.js";
@@ -175,6 +177,9 @@ import {
 } from "./routes/index.js";
 
 import {
+  createClientWalletReadRoutes,
+} from "./routes/client-wallet-read.routes.js";
+import {
   ClientWalletRouteAuthenticationError,
   createClientWalletRoutes,
   type ClientWalletRouteActor,
@@ -218,6 +223,8 @@ export interface BuildAppOptions {
   clientCommercialRequestService?:
     ClientCommercialRequestService;
 
+  walletReadService?:
+    ClientWalletReadService;
   walletFundingService?:
     WalletFundingService;
   walletCreditingService?:
@@ -814,6 +821,18 @@ await app.register(
         createClientCommercialRequestService(),
     }
   );
+  await app.register(
+    createClientWalletReadRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletRequest,
+
+      walletReadService:
+        options
+          .walletReadService ??
+        createProductionClientWalletReadService(),
+    })
+  );
+
   await app.register(
     createClientWalletRoutes({
       authenticateClientRequest:
