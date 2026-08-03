@@ -27,10 +27,12 @@ export type WalletFundingOrderId =
 
 export type WalletFundingOrderStatus =
   | "created"
+  | "pending_provider"
   | "checkout_opened"
   | "payment_submitted"
   | "verification_pending"
   | "verified"
+  | "credited"
   | "failed"
   | "expired"
   | "cancelled";
