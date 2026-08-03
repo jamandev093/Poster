@@ -25,3 +25,4 @@ export * from "./admin-system-status.routes.js";
 export * from "./admin-campaign.routes.js";
 
 export * from "./admin-analytics.routes.js";
+export * from "./admin-wallet-operations.routes.js";

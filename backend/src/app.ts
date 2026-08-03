@@ -101,6 +101,8 @@ import {
   type ClientWalletReadService,
   type WalletCreditingService,
   type WalletFundingService,
+  createProductionAdminWalletOperationsService,
+  type AdminWalletOperationsService,
 } from "./application/payments/index.js";
 
 import {
@@ -205,6 +207,9 @@ import {
   createDevelopmentEmailDeliveryProvider,
   type EmailDeliveryProvider,
 } from "./services/email/index.js";
+import {
+  adminWalletOperationsRoutes,
+} from "./routes/admin-wallet-operations.routes.js";
 export interface BuildAppOptions {
   adminAnalyticsService?:
     AdminAnalyticsService;
@@ -239,6 +244,8 @@ export interface BuildAppOptions {
   paymentWebhookSystemActorUserId?:
     string;
 
+  adminWalletOperationsService?:
+    AdminWalletOperationsService;
   adminUserMetricsService?:
     AdminUserMetricsService;
 
@@ -890,6 +897,18 @@ await app.register(
 
 
 
+  await app.register(
+    adminWalletOperationsRoutes,
+    {
+      prefix:
+        "/api/v1/admin",
+
+      service:
+        options
+          .adminWalletOperationsService ??
+        createProductionAdminWalletOperationsService(),
+    }
+  );
   await app.register(
     adminAnalyticsRoutes,
     {
