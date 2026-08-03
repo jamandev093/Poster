@@ -16,11 +16,11 @@ import type {
   LedgerEntryStatus,
   LedgerEntryType,
   PaymentCurrencyCode,
+  UpdateAdvertiserWalletBalancesInput,
   WalletStatus,
 } from "./payment.types.js";
 
-interface AdvertiserWalletDatabaseRow
-  extends QueryResultRow {
+interface AdvertiserWalletDatabaseRow extends QueryResultRow {
   id: string;
   organization_id: string;
   currency_code: PaymentCurrencyCode;
@@ -35,8 +35,7 @@ interface AdvertiserWalletDatabaseRow
   row_version: string;
 }
 
-interface AdvertiserWalletLedgerDatabaseRow
-  extends QueryResultRow {
+interface AdvertiserWalletLedgerDatabaseRow extends QueryResultRow {
   id: string;
   organization_id: string;
   wallet_id: string;
@@ -66,20 +65,14 @@ const WALLET_COLUMNS = `
   organization_id,
   currency_code,
   status,
-  available_balance_minor_units::text
-    AS available_balance_minor_units,
-  reserved_balance_minor_units::text
-    AS reserved_balance_minor_units,
-  total_credited_minor_units::text
-    AS total_credited_minor_units,
-  total_spent_minor_units::text
-    AS total_spent_minor_units,
-  total_refunded_minor_units::text
-    AS total_refunded_minor_units,
+  available_balance_minor_units::text AS available_balance_minor_units,
+  reserved_balance_minor_units::text AS reserved_balance_minor_units,
+  total_credited_minor_units::text AS total_credited_minor_units,
+  total_spent_minor_units::text AS total_spent_minor_units,
+  total_refunded_minor_units::text AS total_refunded_minor_units,
   created_at,
   updated_at,
-  row_version::text
-    AS row_version
+  row_version::text AS row_version
 `;
 
 const LEDGER_COLUMNS = `
@@ -95,20 +88,16 @@ const LEDGER_COLUMNS = `
   entry_type,
   direction,
   status,
-  amount_minor_units::text
-    AS amount_minor_units,
+  amount_minor_units::text AS amount_minor_units,
   currency_code,
-  balance_before_minor_units::text
-    AS balance_before_minor_units,
-  balance_after_minor_units::text
-    AS balance_after_minor_units,
+  balance_before_minor_units::text AS balance_before_minor_units,
+  balance_after_minor_units::text AS balance_after_minor_units,
   idempotency_key,
   provider_reference,
   metadata,
   created_by_user_id,
   created_at,
-  row_version::text
-    AS row_version
+  row_version::text AS row_version
 `;
 
 function money(
@@ -116,11 +105,7 @@ function money(
   currency: PaymentCurrencyCode
 ) {
   return {
-    minorUnits:
-      BigInt(
-        minorUnits
-      ),
-
+    minorUnits: BigInt(minorUnits),
     currency,
   };
 }
@@ -129,151 +114,59 @@ function mapWalletDatabaseRow(
   row: AdvertiserWalletDatabaseRow
 ): AdvertiserWalletRecord {
   return {
-    id:
-      row.id,
-
-    organizationId:
-      row.organization_id,
-
-    currency:
-      row.currency_code,
-
-    status:
-      row.status,
-
-    availableBalance:
-      money(
-        row.available_balance_minor_units,
-        row.currency_code
-      ),
-
-    reservedBalance:
-      money(
-        row.reserved_balance_minor_units,
-        row.currency_code
-      ),
-
-    totalCredited:
-      money(
-        row.total_credited_minor_units,
-        row.currency_code
-      ),
-
-    totalSpent:
-      money(
-        row.total_spent_minor_units,
-        row.currency_code
-      ),
-
-    totalRefunded:
-      money(
-        row.total_refunded_minor_units,
-        row.currency_code
-      ),
-
-    createdAt:
-      row.created_at,
-
-    updatedAt:
-      row.updated_at,
-
-    rowVersion:
-      row.row_version,
+    id: row.id,
+    organizationId: row.organization_id,
+    currency: row.currency_code,
+    status: row.status,
+    availableBalance: money(row.available_balance_minor_units, row.currency_code),
+    reservedBalance: money(row.reserved_balance_minor_units, row.currency_code),
+    totalCredited: money(row.total_credited_minor_units, row.currency_code),
+    totalSpent: money(row.total_spent_minor_units, row.currency_code),
+    totalRefunded: money(row.total_refunded_minor_units, row.currency_code),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    rowVersion: row.row_version,
   };
 }
 
 function mapOptionalWalletRow(
   row: AdvertiserWalletDatabaseRow | undefined
 ): AdvertiserWalletRecord | null {
-  return row
-    ? mapWalletDatabaseRow(row)
-    : null;
+  return row ? mapWalletDatabaseRow(row) : null;
 }
 
 function mapLedgerDatabaseRow(
   row: AdvertiserWalletLedgerDatabaseRow
 ): AdvertiserWalletLedgerEntryRecord {
   return {
-    id:
-      row.id,
-
-    organizationId:
-      row.organization_id,
-
-    walletId:
-      row.wallet_id,
-
-    fundingOrderId:
-      row.funding_order_id,
-
-    campaignId:
-      row.campaign_id,
-
-    allocationId:
-      row.allocation_id,
-
-    invoiceId:
-      row.invoice_id,
-
-    paymentId:
-      row.payment_id,
-
-    refundId:
-      row.refund_id,
-
-    entryType:
-      row.entry_type,
-
-    direction:
-      row.direction,
-
-    status:
-      row.status,
-
-    amount:
-      money(
-        row.amount_minor_units,
-        row.currency_code
-      ),
-
-    balanceBefore:
-      money(
-        row.balance_before_minor_units,
-        row.currency_code
-      ),
-
-    balanceAfter:
-      money(
-        row.balance_after_minor_units,
-        row.currency_code
-      ),
-
-    idempotencyKey:
-      row.idempotency_key,
-
-    providerReference:
-      row.provider_reference,
-
-    metadata:
-      row.metadata,
-
-    createdByUserId:
-      row.created_by_user_id,
-
-    createdAt:
-      row.created_at,
-
-    rowVersion:
-      row.row_version,
+    id: row.id,
+    organizationId: row.organization_id,
+    walletId: row.wallet_id,
+    fundingOrderId: row.funding_order_id,
+    campaignId: row.campaign_id,
+    allocationId: row.allocation_id,
+    invoiceId: row.invoice_id,
+    paymentId: row.payment_id,
+    refundId: row.refund_id,
+    entryType: row.entry_type,
+    direction: row.direction,
+    status: row.status,
+    amount: money(row.amount_minor_units, row.currency_code),
+    balanceBefore: money(row.balance_before_minor_units, row.currency_code),
+    balanceAfter: money(row.balance_after_minor_units, row.currency_code),
+    idempotencyKey: row.idempotency_key,
+    providerReference: row.provider_reference,
+    metadata: row.metadata,
+    createdByUserId: row.created_by_user_id,
+    createdAt: row.created_at,
+    rowVersion: row.row_version,
   };
 }
 
 function mapOptionalLedgerRow(
   row: AdvertiserWalletLedgerDatabaseRow | undefined
 ): AdvertiserWalletLedgerEntryRecord | null {
-  return row
-    ? mapLedgerDatabaseRow(row)
-    : null;
+  return row ? mapLedgerDatabaseRow(row) : null;
 }
 
 export async function findAdvertiserWalletByOrganizationId(
@@ -289,15 +182,11 @@ export async function findAdvertiserWalletByOrganizationId(
         WHERE organization_id = $1::uuid
         LIMIT 1
       `,
-      [
-        organizationId,
-      ],
+      [organizationId],
       executor
     );
 
-  return mapOptionalWalletRow(
-    result.rows[0]
-  );
+  return mapOptionalWalletRow(result.rows[0]);
 }
 
 export async function createAdvertiserWallet(
@@ -315,9 +204,7 @@ export async function createAdvertiserWallet(
           $1::uuid,
           $2
         )
-        ON CONFLICT (
-          organization_id
-        )
+        ON CONFLICT (organization_id)
         DO NOTHING
         RETURNING
           ${WALLET_COLUMNS}
@@ -329,10 +216,7 @@ export async function createAdvertiserWallet(
       executor
     );
 
-  const created =
-    mapOptionalWalletRow(
-      result.rows[0]
-    );
+  const created = mapOptionalWalletRow(result.rows[0]);
 
   if (created) {
     return created;
@@ -345,12 +229,44 @@ export async function createAdvertiserWallet(
     );
 
   if (!existing) {
-    throw new Error(
-      "Advertiser Wallet could not be created or retrieved."
-    );
+    throw new Error("Advertiser Wallet could not be created or retrieved.");
   }
 
   return existing;
+}
+
+export async function updateAdvertiserWalletBalances(
+  input: UpdateAdvertiserWalletBalancesInput,
+  executor: DatabaseQueryExecutor
+): Promise<AdvertiserWalletRecord | null> {
+  const result =
+    await executeDatabaseQuery<AdvertiserWalletDatabaseRow>(
+      `
+        UPDATE app.advertiser_wallets
+        SET
+          available_balance_minor_units = $2::bigint,
+          reserved_balance_minor_units = $3::bigint,
+          total_credited_minor_units = $4::bigint,
+          total_spent_minor_units = $5::bigint,
+          total_refunded_minor_units = $6::bigint
+        WHERE id = $1::uuid
+          AND row_version = $7::bigint
+        RETURNING
+          ${WALLET_COLUMNS}
+      `,
+      [
+        input.walletId,
+        input.availableBalanceMinorUnits.toString(),
+        input.reservedBalanceMinorUnits.toString(),
+        input.totalCreditedMinorUnits.toString(),
+        input.totalSpentMinorUnits.toString(),
+        input.totalRefundedMinorUnits.toString(),
+        input.expectedRowVersion,
+      ],
+      executor
+    );
+
+  return mapOptionalWalletRow(result.rows[0]);
 }
 
 export async function findAdvertiserWalletLedgerEntryByIdempotencyKey(
@@ -377,9 +293,7 @@ export async function findAdvertiserWalletLedgerEntryByIdempotencyKey(
       executor
     );
 
-  return mapOptionalLedgerRow(
-    result.rows[0]
-  );
+  return mapOptionalLedgerRow(result.rows[0]);
 }
 
 export async function createAdvertiserWalletLedgerEntry(
@@ -456,18 +370,13 @@ export async function createAdvertiserWalletLedgerEntry(
         input.balanceAfterMinorUnits.toString(),
         input.idempotencyKey,
         input.providerReference ?? null,
-        JSON.stringify(
-          input.metadata ?? {}
-        ),
+        JSON.stringify(input.metadata ?? {}),
         input.actorUserId,
       ],
       executor
     );
 
-  const created =
-    mapOptionalLedgerRow(
-      result.rows[0]
-    );
+  const created = mapOptionalLedgerRow(result.rows[0]);
 
   if (created) {
     return created;
@@ -476,19 +385,14 @@ export async function createAdvertiserWalletLedgerEntry(
   const existing =
     await findAdvertiserWalletLedgerEntryByIdempotencyKey(
       {
-        organizationId:
-          input.organizationId,
-
-        idempotencyKey:
-          input.idempotencyKey,
+        organizationId: input.organizationId,
+        idempotencyKey: input.idempotencyKey,
       },
       executor
     );
 
   if (!existing) {
-    throw new Error(
-      "Advertiser Wallet ledger entry could not be created or retrieved."
-    );
+    throw new Error("Advertiser Wallet ledger entry could not be created or retrieved.");
   }
 
   return existing;

@@ -16,11 +16,11 @@ import type {
 import type {
   AttachWalletFundingProviderOrderInput,
   CreateWalletFundingOrderRepositoryInput,
+  MarkWalletFundingOrderCreditedInput,
   WalletFundingOrderRecord,
 } from "./wallet-funding-order.types.js";
 
-interface WalletFundingOrderDatabaseRow
-  extends QueryResultRow {
+interface WalletFundingOrderDatabaseRow extends QueryResultRow {
   id: string;
   organization_id: string;
   wallet_id: string;
@@ -89,9 +89,7 @@ function mapWalletFundingOrderRow(
 function mapOptionalWalletFundingOrderRow(
   row: WalletFundingOrderDatabaseRow | undefined
 ): WalletFundingOrderRecord | null {
-  return row
-    ? mapWalletFundingOrderRow(row)
-    : null;
+  return row ? mapWalletFundingOrderRow(row) : null;
 }
 
 export async function findWalletFundingOrderById(
@@ -194,8 +192,7 @@ export async function createWalletFundingOrder(
       executor
     );
 
-  const created =
-    mapOptionalWalletFundingOrderRow(result.rows[0]);
+  const created = mapOptionalWalletFundingOrderRow(result.rows[0]);
 
   if (created) {
     return created;
@@ -211,9 +208,7 @@ export async function createWalletFundingOrder(
     );
 
   if (!existing) {
-    throw new Error(
-      "Wallet funding order could not be created or retrieved."
-    );
+    throw new Error("Wallet funding order could not be created or retrieved.");
   }
 
   return existing;
@@ -242,6 +237,33 @@ export async function attachWalletFundingProviderOrder(
         input.providerOrderId,
         input.providerReceipt,
         JSON.stringify(input.providerPayload),
+        input.expectedRowVersion,
+      ],
+      executor
+    );
+
+  return mapOptionalWalletFundingOrderRow(result.rows[0]);
+}
+
+export async function markWalletFundingOrderCredited(
+  input: MarkWalletFundingOrderCreditedInput,
+  executor: DatabaseQueryExecutor
+): Promise<WalletFundingOrderRecord | null> {
+  const result =
+    await executeDatabaseQuery<WalletFundingOrderDatabaseRow>(
+      `
+        UPDATE app.wallet_funding_orders
+        SET
+          status = 'credited',
+          credited_at = $2::timestamptz
+        WHERE id = $1::uuid
+          AND row_version = $3::bigint
+        RETURNING
+          ${WALLET_FUNDING_ORDER_COLUMNS}
+      `,
+      [
+        input.fundingOrderId,
+        input.creditedAt,
         input.expectedRowVersion,
       ],
       executor

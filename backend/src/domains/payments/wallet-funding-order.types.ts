@@ -43,3 +43,8 @@ export interface AttachWalletFundingProviderOrderInput {
   providerPayload: Record<string, unknown>;
   expectedRowVersion: string;
 }
+export interface MarkWalletFundingOrderCreditedInput {
+  fundingOrderId: string;
+  creditedAt: Date;
+  expectedRowVersion: string;
+}

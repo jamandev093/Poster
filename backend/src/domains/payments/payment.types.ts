@@ -150,3 +150,12 @@ export interface AdvertiserWalletLedgerEntryRecord {
   createdAt: Date;
   rowVersion: string;
 }
+export interface UpdateAdvertiserWalletBalancesInput {
+  walletId: string;
+  availableBalanceMinorUnits: bigint;
+  reservedBalanceMinorUnits: bigint;
+  totalCreditedMinorUnits: bigint;
+  totalSpentMinorUnits: bigint;
+  totalRefundedMinorUnits: bigint;
+  expectedRowVersion: string;
+}
