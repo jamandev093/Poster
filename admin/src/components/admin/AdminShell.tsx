@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -41,6 +41,14 @@ const monetizationItems = [
   [
     "/monetization/poster-promotion",
     "Poster Promotion",
+  ],
+  [
+    "/monetization/programmatic",
+    "Programmatic",
+  ],
+  [
+    "/monetization/wallet-operations",
+    "Wallet Operations",
   ],
 ] as const;
 
