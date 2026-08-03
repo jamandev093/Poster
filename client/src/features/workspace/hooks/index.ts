@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Poster workspace hook exports.
  *
  * This file is a React hook import boundary only.
@@ -19,3 +19,4 @@
 export * from "./useAnalyticsDashboard";
 
 export * from "./usePaymentDashboard";
+export * from "./useClientWalletOverview";

@@ -47,3 +47,4 @@ export * from "./LedgerDashboardPanel";
 export { default as WalletDashboard } from "./WalletDashboard";
 
 export { default as AddFundsPanel } from "./AddFundsPanel";
+export { default as ClientWalletDashboard } from "./ClientWalletDashboard";
