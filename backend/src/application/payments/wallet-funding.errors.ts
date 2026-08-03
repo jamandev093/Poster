@@ -24,3 +24,15 @@ export class WalletFundingValidationError extends Error {
       details;
   }
 }
+
+export class WalletFundingConflictError extends Error {
+  readonly code =
+    "wallet_funding_conflict";
+
+  constructor(
+    message: string
+  ) {
+    super(message);
+    this.name = "WalletFundingConflictError";
+  }
+}

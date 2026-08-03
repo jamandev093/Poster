@@ -5,6 +5,7 @@ import type {
 import {
   validateWalletFundingOrderInput,
   type AdvertiserWalletRecord,
+  type AttachWalletFundingProviderOrderInput,
   type CreateAdvertiserWalletInput,
   type CreateWalletFundingOrderInput,
   type CreateWalletFundingOrderRepositoryInput,
@@ -14,6 +15,7 @@ import {
 } from "../../domains/payments/index.js";
 
 import {
+  WalletFundingConflictError,
   WalletFundingValidationError,
 } from "./wallet-funding.errors.js";
 
@@ -43,6 +45,19 @@ export interface StartWalletFundingInput {
     Date | null;
 }
 
+export interface WalletFundingProviderOrderInput {
+  amountMinorUnits: bigint;
+  currency: "INR";
+  receipt: string;
+  notes: Record<string, string>;
+}
+
+export interface WalletFundingProviderOrderResult {
+  providerOrderId: string;
+  receipt: string | null;
+  rawPayload: Record<string, unknown>;
+}
+
 export interface WalletFundingServiceDependencies {
   findWalletByOrganizationId: (
     organizationId: string,
@@ -58,6 +73,15 @@ export interface WalletFundingServiceDependencies {
     input: CreateWalletFundingOrderRepositoryInput,
     executor: DatabaseQueryExecutor
   ) => Promise<WalletFundingOrderRecord>;
+
+  attachProviderOrder?: (
+    input: AttachWalletFundingProviderOrderInput,
+    executor: DatabaseQueryExecutor
+  ) => Promise<WalletFundingOrderRecord | null>;
+
+  createProviderOrder?: (
+    input: WalletFundingProviderOrderInput
+  ) => Promise<WalletFundingProviderOrderResult>;
 
   runTransaction: <Result>(
     operation: (
@@ -143,6 +167,102 @@ function validateFundingRequest(
   }
 }
 
+function createProviderReceipt(
+  order: WalletFundingOrderRecord
+): string {
+  return `wf_${order.id.replaceAll("-", "").slice(0, 32)}`;
+}
+
+async function attachProviderOrderWhenConfigured(
+  order: WalletFundingOrderRecord,
+  dependencies: WalletFundingServiceDependencies
+): Promise<WalletFundingOrderRecord> {
+  const createProviderOrder =
+    dependencies.createProviderOrder;
+
+  const attachProviderOrder =
+    dependencies.attachProviderOrder;
+
+  if (
+    !createProviderOrder ||
+    !attachProviderOrder
+  ) {
+    return order;
+  }
+
+  if (
+    order.providerOrderId !== null ||
+    order.status !== "created"
+  ) {
+    return order;
+  }
+
+  if (order.amount.currency !== "INR") {
+    throw new WalletFundingConflictError(
+      "Only INR Razorpay provider orders are supported for v1."
+    );
+  }
+
+  const receipt =
+    createProviderReceipt(
+      order
+    );
+
+  const providerOrder =
+    await createProviderOrder({
+      amountMinorUnits:
+        order.amount.minorUnits,
+
+      currency:
+        "INR",
+
+      receipt,
+
+      notes: {
+        organizationId:
+          order.organizationId,
+
+        walletId:
+          order.walletId,
+
+        fundingOrderId:
+          order.id,
+      },
+    });
+
+  const attached =
+    await dependencies.runTransaction(
+      async executor =>
+        await attachProviderOrder(
+          {
+            fundingOrderId:
+              order.id,
+
+            providerOrderId:
+              providerOrder.providerOrderId,
+
+            providerReceipt:
+              providerOrder.receipt ?? receipt,
+
+            providerPayload:
+              providerOrder.rawPayload,
+
+            expectedRowVersion:
+              order.rowVersion,
+          },
+          executor
+        )
+    );
+
+  if (!attached) {
+    throw new WalletFundingConflictError(
+      "Wallet funding provider order could not be attached because the funding order changed."
+    );
+  }
+
+  return attached;
+}
+
 export function createWalletFundingService(
   dependencies: WalletFundingServiceDependencies
 ): WalletFundingService {
@@ -159,67 +279,73 @@ export function createWalletFundingService(
         input.provider ??
         "razorpay";
 
-      return await dependencies.runTransaction(
-        async executor => {
-          let wallet =
-            await dependencies.findWalletByOrganizationId(
-              input.organizationId,
-              executor
-            );
-
-          if (!wallet) {
-            wallet =
-              await dependencies.createWallet(
-                {
-                  organizationId:
-                    input.organizationId,
-
-                  currency:
-                    input.currency,
-                },
+      const order =
+        await dependencies.runTransaction(
+          async executor => {
+            let wallet =
+              await dependencies.findWalletByOrganizationId(
+                input.organizationId,
                 executor
               );
+
+            if (!wallet) {
+              wallet =
+                await dependencies.createWallet(
+                  {
+                    organizationId:
+                      input.organizationId,
+
+                    currency:
+                      input.currency,
+                  },
+                  executor
+                );
+            }
+
+            validateFundingRequest(
+              input,
+              wallet.id
+            );
+
+            return await dependencies.createFundingOrder(
+              {
+                organizationId:
+                  input.organizationId,
+
+                walletId:
+                  wallet.id,
+
+                requestedByUserId:
+                  input.actorUserId,
+
+                amountMinorUnits:
+                  input.amountMinorUnits,
+
+                currency:
+                  input.currency,
+
+                provider,
+
+                idempotencyKey:
+                  input.idempotencyKey,
+
+                providerPayload:
+                  input.providerPayload ?? {},
+
+                expiresAt:
+                  resolveFundingOrderExpiry(
+                    input,
+                    dependencies
+                  ),
+              },
+              executor
+            );
           }
+        );
 
-          validateFundingRequest(
-            input,
-            wallet.id
-          );
-
-          return await dependencies.createFundingOrder(
-            {
-              organizationId:
-                input.organizationId,
-
-              walletId:
-                wallet.id,
-
-              requestedByUserId:
-                input.actorUserId,
-
-              amountMinorUnits:
-                input.amountMinorUnits,
-
-              currency:
-                input.currency,
-
-              provider,
-
-              idempotencyKey:
-                input.idempotencyKey,
-
-              providerPayload:
-                input.providerPayload ?? {},
-
-              expiresAt:
-                resolveFundingOrderExpiry(
-                  input,
-                  dependencies
-                ),
-            },
-            executor
-          );
-        }
+      return await attachProviderOrderWhenConfigured(
+        order,
+        dependencies
       );
     },
   };
