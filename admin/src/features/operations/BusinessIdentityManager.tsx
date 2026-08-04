@@ -14,6 +14,7 @@ import {
 } from "./business-identity";
 
 import styles from "./BusinessIdentityManager.module.css";
+import BusinessIdentityPropagationPanel from "./business-identity/BusinessIdentityPropagationPanel";
 
 interface FormState {
   publicBrandName:
@@ -698,6 +699,20 @@ export default function BusinessIdentityManager() {
           details must not publish externally unless explicitly promoted here.
         </p>
       </section>
+
+      <BusinessIdentityPropagationPanel
+        identity={
+          identity
+        }
+        isLoading={
+          isLoading
+        }
+        hasError={
+          Boolean(
+            error
+          )
+        }
+      />
 
       {isLoading ||
       !activeForm ||
