@@ -38,10 +38,6 @@ import type {
 } from "@/features/workspace/workspace.types";
 
 import {
-  getCurrentWalletSummary,
-} from "@/features/workspace/wallet/wallet.selectors";
-
-import {
   majorToMinorAmount,
 } from "@/features/workspace/payments/currency.types";
 
@@ -49,6 +45,9 @@ import {
   canRequestCampaignAllowance,
 } from "@/features/workspace/wallet/wallet.types";
 
+import {
+  useClientWalletOverview,
+} from "@/features/workspace/hooks/useClientWalletOverview";
 import styles from "./NewRequestForm.module.css";
 
 interface NewRequestFormProps {
@@ -398,11 +397,50 @@ function createPreviewReference():
   return `ADV-PREVIEW-${suffix}`;
 }
 
+function walletMinorUnitsToNumber(
+  minorUnits:
+    string |
+    undefined
+): number {
+  if (
+    !minorUnits ||
+    !/^[0-9]+$/.test(
+      minorUnits
+    )
+  ) {
+    return 0;
+  }
+
+  return Number(
+    minorUnits
+  );
+}
 export default function NewRequestForm({
   initialRequest,
 }: NewRequestFormProps) {
-  const walletSummary =
-    getCurrentWalletSummary();
+    const {
+    overview:
+      walletOverview,
+    isLoading:
+      isWalletLoading,
+    errorMessage:
+      walletErrorMessage,
+  } =
+    useClientWalletOverview(
+      20
+    );
+
+  const walletSummary = {
+    availableMinor:
+      walletMinorUnitsToNumber(
+        walletOverview?.wallet?.availableBalance
+          .minorUnits
+      ),
+
+    currency:
+      walletOverview?.wallet?.currency ??
+      "INR",
+  };
 
   const isEditMode =
     initialRequest?.status ===
@@ -917,6 +955,27 @@ export default function NewRequestForm({
 
       return;
     }
+    if (
+      isWalletLoading
+    ) {
+      setError(
+        "Wallet balance is still loading from Poster Backend. Wait a moment and try again."
+      );
+
+      return;
+    }
+
+    if (
+      walletErrorMessage ||
+      !walletOverview?.wallet
+    ) {
+      setError(
+        "Wallet balance could not be verified from Poster Backend. Open Wallet and retry."
+      );
+
+      return;
+    }
+
     const requestedAllowanceMajor =
       Number(
         form.proposedBudget
