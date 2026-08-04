@@ -265,41 +265,182 @@ function parseCommissionTerms(
     >;
 }
 
+function requireTextField(
+  label:
+    string,
+  value:
+    string
+): string {
+  const trimmed =
+    value.trim();
+
+  if (trimmed.length === 0) {
+    throw new Error(
+      `${label} is required.`
+    );
+  }
+
+  return trimmed;
+}
+
+function normalizeRequiredUrl(
+  label:
+    string,
+  value:
+    string
+): string {
+  const trimmed =
+    requireTextField(
+      label,
+      value
+    );
+
+  let parsed:
+    URL;
+
+  try {
+    parsed =
+      new URL(
+        trimmed
+      );
+  } catch {
+    throw new Error(
+      `${label} must be a valid URL.`
+    );
+  }
+
+  if (
+    parsed.protocol !== "https:" &&
+    parsed.protocol !== "http:"
+  ) {
+    throw new Error(
+      `${label} must start with https:// or http://.`
+    );
+  }
+
+  return parsed.toString();
+}
+
+function normalizeOptionalUrl(
+  label:
+    string,
+  value:
+    string
+): string | null {
+  const trimmed =
+    value.trim();
+
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  let parsed:
+    URL;
+
+  try {
+    parsed =
+      new URL(
+        trimmed
+      );
+  } catch {
+    throw new Error(
+      `${label} must be a valid URL.`
+    );
+  }
+
+  if (
+    parsed.protocol !== "https:" &&
+    parsed.protocol !== "http:"
+  ) {
+    throw new Error(
+      `${label} must start with https:// or http://.`
+    );
+  }
+
+  return parsed.toString();
+}
+
 function buildRequest(
   form:
     AffiliateMetadataFormState
 ): AffiliateMetadataCreateRequest {
+  const partnerName =
+    requireTextField(
+      "Partner name",
+      form.partnerName
+    );
+
+  const offerName =
+    requireTextField(
+      "Offer name",
+      form.offerName
+    );
+
+  const destinationUrl =
+    normalizeRequiredUrl(
+      "Destination URL",
+      form.destinationUrl
+    );
+
+  const trackingUrl =
+    normalizeOptionalUrl(
+      "Tracking URL",
+      form.trackingUrl
+    );
+
+  const commissionTerms =
+    parseCommissionTerms(
+      form.commissionTermsJson
+    );
+
+  if (
+    form.trackingStatus === "active" &&
+    !trackingUrl
+  ) {
+    throw new Error(
+      "Tracking URL is required when tracking status is active."
+    );
+  }
+
+  if (
+    form.payoutReadinessStatus === "ready" &&
+    form.trackingStatus !== "active"
+  ) {
+    throw new Error(
+      "Payout readiness can be marked ready only when tracking status is active."
+    );
+  }
+
+  if (
+    form.trackingStatus === "blocked" &&
+    form.payoutReadinessStatus === "ready"
+  ) {
+    throw new Error(
+      "Payout readiness cannot be ready while tracking is blocked."
+    );
+  }
+
   return {
-    partnerName:
-      form.partnerName.trim(),
+    partnerName,
 
-    offerName:
-      form.offerName.trim(),
+    offerName,
 
-    destinationUrl:
-      form.destinationUrl.trim(),
+    destinationUrl,
 
     commissionModel:
       form.commissionModel,
 
-    commissionTerms:
-      parseCommissionTerms(
-        form.commissionTermsJson
-      ),
+    commissionTerms,
 
     trackingStatus:
       form.trackingStatus,
 
-    trackingUrl:
-      form.trackingUrl.trim().length > 0
-        ? form.trackingUrl.trim()
-        : null,
+    trackingUrl,
 
     payoutReadinessStatus:
       form.payoutReadinessStatus,
   };
 }
-
 interface AffiliateMetadataActionProps {
   detail:
     AffiliateDetailResponse;
@@ -419,9 +560,11 @@ export default function AffiliateMetadataAction(
         error
       ) {
         setErrorMessage(
-          getAffiliateErrorMessage(
-            error
-          )
+          error instanceof Error
+            ? error.message
+            : getAffiliateErrorMessage(
+                error
+              )
         );
       } finally {
         setIsSaving(
