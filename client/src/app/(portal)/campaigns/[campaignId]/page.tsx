@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import {
   notFound,
@@ -25,6 +25,10 @@ import {
   calculateDeliveryProgress,
   calculateRevenuePerClick,
 } from "@/features/workspace/workspace.types";
+
+import {
+  ClientCampaignWalletAllocationCampaignSection,
+} from "@/features/workspace/components";
 
 import type {
   CampaignStatus,
@@ -1306,6 +1310,24 @@ export default async function CampaignDetailsPage({
               Poster Admin is completing campaign setup. This campaign is not active yet.
             </div>
           ) : null}
+        </article>
+      </section>
+
+      <section
+        className={
+          styles.detailGrid
+        }
+      >
+        <article
+          className={
+            styles.detailCard
+          }
+        >
+          <ClientCampaignWalletAllocationCampaignSection
+            campaignId={
+              campaign.id
+            }
+          />
         </article>
       </section>
 
