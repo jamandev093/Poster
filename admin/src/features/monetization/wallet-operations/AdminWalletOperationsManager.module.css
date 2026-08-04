@@ -225,3 +225,123 @@
     grid-template-columns: 1fr;
   }
 }
+.allocationSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.allocationSummary article {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.allocationSummary strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filterButton,
+.filterButtonActive {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.filterButton {
+  background: var(--card);
+  color: var(--text-secondary);
+}
+
+.filterButtonActive {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.searchBox {
+  display: grid;
+  gap: 6px;
+  min-width: 280px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.searchBox input {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.progressText {
+  display: block;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.progressTrack {
+  display: block;
+  width: 120px;
+  height: 7px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+@media (max-width: 1100px) {
+  .allocationSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .toolbar {
+    display: grid;
+  }
+
+  .searchBox {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .allocationSummary {
+    grid-template-columns: 1fr;
+  }
+}
