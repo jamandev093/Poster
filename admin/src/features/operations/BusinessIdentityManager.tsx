@@ -14,6 +14,7 @@ import {
 } from "./business-identity";
 
 import styles from "./BusinessIdentityManager.module.css";
+import BusinessIdentityFormSafetyPanel from "./business-identity/BusinessIdentityFormSafetyPanel";
 import BusinessIdentityPropagationPanel from "./business-identity/BusinessIdentityPropagationPanel";
 
 interface FormState {
@@ -772,6 +773,14 @@ export default function BusinessIdentityManager() {
             </div>
           </div>
 
+          <BusinessIdentityFormSafetyPanel
+            form={
+              activeForm
+            }
+            rowVersion={
+              identity.rowVersion
+            }
+          />
           <div
             className={
               styles.formGrid
