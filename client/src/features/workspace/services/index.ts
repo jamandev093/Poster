@@ -27,3 +27,4 @@ export * from "./client-api.service";
 export * from "./client-wallet-read.service";
 export * from "./razorpay-checkout.service";
 export * from "./wallet-payment-verification.service";
+export * from "./client-wallet-allocation.service";
