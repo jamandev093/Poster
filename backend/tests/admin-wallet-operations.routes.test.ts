@@ -206,6 +206,8 @@ const SNAPSHOT:
     },
   ],
 
+  campaignAllocations: [],
+
   fundingOrders: [],
 
   payments: [],

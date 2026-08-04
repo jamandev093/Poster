@@ -2,3 +2,4 @@ export { default as AdminWalletOperationsManager } from "./AdminWalletOperations
 export * from "./admin-wallet-operations.service";
 export * from "./admin-wallet-operations.types";
 export * from "./use-admin-wallet-operations";
+export { default as AdminCampaignWalletAllocationsPanel } from "./AdminCampaignWalletAllocationsPanel";

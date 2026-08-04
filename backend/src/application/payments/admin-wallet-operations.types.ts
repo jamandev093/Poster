@@ -97,6 +97,53 @@ export interface AdminWalletOrganizationRow {
     string | null;
 }
 
+export interface AdminCampaignWalletAllocationRow {
+  id:
+    string;
+
+  organizationId:
+    string;
+
+  organizationName:
+    string;
+
+  walletId:
+    string;
+
+  campaignId:
+    string;
+
+  status:
+    string;
+
+  allocated:
+    AdminWalletOperationsMoney;
+
+  reserved:
+    AdminWalletOperationsMoney;
+
+  spent:
+    AdminWalletOperationsMoney;
+
+  released:
+    AdminWalletOperationsMoney;
+
+  refunded:
+    AdminWalletOperationsMoney;
+
+  createdByUserId:
+    string;
+
+  createdAt:
+    string;
+
+  updatedAt:
+    string;
+
+  rowVersion:
+    string;
+}
+
 export interface AdminWalletFundingOrderRow {
   id:
     string;
@@ -202,6 +249,9 @@ export interface AdminWalletOperationsRepositorySnapshot {
 
   organizations:
     AdminWalletOrganizationRow[];
+
+  campaignAllocations:
+    AdminCampaignWalletAllocationRow[];
 
   fundingOrders:
     AdminWalletFundingOrderRow[];

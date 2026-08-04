@@ -82,6 +82,8 @@ const SNAPSHOT:
 
   organizations: [],
 
+  campaignAllocations: [],
+
   fundingOrders: [],
 
   payments: [],

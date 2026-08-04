@@ -8,6 +8,7 @@ import {
 } from "../../database/database.pool.js";
 
 import type {
+  AdminCampaignWalletAllocationRow,
   AdminWalletFundingOrderRow,
   AdminWalletLedgerRow,
   AdminWalletOperationsRepositorySnapshot,
@@ -102,6 +103,53 @@ interface OrganizationDatabaseRow extends QueryResultRow {
 
   updated_at:
     Date | null;
+}
+
+interface CampaignAllocationDatabaseRow extends QueryResultRow {
+  id:
+    string;
+
+  organization_id:
+    string;
+
+  organization_name:
+    string;
+
+  wallet_id:
+    string;
+
+  campaign_id:
+    string;
+
+  status:
+    string;
+
+  allocated_minor_units:
+    string;
+
+  reserved_minor_units:
+    string;
+
+  spent_minor_units:
+    string;
+
+  released_minor_units:
+    string;
+
+  refunded_minor_units:
+    string;
+
+  created_by_user_id:
+    string;
+
+  created_at:
+    Date;
+
+  updated_at:
+    Date;
+
+  row_version:
+    string;
 }
 
 interface FundingOrderDatabaseRow extends QueryResultRow {
@@ -379,6 +427,68 @@ function mapOrganizationRow(
   };
 }
 
+function mapCampaignAllocationRow(
+  row:
+    CampaignAllocationDatabaseRow
+): AdminCampaignWalletAllocationRow {
+  return {
+    id:
+      row.id,
+
+    organizationId:
+      row.organization_id,
+
+    organizationName:
+      row.organization_name,
+
+    walletId:
+      row.wallet_id,
+
+    campaignId:
+      row.campaign_id,
+
+    status:
+      row.status,
+
+    allocated:
+      inrMoney(
+        row.allocated_minor_units
+      ),
+
+    reserved:
+      inrMoney(
+        row.reserved_minor_units
+      ),
+
+    spent:
+      inrMoney(
+        row.spent_minor_units
+      ),
+
+    released:
+      inrMoney(
+        row.released_minor_units
+      ),
+
+    refunded:
+      inrMoney(
+        row.refunded_minor_units
+      ),
+
+    createdByUserId:
+      row.created_by_user_id,
+
+    createdAt:
+      row.created_at.toISOString(),
+
+    updatedAt:
+      row.updated_at.toISOString(),
+
+    rowVersion:
+      row.row_version,
+  };
+}
+
 function mapFundingOrderRow(
   row:
     FundingOrderDatabaseRow
@@ -653,6 +763,50 @@ export async function readAdminWalletOperationsSnapshot(
       executor
     );
 
+  const campaignAllocationsResult =
+    await executeDatabaseQuery<CampaignAllocationDatabaseRow>(
+      `
+        SELECT
+          allocation.id::text
+            AS id,
+          allocation.organization_id::text
+            AS organization_id,
+          'Organization ' || left(allocation.organization_id::text, 8)
+            AS organization_name,
+          allocation.wallet_id::text
+            AS wallet_id,
+          allocation.campaign_id::text
+            AS campaign_id,
+          allocation.status::text
+            AS status,
+          allocation.allocated_minor_units::text
+            AS allocated_minor_units,
+          allocation.reserved_minor_units::text
+            AS reserved_minor_units,
+          allocation.spent_minor_units::text
+            AS spent_minor_units,
+          allocation.released_minor_units::text
+            AS released_minor_units,
+          allocation.refunded_minor_units::text
+            AS refunded_minor_units,
+          allocation.created_by_user_id::text
+            AS created_by_user_id,
+          allocation.created_at,
+          allocation.updated_at,
+          allocation.row_version::text
+            AS row_version
+        FROM app.campaign_wallet_allocations allocation
+        ORDER BY
+          allocation.updated_at DESC,
+          allocation.id DESC
+        LIMIT $1
+      `,
+      [
+        limit,
+      ],
+      executor
+    );
+
   const fundingOrdersResult =
     await executeDatabaseQuery<FundingOrderDatabaseRow>(
       `
@@ -762,6 +916,11 @@ export async function readAdminWalletOperationsSnapshot(
     organizations:
       organizationsResult.rows.map(
         mapOrganizationRow
+      ),
+
+    campaignAllocations:
+      campaignAllocationsResult.rows.map(
+        mapCampaignAllocationRow
       ),
 
     fundingOrders:

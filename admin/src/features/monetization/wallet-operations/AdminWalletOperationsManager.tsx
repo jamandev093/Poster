@@ -1,5 +1,7 @@
 "use client";
 
+import AdminCampaignWalletAllocationsPanel from "./AdminCampaignWalletAllocationsPanel";
+
 import {
   useAdminWalletOperations,
 } from "./use-admin-wallet-operations";
@@ -414,6 +416,15 @@ export default function AdminWalletOperationsManager() {
               </footer>
             ) : null}
           </section>
+
+          <AdminCampaignWalletAllocationsPanel
+            allocations={
+              data.campaignAllocations
+            }
+            generatedAt={
+              data.generatedAt
+            }
+          />
 
           <section className={styles.panel}>
             <header className={styles.panelHeader}>

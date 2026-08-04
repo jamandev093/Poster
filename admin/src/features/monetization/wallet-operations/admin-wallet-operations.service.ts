@@ -73,6 +73,7 @@ function assertValidResponse(
     !isNonNegativeInteger(summary.openRefundCount) ||
     !isNonNegativeInteger(summary.unreconciledWebhookCount) ||
     !Array.isArray(value.organizations) ||
+    !Array.isArray(value.campaignAllocations) ||
     !Array.isArray(value.fundingOrders) ||
     !Array.isArray(value.payments) ||
     !Array.isArray(value.ledgerEntries)
