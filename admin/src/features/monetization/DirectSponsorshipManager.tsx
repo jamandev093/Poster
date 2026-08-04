@@ -21,6 +21,8 @@ import {
 
 import styles from "./DirectSponsorshipManager.module.css";
 
+import DirectSponsorshipReadinessPanel from "./direct-sponsorship/DirectSponsorshipReadinessPanel";
+
 type StatusFilter =
   | "all"
   | DirectSponsorshipStatus;
@@ -1133,6 +1135,12 @@ export default function DirectSponsorshipManager() {
               >
                 Open in Campaigns
               </Link>
+
+              <DirectSponsorshipReadinessPanel
+                campaign={
+                  selectedCampaign
+                }
+              />
 
               <DirectSponsorshipActions
                 campaign={

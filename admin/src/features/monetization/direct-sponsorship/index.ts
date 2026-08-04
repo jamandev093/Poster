@@ -7,3 +7,4 @@ export * from "./use-direct-sponsorships";
 export * from "./direct-sponsorship.mutations";
 export * from "./use-direct-sponsorship-transition";
 export { default as DirectSponsorshipActions } from "./DirectSponsorshipActions";
+export { default as DirectSponsorshipReadinessPanel } from "./DirectSponsorshipReadinessPanel";
