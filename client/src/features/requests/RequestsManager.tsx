@@ -22,6 +22,14 @@ import type {
   CommercialRequestStatus,
 } from "@/features/workspace/workspace.types";
 
+import {
+  useClientWalletOverview,
+} from "@/features/workspace/hooks/useClientWalletOverview";
+
+import type {
+  ClientWalletApiCampaignAllocation,
+  ClientWalletApiMoney,
+} from "@/features/workspace/services/client-wallet-read.service";
 import styles from "./RequestsManager.module.css";
 
 type RequestFilter =
@@ -101,6 +109,88 @@ function getStatusClass(
   }
 }
 
+function requestMinorToMajor(
+  minorUnits:
+    string
+): number {
+  if (!/^-?[0-9]+$/.test(minorUnits)) {
+    return 0;
+  }
+
+  return Number(minorUnits) / 100;
+}
+
+function formatRequestWalletMoney(
+  money:
+    ClientWalletApiMoney
+): string {
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style:
+        "currency",
+
+      currency:
+        money.currency,
+
+      maximumFractionDigits:
+        2,
+    }
+  ).format(
+    requestMinorToMajor(
+      money.minorUnits
+    )
+  );
+}
+
+function getRequestWalletSummary(
+  request:
+    CommercialRequest,
+
+  allocationByCampaignId:
+    Map<
+      string,
+      ClientWalletApiCampaignAllocation
+    >,
+
+  isWalletLoading:
+    boolean,
+
+  walletErrorMessage:
+    string |
+    null
+): string {
+  const linkedCampaignId =
+    request.linkedCampaignId;
+
+  if (!linkedCampaignId) {
+    return "Wallet: pending campaign setup";
+  }
+
+  const allocation =
+    allocationByCampaignId.get(
+      linkedCampaignId
+    );
+
+  if (allocation) {
+    return [
+      "Wallet:",
+      `${formatRequestWalletMoney(allocation.allocated)} allocated`,
+      `${formatRequestWalletMoney(allocation.spent)} spent`,
+      `${formatRequestWalletMoney(allocation.reserved)} reserved`,
+    ].join(" ");
+  }
+
+  if (isWalletLoading) {
+    return "Wallet funding loading...";
+  }
+
+  if (walletErrorMessage) {
+    return "Wallet funding unavailable";
+  }
+
+  return "No Wallet allocation";
+}
 export default function RequestsManager() {
   const [
     search,
@@ -113,6 +203,46 @@ export default function RequestsManager() {
   ] =
     useState<RequestFilter>(
       "all"
+    );
+
+  const {
+    overview:
+      walletOverview,
+    isLoading:
+      isWalletLoading,
+    errorMessage:
+      walletErrorMessage,
+  } =
+    useClientWalletOverview(
+      100
+    );
+
+  const allocationByCampaignId =
+    useMemo(
+      () => {
+        const allocations =
+          new Map<
+            string,
+            ClientWalletApiCampaignAllocation
+          >();
+
+        walletOverview?.campaignAllocations.forEach(
+          (
+            allocation:
+              ClientWalletApiCampaignAllocation
+          ) => {
+            allocations.set(
+              allocation.campaignId,
+              allocation
+            );
+          }
+        );
+
+        return allocations;
+      },
+      [
+        walletOverview?.campaignAllocations,
+      ]
     );
 
   const visibleRequests =
@@ -401,6 +531,19 @@ export default function RequestsManager() {
                       {request.linkedCampaignId
                         ? ` · ${request.linkedCampaignId}`
                         : ""}
+                    </span>
+
+                    <span
+                      className={
+                        styles.walletLine
+                      }
+                    >
+                      {getRequestWalletSummary(
+                        request,
+                        allocationByCampaignId,
+                        isWalletLoading,
+                        walletErrorMessage
+                      )}
                     </span>
                   </div>
 
