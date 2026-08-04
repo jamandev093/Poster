@@ -945,3 +945,65 @@
     width: 100%;
   }
 }
+.actionSafetyPanel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.actionSafetyPanel > strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.actionSafetyPanel ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.actionSafetyReady,
+.actionSafetyAttention {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.actionSafetyReady {
+  border-color: #bbf7d0;
+}
+
+.actionSafetyAttention {
+  border-color: #fed7aa;
+}
+
+.actionSafetyReady span,
+.actionSafetyAttention span {
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.actionSafetyReady span {
+  color: #166534;
+}
+
+.actionSafetyAttention span {
+  color: #92400e;
+}
+
+.actionSafetyReady p,
+.actionSafetyAttention p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}

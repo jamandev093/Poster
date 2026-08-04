@@ -235,6 +235,244 @@ function actionClass(
   }
 }
 
+interface ActionSafetyCheck {
+  label:
+    string;
+
+  status:
+    "ready" |
+    "attention";
+
+  message:
+    string;
+}
+
+function hasSchedule(
+  campaign:
+    DirectSponsorshipCampaign
+): boolean {
+  return Boolean(
+    campaign.scheduledStartDate &&
+    campaign.scheduledEndDate
+  );
+}
+
+function hasPlacements(
+  campaign:
+    DirectSponsorshipCampaign
+): boolean {
+  return campaign.placements.length > 0;
+}
+
+function isCommerciallyApproved(
+  campaign:
+    DirectSponsorshipCampaign
+): boolean {
+  return campaign.commercialStatus === "approved";
+}
+
+function isReadinessReady(
+  campaign:
+    DirectSponsorshipCampaign
+): boolean {
+  return campaign.readinessStatus === "ready";
+}
+
+function safetyStatus(
+  healthy:
+    boolean
+): "ready" | "attention" {
+  return healthy
+    ? "ready"
+    : "attention";
+}
+
+function getActionSafetyChecks(
+  campaign:
+    DirectSponsorshipCampaign,
+  action:
+    DirectSponsorshipTransitionAction
+): readonly ActionSafetyCheck[] {
+  const baseChecks:
+    ActionSafetyCheck[] = [
+    {
+      label:
+        "Authoritative record",
+
+      status:
+        "ready",
+
+      message:
+        `Backend row version ${campaign.rowVersion} will be used to prevent stale updates.`,
+    },
+    {
+      label:
+        "Required audit reason",
+
+      status:
+        "ready",
+
+      message:
+        "This action cannot be submitted without a written Admin reason.",
+    },
+  ];
+
+  if (
+    action === "schedule" ||
+    action === "activate"
+  ) {
+    return [
+      {
+        label:
+          "Commercial approval",
+
+        status:
+          safetyStatus(
+            isCommerciallyApproved(
+              campaign
+            )
+          ),
+
+        message:
+          isCommerciallyApproved(
+            campaign
+          )
+            ? "Commercial approval is present."
+            : "Commercial approval is not ready. Backend may reject this action.",
+      },
+      {
+        label:
+          "Readiness",
+
+        status:
+          safetyStatus(
+            isReadinessReady(
+              campaign
+            )
+          ),
+
+        message:
+          isReadinessReady(
+            campaign
+          )
+            ? "Readiness is marked ready."
+            : "Readiness is not marked ready. Backend may reject this action.",
+      },
+      {
+        label:
+          "Schedule",
+
+        status:
+          safetyStatus(
+            hasSchedule(
+              campaign
+            )
+          ),
+
+        message:
+          hasSchedule(
+            campaign
+          )
+            ? "Start and end dates are present."
+            : "Start and end dates are missing.",
+      },
+      {
+        label:
+          "Placements",
+
+        status:
+          safetyStatus(
+            hasPlacements(
+              campaign
+            )
+          ),
+
+        message:
+          hasPlacements(
+            campaign
+          )
+            ? "At least one Poster-approved placement is present."
+            : "No placement is attached to this sponsorship.",
+      },
+      {
+        label:
+          "Delivery eligibility",
+
+        status:
+          safetyStatus(
+            campaign.deliveryEligible
+          ),
+
+        message:
+          campaign.deliveryEligible
+            ? "Backend reports this campaign as delivery eligible."
+            : "Backend reports this campaign as not delivery eligible.",
+      },
+      ...baseChecks,
+    ];
+  }
+
+  if (
+    action === "pause" ||
+    action === "resume"
+  ) {
+    return [
+      {
+        label:
+          "Operational state",
+
+        status:
+          "ready",
+
+        message:
+          "This action changes delivery state without deleting campaign history.",
+      },
+      {
+        label:
+          "Delivery impact",
+
+        status:
+          action === "resume" &&
+          !campaign.deliveryEligible
+            ? "attention"
+            : "ready",
+
+        message:
+          action === "resume" &&
+          !campaign.deliveryEligible
+            ? "Resume may be rejected because Backend says the campaign is not delivery eligible."
+            : "Delivery impact is explicit and auditable.",
+      },
+      ...baseChecks,
+    ];
+  }
+
+  return [
+    {
+      label:
+        "Permanent history",
+
+      status:
+        "attention",
+
+      message:
+        action === "disable"
+          ? "Disable is an administrative safety action and should only be used when the campaign should not run again."
+          : "End permanently closes campaign delivery while preserving operational history.",
+    },
+    {
+      label:
+        "Audit trail",
+
+      status:
+        "ready",
+
+      message:
+        "Backend records the Admin identity, reason, and lifecycle change.",
+    },
+    ...baseChecks,
+  ];
+}
 export default function DirectSponsorshipActions(
   props:
     DirectSponsorshipActionsProps
@@ -555,6 +793,48 @@ export default function DirectSponsorshipActions(
               }
             </p>
 
+            <div
+              className={
+                styles.actionSafetyPanel
+              }
+              aria-label="Direct Sponsorship action safety checks"
+            >
+              <strong>
+                Safety checks before applying
+              </strong>
+
+              <ul>
+                {getActionSafetyChecks(
+                  campaign,
+                  selectedAction.action
+                ).map(
+                  check => (
+                    <li
+                      key={
+                        check.label
+                      }
+                      className={
+                        check.status === "ready"
+                          ? styles.actionSafetyReady
+                          : styles.actionSafetyAttention
+                      }
+                    >
+                      <span>
+                        {
+                          check.label
+                        }
+                      </span>
+
+                      <p>
+                        {
+                          check.message
+                        }
+                      </p>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
             <label
               className={
                 styles.reasonField
