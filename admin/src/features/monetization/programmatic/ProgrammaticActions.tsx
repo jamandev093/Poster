@@ -227,16 +227,119 @@ function createInitialMappingForm(
   };
 }
 
+const BLOCKED_PLACEMENT_TERMS = [
+  "banner",
+  "popup",
+  "pop_up",
+  "interstitial",
+  "overlay",
+  "floating",
+  "vertical",
+  "provider_created",
+  "provider-created",
+];
+
+function requireTextField(
+  label:
+    string,
+  value:
+    string
+): string {
+  const trimmed =
+    value.trim();
+
+  if (trimmed.length === 0) {
+    throw new Error(
+      `${label} is required.`
+    );
+  }
+
+  return trimmed;
+}
+
+function requireProviderKey(
+  value:
+    string
+): string {
+  const providerKey =
+    requireTextField(
+      "Provider key",
+      value
+    ).toLowerCase();
+
+  if (!/^[a-z0-9][a-z0-9_-]{1,62}[a-z0-9]$/.test(providerKey)) {
+    throw new Error(
+      "Provider key must be 3-64 characters using lowercase letters, numbers, underscores, or hyphens."
+    );
+  }
+
+  return providerKey;
+}
+
+function optionalTextField(
+  value:
+    string
+): string | null {
+  const trimmed =
+    value.trim();
+
+  return trimmed.length > 0
+    ? trimmed
+    : null;
+}
+
+function hasBlockedPlacementTerm(
+  placement:
+    string
+): boolean {
+  const normalized =
+    placement.toLowerCase();
+
+  return BLOCKED_PLACEMENT_TERMS.some(
+    term =>
+      normalized.includes(
+        term
+      )
+  );
+}
+
+function hasObjectKeys(
+  value:
+    Record<string, unknown>
+): boolean {
+  return Object.keys(
+    value
+  ).length > 0;
+}
+
 function buildProviderRequest(
   form:
     ProviderFormState
 ): CreateProgrammaticProviderRequest {
-  return {
-    providerKey:
-      form.providerKey.trim(),
+  const providerKey =
+    requireProviderKey(
+      form.providerKey
+    );
 
-    displayName:
-      form.displayName.trim(),
+  const displayName =
+    requireTextField(
+      "Display name",
+      form.displayName
+    );
+
+  if (
+    form.status === "enabled" &&
+    form.healthStatus !== "healthy"
+  ) {
+    throw new Error(
+      "Provider can be enabled only when health status is healthy."
+    );
+  }
+
+  return {
+    providerKey,
+
+    displayName,
 
     status:
       form.status,
@@ -245,9 +348,9 @@ function buildProviderRequest(
       form.healthStatus,
 
     notes:
-      form.notes.trim().length > 0
-        ? form.notes.trim()
-        : null,
+      optionalTextField(
+        form.notes
+      ),
   };
 }
 
@@ -255,15 +358,87 @@ function buildMappingRequest(
   form:
     MappingFormState
 ): CreateProgrammaticSlotMappingRequest {
+  const providerId =
+    requireTextField(
+      "Provider",
+      form.providerId
+    );
+
+  const placement =
+    requireTextField(
+      "Placement",
+      form.placement
+    );
+
+  if (
+    hasBlockedPlacementTerm(
+      placement
+    )
+  ) {
+    throw new Error(
+      "Placement name references a prohibited format. Programmatic may use only Poster-approved sponsored frames."
+    );
+  }
+
+  const safetyRules =
+    parseJsonObject(
+      form.safetyRulesJson,
+      "Safety rules"
+    );
+
+  const regionRules =
+    parseJsonObject(
+      form.regionRulesJson,
+      "Region rules"
+    );
+
+  const deviceRules =
+    parseJsonObject(
+      form.deviceRulesJson,
+      "Device rules"
+    );
+
+  const frequencyRules =
+    parseJsonObject(
+      form.frequencyRulesJson,
+      "Frequency rules"
+    );
+
+  const fallbackRules =
+    parseJsonObject(
+      form.fallbackRulesJson,
+      "Fallback rules"
+    );
+
+  if (
+    form.status === "enabled" &&
+    !hasObjectKeys(
+      safetyRules
+    )
+  ) {
+    throw new Error(
+      "Enabled slot mappings require explicit safety rules."
+    );
+  }
+
+  if (
+    form.status === "enabled" &&
+    !hasObjectKeys(
+      fallbackRules
+    )
+  ) {
+    throw new Error(
+      "Enabled slot mappings require explicit fallback rules."
+    );
+  }
+
   return {
-    providerId:
-      form.providerId,
+    providerId,
 
     screen:
       form.screen,
 
-    placement:
-      form.placement.trim(),
+    placement,
 
     frame:
       form.frame,
@@ -271,38 +446,17 @@ function buildMappingRequest(
     status:
       form.status,
 
-    safetyRules:
-      parseJsonObject(
-        form.safetyRulesJson,
-        "Safety rules"
-      ),
+    safetyRules,
 
-    regionRules:
-      parseJsonObject(
-        form.regionRulesJson,
-        "Region rules"
-      ),
+    regionRules,
 
-    deviceRules:
-      parseJsonObject(
-        form.deviceRulesJson,
-        "Device rules"
-      ),
+    deviceRules,
 
-    frequencyRules:
-      parseJsonObject(
-        form.frequencyRulesJson,
-        "Frequency rules"
-      ),
+    frequencyRules,
 
-    fallbackRules:
-      parseJsonObject(
-        form.fallbackRulesJson,
-        "Fallback rules"
-      ),
+    fallbackRules,
   };
 }
-
 interface ProgrammaticActionsProps {
   providers:
     readonly ProgrammaticProvider[];
@@ -429,9 +583,11 @@ export default function ProgrammaticActions(
         error
       ) {
         setErrorMessage(
-          getProgrammaticErrorMessage(
-            error
-          )
+          error instanceof Error
+            ? error.message
+            : getProgrammaticErrorMessage(
+                error
+              )
         );
       } finally {
         setIsSaving(
@@ -466,9 +622,11 @@ export default function ProgrammaticActions(
         error
       ) {
         setErrorMessage(
-          getProgrammaticErrorMessage(
-            error
-          )
+          error instanceof Error
+            ? error.message
+            : getProgrammaticErrorMessage(
+                error
+              )
         );
       } finally {
         setIsSaving(
