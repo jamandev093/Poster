@@ -26,6 +26,14 @@ import type {
   CampaignStatus,
 } from "@/features/workspace/workspace.types";
 
+import {
+  useClientWalletOverview,
+} from "@/features/workspace/hooks/useClientWalletOverview";
+
+import type {
+  ClientWalletApiCampaignAllocation,
+  ClientWalletApiMoney,
+} from "@/features/workspace/services/client-wallet-read.service";
 import styles from "./CampaignsManager.module.css";
 
 type CampaignFilter =
@@ -95,6 +103,71 @@ function getStatusClass(
   }
 }
 
+function minorToMajor(
+  minorUnits:
+    string
+): number {
+  if (!/^-?[0-9]+$/.test(minorUnits)) {
+    return 0;
+  }
+
+  return Number(minorUnits) / 100;
+}
+
+function formatWalletMoney(
+  money:
+    ClientWalletApiMoney
+): string {
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style:
+        "currency",
+
+      currency:
+        money.currency,
+
+      maximumFractionDigits:
+        2,
+    }
+  ).format(
+    minorToMajor(
+      money.minorUnits
+    )
+  );
+}
+
+function getCampaignWalletSummary(
+  allocation:
+    ClientWalletApiCampaignAllocation |
+    undefined,
+
+  isWalletLoading:
+    boolean,
+
+  walletErrorMessage:
+    string |
+    null
+): string {
+  if (allocation) {
+    return [
+      "Wallet:",
+      `${formatWalletMoney(allocation.allocated)} allocated`,
+      `${formatWalletMoney(allocation.reserved)} reserved`,
+      `${formatWalletMoney(allocation.spent)} spent`,
+    ].join(" ");
+  }
+
+  if (isWalletLoading) {
+    return "Wallet allocation loading...";
+  }
+
+  if (walletErrorMessage) {
+    return "Wallet allocation unavailable";
+  }
+
+  return "No Wallet allocation";
+}
 export default function CampaignsManager() {
   const [
     search,
@@ -107,6 +180,43 @@ export default function CampaignsManager() {
   ] =
     useState<CampaignFilter>(
       "all"
+    );
+
+  const {
+    overview:
+      walletOverview,
+    isLoading:
+      isWalletLoading,
+    errorMessage:
+      walletErrorMessage,
+  } =
+    useClientWalletOverview(
+      100
+    );
+
+  const allocationByCampaignId =
+    useMemo(
+      () => {
+        const allocations =
+          new Map<
+            string,
+            ClientWalletApiCampaignAllocation
+          >();
+
+        walletOverview?.campaignAllocations.forEach(
+          allocation => {
+            allocations.set(
+              allocation.campaignId,
+              allocation
+            );
+          }
+        );
+
+        return allocations;
+      },
+      [
+        walletOverview?.campaignAllocations,
+      ]
     );
 
   const visibleCampaigns =
@@ -411,6 +521,18 @@ export default function CampaignsManager() {
                       .clicks
                   );
 
+                const walletAllocation =
+                  allocationByCampaignId.get(
+                    campaign.id
+                  );
+
+                const walletSummary =
+                  getCampaignWalletSummary(
+                    walletAllocation,
+                    isWalletLoading,
+                    walletErrorMessage
+                  );
+
                 return (
                   <Link
                     key={
@@ -439,6 +561,16 @@ export default function CampaignsManager() {
                         {" · "}
                         {
                           campaign.requestId
+                        }
+                      </span>
+
+                      <span
+                        className={
+                          styles.walletLine
+                        }
+                      >
+                        {
+                          walletSummary
                         }
                       </span>
                     </div>
