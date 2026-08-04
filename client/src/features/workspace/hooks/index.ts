@@ -20,3 +20,5 @@ export * from "./useAnalyticsDashboard";
 
 export * from "./usePaymentDashboard";
 export * from "./useClientWalletOverview";
+
+export * from "./useClientWalletAllocationActions";
