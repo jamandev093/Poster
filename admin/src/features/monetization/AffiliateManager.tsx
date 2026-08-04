@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import AffiliateMetadataAction from "./affiliate/AffiliateMetadataAction";
+import AffiliateReadinessPanel from "./affiliate/AffiliateReadinessPanel";
 
 import {
   useMemo,
@@ -629,12 +630,30 @@ function AffiliateDrawer(
               styles.footerNote
             }
           >
-            Metadata is saved through the protected Affiliate aackend API.
+            Metadata is saved through the protected Affiliate Backend API.
             Lifecycle actions remain in the shared Campaigns workspace.
           </span>
 
           {props.detail ? (
-            <AffiliateMetadataAction
+            <>
+
+              <AffiliateReadinessPanel
+
+                campaign={
+
+                  campaign
+
+                }
+
+                metadata={
+
+                  metadata
+
+                }
+
+              />
+
+<AffiliateMetadataAction
               detail={
                 props.detail
               }
@@ -642,6 +661,8 @@ function AffiliateDrawer(
                 props.onSaved()
               }
             />
+
+            </>
           ) : null}
 
           <button
@@ -839,7 +860,7 @@ export default function AffiliateManager() {
           </strong>
 
           <small>
-            Authoritative aackend records
+            Authoritative Backend records
           </small>
         </article>
 

@@ -5,3 +5,4 @@ export * from "./affiliate.service";
 export * from "./affiliate.types";
 export * from "./use-affiliate-campaigns";
 export * from "./use-affiliate-detail";
+export { default as AffiliateReadinessPanel } from "./AffiliateReadinessPanel";
