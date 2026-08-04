@@ -1,6 +1,7 @@
 "use client";
 
 import AddFundsPanel from "./AddFundsPanel";
+import ClientCampaignWalletAllocationPanel from "./ClientCampaignWalletAllocationPanel";
 
 import {
   mapClientWalletApiOverviewToAdvertiserWallet,
@@ -497,6 +498,25 @@ export default function ClientWalletDashboard() {
                   Wallet record is loaded.
                 </div>
               )}
+            </div>
+
+            <div
+              className={
+                styles.panel
+              }
+            >
+              <ClientCampaignWalletAllocationPanel
+                wallet={
+                  wallet
+                }
+                allocations={
+                  overview?.campaignAllocations ??
+                  []
+                }
+                onAllocationChange={
+                  refresh
+                }
+              />
             </div>
           </div>
 
