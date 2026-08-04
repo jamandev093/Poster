@@ -4,3 +4,4 @@ export * from "./programmatic.selectors";
 export * from "./programmatic.service";
 export * from "./programmatic.types";
 export * from "./use-programmatic-overview";
+export { default as ProgrammaticReadinessPanel } from "./ProgrammaticReadinessPanel";

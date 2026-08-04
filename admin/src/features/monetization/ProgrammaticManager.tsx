@@ -16,6 +16,8 @@ import {
 
 import styles from "./ProgrammaticManager.module.css";
 
+import ProgrammaticReadinessPanel from "./programmatic/ProgrammaticReadinessPanel";
+
 const BLOCKED_FORMATS = [
   "Banners",
   "Popups",
@@ -195,6 +197,12 @@ export default function ProgrammaticManager() {
           </small>
         </article>
       </section>
+
+      <ProgrammaticReadinessPanel
+        overview={
+          overview
+        }
+      />
 
       <section
         className={
