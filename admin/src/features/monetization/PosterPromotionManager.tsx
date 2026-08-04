@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import PosterPromotionCreateAction from "./poster-promotion/PosterPromotionCreateAction";
 import PosterPromotionEditAction from "./poster-promotion/PosterPromotionEditAction";
+import PosterPromotionReadinessPanel from "./poster-promotion/PosterPromotionReadinessPanel";
 
 import {
   useMemo,
@@ -279,6 +280,12 @@ function PosterPromotionDrawer(
             </div>
           ) : props.detail ? (
             <>
+              <PosterPromotionReadinessPanel
+                detail={
+                  props.detail
+                }
+              />
+
               <section
                 className={
                   styles.detailSection

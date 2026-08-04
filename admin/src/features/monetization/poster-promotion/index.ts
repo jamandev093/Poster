@@ -6,3 +6,4 @@ export * from "./poster-promotion.selectors";
 export * from "./poster-promotion.service";
 export * from "./use-poster-promotions";
 export * from "./poster-promotion.request-mappers";
+export { default as PosterPromotionReadinessPanel } from "./PosterPromotionReadinessPanel";
