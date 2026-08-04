@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 
@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import PosterPromotionMediaField from "./PosterPromotionMediaField";
+import PosterPromotionEditorSafetyPanel from "./PosterPromotionEditorSafetyPanel";
 
 import {
   EMPTY_POSTER_PROMOTION_DRAFT,
@@ -689,6 +690,14 @@ export default function PosterPromotionEditor(
             />
           </section>
 
+          <PosterPromotionEditorSafetyPanel
+            draft={
+              draft
+            }
+            mode={
+              props.mode
+            }
+          />
           <section
             className={
               styles.section
