@@ -26,6 +26,9 @@ interface ClientCampaignWalletAllocationPanelProps {
   allocations:
     ClientWalletApiCampaignAllocation[];
 
+  lockedCampaignId?:
+    string;
+
   onAllocationChange?:
     () => Promise<void> | void;
 }
@@ -194,6 +197,7 @@ function hasPositiveMinorUnits(
 export default function ClientCampaignWalletAllocationPanel({
   wallet,
   allocations,
+  lockedCampaignId,
   onAllocationChange,
 }: ClientCampaignWalletAllocationPanelProps) {
   const [
@@ -201,7 +205,8 @@ export default function ClientCampaignWalletAllocationPanel({
     setCampaignId,
   ] =
     useState(
-      ""
+      lockedCampaignId ??
+        ""
     );
 
   const [
@@ -267,7 +272,10 @@ export default function ClientCampaignWalletAllocationPanel({
     }
 
     const trimmedCampaignId =
-      campaignId.trim();
+      (
+        lockedCampaignId ??
+        campaignId
+      ).trim();
 
     if (
       trimmedCampaignId.length === 0
@@ -322,9 +330,13 @@ export default function ClientCampaignWalletAllocationPanel({
           "INR",
       });
 
-      setCampaignId(
-        ""
-      );
+      if (
+        !lockedCampaignId
+      ) {
+        setCampaignId(
+          ""
+        );
+      }
 
       setAmountInput(
         ""
@@ -443,32 +455,48 @@ export default function ClientCampaignWalletAllocationPanel({
           }
         }
       >
-        <label
-          className={
-            styles.field
-          }
-        >
-          <span>
-            Campaign ID
-          </span>
+        {lockedCampaignId ? (
+          <div
+            className={
+              styles.lockedCampaign
+            }
+          >
+            <span>
+              Campaign ID
+            </span>
 
-          <input
-            value={
-              campaignId
+            <strong>
+              {lockedCampaignId}
+            </strong>
+          </div>
+        ) : (
+          <label
+            className={
+              styles.field
             }
-            onChange={
-              event => {
-                setCampaignId(
-                  event.target.value
-                );
+          >
+            <span>
+              Campaign ID
+            </span>
+
+            <input
+              value={
+                campaignId
               }
-            }
-            placeholder="Campaign UUID"
-            disabled={
-              isActionDisabled
-            }
-          />
-        </label>
+              onChange={
+                event => {
+                  setCampaignId(
+                    event.target.value
+                  );
+                }
+              }
+              placeholder="Campaign UUID"
+              disabled={
+                isActionDisabled
+              }
+            />
+          </label>
+        )}
 
         <label
           className={

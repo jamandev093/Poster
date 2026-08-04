@@ -213,3 +213,24 @@
     grid-template-columns: 1fr;
   }
 }
+.lockedCampaign {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: #f8fafc;
+}
+
+.lockedCampaign span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.lockedCampaign strong {
+  color: #0f172a;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
