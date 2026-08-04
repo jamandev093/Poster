@@ -584,3 +584,10 @@
 .periodLabel + section {
   margin-bottom: 18px;
 }
+
+.walletLine {
+  color: #1e3a8a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.35;
+}

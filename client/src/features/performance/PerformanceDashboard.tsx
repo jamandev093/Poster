@@ -47,6 +47,14 @@ import type {
   CampaignStatus,
 } from "@/features/workspace/workspace.types";
 
+import {
+  useClientWalletOverview,
+} from "@/features/workspace/hooks/useClientWalletOverview";
+
+import type {
+  ClientWalletApiCampaignAllocation,
+  ClientWalletApiMoney,
+} from "@/features/workspace/services/client-wallet-read.service";
 import styles from "./PerformanceDashboard.module.css";
 
 type CampaignSelection =
@@ -125,6 +133,71 @@ function getStatusClass(
   }
 }
 
+function performanceMinorToMajor(
+  minorUnits:
+    string
+): number {
+  if (!/^-?[0-9]+$/.test(minorUnits)) {
+    return 0;
+  }
+
+  return Number(minorUnits) / 100;
+}
+
+function formatPerformanceWalletMoney(
+  money:
+    ClientWalletApiMoney
+): string {
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style:
+        "currency",
+
+      currency:
+        money.currency,
+
+      maximumFractionDigits:
+        2,
+    }
+  ).format(
+    performanceMinorToMajor(
+      money.minorUnits
+    )
+  );
+}
+
+function getPerformanceWalletSummary(
+  allocation:
+    ClientWalletApiCampaignAllocation |
+    undefined,
+
+  isWalletLoading:
+    boolean,
+
+  walletErrorMessage:
+    string |
+    null
+): string {
+  if (allocation) {
+    return [
+      "Wallet:",
+      `${formatPerformanceWalletMoney(allocation.allocated)} allocated`,
+      `${formatPerformanceWalletMoney(allocation.spent)} spent`,
+      `${formatPerformanceWalletMoney(allocation.reserved)} reserved`,
+    ].join(" ");
+  }
+
+  if (isWalletLoading) {
+    return "Wallet spend loading...";
+  }
+
+  if (walletErrorMessage) {
+    return "Wallet spend unavailable";
+  }
+
+  return "No Wallet allocation";
+}
 export default function PerformanceDashboard() {
   const [
     selectedWindow,
@@ -140,6 +213,46 @@ export default function PerformanceDashboard() {
   ] =
     useState<CampaignSelection>(
       "all"
+    );
+
+  const {
+    overview:
+      walletOverview,
+    isLoading:
+      isWalletLoading,
+    errorMessage:
+      walletErrorMessage,
+  } =
+    useClientWalletOverview(
+      100
+    );
+
+  const allocationByCampaignId =
+    useMemo(
+      () => {
+        const allocations =
+          new Map<
+            string,
+            ClientWalletApiCampaignAllocation
+          >();
+
+        walletOverview?.campaignAllocations.forEach(
+          (
+            allocation:
+              ClientWalletApiCampaignAllocation
+          ) => {
+            allocations.set(
+              allocation.campaignId,
+              allocation
+            );
+          }
+        );
+
+        return allocations;
+      },
+      [
+        walletOverview?.campaignAllocations,
+      ]
     );
 
   const visibleCampaigns =
@@ -445,6 +558,20 @@ export default function PerformanceDashboard() {
                     {" · "}
                     {getCampaignTypeLabel(
                       row.campaign.type
+                    )}
+                  </span>
+
+                  <span
+                    className={
+                      styles.walletLine
+                    }
+                  >
+                    {getPerformanceWalletSummary(
+                      allocationByCampaignId.get(
+                        row.campaign.id
+                      ),
+                      isWalletLoading,
+                      walletErrorMessage
                     )}
                   </span>
                 </div>
