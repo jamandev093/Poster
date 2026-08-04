@@ -11,3 +11,7 @@ export * from "./admin-wallet-operations.types.js";
 export * from "./admin-wallet-operations.repository.js";
 export * from "./admin-wallet-operations.service.js";
 export * from "./admin-wallet-operations.production.js";
+
+export * from "./client-wallet-allocation.errors.js";
+export * from "./client-wallet-allocation.service.js";
+export * from "./client-wallet-allocation.production.js";

@@ -95,9 +95,11 @@ import {
 } from "./application/monetization/client-commercial-request.service.js";
 
 import {
+  createProductionClientWalletAllocationService,
   createProductionClientWalletReadService,
   createProductionWalletCreditingService,
   createProductionWalletFundingService,
+  type ClientWalletAllocationService,
   type ClientWalletReadService,
   type WalletCreditingService,
   type WalletFundingService,
@@ -193,6 +195,10 @@ import {
 } from "./routes/client-wallet-payment.routes.js";
 
 import {
+  createClientWalletAllocationRoutes,
+} from "./routes/client-wallet-allocation.routes.js";
+
+import {
   createRazorpayWebhookRoutes,
 } from "./routes/razorpay-webhook.routes.js";
 import {
@@ -232,6 +238,8 @@ export interface BuildAppOptions {
     ClientWalletReadService;
   walletFundingService?:
     WalletFundingService;
+  walletAllocationService?:
+    ClientWalletAllocationService;
   walletCreditingService?:
     WalletCreditingService;
 
@@ -851,6 +859,18 @@ await app.register(
         createProductionWalletFundingService(),
     })
   );
+  await app.register(
+    createClientWalletAllocationRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletRequest,
+
+      walletAllocationService:
+        options
+          .walletAllocationService ??
+        createProductionClientWalletAllocationService(),
+    })
+  );
+
   await app.register(
     createClientWalletPaymentRoutes({
       authenticateClientRequest:
