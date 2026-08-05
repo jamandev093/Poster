@@ -14,15 +14,6 @@ import {
 } from "@/features/workspace/workspace.formatters";
 
 import {
-  getOrganizationRequests,
-} from "@/features/workspace/workspace.selectors";
-
-import type {
-  CommercialRequest,
-  CommercialRequestStatus,
-} from "@/features/workspace/workspace.types";
-
-import {
   useClientWalletOverview,
 } from "@/features/workspace/hooks/useClientWalletOverview";
 
@@ -30,82 +21,155 @@ import type {
   ClientWalletApiCampaignAllocation,
   ClientWalletApiMoney,
 } from "@/features/workspace/services/client-wallet-read.service";
+
+import {
+  useClientCommercialRequests,
+} from "./useClientCommercialRequests";
+
+import type {
+  ClientCommercialRequestApiRecord,
+  ClientCommercialRequestStatus,
+} from "./client-commercial-request.service";
+
 import styles from "./RequestsManager.module.css";
 
 type RequestFilter =
   | "all"
-  | "needs_action"
-  | CommercialRequestStatus;
+  | ClientCommercialRequestStatus;
 
-interface FilterOption {
-  key: RequestFilter;
-  label: string;
-}
+const FILTERS: {
+  key:
+    RequestFilter;
 
-const filters: FilterOption[] = [
+  label:
+    string;
+}[] = [
   {
-    key: "all",
-    label: "All",
+    key:
+      "all",
+
+    label:
+      "All",
   },
   {
-    key: "needs_action",
-    label: "Needs action",
+    key:
+      "pending_review",
+
+    label:
+      "Pending review",
   },
   {
-    key: "pending_review",
-    label: "Pending review",
+    key:
+      "changes_requested",
+
+    label:
+      "Changes requested",
   },
   {
-    key: "approved",
-    label: "Approved",
+    key:
+      "approved",
+
+    label:
+      "Approved",
   },
   {
-    key: "rejected",
-    label: "Rejected",
+    key:
+      "rejected",
+
+    label:
+      "Rejected",
   },
 ];
 
-const requests =
-  getOrganizationRequests();
+function getRequestType(
+  request:
+    ClientCommercialRequestApiRecord
+) {
+  return (
+    request.requestType ??
+    request.type ??
+    "direct_sponsorship"
+  );
+}
+
+function getRequestCampaignName(
+  request:
+    ClientCommercialRequestApiRecord
+): string {
+  return (
+    request.campaignName ??
+    request.title ??
+    "Untitled request"
+  );
+}
 
 function matchesFilter(
-  request: CommercialRequest,
-  filter: RequestFilter
+  request:
+    ClientCommercialRequestApiRecord,
+
+  filter:
+    RequestFilter
 ): boolean {
-  if (filter === "all") {
-    return true;
-  }
-
-  if (
-    filter ===
-    "needs_action"
-  ) {
-    return (
-      request.status ===
-      "changes_requested"
-    );
-  }
-
   return (
+    filter === "all" ||
     request.status === filter
   );
 }
 
-function getStatusClass(
-  status: CommercialRequestStatus
+function matchesSearch(
+  request:
+    ClientCommercialRequestApiRecord,
+
+  normalizedSearch:
+    string
+): boolean {
+  if (!normalizedSearch) {
+    return true;
+  }
+
+  const haystack = [
+    request.id,
+    request.requestReference,
+    request.linkedCampaignId,
+    request.title,
+    request.campaignName,
+    request.objective,
+    request.destinationUrl,
+    getRequestStatusLabel(
+      request.status
+    ),
+    getRequestTypeLabel(
+      getRequestType(
+        request
+      )
+    ),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(
+    normalizedSearch
+  );
+}
+
+function getStatusClassName(
+  status:
+    ClientCommercialRequestStatus
 ): string {
   switch (status) {
-    case "pending_review":
-      return "statusBadge statusScheduled";
+    case "approved":
+      return `statusBadge ${styles.statusApproved}`;
 
     case "changes_requested":
-      return "statusBadge statusAttention";
-
-    case "approved":
-      return "statusBadge statusActive";
+      return `statusBadge ${styles.statusChanges}`;
 
     case "rejected":
       return `statusBadge ${styles.statusRejected}`;
+
+    case "pending_review":
+    default:
+      return `statusBadge ${styles.statusPending}`;
   }
 }
 
@@ -145,7 +209,7 @@ function formatRequestWalletMoney(
 
 function getRequestWalletSummary(
   request:
-    CommercialRequest,
+    ClientCommercialRequestApiRecord,
 
   allocationByCampaignId:
     Map<
@@ -191,11 +255,13 @@ function getRequestWalletSummary(
 
   return "No Wallet allocation";
 }
+
 export default function RequestsManager() {
   const [
     search,
     setSearch,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     filter,
@@ -203,6 +269,21 @@ export default function RequestsManager() {
   ] =
     useState<RequestFilter>(
       "all"
+    );
+
+  const {
+    requests,
+    isLoading:
+      isRequestsLoading,
+    isRefreshing:
+      isRequestsRefreshing,
+    errorMessage:
+      requestsErrorMessage,
+    refresh:
+      refreshRequests,
+  } =
+    useClientCommercialRequests(
+      100
     );
 
   const {
@@ -227,10 +308,7 @@ export default function RequestsManager() {
           >();
 
         walletOverview?.campaignAllocations.forEach(
-          (
-            allocation:
-              ClientWalletApiCampaignAllocation
-          ) => {
+          allocation => {
             allocations.set(
               allocation.campaignId,
               allocation
@@ -254,85 +332,111 @@ export default function RequestsManager() {
             .toLowerCase();
 
         return requests.filter(
-          (
-            request
-          ) => {
-            if (
-              !matchesFilter(
-                request,
-                filter
-              )
-            ) {
-              return false;
-            }
-
-            if (
-              !normalizedSearch
-            ) {
-              return true;
-            }
-
-            const searchable = [
-              request.id,
-              request.campaignName,
-              request.organizationName,
-              getRequestTypeLabel(
-                request.type
-              ),
-              getRequestStatusLabel(
-                request.status
-              ),
-              request.linkedCampaignId ??
-                "",
-            ]
-              .join(" ")
-              .toLowerCase();
-
-            return searchable.includes(
+          request =>
+            matchesFilter(
+              request,
+              filter
+            ) &&
+            matchesSearch(
+              request,
               normalizedSearch
-            );
-          }
+            )
         );
       },
       [
-        filter,
+        requests,
         search,
+        filter,
       ]
     );
 
-  const needsAction =
-    requests.filter(
-      (
-        request
-      ) =>
-        request.status ===
-        "changes_requested"
-    ).length;
-
   const pending =
     requests.filter(
-      (
-        request
-      ) =>
+      request =>
         request.status ===
         "pending_review"
     ).length;
 
+  const changesRequested =
+    requests.filter(
+      request =>
+        request.status ===
+        "changes_requested"
+    ).length;
+
   const approved =
     requests.filter(
-      (
-        request
-      ) =>
+      request =>
         request.status ===
         "approved"
     ).length;
 
   return (
-    <>
-      <section
+    <section
+      className={
+        styles.shell
+      }
+      aria-labelledby="requests-manager-title"
+      aria-busy={
+        isRequestsLoading
+      }
+    >
+      <header
+        className={
+          styles.header
+        }
+      >
+        <div>
+          <p
+            className={
+              styles.eyebrow
+            }
+          >
+            Backend requests
+          </p>
+
+          <h2
+            id="requests-manager-title"
+            className={
+              styles.title
+            }
+          >
+            Submitted requests
+          </h2>
+
+          <p
+            className={
+              styles.description
+            }
+          >
+            Request list is loaded from Poster Backend. Wallet allocation
+            visibility remains tied to Backend Wallet data.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={
+            () => {
+              void refreshRequests();
+            }
+          }
+          disabled={
+            isRequestsRefreshing
+          }
+        >
+          {isRequestsRefreshing
+            ? "Refreshing..."
+            : "Refresh"}
+        </button>
+      </header>
+
+      <div
         className={
           styles.summaryGrid
         }
+        aria-label="Request summary"
       >
         <article
           className={
@@ -346,28 +450,6 @@ export default function RequestsManager() {
           <strong>
             {requests.length}
           </strong>
-
-          <small>
-            Submitted to Poster
-          </small>
-        </article>
-
-        <article
-          className={
-            styles.attentionCard
-          }
-        >
-          <span>
-            Needs action
-          </span>
-
-          <strong>
-            {needsAction}
-          </strong>
-
-          <small>
-            Changes requested
-          </small>
         </article>
 
         <article
@@ -382,10 +464,20 @@ export default function RequestsManager() {
           <strong>
             {pending}
           </strong>
+        </article>
 
-          <small>
-            Poster is reviewing
-          </small>
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Changes requested
+          </span>
+
+          <strong>
+            {changesRequested}
+          </strong>
         </article>
 
         <article
@@ -400,196 +492,193 @@ export default function RequestsManager() {
           <strong>
             {approved}
           </strong>
-
-          <small>
-            Ready for campaign workflow
-          </small>
         </article>
-      </section>
+      </div>
 
-      <section className="contentCard">
-        <div
+      <div
+        className={
+          styles.controls
+        }
+      >
+        <label
           className={
-            styles.toolbar
+            styles.search
           }
         >
+          <span>
+            Search requests
+          </span>
+
           <input
+            type="search"
+            value={
+              search
+            }
+            onChange={
+              event =>
+                setSearch(
+                  event.target.value
+                )
+            }
             className={
               styles.searchInput
-            }
-            value={search}
-            onChange={(
-              event
-            ) =>
-              setSearch(
-                event.target.value
-              )
             }
             placeholder="Search request, campaign, or ID"
             aria-label="Search requests"
           />
-
-          <div
-            className={
-              styles.filters
-            }
-            aria-label="Request status filters"
-          >
-            {filters.map(
-              (
-                option
-              ) => {
-                const active =
-                  filter ===
-                  option.key;
-
-                return (
-                  <button
-                    key={
-                      option.key
-                    }
-                    type="button"
-                    className={
-                      active
-                        ? styles.filterButtonActive
-                        : styles.filterButton
-                    }
-                    onClick={() =>
-                      setFilter(
-                        option.key
-                      )
-                    }
-                  >
-                    {
-                      option.label
-                    }
-                  </button>
-                );
-              }
-            )}
-          </div>
-        </div>
+        </label>
 
         <div
           className={
-            styles.table
+            styles.filters
+          }
+          aria-label="Filter requests"
+        >
+          {FILTERS.map(
+            option => (
+              <button
+                key={
+                  option.key
+                }
+                type="button"
+                className={
+                  filter === option.key
+                    ? styles.filterButtonActive
+                    : styles.filterButton
+                }
+                onClick={
+                  () =>
+                    setFilter(
+                      option.key
+                    )
+                }
+              >
+                {option.label}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {requestsErrorMessage ? (
+        <div
+          className={
+            styles.empty
+          }
+          role="alert"
+        >
+          {requestsErrorMessage}
+        </div>
+      ) : null}
+
+      {isRequestsLoading ? (
+        <div
+          className={
+            styles.empty
+          }
+          role="status"
+        >
+          Loading requests from Poster Backend.
+        </div>
+      ) : visibleRequests.length > 0 ? (
+        <div
+          className={
+            styles.list
           }
         >
-          <div
-            className={
-              styles.tableHeader
-            }
-          >
-            <span>
-              Request
-            </span>
-
-            <span>
-              Type
-            </span>
-
-            <span>
-              Submitted
-            </span>
-
-            <span>
-              Status
-            </span>
-          </div>
-
-          {visibleRequests.length >
-          0 ? (
-            visibleRequests.map(
-              (
-                request
-              ) => (
-                <Link
-                  key={
-                    request.id
-                  }
-                  href={`/requests/${request.id}`}
+          {visibleRequests.map(
+            request => (
+              <article
+                key={
+                  request.id
+                }
+                className={
+                  styles.requestCard
+                }
+              >
+                <div
                   className={
-                    styles.row
+                    styles.requestInfo
                   }
                 >
-                  <div
-                    className={
-                      styles.requestInfo
-                    }
-                  >
-                    <strong>
-                      {
-                        request.campaignName
-                      }
-                    </strong>
+                  <strong>
+                    {getRequestCampaignName(
+                      request
+                    )}
+                  </strong>
 
-                    <span>
-                      {
-                        request.id
-                      }
-
-                      {request.linkedCampaignId
-                        ? ` · ${request.linkedCampaignId}`
-                        : ""}
-                    </span>
-
-                    <span
-                      className={
-                        styles.walletLine
-                      }
-                    >
-                      {getRequestWalletSummary(
-                        request,
-                        allocationByCampaignId,
-                        isWalletLoading,
-                        walletErrorMessage
-                      )}
-                    </span>
-                  </div>
-
-                  <span
-                    className={
-                      styles.typeLabel
-                    }
-                  >
+                  <span>
+                    {request.requestReference ??
+                      request.id}
+                    {" · "}
                     {getRequestTypeLabel(
-                      request.type
+                      getRequestType(
+                        request
+                      )
                     )}
+                    {request.linkedCampaignId
+                      ? ` · ${request.linkedCampaignId}`
+                      : ""}
                   </span>
 
                   <span
                     className={
-                      styles.dateCell
+                      styles.walletLine
                     }
                   >
-                    {formatClientDate(
-                      request.submittedAt
+                    {getRequestWalletSummary(
+                      request,
+                      allocationByCampaignId,
+                      isWalletLoading,
+                      walletErrorMessage
                     )}
                   </span>
+                </div>
 
+                <div
+                  className={
+                    styles.requestMeta
+                  }
+                >
                   <span
-                    className={getStatusClass(
-                      request.status
-                    )}
+                    className={
+                      getStatusClassName(
+                        request.status
+                      )
+                    }
                   >
                     {getRequestStatusLabel(
                       request.status
                     )}
                   </span>
+
+                  <span>
+                    Submitted{" "}
+                    {formatClientDate(
+                      request.submittedAt
+                    )}
+                  </span>
+                </div>
+
+                <Link
+                  href={`/requests/${request.id}`}
+                  className="secondaryButton"
+                >
+                  View request
                 </Link>
-              )
+              </article>
             )
-          ) : (
-            <div
-              className={
-                styles.empty
-              }
-            >
-              No requests match your search or filter.
-            </div>
           )}
         </div>
-      </section>
-    </>
+      ) : (
+        <div
+          className={
+            styles.empty
+          }
+        >
+          No requests match your search or filter.
+        </div>
+      )}
+    </section>
   );
 }
