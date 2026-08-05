@@ -7,6 +7,10 @@ import {
 } from "react";
 
 import {
+  clearStoredAuthenticationSession,
+} from "@/features/auth/auth-session.storage";
+
+import {
   getClientAccount,
   updateClientCurrentOrganization,
 } from "./client-account.service";
@@ -48,6 +52,9 @@ export interface UseClientAccountResult {
     ) => Promise<void>;
 }
 
+const AUTHENTICATION_EXPIRED_MESSAGE =
+  "Your Client session has expired. Sign in again.";
+
 function getErrorMessage(
   error:
     unknown
@@ -57,6 +64,61 @@ function getErrorMessage(
   }
 
   return "Client account could not be loaded.";
+}
+
+function getHttpStatusCode(
+  error:
+    unknown
+): number | null {
+  if (
+    typeof error !== "object" ||
+    error === null
+  ) {
+    return null;
+  }
+
+  const record =
+    error as {
+      status?: unknown;
+      statusCode?: unknown;
+    };
+
+  if (typeof record.status === "number") {
+    return record.status;
+  }
+
+  if (typeof record.statusCode === "number") {
+    return record.statusCode;
+  }
+
+  return null;
+}
+
+function isAuthenticationExpiredError(
+  error:
+    unknown
+): boolean {
+  return getHttpStatusCode(
+    error
+  ) === 401;
+}
+
+function redirectToLogin(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.location.replace(
+    "/login"
+  );
+}
+
+function handleAuthenticationExpired(): string {
+  clearStoredAuthenticationSession();
+
+  redirectToLogin();
+
+  return AUTHENTICATION_EXPIRED_MESSAGE;
 }
 
 export function useClientAccount():
@@ -129,6 +191,22 @@ export function useClientAccount():
             return;
           }
 
+          if (
+            isAuthenticationExpiredError(
+              error
+            )
+          ) {
+            setAccount(
+              null
+            );
+
+            setErrorMessage(
+              handleAuthenticationExpired()
+            );
+
+            return;
+          }
+
           setErrorMessage(
             getErrorMessage(
               error
@@ -167,6 +245,22 @@ export function useClientAccount():
             nextAccount
           );
         } catch (error) {
+          if (
+            isAuthenticationExpiredError(
+              error
+            )
+          ) {
+            setAccount(
+              null
+            );
+
+            setErrorMessage(
+              handleAuthenticationExpired()
+            );
+
+            return;
+          }
+
           setErrorMessage(
             getErrorMessage(
               error
@@ -214,6 +308,22 @@ export function useClientAccount():
             new Date().toISOString()
           );
         } catch (error) {
+          if (
+            isAuthenticationExpiredError(
+              error
+            )
+          ) {
+            setAccount(
+              null
+            );
+
+            setErrorMessage(
+              handleAuthenticationExpired()
+            );
+
+            throw error;
+          }
+
           setErrorMessage(
             getErrorMessage(
               error
