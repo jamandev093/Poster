@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useMemo,
   useState,
 } from "react";
 
@@ -9,288 +10,176 @@ import type {
 } from "react";
 
 import {
-  getWorkspaceAccountRoleLabel,
-  getWorkspaceAccountStatusLabel,
-  workspaceAccountProfile,
-} from "@/features/workspace/workspace.account";
+  useClientAccount,
+} from "./useClientAccount";
 
-import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
+import type {
+  ClientAccount,
+  UpdateClientOrganizationInput,
+} from "./client-account.service";
 
 import styles from "./AccountManager.module.css";
 
 interface AccountFormState {
-  organizationName: string;
+  organizationName:
+    string;
 
-  website: string;
-  industry: string;
-  country: string;
-  billingEmail: string;
+  legalName:
+    string;
 
-  contactName: string;
-  jobTitle: string;
-  businessEmail: string;
-  phone: string;
+  website:
+    string;
+
+  country:
+    string;
+
+  billingEmail:
+    string;
+
+  contactName:
+    string;
+
+  businessEmail:
+    string;
 }
 
-const COUNTRIES = [
-  "Afghanistan",
-  "Albania",
-  "Algeria",
-  "Andorra",
-  "Angola",
-  "Antigua and Barbuda",
-  "Argentina",
-  "Armenia",
-  "Australia",
-  "Austria",
-  "Azerbaijan",
-  "Bahamas",
-  "Bahrain",
-  "Bangladesh",
-  "Barbados",
-  "Belarus",
-  "Belgium",
-  "Belize",
-  "Benin",
-  "Bhutan",
-  "Bolivia",
-  "Bosnia and Herzegovina",
-  "Botswana",
-  "Brazil",
-  "Brunei",
-  "Bulgaria",
-  "Burkina Faso",
-  "Burundi",
-  "Cabo Verde",
-  "Cambodia",
-  "Cameroon",
-  "Canada",
-  "Central African Republic",
-  "Chad",
-  "Chile",
-  "China",
-  "Colombia",
-  "Comoros",
-  "Congo",
-  "Costa Rica",
-  "Croatia",
-  "Cuba",
-  "Cyprus",
-  "Czechia",
-  "Democratic Republic of the Congo",
-  "Denmark",
-  "Djibouti",
-  "Dominica",
-  "Dominican Republic",
-  "Ecuador",
-  "Egypt",
-  "El Salvador",
-  "Equatorial Guinea",
-  "Eritrea",
-  "Estonia",
-  "Eswatini",
-  "Ethiopia",
-  "Fiji",
-  "Finland",
-  "France",
-  "Gabon",
-  "Gambia",
-  "Georgia",
-  "Germany",
-  "Ghana",
-  "Greece",
-  "Grenada",
-  "Guatemala",
-  "Guinea",
-  "Guinea-Bissau",
-  "Guyana",
-  "Haiti",
-  "Honduras",
-  "Hungary",
-  "Iceland",
-  "India",
-  "Indonesia",
-  "Iran",
-  "Iraq",
-  "Ireland",
-  "Israel",
-  "Italy",
-  "Ivory Coast",
-  "Jamaica",
-  "Japan",
-  "Jordan",
-  "Kazakhstan",
-  "Kenya",
-  "Kiribati",
-  "Kuwait",
-  "Kyrgyzstan",
-  "Laos",
-  "Latvia",
-  "Lebanon",
-  "Lesotho",
-  "Liberia",
-  "Libya",
-  "Liechtenstein",
-  "Lithuania",
-  "Luxembourg",
-  "Madagascar",
-  "Malawi",
-  "Malaysia",
-  "Maldives",
-  "Mali",
-  "Malta",
-  "Marshall Islands",
-  "Mauritania",
-  "Mauritius",
-  "Mexico",
-  "Micronesia",
-  "Moldova",
-  "Monaco",
-  "Mongolia",
-  "Montenegro",
-  "Morocco",
-  "Mozambique",
-  "Myanmar",
-  "Namibia",
-  "Nauru",
-  "Nepal",
-  "Netherlands",
-  "New Zealand",
-  "Nicaragua",
-  "Niger",
-  "Nigeria",
-  "North Korea",
-  "North Macedonia",
-  "Norway",
-  "Oman",
-  "Pakistan",
-  "Palau",
-  "Palestine",
-  "Panama",
-  "Papua New Guinea",
-  "Paraguay",
-  "Peru",
-  "Philippines",
-  "Poland",
-  "Portugal",
-  "Qatar",
-  "Romania",
-  "Russia",
-  "Rwanda",
-  "Saint Kitts and Nevis",
-  "Saint Lucia",
-  "Saint Vincent and the Grenadines",
-  "Samoa",
-  "San Marino",
-  "Sao Tome and Principe",
-  "Saudi Arabia",
-  "Senegal",
-  "Serbia",
-  "Seychelles",
-  "Sierra Leone",
-  "Singapore",
-  "Slovakia",
-  "Slovenia",
-  "Solomon Islands",
-  "Somalia",
-  "South Africa",
-  "South Korea",
-  "South Sudan",
-  "Spain",
-  "Sri Lanka",
-  "Sudan",
-  "Suriname",
-  "Sweden",
-  "Switzerland",
-  "Syria",
-  "Taiwan",
-  "Tajikistan",
-  "Tanzania",
-  "Thailand",
-  "Timor-Leste",
-  "Togo",
-  "Tonga",
-  "Trinidad and Tobago",
-  "Tunisia",
-  "Turkey",
-  "Turkmenistan",
-  "Tuvalu",
-  "Uganda",
-  "Ukraine",
-  "United Arab Emirates",
-  "United Kingdom",
-  "United States",
-  "Uruguay",
-  "Uzbekistan",
-  "Vanuatu",
-  "Vatican City",
-  "Venezuela",
-  "Vietnam",
-  "Yemen",
-  "Zambia",
-  "Zimbabwe",
-] as const;
+interface AccountFormProps {
+  account:
+    ClientAccount;
 
-const organization =
-  getCurrentOrganization();
+  isLoading:
+    boolean;
 
-function createInitialState():
-  AccountFormState {
+  isRefreshing:
+    boolean;
+
+  isSubmitting:
+    boolean;
+
+  errorMessage:
+    string |
+    null;
+
+  savedAt:
+    string |
+    null;
+
+  refresh:
+    () => Promise<void>;
+
+  updateOrganization:
+    (
+      input:
+        UpdateClientOrganizationInput
+    ) => Promise<void>;
+}
+
+function mapAccountToForm(
+  account:
+    ClientAccount
+): AccountFormState {
   return {
     organizationName:
-      organization.name,
+      account.organization.displayName ??
+      account.organization.name ??
+      "",
+
+    legalName:
+      account.organization.legalName ??
+      account.organization.name ??
+      "",
 
     website:
-      workspaceAccountProfile
-        .organization
-        .website,
-
-    industry:
-      workspaceAccountProfile
-        .organization
-        .industry,
+      account.organization.websiteUrl ??
+      "",
 
     country:
-      workspaceAccountProfile
-        .organization
-        .country,
+      account.organization.countryCode ??
+      "IN",
 
     billingEmail:
-      workspaceAccountProfile
-        .organization
-        .billingEmail,
+      account.organization.billingEmail ??
+      account.user.email,
 
     contactName:
-      workspaceAccountProfile
-        .primaryClient
-        .fullName,
-
-    jobTitle:
-      workspaceAccountProfile
-        .primaryClient
-        .jobTitle,
+      account.user.fullName,
 
     businessEmail:
-      workspaceAccountProfile
-        .primaryClient
-        .businessEmail,
-
-    phone:
-      workspaceAccountProfile
-        .primaryClient
-        .phone,
+      account.user.email,
   };
 }
 
-export default function AccountManager() {
+function normalizeCountryCode(
+  value:
+    string
+): string {
+  const normalized =
+    value
+      .trim()
+      .toUpperCase();
+
+  return normalized ||
+    "IN";
+}
+
+function getStatusLabel(
+  status:
+    string |
+    undefined
+): string {
+  if (!status) {
+    return "Loading";
+  }
+
+  return status
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /^\w/,
+      character =>
+        character.toUpperCase()
+    );
+}
+
+function getSavedMessage(
+  savedAt:
+    string |
+    null
+): string {
+  if (!savedAt) {
+    return "Account changes saved.";
+  }
+
+  return `Account changes saved at ${new Date(savedAt).toLocaleTimeString()}.`;
+}
+
+function AccountForm(
+  props:
+    AccountFormProps
+) {
+  const {
+    account,
+    isLoading,
+    isRefreshing,
+    isSubmitting,
+    errorMessage,
+    savedAt,
+    refresh,
+    updateOrganization,
+  } =
+    props;
+
   const [
     form,
     setForm,
   ] =
     useState<AccountFormState>(
-      createInitialState
+      () =>
+        mapAccountToForm(
+          account
+        )
     );
 
   const [
@@ -299,16 +188,68 @@ export default function AccountManager() {
   ] =
     useState(false);
 
+  const organization =
+    account.organization;
+
+  const user =
+    account.user;
+
+  const isBusy =
+    isLoading ||
+    isSubmitting;
+
+  const canSubmit =
+    Boolean(
+      organization.rowVersion
+    ) &&
+    form.organizationName.trim().length > 0 &&
+    form.country.trim().length > 0 &&
+    !isBusy;
+
+  const summary =
+    useMemo(
+      () => ({
+        organizationName:
+          organization.displayName ??
+          organization.name ??
+          "Loading account",
+
+        organizationStatus:
+          getStatusLabel(
+            organization.status
+          ),
+
+        businessEmail:
+          form.businessEmail ||
+          user.email ||
+          "Loading",
+
+        contactName:
+          form.contactName ||
+          user.fullName ||
+          "Loading",
+      }),
+      [
+        form.businessEmail,
+        form.contactName,
+        organization.displayName,
+        organization.name,
+        organization.status,
+        user.email,
+        user.fullName,
+      ]
+    );
+
   const updateField = <
     Key extends keyof AccountFormState,
   >(
-    key: Key,
-    value: AccountFormState[Key]
+    key:
+      Key,
+    value:
+      AccountFormState[Key]
   ) => {
     setForm(
-      (
-        current
-      ) => ({
+      current => ({
         ...current,
 
         [key]:
@@ -319,46 +260,53 @@ export default function AccountManager() {
     setSaved(false);
   };
 
-  const saveChanges = (
-    event:
-      FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
+  const saveChanges =
+    async (
+      event:
+        FormEvent<HTMLFormElement>
+    ) => {
+      event.preventDefault();
 
-    /*
-     * Frontend-only demonstration save.
-     *
-     * Backend integration will later:
-     * - authenticate the Client account,
-     * - enforce organization ownership,
-     * - validate editable business fields,
-     * - persist organization/contact changes,
-     * - maintain account audit history.
-     */
-    setSaved(true);
-  };
+      await updateOrganization({
+        displayName:
+          form.organizationName.trim(),
+
+        legalName:
+          (
+            form.legalName.trim() ||
+            form.organizationName.trim()
+          ),
+
+        websiteUrl:
+          form.website.trim() ||
+          null,
+
+        billingEmail:
+          form.billingEmail.trim() ||
+          null,
+
+        countryCode:
+          normalizeCountryCode(
+            form.country
+          ),
+
+        expectedRowVersion:
+          organization.rowVersion,
+      });
+
+      setSaved(true);
+    };
 
   const resetChanges =
     () => {
       setForm(
-        createInitialState()
+        mapAccountToForm(
+          account
+        )
       );
 
       setSaved(false);
     };
-
-  const accountStatus =
-    getWorkspaceAccountStatusLabel(
-      workspaceAccountProfile
-        .status
-    );
-
-  const accountRole =
-    getWorkspaceAccountRoleLabel(
-      workspaceAccountProfile
-        .primaryClient
-        .role
-    );
 
   return (
     <form
@@ -369,363 +317,353 @@ export default function AccountManager() {
         className={styles.summaryGrid}
         aria-label="Client account summary"
       >
-        <article
-          className={styles.summaryCard}
-        >
-          <span>
-            Workspace
+        <article className="contentCard">
+          <span className="sectionEyebrow">
+            Organization
           </span>
 
-          <strong>
-            {accountStatus}
-          </strong>
+          <h2>
+            {summary.organizationName}
+          </h2>
 
-          <small>
-            {organization.name}
-          </small>
+          <p>
+            Backend-connected Client organization profile.
+          </p>
+
+          <strong>
+            {summary.organizationStatus}
+          </strong>
         </article>
 
-        <article
-          className={styles.summaryCard}
-        >
-          <span>
-            Access
+        <article className="contentCard">
+          <span className="sectionEyebrow">
+            Primary contact
           </span>
 
-          <strong>
-            {accountRole}
-          </strong>
+          <h2>
+            {summary.contactName}
+          </h2>
 
-          <small>
-            Organization-scoped workspace
-          </small>
-        </article>
-
-        <article
-          className={styles.summaryCard}
-        >
-          <span>
-            Business email
-          </span>
+          <p>
+            {summary.businessEmail}
+          </p>
 
           <strong>
-            {workspaceAccountProfile
-              .primaryClient
-              .emailVerified
-              ? "Verified"
-              : "Verification pending"}
+            Client account
           </strong>
-
-          <small>
-            {form.businessEmail}
-          </small>
         </article>
       </section>
 
-      <section
-        className={styles.mainGrid}
-      >
-        <div
-          className={styles.primaryColumn}
+      {errorMessage ? (
+        <section
+          className="contentCard"
+          role="alert"
         >
-          <section className="contentCard">
-            <div
-              className={styles.sectionHeader}
-            >
-              <div>
-                <h2 className="sectionTitle">
-                  Organization
-                </h2>
+          <strong>
+            Account could not be loaded
+          </strong>
 
-                <p className="sectionDescription">
-                  Business identity used for your Poster commercial workspace.
-                </p>
-              </div>
-            </div>
+          <p>
+            {errorMessage}
+          </p>
 
-            <div
-              className={styles.formGrid}
-            >
-              <div className={styles.field}>
-                <label htmlFor="organization-name">
-                  Organization name
-                </label>
-
-                <input
-                  id="organization-name"
-                  value={form.organizationName}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "organizationName",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="organization"
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="organization-website">
-                  Website
-                </label>
-
-                <input
-                  id="organization-website"
-                  type="url"
-                  value={form.website}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "website",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="url"
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="organization-industry">
-                  Industry
-                </label>
-
-                <input
-                  id="organization-industry"
-                  value={form.industry}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "industry",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="organization-country">
-                  Country
-                </label>
-
-                <input
-                  id="organization-country"
-                  type="search"
-                  list="client-country-options"
-                  value={form.country}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "country",
-                      event.target.value
-                    )
-                  }
-                  placeholder="Search country by name"
-                  autoComplete="country-name"
-                  required
-                />
-
-                <datalist id="client-country-options">
-                  {COUNTRIES.map(
-                    (
-                      country
-                    ) => (
-                      <option
-                        key={country}
-                        value={country}
-                      />
-                    )
-                  )}
-                </datalist>
-              </div>
-
-              <div
-                className={styles.fieldWide}
-              >
-                <label htmlFor="billing-email">
-                  Billing contact email
-                </label>
-
-                <input
-                  id="billing-email"
-                  type="email"
-                  value={form.billingEmail}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "billingEmail",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="email"
-                />
-
-                <span
-                  className={styles.fieldHint}
-                >
-                  Used for future contract and payment communication.
-                </span>
-              </div>
-            </div>
-          </section>
-
-          <section className="contentCard">
-            <div
-              className={styles.sectionHeader}
-            >
-              <div>
-                <h2 className="sectionTitle">
-                  Primary contact
-                </h2>
-
-                <p className="sectionDescription">
-                  Main person responsible for this Client workspace.
-                </p>
-              </div>
-
-              <span
-                className={styles.primaryBadge}
-              >
-                Primary client
-              </span>
-            </div>
-
-            <div
-              className={styles.formGrid}
-            >
-              <div className={styles.field}>
-                <label htmlFor="contact-name">
-                  Full name
-                </label>
-
-                <input
-                  id="contact-name"
-                  value={form.contactName}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "contactName",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="name"
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="job-title">
-                  Job title
-                </label>
-
-                <input
-                  id="job-title"
-                  value={form.jobTitle}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "jobTitle",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="organization-title"
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="business-email">
-                  Business email
-                </label>
-
-                <input
-                  id="business-email"
-                  type="email"
-                  value={form.businessEmail}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "businessEmail",
-                      event.target.value
-                    )
-                  }
-                  required
-                  autoComplete="email"
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="phone">
-                  Phone
-                </label>
-
-                <input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "phone",
-                      event.target.value
-                    )
-                  }
-                  placeholder="+91"
-                  autoComplete="tel"
-                />
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
-
-      {saved ? (
-        <div
-          className={styles.success}
-          role="status"
-        >
-          Account changes saved.
-        </div>
+          <button
+            type="button"
+            onClick={() => {
+              void refresh();
+            }}
+            disabled={isRefreshing}
+          >
+            {isRefreshing
+              ? "Refreshing..."
+              : "Retry"}
+          </button>
+        </section>
       ) : null}
 
-      <div
-        className={styles.actions}
+      <section
+        className="contentCard"
+        aria-busy={isBusy}
       >
-        <button
-          type="button"
-          className="secondaryButton"
-          onClick={resetChanges}
-        >
-          Reset
-        </button>
+        <div>
+          <span className="sectionEyebrow">
+            Business identity
+          </span>
 
-        <button
-          type="submit"
-          className="primaryButton"
-        >
-          Save changes
-        </button>
+          <h2>
+            Organization
+          </h2>
+
+          <p>
+            Manage the organization profile stored in Poster Backend.
+          </p>
+        </div>
+
+        <div className={styles.formGrid}>
+          <label
+            className={styles.field}
+            htmlFor="organization-name"
+          >
+            <span>
+              Organization name
+            </span>
+
+            <input
+              id="organization-name"
+              value={form.organizationName}
+              onChange={event =>
+                updateField(
+                  "organizationName",
+                  event.target.value
+                )
+              }
+              autoComplete="organization"
+              disabled={isBusy}
+            />
+          </label>
+
+          <label
+            className={styles.field}
+            htmlFor="organization-legal-name"
+          >
+            <span>
+              Legal name
+            </span>
+
+            <input
+              id="organization-legal-name"
+              value={form.legalName}
+              onChange={event =>
+                updateField(
+                  "legalName",
+                  event.target.value
+                )
+              }
+              autoComplete="organization"
+              disabled={isBusy}
+            />
+          </label>
+
+          <label
+            className={styles.field}
+            htmlFor="organization-website"
+          >
+            <span>
+              Website
+            </span>
+
+            <input
+              id="organization-website"
+              type="url"
+              value={form.website}
+              onChange={event =>
+                updateField(
+                  "website",
+                  event.target.value
+                )
+              }
+              placeholder="https://example.com"
+              autoComplete="url"
+              disabled={isBusy}
+            />
+          </label>
+
+          <label
+            className={styles.field}
+            htmlFor="organization-country"
+          >
+            <span>
+              Country code
+            </span>
+
+            <input
+              id="organization-country"
+              value={form.country}
+              onChange={event =>
+                updateField(
+                  "country",
+                  event.target.value
+                )
+              }
+              placeholder="IN"
+              autoComplete="country"
+              disabled={isBusy}
+              maxLength={2}
+            />
+          </label>
+
+          <label
+            className={styles.fieldWide}
+            htmlFor="billing-email"
+          >
+            <span>
+              Billing contact email
+            </span>
+
+            <input
+              id="billing-email"
+              type="email"
+              value={form.billingEmail}
+              onChange={event =>
+                updateField(
+                  "billingEmail",
+                  event.target.value
+                )
+              }
+              autoComplete="email"
+              disabled={isBusy}
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className="contentCard">
+        <div>
+          <span className="sectionEyebrow">
+            Primary contact
+          </span>
+
+          <h2>
+            Client account
+          </h2>
+
+          <p>
+            Primary contact is read from the authenticated Backend account.
+          </p>
+        </div>
+
+        <div className={styles.formGrid}>
+          <label
+            className={styles.field}
+            htmlFor="contact-name"
+          >
+            <span>
+              Contact name
+            </span>
+
+            <input
+              id="contact-name"
+              value={form.contactName}
+              readOnly
+            />
+          </label>
+
+          <label
+            className={styles.field}
+            htmlFor="business-email"
+          >
+            <span>
+              Business email
+            </span>
+
+            <input
+              id="business-email"
+              type="email"
+              value={form.businessEmail}
+              readOnly
+            />
+          </label>
+        </div>
+      </section>
+
+      <div className={styles.actions}>
+        <p className={styles.demoNote}>
+          Backend-connected account settings. Public business contact and Signal remain deferred.
+        </p>
+
+        <div>
+          <button
+            type="button"
+            onClick={resetChanges}
+            disabled={isBusy}
+          >
+            Reset
+          </button>
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+          >
+            {isSubmitting
+              ? "Saving..."
+              : "Save changes"}
+          </button>
+        </div>
       </div>
 
-      <p
-        className={styles.demoNote}
-      >
-        Development environment · Production account changes will be stored
-        through authenticated organization APIs.
-      </p>
+      {saved ? (
+        <p
+          className={styles.demoNote}
+          role="status"
+        >
+          {getSavedMessage(
+            savedAt
+          )}
+        </p>
+      ) : null}
     </form>
+  );
+}
+
+export default function AccountManager() {
+  const accountState =
+    useClientAccount();
+
+  if (
+    accountState.isLoading &&
+    !accountState.account
+  ) {
+    return (
+      <section
+        className="contentCard"
+        aria-live="polite"
+      >
+        Loading Client account from Backend...
+      </section>
+    );
+  }
+
+  if (!accountState.account) {
+    return (
+      <section
+        className="contentCard"
+        role="alert"
+      >
+        <strong>
+          Account could not be loaded
+        </strong>
+
+        <p>
+          {accountState.errorMessage ??
+            "Client account could not be loaded."}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            void accountState.refresh();
+          }}
+          disabled={accountState.isRefreshing}
+        >
+          {accountState.isRefreshing
+            ? "Refreshing..."
+            : "Retry"}
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <AccountForm
+      key={accountState.account.organization.rowVersion}
+      account={accountState.account}
+      isLoading={accountState.isLoading}
+      isRefreshing={accountState.isRefreshing}
+      isSubmitting={accountState.isSubmitting}
+      errorMessage={accountState.errorMessage}
+      savedAt={accountState.savedAt}
+      refresh={accountState.refresh}
+      updateOrganization={accountState.updateOrganization}
+    />
   );
 }
