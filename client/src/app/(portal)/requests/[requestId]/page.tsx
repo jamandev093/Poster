@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import {
   notFound,
@@ -25,6 +25,7 @@ import type {
   SlidingCreativeCard,
 } from "@/features/workspace/workspace.types";
 
+import RequestWalletFundingSummary from "@/features/requests/RequestWalletFundingSummary";
 import styles from "./page.module.css";
 
 interface RequestDetailsPageProps {
@@ -1147,6 +1148,25 @@ export default async function RequestDetailsPage({
           </div>
         ) : null}
       </section>
+
+      <RequestWalletFundingSummary
+        linkedCampaignId={
+          request.linkedCampaignId ??
+          linkedCampaign?.id ??
+          null
+        }
+        campaignName={
+          request.campaignName
+        }
+        requestStatus={
+          getRequestStatusLabel(
+            request.status
+          )
+        }
+        commercialValue={
+          commercialValue
+        }
+      />
 
       <p
         className={
