@@ -1,4 +1,8 @@
 import {
+  createProductionClientAccountService,
+  type ClientAccountService,
+} from "./application/client-account/index.js";
+import {
   createPublicBusinessIdentityService,
 } from "./application/business-identity/index.js";
 
@@ -183,6 +187,10 @@ import {
 import {
   createClientWalletReadRoutes,
 } from "./routes/client-wallet-read.routes.js";
+
+import {
+  clientAccountRoutes,
+} from "./routes/client-account.routes.js";
 import {
   ClientWalletRouteAuthenticationError,
   createClientWalletRoutes,
@@ -233,6 +241,9 @@ export interface BuildAppOptions {
 
   clientCommercialRequestService?:
     ClientCommercialRequestService;
+
+  clientAccountService?:
+    ClientAccountService;
 
   walletReadService?:
     ClientWalletReadService;
@@ -836,6 +847,20 @@ await app.register(
         createClientCommercialRequestService(),
     }
   );
+  await app.register(
+    clientAccountRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletRequest,
+      clientAccountService:
+        options.clientAccountService ??
+        createProductionClientAccountService(),
+    }),
+    {
+      prefix:
+        "/api/v1/client",
+    }
+  );
+
   await app.register(
     createClientWalletReadRoutes({
       authenticateClientRequest:
