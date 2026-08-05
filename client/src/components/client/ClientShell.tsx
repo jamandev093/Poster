@@ -10,13 +10,11 @@ import {
   usePathname,
 } from "next/navigation";
 
-import {
-  workspaceAccountProfile,
-} from "@/features/workspace/workspace.account";
+
 
 import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
+  useClientAccount,
+} from "@/features/account/useClientAccount";
 
 import SignalContact from "./SignalContact";
 
@@ -326,18 +324,27 @@ export default function ClientShell({
   const activeItem =
     findActiveItem(
       pathname
+    );  const {
+    account,
+    isLoading: isAccountLoading,
+  } =
+    useClientAccount();
+
+  const primaryClientName =
+    account?.user.fullName ??
+    "Client account";
+
+  const organizationName =
+    account?.organization.displayName ?? account?.organization.legalName ??
+    (
+      isAccountLoading
+        ? "Loading workspace"
+        : "Poster Client workspace"
     );
-
-  const organization =
-    getCurrentOrganization();
-
-  const primaryClient =
-    workspaceAccountProfile
-      .primaryClient;
 
   const profileInitials =
     getInitials(
-      primaryClient.fullName
+      primaryClientName
     );
 
   return (
@@ -461,7 +468,7 @@ export default function ClientShell({
             className={
               styles.profile
             }
-            aria-label={`Open account for ${primaryClient.fullName}`}
+            aria-label={`Open account for ${primaryClientName}`}
           >
             <div
               className={
@@ -480,13 +487,13 @@ export default function ClientShell({
             >
               <strong>
                 {
-                  primaryClient.fullName
+                  primaryClientName
                 }
               </strong>
 
               <span>
                 {
-                  organization.name
+                  organizationName
                 }
               </span>
             </div>
