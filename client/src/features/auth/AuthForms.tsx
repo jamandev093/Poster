@@ -5,7 +5,6 @@ import type {
 } from "react";
 
 import {
-  useEffect,
   useState,
 } from "react";
 
@@ -14,6 +13,10 @@ import {
   useRouter,
 } from "next/navigation";
 
+import {
+  getClientAccount,
+  updateClientCurrentOrganization,
+} from "@/features/account/client-account.service";
 import styles from "./AuthForms.module.css";
 
 interface VerifyEmailFormProps {
@@ -783,10 +786,10 @@ export function OrganizationOnboardingForm() {
 
   const [
     signupDraft,
-    setSignupDraft,
   ] =
     useState<SignupDraft | null>(
-      null
+      () =>
+        readSignupDraft()
     );
 
   const [
@@ -805,84 +808,102 @@ export function OrganizationOnboardingForm() {
     industry,
     setIndustry,
   ] =
-    useState(
-      "Professional learning"
-    );
+    useState("");
 
   const [
     country,
     setCountry,
   ] =
-    useState(
-      "India"
-    );
+    useState("IN");
 
   const [
     billingEmail,
     setBillingEmail,
   ] =
-    useState("");
+    useState(
+      () =>
+        readSignupDraft()
+          ?.businessEmail ??
+        ""
+    );
 
   const [
     objective,
     setObjective,
   ] =
-    useState(
-      "direct_sponsorship"
-    );
+    useState("");
 
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
 
-     useEffect(
-  () => {
-    const timeoutId =
-      window.setTimeout(
-        () => {
-          const draft =
-            readSignupDraft();
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState("");
 
-          setSignupDraft(
-            draft
-          );
-
-          if (
-            draft?.businessEmail
-          ) {
-            setBillingEmail(
-              draft.businessEmail
-            );
-          }
-        },
-        0
-      );
-
-    return () => {
-      window.clearTimeout(
-        timeoutId
-      );
-    };
-  },
-  []
-);
-
-
-  const submit = (
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    /*
-     * Frontend-only onboarding.
-     *
-     * Backend integration will later create the organization,
-     * connect the verified primary Client account, and enforce
-     * organization ownership.
-     */
-    clearSignupDraft();
-
-    router.push(
-      "/dashboard"
+    setIsSubmitting(
+      true
     );
+
+    setErrorMessage(
+      ""
+    );
+
+    try {
+      const account =
+        await getClientAccount();
+
+      await updateClientCurrentOrganization({
+        displayName:
+          organization.trim(),
+
+        legalName:
+          organization.trim(),
+
+        websiteUrl:
+          website.trim() ||
+          null,
+
+        billingEmail:
+          billingEmail.trim() ||
+          account.user.email,
+
+        countryCode:
+          country
+            .trim()
+            .toUpperCase() ||
+          "IN",
+
+        expectedRowVersion:
+          account.organization.rowVersion,
+      });
+
+      clearSignupDraft();
+
+      router.push(
+        "/dashboard"
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Organization setup could not be saved."
+      );
+    } finally {
+      setIsSubmitting(
+        false
+      );
+    }
   };
 
   return (
@@ -947,8 +968,11 @@ export function OrganizationOnboardingForm() {
               event.target.value
             )
           }
-          required
           autoComplete="organization"
+          required
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
@@ -974,9 +998,11 @@ export function OrganizationOnboardingForm() {
               event.target.value
             )
           }
-          required
-          placeholder="https://"
+          placeholder="https://example.com"
           autoComplete="url"
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
@@ -1001,86 +1027,72 @@ export function OrganizationOnboardingForm() {
               event.target.value
             )
           }
-          required
+          placeholder="Media, retail, education..."
+          autoComplete="organization-title"
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
       <div
         className={
-          styles.twoColumns
+          styles.field
         }
       >
-        <div
-          className={
-            styles.field
+        <label htmlFor="onboarding-country">
+          Country
+        </label>
+
+        <input
+          id="onboarding-country"
+          value={
+            country
           }
-        >
-          <label htmlFor="onboarding-country">
-            Country
-          </label>
-
-          <select
-            id="onboarding-country"
-            value={
-              country
-            }
-            onChange={(
-              event
-            ) =>
-              setCountry(
-                event.target.value
-              )
-            }
-            required
-          >
-            <option value="India">
-              India
-            </option>
-
-            <option value="United States">
-              United States
-            </option>
-
-            <option value="United Kingdom">
-              United Kingdom
-            </option>
-
-            <option value="Singapore">
-              Singapore
-            </option>
-
-            <option value="Other">
-              Other
-            </option>
-          </select>
-        </div>
-
-        <div
-          className={
-            styles.field
+          onChange={(
+            event
+          ) =>
+            setCountry(
+              event.target.value
+            )
           }
-        >
-          <label htmlFor="onboarding-billing-email">
-            Billing email
-          </label>
+          placeholder="IN"
+          autoComplete="country"
+          maxLength={2}
+          required
+          disabled={
+            isSubmitting
+          }
+        />
+      </div>
 
-          <input
-            id="onboarding-billing-email"
-            type="email"
-            value={
-              billingEmail
-            }
-            onChange={(
-              event
-            ) =>
-              setBillingEmail(
-                event.target.value
-              )
-            }
-            required
-            autoComplete="email"
-          />
-        </div>
+      <div
+        className={
+          styles.field
+        }
+      >
+        <label htmlFor="onboarding-billing-email">
+          Billing email
+        </label>
+
+        <input
+          id="onboarding-billing-email"
+          type="email"
+          value={
+            billingEmail
+          }
+          onChange={(
+            event
+          ) =>
+            setBillingEmail(
+              event.target.value
+            )
+          }
+          autoComplete="email"
+          disabled={
+            isSubmitting
+          }
+        />
       </div>
 
       <div
@@ -1092,7 +1104,7 @@ export function OrganizationOnboardingForm() {
           Primary objective
         </label>
 
-        <select
+        <textarea
           id="onboarding-objective"
           value={
             objective
@@ -1104,19 +1116,11 @@ export function OrganizationOnboardingForm() {
               event.target.value
             )
           }
-        >
-          <option value="direct_sponsorship">
-            Direct sponsorship
-          </option>
-
-          <option value="affiliate">
-            Affiliate partnership
-          </option>
-
-          <option value="both">
-            Sponsorship and affiliate
-          </option>
-        </select>
+          placeholder="Launch campaigns, review performance, and manage Wallet funding."
+          disabled={
+            isSubmitting
+          }
+        />
       </div>
 
       <div
@@ -1125,22 +1129,37 @@ export function OrganizationOnboardingForm() {
         }
       >
         <strong>
-          Initial workspace
+          Backend-connected setup
         </strong>
 
         <span>
-          One organization and one primary Client account.
-          Team access will be added later.
+          Organization profile is saved through Poster Backend. Payments and public Signal contact remain deferred.
         </span>
       </div>
+
+      {errorMessage ? (
+        <div
+          className={
+            styles.error
+          }
+          role="alert"
+        >
+          {errorMessage}
+        </div>
+      ) : null}
 
       <button
         type="submit"
         className={
           styles.primaryAction
         }
+        disabled={
+          isSubmitting
+        }
       >
-        Open Client workspace
+        {isSubmitting
+          ? "Saving organization..."
+          : "Open Client workspace"}
       </button>
     </form>
   );
