@@ -14,7 +14,9 @@ export default function PerformancePage() {
           </h1>
 
           <p className="pageDescription">
-            Track delivery, engagement, conversions, and commission.
+            View Backend-derived campaign delivery and Wallet spend visibility.
+            Detailed analytics will activate after Client analytics APIs are
+            connected.
           </p>
         </div>
       </header>

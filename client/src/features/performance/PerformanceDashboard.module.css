@@ -591,3 +591,308 @@
   font-weight: 800;
   line-height: 1.35;
 }
+/* ==========================================================================
+   BACKEND-DERIVED PERFORMANCE SNAPSHOT
+   ========================================================================== */
+
+.backendShell {
+  display: grid;
+  gap: 1rem;
+}
+
+.backendHeader,
+.backendPanelHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.backendHeader h2,
+.backendPanelHeader h3 {
+  color: #0f172a;
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+
+.backendHeader p,
+.backendPanelHeader p,
+.backendNote {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.55;
+  margin: 0.45rem 0 0;
+  max-width: 48rem;
+}
+
+.backendToolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: space-between;
+}
+
+.backendFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.backendFilterButton,
+.backendFilterButtonActive {
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 900;
+  padding: 0.55rem 0.85rem;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.backendFilterButton {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.backendFilterButton:hover {
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.backendFilterButtonActive {
+  background: #1d4ed8;
+  border: 1px solid #1d4ed8;
+  color: #ffffff;
+}
+
+.backendCampaignSelect {
+  align-items: center;
+  display: flex;
+  gap: 0.55rem;
+}
+
+.backendCampaignSelect span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.backendCampaignSelect select {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-width: 16rem;
+  padding: 0.65rem 0.8rem;
+}
+
+.backendSummary {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.backendSummaryCard,
+.backendPanel,
+.backendPendingCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.backendSummaryCard,
+.backendPendingCard {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.backendPanel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+}
+
+.backendSummaryCard span,
+.backendPendingCard span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.backendSummaryCard strong,
+.backendPendingCard strong {
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+.backendSummaryCard small,
+.backendPendingCard small {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.backendTable {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.backendTableHeader,
+.backendTableRow {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: minmax(13rem, 1.7fr) 9rem repeat(4, minmax(6rem, 0.8fr));
+}
+
+.backendTableHeader {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 0.75rem 0.9rem;
+  text-transform: uppercase;
+}
+
+.backendTableRow {
+  align-items: center;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0.9rem;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.backendTableRow + .backendTableRow {
+  border-top: 1px solid #e2e8f0;
+}
+
+.backendTableRow:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.backendCampaignInfo {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.backendCampaignInfo strong,
+.backendCampaignInfo small,
+.backendWalletLine {
+  overflow-wrap: anywhere;
+}
+
+.backendCampaignInfo small,
+.backendWalletLine {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.backendWalletLine {
+  color: #1e3a8a;
+}
+
+.backendStatusPositive {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.backendStatusAttention {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.backendStatusNeutral {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.backendEmpty {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 1rem;
+}
+
+.backendPendingGrid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.backendNote {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  color: #1e3a8a;
+  padding: 0.9rem 1rem;
+}
+
+@media (max-width: 1180px) {
+  .backendSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .backendSummaryCard:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .backendTable {
+    overflow-x: auto;
+  }
+
+  .backendTableHeader,
+  .backendTableRow {
+    min-width: 58rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .backendHeader,
+  .backendPanelHeader,
+  .backendToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .backendSummary,
+  .backendPendingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .backendCampaignSelect,
+  .backendCampaignSelect select {
+    width: 100%;
+  }
+}

@@ -11,193 +11,305 @@ import {
   formatClientNumber,
   getCampaignStatusLabel,
   getCampaignTypeLabel,
-  getPlacementLabel,
-  getTrackingStatusLabel,
 } from "@/features/workspace/workspace.formatters";
-
-import {
-  getCampaignPerformanceSnapshot,
-  getPerformanceWindowLabel,
-  placementPerformanceSnapshots,
-} from "@/features/workspace/workspace.performance";
-
-import type {
-  PerformanceWindow,
-} from "@/features/workspace/workspace.performance";
-
-import {
-  getCurrentOrganization,
-  getOrganizationCampaigns,
-} from "@/features/workspace/workspace.selectors";
-
-import {
-  AnalyticsDashboardPanel,
-} from "@/features/workspace/components";
-
-import type {
-  OrganizationId,
-} from "@/features/workspace/advertising/advertising.types";
-
-import {
-  calculateConversionRate,
-  calculateCtr,
-} from "@/features/workspace/workspace.types";
 
 import type {
   CampaignStatus,
 } from "@/features/workspace/workspace.types";
 
 import {
-  useClientWalletOverview,
-} from "@/features/workspace/hooks/useClientWalletOverview";
+  useClientCampaigns,
+} from "@/features/campaigns/useClientCampaigns";
 
 import type {
-  ClientWalletApiCampaignAllocation,
-  ClientWalletApiMoney,
-} from "@/features/workspace/services/client-wallet-read.service";
+  ClientCampaignListItem,
+} from "@/features/campaigns/useClientCampaigns";
+
 import styles from "./PerformanceDashboard.module.css";
 
 type CampaignSelection =
   | "all"
   | string;
 
-const clientCampaigns =
-  getOrganizationCampaigns();
+type PerformanceWindow =
+  | "7d"
+  | "30d"
+  | "90d";
 
-const currentOrganization =
-  getCurrentOrganization();
+const performanceWindows: {
+  key:
+    PerformanceWindow;
 
-function normalizeOrganizationId(
-  value:
-    string
-): OrganizationId {
-  const normalized =
-    value.trim();
-
-  if (
-    !normalized.startsWith(
-      "ORG-"
-    )
-  ) {
-    throw new Error(
-      `Invalid organization ID: ${value}`
-    );
-  }
-
-  return normalized as
-    OrganizationId;
-}
-
-const organizationId =
-  normalizeOrganizationId(
-    currentOrganization.id
-  );
-
-const windowOptions: {
-  value: PerformanceWindow;
-  label: string;
+  label:
+    string;
 }[] = [
   {
-    value: "7d",
-    label: "7 days",
-  },
+    key:
+      "7d",
 
-  {
-    value: "30d",
-    label: "30 days",
+    label:
+      "7 days",
   },
-
   {
-    value: "all",
-    label: "All time",
+    key:
+      "30d",
+
+    label:
+      "30 days",
+  },
+  {
+    key:
+      "90d",
+
+    label:
+      "90 days",
   },
 ];
 
-function getStatusClass(
-  status: CampaignStatus
+function getStatusClassName(
+  status:
+    CampaignStatus
 ): string {
   switch (status) {
     case "active":
-      return "statusBadge statusActive";
-
-    case "scheduled":
-      return "statusBadge statusScheduled";
+      return `statusBadge ${styles.backendStatusPositive}`;
 
     case "paused":
-      return "statusBadge statusAttention";
+    case "disabled":
+      return `statusBadge ${styles.backendStatusAttention}`;
 
     case "draft":
+    case "scheduled":
     case "ended":
-    case "disabled":
-      return `statusBadge ${styles.statusNeutral}`;
+    default:
+      return `statusBadge ${styles.backendStatusNeutral}`;
   }
 }
 
-function performanceMinorToMajor(
-  minorUnits:
-    string
-): number {
-  if (!/^-?[0-9]+$/.test(minorUnits)) {
-    return 0;
-  }
+function formatMajorMoney(
+  value:
+    number |
+    undefined,
 
-  return Number(minorUnits) / 100;
-}
-
-function formatPerformanceWalletMoney(
-  money:
-    ClientWalletApiMoney
+  currency:
+    string =
+      "INR"
 ): string {
+  if (
+    value === undefined ||
+    !Number.isFinite(
+      value
+    )
+  ) {
+    return "Not available";
+  }
+
   return new Intl.NumberFormat(
     "en-IN",
     {
       style:
         "currency",
 
-      currency:
-        money.currency,
+      currency,
 
       maximumFractionDigits:
         2,
     }
   ).format(
-    performanceMinorToMajor(
-      money.minorUnits
-    )
+    value
   );
 }
 
-function getPerformanceWalletSummary(
-  allocation:
-    ClientWalletApiCampaignAllocation |
+function minorUnitsToMajor(
+  minorUnits:
+    string |
+    undefined
+): number {
+  if (
+    !minorUnits ||
+    !/^-?[0-9]+$/.test(
+      minorUnits
+    )
+  ) {
+    return 0;
+  }
+
+  return Number(
+    minorUnits
+  ) / 100;
+}
+
+function formatMinorMoney(
+  minorUnits:
+    string |
     undefined,
 
-  isWalletLoading:
-    boolean,
-
-  walletErrorMessage:
-    string |
-    null
+  currency:
+    string =
+      "INR"
 ): string {
-  if (allocation) {
-    return [
-      "Wallet:",
-      `${formatPerformanceWalletMoney(allocation.allocated)} allocated`,
-      `${formatPerformanceWalletMoney(allocation.spent)} spent`,
-      `${formatPerformanceWalletMoney(allocation.reserved)} reserved`,
-    ].join(" ");
+  if (
+    !minorUnits ||
+    !/^-?[0-9]+$/.test(
+      minorUnits
+    )
+  ) {
+    return "Not available";
   }
 
-  if (isWalletLoading) {
-    return "Wallet spend loading...";
-  }
-
-  if (walletErrorMessage) {
-    return "Wallet spend unavailable";
-  }
-
-  return "No Wallet allocation";
+  return formatMajorMoney(
+    minorUnitsToMajor(
+      minorUnits
+    ),
+    currency
+  );
 }
+
+function calculateCtr(
+  impressions:
+    number,
+
+  clicks:
+    number
+): string {
+  if (impressions <= 0) {
+    return "0.00%";
+  }
+
+  return `${(
+    (
+      clicks /
+      impressions
+    ) *
+    100
+  ).toFixed(
+    2
+  )}%`;
+}
+
+function calculateConversionRate(
+  clicks:
+    number,
+
+  conversions:
+    number
+): string {
+  if (clicks <= 0) {
+    return "0.00%";
+  }
+
+  return `${(
+    (
+      conversions /
+      clicks
+    ) *
+    100
+  ).toFixed(
+    2
+  )}%`;
+}
+
+function getCampaignSpendMajor(
+  campaign:
+    ClientCampaignListItem
+): number {
+  return minorUnitsToMajor(
+    campaign.walletAllocation?.spent.minorUnits
+  );
+}
+
+function getCampaignSpendLabel(
+  campaign:
+    ClientCampaignListItem
+): string {
+  if (campaign.walletAllocation) {
+    return formatMinorMoney(
+      campaign.walletAllocation.spent.minorUnits,
+      campaign.walletAllocation.spent.currency
+    );
+  }
+
+  return formatMajorMoney(
+    campaign.financials.utilized
+  );
+}
+
+function getCampaignAllocationLabel(
+  campaign:
+    ClientCampaignListItem
+): string {
+  const allocation =
+    campaign.walletAllocation;
+
+  if (!allocation) {
+    return campaign.linkedCampaignId
+      ? "No Backend Wallet allocation"
+      : "Campaign setup pending";
+  }
+
+  return [
+    `${formatMinorMoney(
+      allocation.allocated.minorUnits,
+      allocation.allocated.currency
+    )} allocated`,
+    `${formatMinorMoney(
+      allocation.reserved.minorUnits,
+      allocation.reserved.currency
+    )} reserved`,
+    `${formatMinorMoney(
+      allocation.spent.minorUnits,
+      allocation.spent.currency
+    )} spent`,
+  ].join(
+    " · "
+  );
+}
+
+function getCampaignConversions(
+  campaign:
+    ClientCampaignListItem
+): number {
+  return campaign.performance.conversions ??
+    0;
+}
+
+function getCampaignTrackingState(
+  campaign:
+    ClientCampaignListItem
+): string {
+  if (
+    campaign.performance.impressions > 0 ||
+    campaign.performance.clicks > 0 ||
+    getCampaignConversions(
+      campaign
+    ) > 0
+  ) {
+    return "Analytics available";
+  }
+
+  return "Analytics pending";
+}
+
+function sortCampaignsByUpdatedAt(
+  campaigns:
+    ClientCampaignListItem[]
+): ClientCampaignListItem[] {
+  return [
+    ...campaigns,
+  ].sort(
+    (
+      first,
+      second
+    ) =>
+      new Date(
+        second.updatedAt
+      ).getTime() -
+      new Date(
+        first.updatedAt
+      ).getTime()
+  );
+}
+
 export default function PerformanceDashboard() {
   const [
     selectedWindow,
@@ -216,170 +328,180 @@ export default function PerformanceDashboard() {
     );
 
   const {
-    overview:
-      walletOverview,
-    isLoading:
-      isWalletLoading,
-    errorMessage:
-      walletErrorMessage,
+    campaigns,
+    isLoading,
+    isRefreshing,
+    errorMessage,
+    walletErrorMessage,
+    refresh,
   } =
-    useClientWalletOverview(
+    useClientCampaigns(
       100
-    );
-
-  const allocationByCampaignId =
-    useMemo(
-      () => {
-        const allocations =
-          new Map<
-            string,
-            ClientWalletApiCampaignAllocation
-          >();
-
-        walletOverview?.campaignAllocations.forEach(
-          (
-            allocation:
-              ClientWalletApiCampaignAllocation
-          ) => {
-            allocations.set(
-              allocation.campaignId,
-              allocation
-            );
-          }
-        );
-
-        return allocations;
-      },
-      [
-        walletOverview?.campaignAllocations,
-      ]
     );
 
   const visibleCampaigns =
     useMemo(
       () => {
-        if (
-          selectedCampaign ===
-          "all"
-        ) {
-          return clientCampaigns;
-        }
+        const source =
+          selectedCampaign === "all"
+            ? campaigns
+            : campaigns.filter(
+                campaign =>
+                  campaign.id === selectedCampaign ||
+                  campaign.linkedCampaignId === selectedCampaign ||
+                  campaign.requestId === selectedCampaign
+              );
 
-        return clientCampaigns.filter(
-          (
-            campaign
-          ) =>
-            campaign.id ===
-            selectedCampaign
+        return sortCampaignsByUpdatedAt(
+          source
         );
       },
       [
+        campaigns,
         selectedCampaign,
       ]
     );
 
-  const campaignRows =
-    useMemo(
-      () =>
-        visibleCampaigns.map(
-          (
-            campaign
-          ) => {
-            const snapshot =
-              getCampaignPerformanceSnapshot(
-                campaign.id
-              );
+  const totalImpressions =
+    visibleCampaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance.impressions,
+      0
+    );
 
-            const metrics =
-              snapshot?.windows[
-                selectedWindow
-              ] ?? {
-                impressions:
-                  0,
+  const totalClicks =
+    visibleCampaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        campaign.performance.clicks,
+      0
+    );
 
-                clicks:
-                  0,
-
-                conversions:
-                  null,
-              };
-
-            const ctr =
-              calculateCtr(
-                metrics.impressions,
-                metrics.clicks
-              );
-
-            const conversionRate =
-              calculateConversionRate(
-                metrics.clicks,
-                metrics.conversions
-              );
-
-            return {
-              campaign,
-              metrics,
-              ctr,
-              conversionRate,
-            };
-          }
+  const totalConversions =
+    visibleCampaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        getCampaignConversions(
+          campaign
         ),
-      [
-        selectedWindow,
-        visibleCampaigns,
-      ]
+      0
     );
 
-  const maximumPlacementImpressions =
-    Math.max(
-      ...placementPerformanceSnapshots.map(
-        (
-          placement
-        ) =>
-          placement.windows[
-            selectedWindow
-          ].impressions
-      ),
-      1
+  const totalWalletSpend =
+    visibleCampaigns.reduce(
+      (
+        total,
+        campaign
+      ) =>
+        total +
+        getCampaignSpendMajor(
+          campaign
+        ),
+      0
     );
+
+  const campaignsAwaitingAnalytics =
+    visibleCampaigns.filter(
+      campaign =>
+        getCampaignTrackingState(
+          campaign
+        ) === "Analytics pending"
+    ).length;
 
   return (
-    <>
-      <section
+    <section
+      className={
+        styles.backendShell
+      }
+      aria-labelledby="performance-dashboard-title"
+      aria-busy={
+        isLoading
+      }
+    >
+      <header
         className={
-          styles.controls
+          styles.backendHeader
+        }
+      >
+        <div>
+          <div
+            className="pageEyebrow"
+          >
+            Backend-derived performance
+          </div>
+
+          <h2
+            id="performance-dashboard-title"
+          >
+            Campaign delivery snapshot
+          </h2>
+
+          <p>
+            Performance now uses Backend-derived campaign records and Backend
+            Wallet allocations. Detailed analytics remain pending until a
+            Client-facing analytics read endpoint is connected.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={
+            () => {
+              void refresh();
+            }
+          }
+          disabled={
+            isRefreshing
+          }
+        >
+          {isRefreshing
+            ? "Refreshing..."
+            : "Refresh"}
+        </button>
+      </header>
+
+      <div
+        className={
+          styles.backendToolbar
         }
       >
         <div
           className={
-            styles.windowFilters
+            styles.backendFilters
           }
           aria-label="Performance date range"
         >
-          {windowOptions.map(
-            (
-              option
-            ) => (
+          {performanceWindows.map(
+            option => (
               <button
                 key={
-                  option.value
+                  option.key
                 }
                 type="button"
                 className={
-                  selectedWindow ===
-                  option.value
-                    ? styles.windowButtonActive
-                    : styles.windowButton
+                  selectedWindow === option.key
+                    ? styles.backendFilterButtonActive
+                    : styles.backendFilterButton
                 }
-                onClick={() =>
-                  setSelectedWindow(
-                    option.value
-                  )
+                onClick={
+                  () =>
+                    setSelectedWindow(
+                      option.key
+                    )
                 }
               >
-                {
-                  option.label
-                }
+                {option.label}
               </button>
             )
           )}
@@ -387,7 +509,7 @@ export default function PerformanceDashboard() {
 
         <label
           className={
-            styles.campaignFilter
+            styles.backendCampaignSelect
           }
         >
           <span>
@@ -398,24 +520,19 @@ export default function PerformanceDashboard() {
             value={
               selectedCampaign
             }
-            onChange={(
-              event
-            ) =>
-              setSelectedCampaign(
-                event.target.value
-              )
+            onChange={
+              event =>
+                setSelectedCampaign(
+                  event.target.value
+                )
             }
           >
-            <option
-              value="all"
-            >
+            <option value="all">
               All campaigns
             </option>
 
-            {clientCampaigns.map(
-              (
-                campaign
-              ) => (
+            {campaigns.map(
+              campaign => (
                 <option
                   key={
                     campaign.id
@@ -424,368 +541,421 @@ export default function PerformanceDashboard() {
                     campaign.id
                   }
                 >
-                  {
-                    campaign.id
-                  }
-                  {" · "}
-                  {
-                    campaign.name
-                  }
+                  {campaign.name}
                 </option>
               )
             )}
           </select>
         </label>
-      </section>
-
-      <div
-        className={
-          styles.periodLabel
-        }
-      >
-        {getPerformanceWindowLabel(
-          selectedWindow
-        )}
       </div>
 
-      <AnalyticsDashboardPanel
-        campaignIds={
-          selectedCampaign ===
-          "all"
-            ? undefined
-            : [
-                selectedCampaign,
-              ]
-        }
-        currency="INR"
-        description={
-          selectedWindow ===
-          "30d"
-            ? "Validated delivery, engagement, conversions, spend, and traffic quality for the selected campaign scope."
-            : "Validated analytics use the latest canonical reporting snapshot. The campaign comparison and placement sections below continue to follow the selected legacy date range."
-        }
-        organizationId={
-          organizationId
-        }
-        title="Validated performance"
-      />
+      {errorMessage ||
+      walletErrorMessage ? (
+        <div
+          className="statePanel"
+          role="status"
+        >
+          {errorMessage ? (
+            <p>
+              Campaigns: {errorMessage}
+            </p>
+          ) : null}
+
+          {walletErrorMessage ? (
+            <p>
+              Wallet allocation: {walletErrorMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <section
-        className="contentCard"
+        className={
+          styles.backendSummary
+        }
+        aria-label="Performance summary"
+      >
+        <article
+          className={
+            styles.backendSummaryCard
+          }
+        >
+          <span>
+            Campaigns in scope
+          </span>
+
+          <strong>
+            {visibleCampaigns.length}
+          </strong>
+
+          <small>
+            {selectedWindow} conservative view
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.backendSummaryCard
+          }
+        >
+          <span>
+            Impressions
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalImpressions
+            )}
+          </strong>
+
+          <small>
+            Backend-derived campaign snapshot
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.backendSummaryCard
+          }
+        >
+          <span>
+            Clicks
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalClicks
+            )}
+          </strong>
+
+          <small>
+            CTR {calculateCtr(
+              totalImpressions,
+              totalClicks
+            )}
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.backendSummaryCard
+          }
+        >
+          <span>
+            Conversions
+          </span>
+
+          <strong>
+            {formatClientNumber(
+              totalConversions
+            )}
+          </strong>
+
+          <small>
+            CVR {calculateConversionRate(
+              totalClicks,
+              totalConversions
+            )}
+          </small>
+        </article>
+
+        <article
+          className={
+            styles.backendSummaryCard
+          }
+        >
+          <span>
+            Wallet spend
+          </span>
+
+          <strong>
+            {formatMajorMoney(
+              totalWalletSpend
+            )}
+          </strong>
+
+          <small>
+            From campaign Wallet allocations
+          </small>
+        </article>
+      </section>
+
+      <section
+        className={
+          styles.backendPanel
+        }
+        aria-labelledby="campaign-comparison-title"
       >
         <div
           className={
-            styles.cardHeader
+            styles.backendPanelHeader
           }
         >
           <div>
-            <h2
-              className="sectionTitle"
+            <div
+              className="pageEyebrow"
             >
               Campaign comparison
-            </h2>
+            </div>
 
-            <p
-              className="sectionDescription"
+            <h3
+              id="campaign-comparison-title"
             >
-              Performance and tracking by campaign.
+              Performance by campaign
+            </h3>
+
+            <p>
+              Analytics values stay conservative until validated Client
+              analytics reporting is available.
+            </p>
+          </div>
+
+          <Link
+            href="/campaigns"
+            className="secondaryButton"
+          >
+            View campaigns
+          </Link>
+        </div>
+
+        {isLoading ? (
+          <div
+            className={
+              styles.backendEmpty
+            }
+            role="status"
+          >
+            Loading Backend-derived performance.
+          </div>
+        ) : visibleCampaigns.length > 0 ? (
+          <div
+            className={
+              styles.backendTable
+            }
+          >
+            <div
+              className={
+                styles.backendTableHeader
+              }
+            >
+              <span>
+                Campaign
+              </span>
+
+              <span>
+                Status
+              </span>
+
+              <span>
+                Impressions
+              </span>
+
+              <span>
+                Clicks
+              </span>
+
+              <span>
+                Conversions
+              </span>
+
+              <span>
+                Wallet spend
+              </span>
+            </div>
+
+            {visibleCampaigns.map(
+              campaign => (
+                <Link
+                  key={
+                    campaign.id
+                  }
+                  href={`/campaigns/${campaign.id}`}
+                  className={
+                    styles.backendTableRow
+                  }
+                >
+                  <span
+                    className={
+                      styles.backendCampaignInfo
+                    }
+                  >
+                    <strong>
+                      {campaign.name}
+                    </strong>
+
+                    <small>
+                      {getCampaignTypeLabel(
+                        campaign.type
+                      )}
+                      {" · "}
+                      {campaign.requestReference}
+                    </small>
+
+                    <small
+                      className={
+                        styles.backendWalletLine
+                      }
+                    >
+                      {getCampaignAllocationLabel(
+                        campaign
+                      )}
+                    </small>
+                  </span>
+
+                  <span
+                    className={
+                      getStatusClassName(
+                        campaign.status
+                      )
+                    }
+                  >
+                    {getCampaignStatusLabel(
+                      campaign.status
+                    )}
+                  </span>
+
+                  <strong>
+                    {formatClientNumber(
+                      campaign.performance.impressions
+                    )}
+                  </strong>
+
+                  <strong>
+                    {formatClientNumber(
+                      campaign.performance.clicks
+                    )}
+                  </strong>
+
+                  <strong>
+                    {formatClientNumber(
+                      getCampaignConversions(
+                        campaign
+                      )
+                    )}
+                  </strong>
+
+                  <strong>
+                    {getCampaignSpendLabel(
+                      campaign
+                    )}
+                  </strong>
+                </Link>
+              )
+            )}
+          </div>
+        ) : (
+          <div
+            className={
+              styles.backendEmpty
+            }
+          >
+            No Backend-derived campaign records are available for this scope.
+          </div>
+        )}
+      </section>
+
+      <section
+        className={
+          styles.backendPanel
+        }
+        aria-labelledby="analytics-readiness-title"
+      >
+        <div
+          className={
+            styles.backendPanelHeader
+          }
+        >
+          <div>
+            <div
+              className="pageEyebrow"
+            >
+              Analytics readiness
+            </div>
+
+            <h3
+              id="analytics-readiness-title"
+            >
+              Validated analytics pending
+            </h3>
+
+            <p>
+              This page no longer uses local campaign fixtures. Client analytics
+              will become fully live after the dedicated Client analytics
+              Backend read endpoint is connected.
             </p>
           </div>
         </div>
 
         <div
           className={
-            styles.table
+            styles.backendPendingGrid
           }
         >
-          <div
+          <article
             className={
-              styles.tableHeader
+              styles.backendPendingCard
             }
           >
             <span>
-              Campaign
+              Data source
             </span>
 
+            <strong>
+              Backend commercial requests
+            </strong>
+
+            <small>
+              Campaign records are derived from A36/A37 Backend request reads.
+            </small>
+          </article>
+
+          <article
+            className={
+              styles.backendPendingCard
+            }
+          >
             <span>
-              Impressions
+              Spend source
             </span>
 
+            <strong>
+              Backend Wallet allocation
+            </strong>
+
+            <small>
+              Wallet spend is shown only where campaign allocation data exists.
+            </small>
+          </article>
+
+          <article
+            className={
+              styles.backendPendingCard
+            }
+          >
             <span>
-              Clicks / CTR
+              Awaiting analytics
             </span>
 
-            <span>
-              Conversions
-            </span>
+            <strong>
+              {campaignsAwaitingAnalytics}
+            </strong>
 
-            <span>
-              Tracking
-            </span>
-
-            <span>
-              Status
-            </span>
-          </div>
-
-          {campaignRows.map(
-            (
-              row
-            ) => (
-              <Link
-                key={
-                  row.campaign.id
-                }
-                href={`/campaigns/${row.campaign.id}`}
-                className={
-                  styles.tableRow
-                }
-              >
-                <div
-                  className={
-                    styles.campaignInfo
-                  }
-                >
-                  <strong>
-                    {
-                      row.campaign.name
-                    }
-                  </strong>
-
-                  <span>
-                    {
-                      row.campaign.id
-                    }
-                    {" · "}
-                    {getCampaignTypeLabel(
-                      row.campaign.type
-                    )}
-                  </span>
-
-                  <span
-                    className={
-                      styles.walletLine
-                    }
-                  >
-                    {getPerformanceWalletSummary(
-                      allocationByCampaignId.get(
-                        row.campaign.id
-                      ),
-                      isWalletLoading,
-                      walletErrorMessage
-                    )}
-                  </span>
-                </div>
-
-                <strong>
-                  {formatClientNumber(
-                    row.metrics
-                      .impressions
-                  )}
-                </strong>
-
-                <div
-                  className={
-                    styles.compactMetric
-                  }
-                >
-                  <strong>
-                    {formatClientNumber(
-                      row.metrics
-                        .clicks
-                    )}
-                  </strong>
-
-                  <span>
-                    {row.ctr.toFixed(
-                      2
-                    )}
-                    % CTR
-                  </span>
-                </div>
-
-                <div
-                  className={
-                    styles.compactMetric
-                  }
-                >
-                  <strong>
-                    {row.metrics
-                      .conversions ===
-                    null
-                      ? "Not tracked"
-                      : formatClientNumber(
-                          row.metrics
-                            .conversions
-                        )}
-                  </strong>
-
-                  <span>
-                    {row.conversionRate ===
-                    null
-                      ? "—"
-                      : `${row.conversionRate.toFixed(
-                          2
-                        )}%`}
-                  </span>
-                </div>
-
-                <span
-                  className={
-                    styles.tracking
-                  }
-                >
-                  {getTrackingStatusLabel(
-                    row.campaign
-                      .trackingStatus
-                  )}
-                </span>
-
-                <span
-                  className={getStatusClass(
-                    row.campaign.status
-                  )}
-                >
-                  {getCampaignStatusLabel(
-                    row.campaign.status
-                  )}
-                </span>
-              </Link>
-            )
-          )}
+            <small>
+              Campaigns without validated delivery events yet.
+            </small>
+          </article>
         </div>
-      </section>
 
-      {selectedCampaign ===
-      "all" ? (
-        <section
-          className="contentCard"
+        <p
+          className={
+            styles.backendNote
+          }
         >
-          <div
-            className={
-              styles.cardHeader
-            }
-          >
-            <div>
-              <h2
-                className="sectionTitle"
-              >
-                Placement performance
-              </h2>
-
-              <p
-                className="sectionDescription"
-              >
-                Home, Search, and Trending results.
-              </p>
-            </div>
-          </div>
-
-          <div
-            className={
-              styles.placementList
-            }
-          >
-            {placementPerformanceSnapshots.map(
-              (
-                placement
-              ) => {
-                const metrics =
-                  placement.windows[
-                    selectedWindow
-                  ];
-
-                const ctr =
-                  calculateCtr(
-                    metrics.impressions,
-                    metrics.clicks
-                  );
-
-                const width =
-                  (
-                    metrics.impressions /
-                    maximumPlacementImpressions
-                  ) *
-                  100;
-
-                return (
-                  <article
-                    key={
-                      placement.placement
-                    }
-                    className={
-                      styles.placementRow
-                    }
-                  >
-                    <div
-                      className={
-                        styles.placementName
-                      }
-                    >
-                      <strong>
-                        {getPlacementLabel(
-                          placement.placement
-                        )}
-                      </strong>
-
-                      <span>
-                        {formatClientNumber(
-                          metrics.impressions
-                        )}
-                        {" impressions"}
-                      </span>
-                    </div>
-
-                    <div
-                      className={
-                        styles.placementBar
-                      }
-                    >
-                      <span
-                        style={{
-                          width:
-                            `${width}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div
-                      className={
-                        styles.placementMetrics
-                      }
-                    >
-                      <strong>
-                        {formatClientNumber(
-                          metrics.clicks
-                        )}
-                        {" clicks"}
-                      </strong>
-
-                      <span>
-                        {ctr.toFixed(
-                          2
-                        )}
-                        % CTR
-                      </span>
-                    </div>
-                  </article>
-                );
-              }
-            )}
-          </div>
-        </section>
-      ) : null}
-
-      <p
-        className={
-          styles.demoNote
-        }
-      >
-        Campaign performance updates as validated reporting data becomes available.
-      </p>
-    </>
+          Placement performance, trend charts, invalid-traffic filtering, and
+          finalized analytics remain intentionally conservative until Client
+          analytics APIs are connected.
+        </p>
+      </section>
+    </section>
   );
 }
-
-
-
-
