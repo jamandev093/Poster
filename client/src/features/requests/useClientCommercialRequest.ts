@@ -7,9 +7,8 @@ import {
 } from "react";
 
 import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
-
+  useClientAccount,
+} from "@/features/account/useClientAccount";
 import {
   getClientCommercialRequest,
 } from "./client-commercial-request.service";
@@ -64,12 +63,15 @@ export function useClientCommercialRequest(
   requestId:
     string |
     null
-): UseClientCommercialRequestResult {
-  const organization =
-    getCurrentOrganization();
+): UseClientCommercialRequestResult {  const {
+    account,
+    isLoading:
+      isAccountLoading,
+  } =
+    useClientAccount();
 
   const organizationId =
-    organization?.id ??
+    account?.organization.id ??
     null;
 
   const [
@@ -128,6 +130,12 @@ export function useClientCommercialRequest(
             false
           );
 
+          return;
+        }
+
+        if (
+          isAccountLoading
+        ) {
           return;
         }
 
@@ -195,6 +203,7 @@ export function useClientCommercialRequest(
       },
       [
         organizationId,
+        isAccountLoading,
         requestId,
       ]
     );
