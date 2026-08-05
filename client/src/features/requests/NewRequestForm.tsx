@@ -48,6 +48,19 @@ import {
 import {
   useClientWalletOverview,
 } from "@/features/workspace/hooks/useClientWalletOverview";
+import {
+  getCurrentOrganization,
+} from "@/features/workspace/workspace.selectors";
+
+import {
+  resubmitClientCommercialRequest,
+  submitClientCommercialRequest,
+} from "./client-commercial-request.service";
+
+import type {
+  ClientCommercialRequestDraft,
+  ClientCommercialRequestJsonObject,
+} from "./client-commercial-request.service";
 import styles from "./NewRequestForm.module.css";
 
 interface NewRequestFormProps {
@@ -385,18 +398,6 @@ function createInitialSlideMedia(
   return result;
 }
 
-function createPreviewReference():
-  string {
-  const suffix =
-    Date.now()
-      .toString()
-      .slice(
-        -6
-      );
-
-  return `ADV-PREVIEW-${suffix}`;
-}
-
 function walletMinorUnitsToNumber(
   minorUnits:
     string |
@@ -415,9 +416,61 @@ function walletMinorUnitsToNumber(
     minorUnits
   );
 }
+function parseOptionalMoneyInputToMinorUnits(
+  value:
+    string
+): number | undefined {
+  const trimmed =
+    value.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const amount =
+    Number(
+      trimmed
+    );
+
+  if (
+    !Number.isFinite(
+      amount
+    ) ||
+    amount < 0
+  ) {
+    return undefined;
+  }
+
+  return Math.round(
+    amount * 100
+  );
+}
+
+function getRequestSubmissionErrorMessage(
+  error:
+    unknown
+): string {
+  if (
+    error instanceof Error &&
+    error.message.trim().length > 0
+  ) {
+    return error.message;
+  }
+
+  return "Poster Backend could not submit this advertising request. Try again.";
+}
 export default function NewRequestForm({
   initialRequest,
 }: NewRequestFormProps) {
+  const currentOrganization =
+    getCurrentOrganization();
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
     const {
     overview:
       walletOverview,
@@ -900,13 +953,23 @@ export default function NewRequestForm({
       );
     };
 
-  const submitRequest = (
+  const submitRequest = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
+
     if (
+      isSubmitting
+    ) {
+      setError(
+        "Submission is already in progress."
+      );
+
+      return;
+    }
+if (
       placements.length ===
       0
     ) {
@@ -1065,32 +1128,134 @@ export default function NewRequestForm({
       ""
     );
 
-    /*
-     * Frontend-only workflow.
-     *
-     * Backend integration will later:
-     *
-     * - authenticate the client;
-     * - enforce organization ownership;
-     * - upload media to secure object storage;
-     * - re-verify MIME, codec, FPS, duration,
-     *   dimensions and aspect ratio;
-     * - generate permanent media asset IDs/URLs;
-     * - create/update the ADV request;
-     * - preserve immutable review history;
-     * - notify Admin;
-     * - return the permanent request reference.
-     *
-     * Browser File objects and object URLs are never
-     * persisted as canonical campaign data.
-     */
-    void creative;
+    if (
+      !currentOrganization?.id
+    ) {
+      setError(
+        "Poster Client organization could not be resolved. Return to onboarding or sign in again."
+      );
 
-    setSubmittedReference(
-      initialRequest
-        ?.id ??
-        createPreviewReference()
+      return;
+    }
+
+    const proposedContractValueMinor =
+      parseOptionalMoneyInputToMinorUnits(
+        form.proposedContractValue
+      );
+
+    const draft: ClientCommercialRequestDraft = {
+      requestType:
+        form.type as ClientCommercialRequestDraft["requestType"],
+
+      title:
+        form.campaignName.trim(),
+
+      objective:
+        form.body.trim() ||
+        form.headline.trim() ||
+        form.campaignName.trim(),
+
+      destinationUrl:
+        form.destinationUrl.trim(),
+
+      requestedPlacements:
+        [
+          ...placements,
+        ] as ClientCommercialRequestDraft["requestedPlacements"],
+
+      requestedStartDate:
+        form.requestedStartDate,
+
+      requestedEndDate:
+        form.requestedEndDate,
+
+      budgetMinorUnits:
+        requestedAllowanceMinor,
+
+      currencyCode:
+        walletSummary.currency,
+
+      creativeSpec:
+        creative as unknown as ClientCommercialRequestJsonObject,
+
+      commercialTerms:
+        {
+          organizationName:
+            form.organizationName.trim(),
+
+          contactName:
+            form.contactName.trim(),
+
+          businessEmail:
+            form.businessEmail.trim(),
+
+          website:
+            form.website.trim(),
+
+          campaignName:
+            form.campaignName.trim(),
+
+          proposedBudgetMinor:
+            requestedAllowanceMinor,
+
+          proposedContractValueMinor:
+            proposedContractValueMinor ??
+            null,
+
+          commissionModel:
+            form.commissionModel.trim(),
+
+          conversionDefinition:
+            form.conversionDefinition.trim(),
+
+          campaignAllowanceAccepted:
+            form.campaignAllowanceAccepted,
+        },
+    };
+
+    setIsSubmitting(
+      true
     );
+
+    try {
+      const submittedRequest =
+        initialRequest
+          ? await resubmitClientCommercialRequest(
+              {
+                organizationId:
+                  currentOrganization.id,
+
+                requestId:
+                  initialRequest.id,
+
+                draft,
+              }
+            )
+          : await submitClientCommercialRequest(
+              {
+                organizationId:
+                  currentOrganization.id,
+
+                draft,
+              }
+            );
+
+      setSubmittedReference(
+        submittedRequest.id
+      );
+    } catch (
+      submissionError
+    ) {
+      setError(
+        getRequestSubmissionErrorMessage(
+          submissionError
+        )
+      );
+    } finally {
+      setIsSubmitting(
+        false
+      );
+    }
   };
 
   if (
@@ -1117,13 +1282,13 @@ export default function NewRequestForm({
             }
           >
             {isEditMode
-              ? "Corrections ready"
-              : "Request prepared"}
+              ? "Corrections submitted"
+              : "Request submitted"}
           </div>
 
           <h2>
             {isEditMode
-              ? "Your changes are ready to return to Poster for review."
+              ? "Your changes were sent back to Poster for review."
               : "Your advertising request is ready for Poster review."}
           </h2>
 
@@ -1137,7 +1302,7 @@ export default function NewRequestForm({
           </p>
 
           <p>
-            Your request has been prepared. Secure submission is currently unavailable.
+            Your request was securely submitted to Poster Backend for review.
           </p>
 
           <div

@@ -17,110 +17,23 @@ export type ClientCommercialRequestPlacement =
   | "search"
   | "trending";
 
-export type ClientCommercialRequestCreativeLayout =
-  | "standard"
-  | "sliding";
+export type ClientCommercialRequestJsonObject =
+  Record<
+    string,
+    unknown
+  >;
 
-export interface ClientCommercialRequestMoney {
-  minorUnits:
-    string;
-
-  currency:
-    "INR";
-}
-
-export interface ClientCommercialRequestMediaAsset {
-  role:
-    string;
-
-  type:
-    string;
-
-  frameProfile:
-    string;
-
-  fileName:
-    string;
-
-  mimeType:
-    string;
-
-  sizeBytes:
-    number;
-
-  width:
-    number;
-
-  height:
-    number;
-
-  durationSeconds?:
-    number;
-
-  framesPerSecond?:
-    number;
-
-  altText?:
-    string;
-
-  localPreviewUrl?:
-    string;
-}
-
-export interface ClientCommercialRequestSlidingCard {
-  slot:
-    number;
+export interface ClientCommercialRequestDraft {
+  requestType:
+    ClientCommercialRequestType;
 
   title:
     string;
 
-  media:
-    ClientCommercialRequestMediaAsset;
-}
-
-export interface ClientCommercialRequestCreativeDraft {
-  layout:
-    ClientCommercialRequestCreativeLayout;
-
-  headline:
-    string;
-
-  body:
-    string;
-
-  callToAction:
+  objective:
     string;
 
   destinationUrl:
-    string;
-
-  primaryMedia?:
-    ClientCommercialRequestMediaAsset;
-
-  logoMedia?:
-    ClientCommercialRequestMediaAsset;
-
-  slidingCards?:
-    ClientCommercialRequestSlidingCard[];
-}
-
-export interface ClientCommercialRequestDraft {
-  type:
-    ClientCommercialRequestType;
-
-  organizationName:
-    string;
-
-  contactName:
-    string;
-
-  businessEmail:
-    string;
-
-  website:
-    string;
-
-  campaignName:
     string;
 
   requestedPlacements:
@@ -132,35 +45,19 @@ export interface ClientCommercialRequestDraft {
   requestedEndDate:
     string;
 
-  proposedBudgetMinor?:
-    number;
-
-  proposedContractValueMinor?:
-    number;
+  budgetMinorUnits?:
+    number |
+    null;
 
   currencyCode?:
-    "INR";
+    string |
+    null;
 
-  commissionModel?:
-    string;
+  creativeSpec:
+    ClientCommercialRequestJsonObject;
 
-  conversionDefinition?:
-    string;
-
-  creative:
-    ClientCommercialRequestCreativeDraft;
-
-  rightsConfirmed:
-    boolean;
-
-  campaignAllowanceAccepted:
-    boolean;
-
-  metadata?:
-    Record<
-      string,
-      unknown
-    >;
+  commercialTerms:
+    ClientCommercialRequestJsonObject;
 }
 
 export interface ClientCommercialRequestApiRecord {
@@ -170,16 +67,22 @@ export interface ClientCommercialRequestApiRecord {
   organizationId:
     string;
 
-  organizationName:
+  requestReference?:
     string;
 
-  type:
+  requestType?:
+    ClientCommercialRequestType;
+
+  type?:
     ClientCommercialRequestType;
 
   status:
     ClientCommercialRequestStatus;
 
-  campaignName:
+  title?:
+    string;
+
+  campaignName?:
     string;
 
   submittedAt:
