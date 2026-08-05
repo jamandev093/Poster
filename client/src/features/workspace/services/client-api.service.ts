@@ -1,3 +1,6 @@
+import {
+  getStoredAuthenticationAccessToken,
+} from "@/features/auth/auth-session.storage";
 export interface PosterApiErrorPayload {
   message?:
     string;
@@ -129,6 +132,18 @@ export async function requestPosterApiJson<ResponseBody>(
       "Content-Type",
       "application/json"
     );
+  }
+
+  if (!headers.has("Authorization")) {
+    const accessToken =
+      getStoredAuthenticationAccessToken();
+
+    if (accessToken) {
+      headers.set(
+        "Authorization",
+        `Bearer ${accessToken}`
+      );
+    }
   }
 
   const response =
