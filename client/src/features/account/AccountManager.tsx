@@ -10,6 +10,14 @@ import type {
 } from "react";
 
 import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  logoutClient,
+} from "@/features/auth/client-auth.service";
+
+import {
   useClientAccount,
 } from "./useClientAccount";
 
@@ -56,7 +64,14 @@ interface AccountFormProps {
   isSubmitting:
     boolean;
 
+  isSigningOut:
+    boolean;
+
   errorMessage:
+    string |
+    null;
+
+  logoutErrorMessage:
     string |
     null;
 
@@ -72,6 +87,9 @@ interface AccountFormProps {
       input:
         UpdateClientOrganizationInput
     ) => Promise<void>;
+
+  signOut:
+    () => Promise<void>;
 }
 
 function mapAccountToForm(
@@ -164,10 +182,13 @@ function AccountForm(
     isLoading,
     isRefreshing,
     isSubmitting,
+    isSigningOut,
     errorMessage,
+    logoutErrorMessage,
     savedAt,
     refresh,
     updateOrganization,
+    signOut,
   } =
     props;
 
@@ -196,7 +217,8 @@ function AccountForm(
 
   const isBusy =
     isLoading ||
-    isSubmitting;
+    isSubmitting ||
+    isSigningOut;
 
   const canSubmit =
     Boolean(
@@ -378,6 +400,21 @@ function AccountForm(
               ? "Refreshing..."
               : "Retry"}
           </button>
+        </section>
+      ) : null}
+
+      {logoutErrorMessage ? (
+        <section
+          className="contentCard"
+          role="alert"
+        >
+          <strong>
+            Sign out could not be completed
+          </strong>
+
+          <p>
+            {logoutErrorMessage}
+          </p>
         </section>
       ) : null}
 
@@ -574,6 +611,18 @@ function AccountForm(
         <div>
           <button
             type="button"
+            onClick={() => {
+              void signOut();
+            }}
+            disabled={isBusy}
+          >
+            {isSigningOut
+              ? "Signing out..."
+              : "Sign out"}
+          </button>
+
+          <button
+            type="button"
             onClick={resetChanges}
             disabled={isBusy}
           >
@@ -606,8 +655,58 @@ function AccountForm(
 }
 
 export default function AccountManager() {
+  const router =
+    useRouter();
+
   const accountState =
     useClientAccount();
+
+  const [
+    isSigningOut,
+    setIsSigningOut,
+  ] =
+    useState(false);
+
+  const [
+    logoutErrorMessage,
+    setLogoutErrorMessage,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const signOut =
+    async () => {
+      if (isSigningOut) {
+        return;
+      }
+
+      setIsSigningOut(
+        true
+      );
+
+      setLogoutErrorMessage(
+        null
+      );
+
+      try {
+        await logoutClient();
+
+        router.replace(
+          "/login"
+        );
+      } catch (error) {
+        setLogoutErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Poster could not sign you out. Please try again."
+        );
+      } finally {
+        setIsSigningOut(
+          false
+        );
+      }
+    };
 
   if (
     accountState.isLoading &&
@@ -660,10 +759,13 @@ export default function AccountManager() {
       isLoading={accountState.isLoading}
       isRefreshing={accountState.isRefreshing}
       isSubmitting={accountState.isSubmitting}
+      isSigningOut={isSigningOut}
       errorMessage={accountState.errorMessage}
+      logoutErrorMessage={logoutErrorMessage}
       savedAt={accountState.savedAt}
       refresh={accountState.refresh}
       updateOrganization={accountState.updateOrganization}
+      signOut={signOut}
     />
   );
 }
