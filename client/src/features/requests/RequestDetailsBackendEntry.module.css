@@ -1,0 +1,200 @@
+.header {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.title {
+  color: #0f172a;
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.description {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0.8rem 0 0;
+  max-width: 44rem;
+}
+
+.headerActions {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.summaryCard,
+.panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.summaryCard {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.summaryCard span,
+.detailRow span,
+.mediaCard span,
+.copyBlock span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summaryCard strong,
+.detailRow strong,
+.mediaCard strong,
+.copyBlock strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.panel {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1.2rem;
+}
+
+.panelHeader h2 {
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.detailGrid,
+.mediaGrid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detailRow,
+.mediaCard,
+.copyBlock {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.95rem;
+}
+
+.copyBlock {
+  grid-column: 1 / -1;
+}
+
+.copyBlock p,
+.copyBlock small,
+.mediaCard small,
+.note {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.placementList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.placementList span {
+  background: #eff6ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 0.45rem 0.7rem;
+}
+
+.destination {
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.statusPending {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.statusChanges {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.statusApproved {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.statusRejected {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1024px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detailGrid,
+  .mediaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .headerActions {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
