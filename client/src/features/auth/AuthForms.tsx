@@ -19,6 +19,10 @@ import {
 } from "@/features/account/client-account.service";
 import styles from "./AuthForms.module.css";
 
+import {
+  loginClient,
+} from "./client-auth.service";
+
 interface VerifyEmailFormProps {
   email?: string;
 }
@@ -193,14 +197,27 @@ export function LoginForm() {
   ] =
     useState("");
 
-  const submit = (
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
+    if (isSubmitting) {
+      return;
+    }
+
+    const normalizedEmail =
+      email.trim();
+
     if (
-      !email.trim() ||
+      !normalizedEmail ||
       !password
     ) {
       setError(
@@ -211,19 +228,27 @@ export function LoginForm() {
     }
 
     setError("");
+    setIsSubmitting(true);
 
-    /*
-     * Frontend demonstration only.
-     *
-     * Backend authentication will later:
-     * - validate credentials,
-     * - create the secure session,
-     * - resolve organization membership,
-     * - enforce organization-scoped access.
-     */
-    router.push(
-      "/dashboard"
-    );
+    try {
+      await loginClient({
+        email:
+          normalizedEmail,
+        password,
+      });
+
+      router.push(
+        "/dashboard"
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Poster could not sign you in. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -235,68 +260,66 @@ export function LoginForm() {
         submit
       }
     >
-      <div
+      <label
         className={
           styles.field
         }
       >
-        <label htmlFor="login-email">
+        <span>
           Business email
-        </label>
-
+        </span>
         <input
-          id="login-email"
           type="email"
-          value={email}
-          onChange={(
-            event
-          ) => {
-            setEmail(
-              event.target.value
-            );
-
-            setError("");
-          }}
-          required
+          value={
+            email
+          }
+          onChange={
+            (
+              event
+            ) =>
+              setEmail(
+                event.target.value
+              )
+          }
+          placeholder="you@company.com"
           autoComplete="email"
         />
-      </div>
+      </label>
 
-      <PasswordField
-        id="login-password"
-        label="Password"
-        value={password}
-        onChange={(
-          value
-        ) => {
-          setPassword(
-            value
-          );
-
-          setError("");
-        }}
-        autoComplete="current-password"
-      />
-
-      <div
+      <label
         className={
-          styles.linkRow
+          styles.field
         }
       >
-        <Link href="/forgot-password">
-          Forgot password?
-        </Link>
-      </div>
+        <span>
+          Password
+        </span>
+        <input
+          type="password"
+          value={
+            password
+          }
+          onChange={
+            (
+              event
+            ) =>
+              setPassword(
+                event.target.value
+              )
+          }
+          placeholder="Enter your password"
+          autoComplete="current-password"
+        />
+      </label>
 
       {error ? (
-        <div
+        <p
           className={
             styles.error
           }
-          role="alert"
         >
           {error}
-        </div>
+        </p>
       ) : null}
 
       <button
@@ -304,22 +327,14 @@ export function LoginForm() {
         className={
           styles.primaryAction
         }
-      >
-        Sign in
-      </button>
-
-      <p
-        className={
-          styles.switchText
+        disabled={
+          isSubmitting
         }
       >
-        New business partner?
-        {" "}
-
-        <Link href="/signup">
-          Create Client account
-        </Link>
-      </p>
+        {isSubmitting
+          ? "Signing in..."
+          : "Sign in"}
+      </button>
     </form>
   );
 }
