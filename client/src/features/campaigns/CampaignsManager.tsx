@@ -13,27 +13,18 @@ import {
   getCampaignTypeLabel,
 } from "@/features/workspace/workspace.formatters";
 
-import {
-  getOrganizationCampaigns,
-} from "@/features/workspace/workspace.selectors";
-
-import {
-  calculateCtr,
-  calculateDeliveryProgress,
-} from "@/features/workspace/workspace.types";
-
 import type {
   CampaignStatus,
 } from "@/features/workspace/workspace.types";
 
 import {
-  useClientWalletOverview,
-} from "@/features/workspace/hooks/useClientWalletOverview";
+  useClientCampaigns,
+} from "./useClientCampaigns";
 
 import type {
-  ClientWalletApiCampaignAllocation,
-  ClientWalletApiMoney,
-} from "@/features/workspace/services/client-wallet-read.service";
+  ClientCampaignListItem,
+} from "./useClientCampaigns";
+
 import styles from "./CampaignsManager.module.css";
 
 type CampaignFilter =
@@ -41,46 +32,68 @@ type CampaignFilter =
   | CampaignStatus;
 
 interface FilterOption {
-  key: CampaignFilter;
-  label: string;
+  key:
+    CampaignFilter;
+
+  label:
+    string;
 }
 
 const filters: FilterOption[] = [
   {
-    key: "all",
-    label: "All",
+    key:
+      "all",
+
+    label:
+      "All",
   },
   {
-    key: "draft",
-    label: "Draft",
+    key:
+      "draft",
+
+    label:
+      "Draft",
   },
   {
-    key: "scheduled",
-    label: "Scheduled",
+    key:
+      "scheduled",
+
+    label:
+      "Scheduled",
   },
   {
-    key: "active",
-    label: "Active",
+    key:
+      "active",
+
+    label:
+      "Active",
   },
   {
-    key: "paused",
-    label: "Paused",
+    key:
+      "paused",
+
+    label:
+      "Paused",
   },
   {
-    key: "ended",
-    label: "Ended",
+    key:
+      "ended",
+
+    label:
+      "Ended",
   },
   {
-    key: "disabled",
-    label: "Disabled",
+    key:
+      "disabled",
+
+    label:
+      "Disabled",
   },
 ];
 
-const campaigns =
-  getOrganizationCampaigns();
-
 function getStatusClass(
-  status: CampaignStatus
+  status:
+    CampaignStatus
 ): string {
   switch (status) {
     case "active":
@@ -99,8 +112,40 @@ function getStatusClass(
       return `statusBadge ${styles.statusEnded}`;
 
     case "disabled":
+    default:
       return "statusBadge statusAttention";
   }
+}
+
+function formatMoney(
+  value:
+    number |
+    undefined
+): string {
+  if (
+    value === undefined ||
+    !Number.isFinite(
+      value
+    )
+  ) {
+    return "Not available";
+  }
+
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style:
+        "currency",
+
+      currency:
+        "INR",
+
+      maximumFractionDigits:
+        2,
+    }
+  ).format(
+    value
+  );
 }
 
 function minorToMajor(
@@ -115,8 +160,8 @@ function minorToMajor(
 }
 
 function formatWalletMoney(
-  money:
-    ClientWalletApiMoney
+  minorUnits:
+    string
 ): string {
   return new Intl.NumberFormat(
     "en-IN",
@@ -125,54 +170,88 @@ function formatWalletMoney(
         "currency",
 
       currency:
-        money.currency,
+        "INR",
 
       maximumFractionDigits:
         2,
     }
   ).format(
     minorToMajor(
-      money.minorUnits
+      minorUnits
     )
   );
 }
 
-function getCampaignWalletSummary(
-  allocation:
-    ClientWalletApiCampaignAllocation |
-    undefined,
+function matchesSearch(
+  campaign:
+    ClientCampaignListItem,
 
-  isWalletLoading:
-    boolean,
+  query:
+    string
+): boolean {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [
+    campaign.id,
+    campaign.requestId,
+    campaign.requestReference,
+    campaign.name,
+    campaign.objective,
+    campaign.destinationUrl,
+    campaign.linkedCampaignId,
+    campaign.status,
+    campaign.requestStatus,
+    getCampaignTypeLabel(
+      campaign.type
+    ),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(
+    query
+  );
+}
+
+function getWalletSummary(
+  campaign:
+    ClientCampaignListItem,
 
   walletErrorMessage:
     string |
     null
 ): string {
+  const allocation =
+    campaign.walletAllocation;
+
   if (allocation) {
     return [
-      "Wallet:",
-      `${formatWalletMoney(allocation.allocated)} allocated`,
-      `${formatWalletMoney(allocation.reserved)} reserved`,
-      `${formatWalletMoney(allocation.spent)} spent`,
-    ].join(" ");
-  }
-
-  if (isWalletLoading) {
-    return "Wallet allocation loading...";
+      `${formatWalletMoney(allocation.allocated.minorUnits)} allocated`,
+      `${formatWalletMoney(allocation.reserved.minorUnits)} reserved`,
+      `${formatWalletMoney(allocation.spent.minorUnits)} spent`,
+    ].join(" · ");
   }
 
   if (walletErrorMessage) {
     return "Wallet allocation unavailable";
   }
 
+  if (!campaign.linkedCampaignId) {
+    return "Wallet allocation pending campaign setup";
+  }
+
   return "No Wallet allocation";
 }
+
 export default function CampaignsManager() {
   const [
     search,
     setSearch,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     filter,
@@ -183,40 +262,15 @@ export default function CampaignsManager() {
     );
 
   const {
-    overview:
-      walletOverview,
-    isLoading:
-      isWalletLoading,
-    errorMessage:
-      walletErrorMessage,
+    campaigns,
+    isLoading,
+    isRefreshing,
+    errorMessage,
+    walletErrorMessage,
+    refresh,
   } =
-    useClientWalletOverview(
+    useClientCampaigns(
       100
-    );
-
-  const allocationByCampaignId =
-    useMemo(
-      () => {
-        const allocations =
-          new Map<
-            string,
-            ClientWalletApiCampaignAllocation
-          >();
-
-        walletOverview?.campaignAllocations.forEach(
-          allocation => {
-            allocations.set(
-              allocation.campaignId,
-              allocation
-            );
-          }
-        );
-
-        return allocations;
-      },
-      [
-        walletOverview?.campaignAllocations,
-      ]
     );
 
   const visibleCampaigns =
@@ -228,69 +282,34 @@ export default function CampaignsManager() {
             .toLowerCase();
 
         return campaigns.filter(
-          (
-            campaign
-          ) => {
-            if (
-              filter !==
-                "all" &&
-              campaign.status !==
-                filter
-            ) {
-              return false;
-            }
-
-            if (
-              !normalizedSearch
-            ) {
-              return true;
-            }
-
-            const searchable = [
-              campaign.id,
-              campaign.requestId,
-              campaign.name,
-              campaign.organizationName,
-              getCampaignTypeLabel(
-                campaign.type
-              ),
-              getCampaignStatusLabel(
-                campaign.status
-              ),
-            ]
-              .join(" ")
-              .toLowerCase();
-
-            return searchable.includes(
+          campaign =>
+            (
+              filter === "all" ||
+              campaign.status === filter
+            ) &&
+            matchesSearch(
+              campaign,
               normalizedSearch
-            );
-          }
+            )
         );
       },
       [
+        campaigns,
         filter,
         search,
       ]
     );
 
-  const activeCount =
+  const activeCampaigns =
     campaigns.filter(
-      (
-        campaign
-      ) =>
-        campaign.status ===
-        "active"
+      campaign =>
+        campaign.status === "active"
     ).length;
 
-  const upcomingCount =
+  const scheduledCampaigns =
     campaigns.filter(
-      (
-        campaign
-      ) =>
-        campaign.status ===
-          "draft" ||
-        campaign.status ===
-          "scheduled"
+      campaign =>
+        campaign.status === "scheduled"
     ).length;
 
   const totalImpressions =
@@ -300,8 +319,7 @@ export default function CampaignsManager() {
         campaign
       ) =>
         total +
-        campaign.performance
-          .impressions,
+        campaign.performance.impressions,
       0
     );
 
@@ -312,17 +330,76 @@ export default function CampaignsManager() {
         campaign
       ) =>
         total +
-        campaign.performance
-          .clicks,
+        campaign.performance.clicks,
       0
     );
 
   return (
-    <>
-      <section
+    <section
+      className={
+        styles.shell
+      }
+      aria-labelledby="campaigns-manager-title"
+      aria-busy={
+        isLoading
+      }
+    >
+      <header
+        className={
+          styles.header
+        }
+      >
+        <div>
+          <p
+            className={
+              styles.eyebrow
+            }
+          >
+            Backend campaigns
+          </p>
+
+          <h2
+            id="campaigns-manager-title"
+            className={
+              styles.title
+            }
+          >
+            Campaigns
+          </h2>
+
+          <p
+            className={
+              styles.description
+            }
+          >
+            Campaign visibility is derived from Poster Backend commercial
+            requests and Backend Wallet allocation records.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={
+            () => {
+              void refresh();
+            }
+          }
+          disabled={
+            isRefreshing
+          }
+        >
+          {isRefreshing
+            ? "Refreshing..."
+            : "Refresh"}
+        </button>
+      </header>
+
+      <div
         className={
           styles.summaryGrid
         }
+        aria-label="Campaign summary"
       >
         <article
           className={
@@ -330,16 +407,12 @@ export default function CampaignsManager() {
           }
         >
           <span>
-            Active campaigns
+            Total campaigns
           </span>
 
           <strong>
-            {activeCount}
+            {campaigns.length}
           </strong>
-
-          <small>
-            Currently delivering
-          </small>
         </article>
 
         <article
@@ -348,16 +421,12 @@ export default function CampaignsManager() {
           }
         >
           <span>
-            Upcoming
+            Active
           </span>
 
           <strong>
-            {upcomingCount}
+            {activeCampaigns}
           </strong>
-
-          <small>
-            Draft or scheduled
-          </small>
         </article>
 
         <article
@@ -366,7 +435,21 @@ export default function CampaignsManager() {
           }
         >
           <span>
-            Impressions
+            Scheduled
+          </span>
+
+          <strong>
+            {scheduledCampaigns}
+          </strong>
+        </article>
+
+        <article
+          className={
+            styles.summaryCard
+          }
+        >
+          <span>
+            Delivery
           </span>
 
           <strong>
@@ -376,305 +459,260 @@ export default function CampaignsManager() {
           </strong>
 
           <small>
-            Across your campaigns
+            {formatClientNumber(
+              totalClicks
+            )} clicks
           </small>
         </article>
+      </div>
 
-        <article
+      <div
+        className={
+          styles.controls
+        }
+      >
+        <label
           className={
-            styles.summaryCard
+            styles.search
           }
         >
           <span>
-            Clicks
+            Search campaigns
           </span>
 
-          <strong>
-            {formatClientNumber(
-              totalClicks
-            )}
-          </strong>
-
-          <small>
-            Recorded engagement
-          </small>
-        </article>
-      </section>
-
-      <section className="contentCard">
-        <div
-          className={
-            styles.toolbar
-          }
-        >
           <input
+            type="search"
+            value={
+              search
+            }
+            onChange={
+              event =>
+                setSearch(
+                  event.target.value
+                )
+            }
             className={
               styles.searchInput
-            }
-            value={search}
-            onChange={(
-              event
-            ) =>
-              setSearch(
-                event.target.value
-              )
             }
             placeholder="Search campaign, request, or ID"
             aria-label="Search campaigns"
           />
-
-          <div
-            className={
-              styles.filters
-            }
-            aria-label="Campaign status filters"
-          >
-            {filters.map(
-              (
-                option
-              ) => {
-                const active =
-                  filter ===
-                  option.key;
-
-                return (
-                  <button
-                    key={
-                      option.key
-                    }
-                    type="button"
-                    className={
-                      active
-                        ? styles.filterButtonActive
-                        : styles.filterButton
-                    }
-                    onClick={() =>
-                      setFilter(
-                        option.key
-                      )
-                    }
-                  >
-                    {
-                      option.label
-                    }
-                  </button>
-                );
-              }
-            )}
-          </div>
-        </div>
+        </label>
 
         <div
           className={
-            styles.table
+            styles.filters
+          }
+          aria-label="Campaign status filters"
+        >
+          {filters.map(
+            option => (
+              <button
+                key={
+                  option.key
+                }
+                type="button"
+                className={
+                  filter === option.key
+                    ? styles.filterButtonActive
+                    : styles.filterButton
+                }
+                onClick={
+                  () =>
+                    setFilter(
+                      option.key
+                    )
+                }
+              >
+                {option.label}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {errorMessage ? (
+        <div
+          className={
+            styles.empty
+          }
+          role="alert"
+        >
+          {errorMessage}
+        </div>
+      ) : null}
+
+      {isLoading ? (
+        <div
+          className={
+            styles.empty
+          }
+          role="status"
+        >
+          Loading campaigns from Poster Backend.
+        </div>
+      ) : visibleCampaigns.length > 0 ? (
+        <div
+          className={
+            styles.grid
           }
         >
-          <div
-            className={
-              styles.tableHeader
-            }
-          >
-            <span>
-              Campaign
-            </span>
-
-            <span>
-              Type
-            </span>
-
-            <span>
-              Delivery
-            </span>
-
-            <span>
-              Performance
-            </span>
-
-            <span>
-              Status
-            </span>
-          </div>
-
-          {visibleCampaigns.length >
-          0 ? (
-            visibleCampaigns.map(
-              (
-                campaign
-              ) => {
-                const delivery =
-                  calculateDeliveryProgress(
-                    campaign
-                      .financials
-                      .deliveryTarget,
-                    campaign
-                      .financials
-                      .delivered
-                  );
-
-                const ctr =
-                  calculateCtr(
-                    campaign
-                      .performance
-                      .impressions,
-                    campaign
-                      .performance
-                      .clicks
-                  );
-
-                const walletAllocation =
-                  allocationByCampaignId.get(
-                    campaign.id
-                  );
-
-                const walletSummary =
-                  getCampaignWalletSummary(
-                    walletAllocation,
-                    isWalletLoading,
-                    walletErrorMessage
-                  );
-
-                return (
-                  <Link
-                    key={
-                      campaign.id
-                    }
-                    href={`/campaigns/${campaign.id}`}
-                    className={
-                      styles.row
-                    }
-                  >
-                    <div
+          {visibleCampaigns.map(
+            campaign => (
+              <article
+                key={
+                  campaign.id
+                }
+                className={
+                  styles.campaignCard
+                }
+              >
+                <div
+                  className={
+                    styles.cardHeader
+                  }
+                >
+                  <div>
+                    <p
                       className={
-                        styles.campaignInfo
+                        styles.eyebrow
                       }
                     >
-                      <strong>
-                        {
-                          campaign.name
-                        }
-                      </strong>
+                      {campaign.requestReference}
+                    </p>
 
-                      <span>
-                        {
-                          campaign.id
-                        }
-                        {" · "}
-                        {
-                          campaign.requestId
-                        }
-                      </span>
+                    <h3>
+                      {campaign.name}
+                    </h3>
 
-                      <span
-                        className={
-                          styles.walletLine
-                        }
-                      >
-                        {
-                          walletSummary
-                        }
-                      </span>
-                    </div>
-
-                    <span
-                      className={
-                        styles.typeLabel
-                      }
-                    >
+                    <p>
                       {getCampaignTypeLabel(
                         campaign.type
                       )}
-                    </span>
+                      {" · "}
+                      {campaign.linkedCampaignId ??
+                        "Pending campaign setup"}
+                    </p>
+                  </div>
 
-                    <div
-                      className={
-                        styles.delivery
-                      }
-                    >
-                      <strong>
-                        {delivery ===
-                        null
-                          ? campaign.type ===
-                            "affiliate"
-                            ? "Performance based"
-                            : "Not configured"
-                          : `${delivery.toFixed(
-                              1
-                            )}%`}
-                      </strong>
-
-                      {delivery !==
-                      null ? (
-                        <div
-                          className={
-                            styles.progressTrack
-                          }
-                        >
-                          <span
-                            style={{
-                              width: `${delivery}%`,
-                            }}
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div
-                      className={
-                        styles.performance
-                      }
-                    >
-                      <strong>
-                        {ctr.toFixed(
-                          2
-                        )}
-                        % CTR
-                      </strong>
-
-                      <span>
-                        {formatClientNumber(
-                          campaign
-                            .performance
-                            .impressions
-                        )}
-                        {
-                          " impressions"
-                        }
-                      </span>
-                    </div>
-
-                    <span
-                      className={getStatusClass(
+                  <span
+                    className={
+                      getStatusClass(
                         campaign.status
+                      )
+                    }
+                  >
+                    {getCampaignStatusLabel(
+                      campaign.status
+                    )}
+                  </span>
+                </div>
+
+                <div
+                  className={
+                    styles.performance
+                  }
+                >
+                  <div>
+                    <strong>
+                      {formatClientNumber(
+                        campaign.performance.impressions
                       )}
-                    >
-                      {getCampaignStatusLabel(
-                        campaign.status
-                      )}
+                    </strong>
+
+                    <span>
+                      Impressions
                     </span>
-                  </Link>
-                );
-              }
+                  </div>
+
+                  <div>
+                    <strong>
+                      {formatClientNumber(
+                        campaign.performance.clicks
+                      )}
+                    </strong>
+
+                    <span>
+                      Clicks
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>
+                      {campaign.performance.conversions === null
+                        ? "—"
+                        : formatClientNumber(
+                            campaign.performance.conversions
+                          )}
+                    </strong>
+
+                    <span>
+                      Conversions
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    styles.performance
+                  }
+                >
+                  <div>
+                    <strong>
+                      {formatMoney(
+                        campaign.financials.budget ??
+                        campaign.financials.contractValue
+                      )}
+                    </strong>
+
+                    <span>
+                      Commercial value
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>
+                      {formatMoney(
+                        campaign.financials.utilized
+                      )}
+                    </strong>
+
+                    <span>
+                      Wallet spent
+                    </span>
+                  </div>
+                </div>
+
+                <p
+                  className={
+                    styles.walletLine
+                  }
+                >
+                  {getWalletSummary(
+                    campaign,
+                    walletErrorMessage
+                  )}
+                </p>
+
+                <Link
+                  href={`/campaigns/${campaign.id}`}
+                  className="secondaryButton"
+                >
+                  View campaign
+                </Link>
+              </article>
             )
-          ) : (
-            <div
-              className={
-                styles.empty
-              }
-            >
-              No campaigns match your search or filter.
-            </div>
           )}
         </div>
-      </section>
-
-      <p
-        className={
-          styles.note
-        }
-      >
-        Campaign setup, scheduling, activation, pausing,
-        and completion are controlled by Poster Admin.
-      </p>
-    </>
+      ) : (
+        <div
+          className={
+            styles.empty
+          }
+        >
+          No Backend-linked campaigns match your search or filter.
+        </div>
+      )}
+    </section>
   );
 }
