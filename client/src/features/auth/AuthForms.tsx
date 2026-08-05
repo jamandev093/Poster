@@ -21,6 +21,9 @@ import styles from "./AuthForms.module.css";
 
 import {
   loginClient,
+  requestClientPasswordReset,
+  signupClient,
+  verifyClientSignupEmail,
 } from "./client-auth.service";
 
 interface VerifyEmailFormProps {
@@ -379,11 +382,21 @@ export function SignupForm() {
   ] =
     useState("");
 
-  const submit = (
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const normalizedName =
       name.trim();
@@ -434,19 +447,40 @@ export function SignupForm() {
       return;
     }
 
-    saveSignupDraft({
-      fullName:
-        normalizedName,
+    setError("");
+    setIsSubmitting(true);
 
-      businessEmail:
-        normalizedEmail,
-    });
+    try {
+      await signupClient({
+        fullName:
+          normalizedName,
+        email:
+          normalizedEmail,
+        password,
+      });
 
-    router.push(
-      `/verify-email?email=${encodeURIComponent(
-        normalizedEmail
-      )}`
-    );
+      saveSignupDraft({
+        fullName:
+          normalizedName,
+
+        businessEmail:
+          normalizedEmail,
+      });
+
+      router.push(
+        `/verify-email?email=${encodeURIComponent(
+          normalizedEmail
+        )}`
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Poster could not create this Client account. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -481,6 +515,9 @@ export function SignupForm() {
           }}
           required
           autoComplete="name"
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
@@ -508,6 +545,9 @@ export function SignupForm() {
           }}
           required
           autoComplete="email"
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
@@ -564,6 +604,9 @@ export function SignupForm() {
 
             setError("");
           }}
+          disabled={
+            isSubmitting
+          }
         />
 
         <span>
@@ -588,8 +631,13 @@ export function SignupForm() {
         className={
           styles.primaryAction
         }
+        disabled={
+          isSubmitting
+        }
       >
-        Continue
+        {isSubmitting
+          ? "Creating account..."
+          : "Continue"}
       </button>
 
       <p
@@ -632,11 +680,34 @@ export function VerifyEmailForm({
   ] =
     useState("");
 
-  const submit = (
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
+    const normalizedEmail =
+      email
+        .trim()
+        .toLowerCase();
+
+    if (!normalizedEmail) {
+      setError(
+        "Open the verification link from the same signup flow or sign up again."
+      );
+
+      return;
+    }
 
     if (
       !/^\d{6}$/.test(
@@ -651,20 +722,35 @@ export function VerifyEmailForm({
     }
 
     setError("");
+    setResendMessage("");
+    setIsSubmitting(true);
 
-    router.push(
-      "/onboarding/organization"
-    );
+    try {
+      await verifyClientSignupEmail({
+        email:
+          normalizedEmail,
+        token:
+          code,
+      });
+
+      router.push(
+        "/onboarding/organization"
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Poster could not verify this email. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resend =
     () => {
-      /*
-       * Do not pretend that an email was sent.
-       * Email delivery is not connected yet.
-       */
       setResendMessage(
-        "Verification email service is temporarily unavailable. Please try again later."
+        "Use the latest verification code from your email."
       );
     };
 
@@ -720,10 +806,7 @@ export function VerifyEmailForm({
             );
 
             setError("");
-
-            setResendMessage(
-              ""
-            );
+            setResendMessage("");
           }}
           inputMode="numeric"
           autoComplete="one-time-code"
@@ -732,6 +815,9 @@ export function VerifyEmailForm({
             styles.codeInput
           }
           required
+          disabled={
+            isSubmitting
+          }
         />
       </div>
 
@@ -741,11 +827,11 @@ export function VerifyEmailForm({
         }
       >
         <strong>
-          Frontend test mode
+          Backend-connected verification
         </strong>
 
         <span>
-          Verification email service is temporarily unavailable. Please try again later.
+          Poster Backend verifies the signup code before opening organization setup.
         </span>
       </div>
 
@@ -776,8 +862,13 @@ export function VerifyEmailForm({
         className={
           styles.primaryAction
         }
+        disabled={
+          isSubmitting
+        }
       >
-        Verify email
+        {isSubmitting
+          ? "Verifying..."
+          : "Verify email"}
       </button>
 
       <button
@@ -787,6 +878,9 @@ export function VerifyEmailForm({
         }
         onClick={
           resend
+        }
+        disabled={
+          isSubmitting
         }
       >
         Resend code
@@ -1180,6 +1274,8 @@ export function OrganizationOnboardingForm() {
   );
 }
 
+
+
 export function ForgotPasswordForm() {
   const [
     email,
@@ -1193,15 +1289,62 @@ export function ForgotPasswordForm() {
   ] =
     useState(false);
 
-  const submit = (
+  const [
+    error,
+    setError,
+  ] =
+    useState("");
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    setSubmitted(
-      true
-    );
+    if (isSubmitting) {
+      return;
+    }
+
+    const normalizedEmail =
+      email
+        .trim()
+        .toLowerCase();
+
+    if (!normalizedEmail) {
+      setError(
+        "Enter your business email."
+      );
+
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await requestClientPasswordReset({
+        email:
+          normalizedEmail,
+      });
+
+      setSubmitted(
+        true
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Poster could not start password recovery. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -1216,15 +1359,15 @@ export function ForgotPasswordForm() {
             styles.resultMark
           }
         >
-          ✓
+          OK
         </span>
 
         <h3>
-          Reset request recorded
+          Check your email
         </h3>
 
         <p>
-          Password recovery is temporarily unavailable. Please try again later.
+          If this Client account exists, Poster has sent password reset instructions to the business email.
         </p>
 
         <Link
@@ -1263,23 +1406,44 @@ export function ForgotPasswordForm() {
           value={email}
           onChange={(
             event
-          ) =>
+          ) => {
             setEmail(
               event.target.value
-            )
-          }
+            );
+
+            setError("");
+          }}
           required
           autoComplete="email"
+          disabled={
+            isSubmitting
+          }
         />
       </div>
+
+      {error ? (
+        <div
+          className={
+            styles.error
+          }
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
 
       <button
         type="submit"
         className={
           styles.primaryAction
         }
+        disabled={
+          isSubmitting
+        }
       >
-        Continue
+        {isSubmitting
+          ? "Sending..."
+          : "Continue"}
       </button>
 
       <p
