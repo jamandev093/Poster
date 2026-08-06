@@ -186,3 +186,8 @@ backups/
 /A17*.txt
 /A18*.txt
 /A19*.txt
+# Poster env template allowlist.
+# Keep real env files ignored, but allow safe sample templates.
+!.env.example
+!.env.local.example
+!.env.production.example
