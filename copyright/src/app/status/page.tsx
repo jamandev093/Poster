@@ -7,6 +7,15 @@ import {
 
 import SignalContact from "@/components/SignalContact";
 
+import {
+  lookupPublicCopyrightStatus,
+  PublicCopyrightClaimError,
+} from "@/features/copyright/public-copyright.service";
+
+import type {
+  PublicCopyrightStatus,
+} from "@/features/copyright/public-copyright.types";
+
 type TimelineState =
   | "complete"
   | "current"
@@ -14,128 +23,138 @@ type TimelineState =
 
 interface TimelineEntry {
   label: string;
+
   detail: string;
-  state: TimelineState;
+
+  state:
+    TimelineState;
 }
 
-interface ClaimItem {
-  contentId: string;
-  status: string;
-  outcome: string;
+function titleCaseToken(
+  value: string
+): string {
+  return value
+    .replace(
+      /_/g,
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      character =>
+        character.toUpperCase()
+    );
 }
 
-interface BulkSummary {
-  removed: number;
-  blocked: number;
-  underReview: number;
-  informationRequired: number;
-  noAction: number;
+function requestTypeLabel(
+  requestType: string
+): string {
+  if (
+    requestType ===
+    "copyright_strike"
+  ) {
+    return "Single copyright claim";
+  }
+
+  return titleCaseToken(
+    requestType
+  );
 }
 
-interface DemoClaim {
-  reference: string;
-  email: string;
-  kind: "single" | "bulk";
-  status: string;
-  affectedCount: number;
-  timeline: TimelineEntry[];
-  outcome?: string;
-  reimportProtection?: string;
-  summary?: BulkSummary;
-  items?: ClaimItem[];
+function statusLabel(
+  status: string
+): string {
+  switch (status) {
+    case "needs_action":
+      return "Awaiting review";
+
+    case "under_review":
+      return "Under review";
+
+    case "information_required":
+      return "Information required";
+
+    case "resolved":
+      return "Resolved";
+
+    case "dismissed":
+      return "No action recorded";
+
+    default:
+      return titleCaseToken(
+        status
+      );
+  }
 }
 
-const DEMO_CLAIMS: DemoClaim[] = [
-  {
-    reference: "CR-DEMO-0001",
-    email: "claimant@example.com",
-    kind: "single",
-    status: "Resolved",
-    affectedCount: 1,
-    timeline: [
-      {
-        label: "Submitted",
-        detail: "Copyright request received",
-        state: "complete",
-      },
-      {
-        label: "Under review",
-        detail: "Claim and affected content reviewed",
-        state: "complete",
-      },
-      {
-        label: "Action taken",
-        detail: "Content removal completed",
-        state: "complete",
-      },
-      {
-        label: "Resolved",
-        detail: "Final outcome recorded",
-        state: "complete",
-      },
-    ],
-    outcome: "Removed",
-    reimportProtection: "Enabled",
-  },
-  {
-    reference: "CR-DEMO-0002",
-    email: "rights@example.com",
-    kind: "bulk",
-    status: "Partially resolved",
-    affectedCount: 5,
-    timeline: [
-      {
-        label: "Submitted",
-        detail: "Bulk copyright request received",
-        state: "complete",
-      },
-      {
-        label: "Under review",
-        detail: "Affected items are being reviewed",
-        state: "current",
-      },
-      {
-        label: "Resolved",
-        detail: "Final outcomes pending for remaining items",
-        state: "pending",
-      },
-    ],
-    summary: {
-      removed: 2,
-      blocked: 1,
-      underReview: 1,
-      informationRequired: 1,
-      noAction: 0,
-    },
-    items: [
-      {
-        contentId: "CNT-1001",
-        status: "Resolved",
-        outcome: "Removed",
-      },
-      {
-        contentId: "CNT-1002",
-        status: "Resolved",
-        outcome: "Removed",
-      },
-      {
-        contentId: "CNT-1003",
-        status: "Resolved",
-        outcome: "Removed + re-import blocked",
-      },
-      {
-        contentId: "CNT-1004",
-        status: "Under review",
-        outcome: "Review in progress",
-      },
-      {
-        contentId: "CNT-1005",
-        status: "Information required",
-        outcome: "Waiting for claimant information",
-      },
-    ],
-  },
-];
+function verificationLabel(
+  status: string
+): string {
+  switch (status) {
+    case "pending":
+      return "Pending verification";
+
+    case "verified":
+      return "Verified";
+
+    case "rejected":
+      return "Rejected";
+
+    default:
+      return titleCaseToken(
+        status
+      );
+  }
+}
+
+function actionLabel(
+  action:
+    string |
+    null
+): string {
+  if (!action) {
+    return "No final action recorded yet";
+  }
+
+  return titleCaseToken(
+    action
+  );
+}
+
+function formatDateTime(
+  value:
+    string |
+    null
+): string {
+  if (!value) {
+    return "Not yet recorded";
+  }
+
+  const date =
+    new Date(
+      value
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "Recorded";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en",
+    {
+      dateStyle:
+        "medium",
+
+      timeStyle:
+        "short",
+    }
+  ).format(
+    date
+  );
+}
 
 function timelineMark(
   state: TimelineState
@@ -170,54 +189,165 @@ function timelineClassName(
 function statusBadgeClassName(
   status: string
 ): string {
-  return status === "Resolved"
+  return (
+    status === "resolved" ||
+    status === "dismissed"
+  )
     ? "statusBadge statusBadgeResolved"
     : "statusBadge statusBadgeProgress";
+}
+
+function buildTimeline(
+  claim:
+    PublicCopyrightStatus
+): TimelineEntry[] {
+  const isResolved =
+    claim.status === "resolved" ||
+    claim.status === "dismissed" ||
+    claim.resolvedAt !== null ||
+    claim.actionTaken !== null;
+
+  const isUnderReview =
+    claim.status === "under_review" ||
+    claim.status === "information_required" ||
+    isResolved;
+
+  return [
+    {
+      label:
+        "Submitted",
+
+      detail:
+        `Copyright request received on ${formatDateTime(
+          claim.receivedAt
+        )}.`,
+
+      state:
+        "complete",
+    },
+    {
+      label:
+        "Verification",
+
+      detail:
+        verificationLabel(
+          claim.verificationStatus
+        ),
+
+      state:
+        claim.verificationStatus === "pending"
+          ? "current"
+          : "complete",
+    },
+    {
+      label:
+        "Review",
+
+      detail:
+        isUnderReview
+          ? "Poster is reviewing the claim, affected content, and supporting information."
+          : "Waiting for Poster review.",
+
+      state:
+        isUnderReview
+          ? "complete"
+          : "pending",
+    },
+    {
+      label:
+        "Outcome",
+
+      detail:
+        actionLabel(
+          claim.actionTaken
+        ),
+
+      state:
+        isResolved
+          ? "complete"
+          : "pending",
+    },
+  ];
+}
+
+function normalizeReferenceInput(
+  value: string
+): string {
+  return value
+    .trim()
+    .toUpperCase();
+}
+
+function normalizeEmailInput(
+  value: string
+): string {
+  return value
+    .trim()
+    .toLowerCase();
 }
 
 export default function CopyrightStatusPage() {
   const [
     reference,
     setReference,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     email,
     setEmail,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     error,
     setError,
-  ] = useState("");
+  ] =
+    useState("");
+
+  const [
+    isLoading,
+    setIsLoading,
+  ] =
+    useState(false);
 
   const [
     claim,
     setClaim,
-  ] = useState<DemoClaim | null>(
-    null
-  );
+  ] =
+    useState<PublicCopyrightStatus | null>(
+      null
+    );
 
-  const checkStatus = (
-    event: FormEvent<HTMLFormElement>
+  const checkStatus = async (
+    event:
+      FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
+    if (
+      isLoading
+    ) {
+      return;
+    }
+
     const normalizedReference =
-      reference
-        .trim()
-        .toUpperCase();
+      normalizeReferenceInput(
+        reference
+      );
 
     const normalizedEmail =
-      email
-        .trim()
-        .toLowerCase();
+      normalizeEmailInput(
+        email
+      );
 
     if (
       !normalizedReference ||
       !normalizedEmail
     ) {
-      setClaim(null);
+      setClaim(
+        null
+      );
 
       setError(
         "Enter your claim reference and the email used for submission."
@@ -226,57 +356,81 @@ export default function CopyrightStatusPage() {
       return;
     }
 
-    /*
-     * The production backend will verify the
-     * reference and email pair, apply request
-     * limits, and return only the matching case.
-     *
-     * This workflow does not require a separate
-     * account, OTP, or verification page.
-     */
-    const matchedClaim =
-      DEMO_CLAIMS.find(
-        (candidate) =>
-          candidate.reference ===
-            normalizedReference &&
-          candidate.email.toLowerCase() ===
-            normalizedEmail
+    setError(
+      ""
+    );
+
+    setIsLoading(
+      true
+    );
+
+    try {
+      const status =
+        await lookupPublicCopyrightStatus({
+          reference:
+            normalizedReference,
+
+          email:
+            normalizedEmail,
+        });
+
+      setClaim(
+        status
+      );
+    } catch (
+      caughtError
+    ) {
+      setClaim(
+        null
       );
 
-    if (!matchedClaim) {
-      setClaim(null);
+      if (
+        caughtError instanceof
+        PublicCopyrightClaimError
+      ) {
+        const issueText =
+          caughtError.issues.length > 0
+            ? ` ${caughtError.issues.join(" ")}`
+            : "";
 
-      /*
-       * Keep this response generic so the page
-       * does not reveal whether the claim
-       * reference or email was incorrect.
-       */
-      setError(
-        "No matching copyright request was found with those details."
+        setError(
+          `${caughtError.message}${issueText}`
+        );
+      } else {
+        setError(
+          "No matching copyright request was found with those details."
+        );
+      }
+    } finally {
+      setIsLoading(
+        false
       );
-
-      return;
     }
-
-    setError("");
-    setClaim(matchedClaim);
   };
 
   const resetLookup = () => {
-    setClaim(null);
-    setReference("");
-    setEmail("");
-    setError("");
+    setClaim(
+      null
+    );
+
+    setReference(
+      ""
+    );
+
+    setEmail(
+      ""
+    );
+
+    setError(
+      ""
+    );
   };
 
-  const bulkSummary =
-    claim?.kind === "bulk"
-      ? claim.summary
-      : undefined;
-
-  const bulkItems =
-    claim?.kind === "bulk"
-      ? claim.items ?? []
+  const timeline =
+    claim
+      ? buildTimeline(
+          claim
+        )
       : [];
 
   return (
@@ -295,8 +449,8 @@ export default function CopyrightStatusPage() {
 
           <p className="pageDescription pageDescriptionLarge">
             {claim
-              ? "Review the current case status, progress, and recorded outcome for each affected Poster content item."
-              : "Enter the claim reference and email used during submission. No Poster account or separate verification screen is required."}
+              ? "Review the current case status, review progress, and recorded outcome for the affected Poster content item."
+              : "Enter the claim reference and email used during submission. No Poster account, OTP, or separate verification screen is required."}
           </p>
         </div>
       </header>
@@ -351,13 +505,13 @@ export default function CopyrightStatusPage() {
                           event.target.value
                         )
                       }
-                      placeholder="CR-..."
+                      placeholder="CR-900001"
                       autoComplete="off"
                       required
                     />
 
                     <span className="fieldHelp">
-                      Example format: CR-2026-0001
+                      Example format: CR-900001
                     </span>
                   </div>
 
@@ -394,36 +548,13 @@ export default function CopyrightStatusPage() {
                 <button
                   type="submit"
                   className="primaryButton statusSubmitButton"
+                  disabled={isLoading}
                 >
-                  Check status
+                  {isLoading
+                    ? "Checking..."
+                    : "Check status"}
                 </button>
               </form>
-
-              <div className="statusDemoRecords">
-                <div className="statusDemoLabel">
-                  Frontend demonstration records
-                </div>
-
-                <div className="statusDemoRecord">
-                  <strong>
-                    CR-DEMO-0001
-                  </strong>
-
-                  <span>
-                    claimant@example.com
-                  </span>
-                </div>
-
-                <div className="statusDemoRecord">
-                  <strong>
-                    CR-DEMO-0002
-                  </strong>
-
-                  <span>
-                    rights@example.com
-                  </span>
-                </div>
-              </div>
             </div>
           </section>
 
@@ -435,17 +566,17 @@ export default function CopyrightStatusPage() {
                 </div>
 
                 <h2 className="sectionTitle sectionTitleLarge">
-                  Clear status and item-level outcomes
+                  Safe status and content outcome details
                 </h2>
               </div>
 
               <p className="sectionIntro">
-                A request can remain under review,
-                require more information, be resolved
-                with removal, include re-import
-                protection, or receive different
-                outcomes for separate bulk-request
-                items.
+                Poster returns only public case status,
+                affected-content summary, verification
+                state, review outcome, and re-import
+                protection state. Claimant details,
+                internal IDs, evidence internals, and
+                Admin audit fields stay private.
               </p>
             </div>
 
@@ -461,9 +592,9 @@ export default function CopyrightStatusPage() {
                   </h3>
 
                   <p className="processDescription">
-                    See whether the request is submitted,
-                    under review, partially resolved, or
-                    fully resolved.
+                    See whether the request is awaiting
+                    review, under review, requires more
+                    information, or has been resolved.
                   </p>
                 </div>
               </div>
@@ -480,8 +611,8 @@ export default function CopyrightStatusPage() {
 
                   <p className="processDescription">
                     Follow the recorded stages from
-                    submission through review and final
-                    action.
+                    submission through verification,
+                    review, and final outcome.
                   </p>
                 </div>
               </div>
@@ -493,13 +624,14 @@ export default function CopyrightStatusPage() {
 
                 <div>
                   <h3 className="processTitle">
-                    Individual content outcomes
+                    Content outcome
                   </h3>
 
                   <p className="processDescription">
-                    Bulk cases display separate results
-                    for every affected Poster content
-                    record.
+                    View the affected Poster content
+                    summary and whether any action or
+                    re-import protection has been
+                    recorded.
                   </p>
                 </div>
               </div>
@@ -525,7 +657,9 @@ export default function CopyrightStatusPage() {
                   claim.status
                 )}
               >
-                {claim.status}
+                {statusLabel(
+                  claim.status
+                )}
               </div>
             </div>
 
@@ -536,9 +670,9 @@ export default function CopyrightStatusPage() {
                 </dt>
 
                 <dd>
-                  {claim.kind === "bulk"
-                    ? "Bulk copyright request"
-                    : "Single copyright claim"}
+                  {requestTypeLabel(
+                    claim.requestType
+                  )}
                 </dd>
               </div>
 
@@ -548,20 +682,29 @@ export default function CopyrightStatusPage() {
                 </dt>
 
                 <dd>
-                  {claim.affectedCount}{" "}
-                  {claim.affectedCount === 1
-                    ? "item"
-                    : "items"}
+                  {claim.affectedContent.publicId}
                 </dd>
               </div>
 
               <div>
                 <dt>
-                  Submitted email
+                  Access check
                 </dt>
 
                 <dd>
-                  {claim.email}
+                  Verified with supplied email
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Received
+                </dt>
+
+                <dd>
+                  {formatDateTime(
+                    claim.receivedAt
+                  )}
                 </dd>
               </div>
             </dl>
@@ -589,13 +732,13 @@ export default function CopyrightStatusPage() {
 
               <p className="sectionIntro">
                 The timeline reflects the current
-                processing state of this copyright
-                request.
+                processing state returned by Poster
+                Backend.
               </p>
             </div>
 
             <div className="statusTimeline">
-              {claim.timeline.map(
+              {timeline.map(
                 (entry) => (
                   <div
                     key={entry.label}
@@ -626,203 +769,155 @@ export default function CopyrightStatusPage() {
             </div>
           </section>
 
-          {claim.kind === "single" ? (
-            <section className="pageSection">
-              <div className="sectionHeading">
-                <div>
-                  <div className="sectionEyebrow">
-                    Content decision
-                  </div>
-
-                  <h2 className="sectionTitle sectionTitleLarge">
-                    Recorded outcome
-                  </h2>
+          <section className="pageSection">
+            <div className="sectionHeading">
+              <div>
+                <div className="sectionEyebrow">
+                  Affected content
                 </div>
 
-                <p className="sectionIntro">
-                  This result shows the action recorded
-                  for the affected Poster content item.
+                <h2 className="sectionTitle sectionTitleLarge">
+                  Content summary
+                </h2>
+              </div>
+
+              <p className="sectionIntro">
+                This is the public content summary linked
+                to the copyright case.
+              </p>
+            </div>
+
+            <div className="statusOutcomeGrid">
+              <div className="statusOutcomeItem">
+                <span>
+                  Poster Content ID
+                </span>
+
+                <strong>
+                  {claim.affectedContent.publicId}
+                </strong>
+
+                <p>
+                  {claim.affectedContent.title}
                 </p>
               </div>
 
-              <div className="statusOutcomeGrid">
-                <div className="statusOutcomeItem">
-                  <span>
-                    Content outcome
-                  </span>
+              <div className="statusOutcomeItem">
+                <span>
+                  Publisher
+                </span>
 
-                  <strong className="statusOutcomeSuccess">
-                    {claim.outcome}
-                  </strong>
+                <strong>
+                  {claim.affectedContent.publisherName}
+                </strong>
 
-                  <p>
-                    The affected Poster content reference
-                    is no longer available through
-                    discovery.
-                  </p>
-                </div>
-
-                <div className="statusOutcomeItem">
-                  <span>
-                    Re-import protection
-                  </span>
-
-                  <strong>
-                    {claim.reimportProtection}
-                  </strong>
-
-                  <p>
-                    Poster will prevent the removed
-                    content record from being
-                    automatically imported again.
-                  </p>
-                </div>
-              </div>
-            </section>
-          ) : null}
-
-          {claim.kind === "bulk" &&
-          bulkSummary ? (
-            <section className="pageSection">
-              <div className="sectionHeading">
-                <div>
-                  <div className="sectionEyebrow">
-                    Bulk request
-                  </div>
-
-                  <h2 className="sectionTitle sectionTitleLarge">
-                    Outcome summary
-                  </h2>
-                </div>
-
-                <p className="sectionIntro">
-                  A bulk case can contain several
-                  different results while remaining
-                  partially resolved.
+                <p>
+                  Original URL: {claim.affectedContent.originalUrl}
                 </p>
               </div>
 
-              <div className="statusMetrics">
-                {[
-                  {
-                    label: "Removed",
-                    value: bulkSummary.removed,
-                  },
-                  {
-                    label: "Removed + blocked",
-                    value: bulkSummary.blocked,
-                  },
-                  {
-                    label: "Under review",
-                    value: bulkSummary.underReview,
-                  },
-                  {
-                    label: "Information required",
-                    value:
-                      bulkSummary.informationRequired,
-                  },
-                  {
-                    label: "No action",
-                    value: bulkSummary.noAction,
-                  },
-                ].map((entry) => (
-                  <div
-                    key={entry.label}
-                    className="statusMetric"
-                  >
-                    <strong>
-                      {entry.value}
-                    </strong>
+              <div className="statusOutcomeItem">
+                <span>
+                  Content state
+                </span>
 
-                    <span>
-                      {entry.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {claim.kind === "bulk" &&
-          bulkItems.length > 0 ? (
-            <section className="pageSection">
-              <div className="sectionHeading">
-                <div>
-                  <div className="sectionEyebrow">
-                    Affected content
-                  </div>
-
-                  <h2 className="sectionTitle sectionTitleLarge">
-                    Item-level decisions
-                  </h2>
-                </div>
-
-                <p className="sectionIntro">
-                  Every content record keeps its own
-                  review status and outcome.
-                </p>
-              </div>
-
-              <div className="statusTableWrapper">
-                <div className="statusTable">
-                  <div className="statusTableHeader">
-                    <span>
-                      Content ID
-                    </span>
-
-                    <span>
-                      Status
-                    </span>
-
-                    <span>
-                      Outcome
-                    </span>
-                  </div>
-
-                  {bulkItems.map(
-                    (item) => (
-                      <div
-                        key={item.contentId}
-                        className="statusTableRow"
-                      >
-                        <strong>
-                          {item.contentId}
-                        </strong>
-
-                        <span>
-                          {item.status}
-                        </span>
-
-                        <span
-                          className={
-                            item.outcome.startsWith(
-                              "Removed"
-                            )
-                              ? "statusTableOutcomeSuccess"
-                              : undefined
-                          }
-                        >
-                          {item.outcome}
-                        </span>
-                      </div>
-                    )
+                <strong>
+                  {titleCaseToken(
+                    claim.affectedContent.status
                   )}
-                </div>
+                </strong>
+
+                <p>
+                  Current public discovery state for the
+                  affected content record.
+                </p>
               </div>
-            </section>
-          ) : null}
+            </div>
+          </section>
+
+          <section className="pageSection">
+            <div className="sectionHeading">
+              <div>
+                <div className="sectionEyebrow">
+                  Recorded outcome
+                </div>
+
+                <h2 className="sectionTitle sectionTitleLarge">
+                  Review result
+                </h2>
+              </div>
+
+              <p className="sectionIntro">
+                Outcomes are recorded through the
+                Backend-managed Admin Copyright workflow.
+              </p>
+            </div>
+
+            <div className="statusOutcomeGrid">
+              <div className="statusOutcomeItem">
+                <span>
+                  Action taken
+                </span>
+
+                <strong
+                  className={
+                    claim.actionTaken
+                      ? "statusOutcomeSuccess"
+                      : undefined
+                  }
+                >
+                  {actionLabel(
+                    claim.actionTaken
+                  )}
+                </strong>
+
+                <p>
+                  {claim.resolvedAt
+                    ? `Resolved at ${formatDateTime(
+                        claim.resolvedAt
+                      )}.`
+                    : "The case is still awaiting a final recorded outcome."}
+                </p>
+              </div>
+
+              <div className="statusOutcomeItem">
+                <span>
+                  Re-import protection
+                </span>
+
+                <strong>
+                  {claim.preventReimport
+                    ? "Enabled"
+                    : "Not enabled"}
+                </strong>
+
+                <p>
+                  Re-import protection is enabled only
+                  when Poster records a prevention action
+                  for the affected content.
+                </p>
+              </div>
+
+              <div className="statusOutcomeItem">
+                <span>
+                  Verification
+                </span>
+
+                <strong>
+                  {verificationLabel(
+                    claim.verificationStatus
+                  )}
+                </strong>
+
+                <p>
+                  Claimant and content verification state
+                  for this copyright case.
+                </p>
+              </div>
+            </div>
+          </section>
 
           <SignalContact />
-
-          <div className="statusDevelopmentNotice">
-            <strong>
-              Development environment:
-            </strong>{" "}
-            demonstration claim information is
-            temporary. Backend and database
-            integration will later provide secure,
-            permanent case records.
-          </div>
         </>
       )}
     </>

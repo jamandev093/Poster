@@ -14,6 +14,15 @@ import {
 
 import styles from "./CopyrightForms.module.css";
 
+import {
+  PublicCopyrightClaimError,
+  submitPublicBulkRemoval,
+} from "./public-copyright.service";
+
+import type {
+  PublicCopyrightRelationship,
+} from "./public-copyright.types";
+
 interface BulkItem {
   id: string;
   value: string;
@@ -441,6 +450,51 @@ function importSummaryText(
   );
 }
 
+function readBulkFormValue(
+  formData:
+    FormData,
+  key: string
+): string {
+  const value =
+    formData.get(
+      key
+    );
+
+  return typeof value === "string"
+    ? value.trim()
+    : "";
+}
+
+function readOptionalBulkFormValue(
+  formData:
+    FormData,
+  key: string
+): string | null {
+  const value =
+    readBulkFormValue(
+      formData,
+      key
+    );
+
+  return value.length > 0
+    ? value
+    : null;
+}
+
+function readBulkRelationship(
+  value: string
+): PublicCopyrightRelationship {
+  if (
+    value === "owner" ||
+    value === "authorized" ||
+    value === "publisher"
+  ) {
+    return value;
+  }
+
+  return "owner";
+}
+
 export default function BulkRemovalForm({
   initialItems = [],
 }: BulkRemovalFormProps) {
@@ -476,6 +530,14 @@ export default function BulkRemovalForm({
     setError,
   ] =
     useState("");
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(
+      false
+    );
 
   const [
     importMessage,
@@ -967,11 +1029,17 @@ export default function BulkRemovalForm({
       );
     };
 
-  const submitBulkClaim = (
+  const submitBulkClaim = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (
+      isSubmitting
+    ) {
+      return;
+    }
 
     if (
       selectedCount ===
@@ -1018,22 +1086,135 @@ export default function BulkRemovalForm({
       return;
     }
 
-    /*
-     * Frontend-only workflow.
-     *
-     * Production backend will later:
-     * - validate every identifier again server-side,
-     * - resolve exact Poster records,
-     * - deduplicate by canonical Content ID,
-     * - create one CR parent case,
-     * - create affected-item child records,
-     * - send the case to Admin Copyright,
-     * - store item-level outcomes,
-     * - notify the claimant.
-     */
-    router.push(
-      `/submitted?type=bulk&count=${selectedCount}`
+    const formData =
+      new FormData(
+        event.currentTarget
+      );
+
+    const selectedItems =
+      items
+        .filter(
+          item =>
+            item.selected
+        )
+        .map(
+          item => ({
+            value:
+              item.value,
+          })
+        );
+
+    setError(
+      ""
     );
+
+    setIsSubmitting(
+      true
+    );
+
+    try {
+      const bulkRequest =
+        await submitPublicBulkRemoval({
+          claimantName:
+            readBulkFormValue(
+              formData,
+              "claimantName"
+            ),
+
+          organization:
+            readOptionalBulkFormValue(
+              formData,
+              "organization"
+            ),
+
+          email:
+            readBulkFormValue(
+              formData,
+              "email"
+            ),
+
+          relationship:
+            readBulkRelationship(
+              readBulkFormValue(
+                formData,
+                "relationship"
+              )
+            ),
+
+          workTitle:
+            readBulkFormValue(
+              formData,
+              "workTitle"
+            ),
+
+          originalUrl:
+            readOptionalBulkFormValue(
+              formData,
+              "originalUrl"
+            ),
+
+          items:
+            selectedItems,
+
+          explanation:
+            readBulkFormValue(
+              formData,
+              "explanation"
+            ),
+
+          evidence:
+            readOptionalBulkFormValue(
+              formData,
+              "evidence"
+            ),
+
+          legalName:
+            readBulkFormValue(
+              formData,
+              "legalName"
+            ),
+
+          declarations,
+        });
+
+      router.push(
+        `/submitted?reference=${encodeURIComponent(
+          bulkRequest.reference
+        )}&type=bulk&count=${encodeURIComponent(
+          String(
+            bulkRequest.itemCount
+          )
+        )}`
+      );
+    } catch (
+      caughtError
+    ) {
+      if (
+        caughtError instanceof
+        PublicCopyrightClaimError
+      ) {
+        const issueText =
+          caughtError.issues.length > 0
+            ? ` ${caughtError.issues.join(" ")}`
+            : "";
+
+        setError(
+          `${caughtError.message}${issueText}`
+        );
+      } else {
+        setError(
+          "The bulk copyright request could not be submitted. Please try again."
+        );
+      }
+
+      setConfirmSubmission(
+        false
+      );
+    } finally {
+      setIsSubmitting(
+        false
+      );
+    }
   };
 
   return (
@@ -1737,6 +1918,7 @@ https://publisher.example/article/123`}
         <button
           type="submit"
           className="primaryButton"
+          disabled={isSubmitting}
         >
           {confirmSubmission
             ? `Confirm and submit ${selectedCount} ${

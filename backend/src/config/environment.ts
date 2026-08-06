@@ -44,6 +44,11 @@ const EnvironmentSchema = z.object({
     .url()
     .default("http://localhost:3001"),
 
+  COPYRIGHT_WEB_ORIGIN: z
+    .string()
+    .url()
+    .default("http://localhost:3002"),
+
   DATABASE_URL: z
     .string()
     .trim()

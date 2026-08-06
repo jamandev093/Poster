@@ -9,6 +9,15 @@ import {
   useRouter,
 } from "next/navigation";
 
+import {
+  PublicCopyrightClaimError,
+  submitPublicCopyrightClaim,
+} from "./public-copyright.service";
+
+import type {
+  PublicCopyrightRelationship,
+} from "./public-copyright.types";
+
 import styles from "./CopyrightForms.module.css";
 
 interface CopyrightClaimFormProps {
@@ -19,6 +28,51 @@ interface DeclarationState {
   goodFaith: boolean;
   accurate: boolean;
   authorized: boolean;
+}
+
+function readFormValue(
+  formData:
+    FormData,
+  key: string
+): string {
+  const value =
+    formData.get(
+      key
+    );
+
+  return typeof value === "string"
+    ? value.trim()
+    : "";
+}
+
+function readOptionalFormValue(
+  formData:
+    FormData,
+  key: string
+): string | null {
+  const value =
+    readFormValue(
+      formData,
+      key
+    );
+
+  return value.length > 0
+    ? value
+    : null;
+}
+
+function readRelationship(
+  value: string
+): PublicCopyrightRelationship {
+  if (
+    value === "owner" ||
+    value === "authorized" ||
+    value === "publisher"
+  ) {
+    return value;
+  }
+
+  return "owner";
 }
 
 export default function CopyrightClaimForm({
@@ -34,6 +88,12 @@ export default function CopyrightClaimForm({
     useState("");
 
   const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const [
     declarations,
     setDeclarations,
   ] =
@@ -43,11 +103,17 @@ export default function CopyrightClaimForm({
       authorized: false,
     });
 
-  const submitClaim = (
+  const submitClaim = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (
+      isSubmitting
+    ) {
+      return;
+    }
 
     if (
       !declarations.goodFaith ||
@@ -61,54 +127,141 @@ export default function CopyrightClaimForm({
       return;
     }
 
-    setError("");
+    const formData =
+      new FormData(
+        event.currentTarget
+      );
 
-    /*
-     * Frontend-only submission flow.
-     *
-     * Backend integration will later:
-     * - validate the affected content again,
-     * - create the permanent CR reference,
-     * - store claimant and evidence data,
-     * - connect the case to Admin Copyright,
-     * - maintain the audit trail,
-     * - send acknowledgement/status emails.
-     */
-    router.push(
-      "/submitted?type=claim&count=1"
+    setError("");
+    setIsSubmitting(
+      true
     );
+
+    try {
+      const claim =
+        await submitPublicCopyrightClaim({
+          claimantName:
+            readFormValue(
+              formData,
+              "claimantName"
+            ),
+
+          organization:
+            readOptionalFormValue(
+              formData,
+              "organization"
+            ),
+
+          email:
+            readFormValue(
+              formData,
+              "email"
+            ),
+
+          relationship:
+            readRelationship(
+              readFormValue(
+                formData,
+                "relationship"
+              )
+            ),
+
+          workTitle:
+            readFormValue(
+              formData,
+              "workTitle"
+            ),
+
+          originalUrl:
+            readOptionalFormValue(
+              formData,
+              "originalUrl"
+            ),
+
+          affectedContent:
+            readFormValue(
+              formData,
+              "affectedContent"
+            ),
+
+          explanation:
+            readFormValue(
+              formData,
+              "explanation"
+            ),
+
+          evidence:
+            readOptionalFormValue(
+              formData,
+              "evidence"
+            ),
+
+          legalName:
+            readFormValue(
+              formData,
+              "legalName"
+            ),
+
+          declarations,
+        });
+
+      router.push(
+        `/submitted?reference=${encodeURIComponent(
+          claim.reference
+        )}`
+      );
+    } catch (
+      caughtError
+    ) {
+      if (
+        caughtError instanceof
+        PublicCopyrightClaimError
+      ) {
+        const issueText =
+          caughtError.issues.length > 0
+            ? ` ${caughtError.issues.join(" ")}`
+            : "";
+
+        setError(
+          `${caughtError.message}${issueText}`
+        );
+      } else {
+        setError(
+          "The copyright claim could not be submitted. Please try again."
+        );
+      }
+    } finally {
+      setIsSubmitting(
+        false
+      );
+    }
   };
 
   return (
     <form
-      className={
-        styles.form
-      }
-      onSubmit={
-        submitClaim
-      }
+      className={styles.form}
+      onSubmit={submitClaim}
     >
-      <section
-        className={
-          styles.section
-        }
-      >
-        <div
-          className={
-            styles.sectionHeader
-          }
-        >
-          <h2>
-            1. Claimant
-          </h2>
+      <section className={styles.formSection}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.stepNumber}>
+            1
+          </span>
 
-          <p>
-            Rights holder or authorized representative.
-          </p>
+          <div>
+            <h2>
+              Claimant
+            </h2>
+
+            <p>
+              Identify the rights holder or authorized
+              representative for this request.
+            </p>
+          </div>
         </div>
 
-        <div className="formGrid">
-          <div className="formField">
+        <div className={styles.formGrid}>
+          <div className={styles.formField}>
             <label htmlFor="claimant-name">
               Rights holder / claimant name *
             </label>
@@ -116,12 +269,13 @@ export default function CopyrightClaimForm({
             <input
               id="claimant-name"
               name="claimantName"
-              required
+              placeholder="Example Publisher"
               autoComplete="name"
+              required
             />
           </div>
 
-          <div className="formField">
+          <div className={styles.formField}>
             <label htmlFor="organization">
               Organization
             </label>
@@ -129,25 +283,27 @@ export default function CopyrightClaimForm({
             <input
               id="organization"
               name="organization"
+              placeholder="Company, publisher, or rights owner"
               autoComplete="organization"
             />
           </div>
 
-          <div className="formField">
+          <div className={styles.formField}>
             <label htmlFor="email">
               Contact email *
             </label>
 
             <input
               id="email"
-              name="email"
               type="email"
-              required
+              name="email"
+              placeholder="rights@example.com"
               autoComplete="email"
+              required
             />
           </div>
 
-          <div className="formField">
+          <div className={styles.formField}>
             <label htmlFor="relationship">
               Relationship to the work *
             </label>
@@ -155,16 +311,9 @@ export default function CopyrightClaimForm({
             <select
               id="relationship"
               name="relationship"
+              defaultValue="owner"
               required
-              defaultValue=""
             >
-              <option
-                value=""
-                disabled
-              >
-                Select
-              </option>
-
               <option value="owner">
                 Rights holder
               </option>
@@ -181,39 +330,39 @@ export default function CopyrightClaimForm({
         </div>
       </section>
 
-      <section
-        className={
-          styles.section
-        }
-      >
-        <div
-          className={
-            styles.sectionHeader
-          }
-        >
-          <h2>
-            2. Original work
-          </h2>
+      <section className={styles.formSection}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.stepNumber}>
+            2
+          </span>
 
-          <p>
-            Identify the copyrighted work involved.
-          </p>
+          <div>
+            <h2>
+              Original work
+            </h2>
+
+            <p>
+              Tell Poster which original work is being
+              referenced by the affected Poster record.
+            </p>
+          </div>
         </div>
 
-        <div className="formGridSingle">
-          <div className="formField">
+        <div className={styles.formGrid}>
+          <div className={styles.formField}>
             <label htmlFor="work-title">
-              Work title or description *
+              Original work title *
             </label>
 
             <input
               id="work-title"
               name="workTitle"
+              placeholder="Original article, page, video, or work title"
               required
             />
           </div>
 
-          <div className="formField">
+          <div className={styles.formField}>
             <label htmlFor="original-url">
               Original publication URL
             </label>
@@ -222,152 +371,118 @@ export default function CopyrightClaimForm({
               id="original-url"
               name="originalUrl"
               type="url"
-              placeholder="https://"
+              placeholder="https://publisher.example/original-work"
             />
-
-            <span className="fieldHelp">
-              Provide the original publisher or
-              source URL when available.
-            </span>
           </div>
         </div>
       </section>
 
-      <section
-        className={
-          styles.section
-        }
-      >
-        <div
-          className={
-            styles.sectionHeader
-          }
-        >
-          <h2>
-            3. Affected content
-          </h2>
+      <section className={styles.formSection}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.stepNumber}>
+            3
+          </span>
 
-          <p>
-            Enter the Poster Content ID or exact URL.
-          </p>
+          <div>
+            <h2>
+              Affected Poster content
+            </h2>
+
+            <p>
+              Provide the Poster Content ID, Poster URL,
+              or original-source URL connected to this
+              claim.
+            </p>
+          </div>
         </div>
 
-        <div className="formField">
+        <div className={styles.formField}>
           <label htmlFor="affected-content">
-            Poster URL or Content ID *
+            Affected content *
           </label>
 
           <input
             id="affected-content"
             name="affectedContent"
+            defaultValue={initialAffectedContent}
+            placeholder="CNT-1001 or https://..."
             required
-            defaultValue={
-              initialAffectedContent
-            }
-            placeholder="Poster URL or CNT-..."
           />
+        </div>
+      </section>
 
-          <span className="fieldHelp">
-            A record selected through Find Your Content
-            can be filled automatically here. For multiple
-            affected records, use Bulk Removal Request.
+      <section className={styles.formSection}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.stepNumber}>
+            4
           </span>
+
+          <div>
+            <h2>
+              Explanation and evidence
+            </h2>
+
+            <p>
+              Explain the concern and provide supporting
+              evidence.
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.formField}>
+          <label htmlFor="explanation">
+            Explanation *
+          </label>
+
+          <textarea
+            id="explanation"
+            name="explanation"
+            placeholder="Explain why this Poster record raises a copyright or rights concern."
+            rows={5}
+            required
+          />
+        </div>
+
+        <div className={styles.formField}>
+          <label htmlFor="evidence">
+            Supporting evidence / references
+          </label>
+
+          <textarea
+            id="evidence"
+            name="evidence"
+            placeholder="Ownership references, publication details, supporting URLs, licensing information, or other relevant evidence."
+            rows={4}
+          />
         </div>
       </section>
 
-      <section
-        className={
-          styles.section
-        }
-      >
-        <div
-          className={
-            styles.sectionHeader
-          }
-        >
-          <h2>
-            4. Claim details
-          </h2>
+      <section className={styles.formSection}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.stepNumber}>
+            5
+          </span>
 
-          <p>
-            Explain the concern and provide supporting evidence.
-          </p>
-        </div>
+          <div>
+            <h2>
+              Declarations
+            </h2>
 
-        <div className="formGridSingle">
-          <div className="formField">
-            <label htmlFor="explanation">
-              Explain the copyright concern *
-            </label>
-
-            <textarea
-              id="explanation"
-              name="explanation"
-              required
-              placeholder="Explain why you believe this Poster content affects copyright that you own or are authorized to represent."
-            />
-          </div>
-
-          <div className="formField">
-            <label htmlFor="evidence">
-              Supporting evidence / references
-            </label>
-
-            <textarea
-              id="evidence"
-              name="evidence"
-              placeholder="Ownership references, publication details, supporting URLs, licensing information, or other relevant evidence."
-            />
-
-            <span className="fieldHelp">
-              Supporting information can help Poster
-              verify the claim accurately.
-            </span>
+            <p>
+              Confirm the required statements before
+              submitting.
+            </p>
           </div>
         </div>
-      </section>
 
-      <section
-        className={
-          styles.section
-        }
-      >
-        <div
-          className={
-            styles.sectionHeader
-          }
-        >
-          <h2>
-            5. Declarations
-          </h2>
-
-          <p>
-            Confirm the request before submission.
-          </p>
-        </div>
-
-        <div
-          className={
-            styles.declarations
-          }
-        >
-          <label
-            className={
-              styles.checkboxRow
-            }
-          >
+        <div className={styles.declarations}>
+          <label>
             <input
               type="checkbox"
-              checked={
-                declarations.goodFaith
-              }
-              onChange={(
-                event
-              ) =>
+              checked={declarations.goodFaith}
+              onChange={(event) =>
                 setDeclarations(
-                  (
-                    current
-                  ) => ({
+                  current => ({
                     ...current,
                     goodFaith:
                       event.target.checked,
@@ -377,28 +492,19 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I have a good-faith basis for submitting
-              this copyright request.
+              I have a good-faith belief that the
+              affected Poster content is not authorized
+              by the rights holder, its agent, or the law.
             </span>
           </label>
 
-          <label
-            className={
-              styles.checkboxRow
-            }
-          >
+          <label>
             <input
               type="checkbox"
-              checked={
-                declarations.accurate
-              }
-              onChange={(
-                event
-              ) =>
+              checked={declarations.accurate}
+              onChange={(event) =>
                 setDeclarations(
-                  (
-                    current
-                  ) => ({
+                  current => ({
                     ...current,
                     accurate:
                       event.target.checked,
@@ -408,29 +514,17 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I confirm that the information supplied
-              in this request is accurate to the best
-              of my knowledge.
+              The information in this request is accurate.
             </span>
           </label>
 
-          <label
-            className={
-              styles.checkboxRow
-            }
-          >
+          <label>
             <input
               type="checkbox"
-              checked={
-                declarations.authorized
-              }
-              onChange={(
-                event
-              ) =>
+              checked={declarations.authorized}
+              onChange={(event) =>
                 setDeclarations(
-                  (
-                    current
-                  ) => ({
+                  current => ({
                     ...current,
                     authorized:
                       event.target.checked,
@@ -440,54 +534,45 @@ export default function CopyrightClaimForm({
             />
 
             <span>
-              I am the rights holder or am authorized
-              to act on behalf of the rights holder.
+              I am the rights holder or authorized to act
+              on behalf of the rights holder.
             </span>
           </label>
+        </div>
 
-          <div className="formField">
-            <label htmlFor="legal-name">
-              Full legal name *
-            </label>
+        <div className={styles.formField}>
+          <label htmlFor="legal-name">
+            Legal name / authorized signer *
+          </label>
 
-            <input
-              id="legal-name"
-              name="legalName"
-              required
-              autoComplete="name"
-            />
-
-            <span className="fieldHelp">
-              Used to confirm the person making this
-              copyright request. No Poster account is created.
-            </span>
-          </div>
+          <input
+            id="legal-name"
+            name="legalName"
+            placeholder="Full legal name"
+            autoComplete="name"
+            required
+          />
         </div>
       </section>
 
       {error ? (
         <div
-          className={
-            styles.error
-          }
+          className={styles.formError}
           role="alert"
         >
-          {
-            error
-          }
+          {error}
         </div>
       ) : null}
 
-      <div
-        className={
-          styles.actions
-        }
-      >
+      <div className={styles.formActions}>
         <button
           type="submit"
           className="primaryButton"
+          disabled={isSubmitting}
         >
-          Submit copyright claim
+          {isSubmitting
+            ? "Submitting..."
+            : "Submit copyright claim"}
         </button>
       </div>
     </form>

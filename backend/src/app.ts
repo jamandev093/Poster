@@ -10,6 +10,9 @@ import {
   publicBusinessIdentityRoutes,
 } from "./routes/public-business-identity.routes.js";
 import {
+  publicCopyrightRoutes,
+} from "./routes/public-copyright.routes.js";
+import {
   createAdminBusinessIdentityService,
 } from "./application/business-identity/index.js";
 
@@ -42,7 +45,9 @@ import Fastify, {
 
 import {
   createAdminCopyrightService,
+  createPublicCopyrightService,
   type AdminCopyrightService,
+  type PublicCopyrightService,
 } from "./application/copyright/index.js";
 
 import {
@@ -282,6 +287,9 @@ export interface BuildAppOptions {
 
   adminCopyrightService?:
     AdminCopyrightService;
+
+  publicCopyrightService?:
+    PublicCopyrightService;
 
   adminReportsService?:
     AdminReportsService;
@@ -592,6 +600,7 @@ await app.register(
     new Set([
       environment.CLIENT_WEB_ORIGIN,
       environment.ADMIN_WEB_ORIGIN,
+      environment.COPYRIGHT_WEB_ORIGIN,
     ]);
 
   await app.register(
@@ -1015,6 +1024,18 @@ await app.register(
         options
           .adminCommercialRequestService ??
         createAdminCommercialRequestService(),
+    }
+  );
+  await app.register(
+    publicCopyrightRoutes,
+    {
+      prefix:
+        "/api/v1",
+
+      service:
+        options
+          .publicCopyrightService ??
+        createPublicCopyrightService(),
     }
   );
   app.get(
