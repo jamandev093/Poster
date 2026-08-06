@@ -505,6 +505,7 @@ export default function NewRequestForm({
         createInitialState(initialRequest, currentOrganization),
       [
         initialRequest,
+        currentOrganization,
       ]
     );
 
