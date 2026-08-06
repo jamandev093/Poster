@@ -1242,7 +1242,7 @@ export function OrganizationOnboardingForm() {
         </strong>
 
         <span>
-          Organization profile is saved through Poster Backend. Payments and public Signal contact remain deferred.
+          Organization profile is saved through Poster Backend. Payments remain deferred.
         </span>
       </div>
 

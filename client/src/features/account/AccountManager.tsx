@@ -605,7 +605,7 @@ function AccountForm(
 
       <div className={styles.actions}>
         <p className={styles.demoNote}>
-          Backend-connected account settings. Public business contact and Signal remain deferred.
+          Backend-connected account settings. Official Signal contact is managed through Poster Business Identity.
         </p>
 
         <div>
