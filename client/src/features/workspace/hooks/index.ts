@@ -18,7 +18,6 @@
 
 
 
-export * from "./usePaymentDashboard";
 export * from "./useClientWalletOverview";
 
 export * from "./useClientWalletAllocationActions";

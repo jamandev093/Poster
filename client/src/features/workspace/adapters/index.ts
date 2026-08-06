@@ -19,7 +19,7 @@
 
 
 
-export * from "./payment-dashboard.adapter";
+
 
 /* =========================================================
    TEMPORARY LEGACY MIGRATION ADAPTERS

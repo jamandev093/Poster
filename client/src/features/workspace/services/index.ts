@@ -20,7 +20,6 @@
 
 
 
-export * from "./payment-workspace.service";
 
 export * from "./wallet-funding.service";
 export * from "./client-api.service";
