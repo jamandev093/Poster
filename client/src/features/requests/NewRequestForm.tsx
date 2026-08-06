@@ -2,11 +2,20 @@
 
 import {
   type FormEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
 import Link from "next/link";
+
+import type {
+  ClientAccount,
+} from "@/features/account/client-account.service";
+
+import {
+  useClientAccount,
+} from "@/features/account/useClientAccount";
 
 import CampaignAllowanceField from "./CampaignAllowanceField";
 
@@ -45,10 +54,6 @@ import {
   useClientWalletOverview,
 } from "@/features/workspace/hooks/useClientWalletOverview";
 import {
-  getCurrentOrganization,
-} from "@/features/workspace/workspace.selectors";
-
-import {
   resubmitClientCommercialRequest,
   submitClientCommercialRequest,
 } from "./client-commercial-request.service";
@@ -61,6 +66,88 @@ import styles from "./NewRequestForm.module.css";
 
 interface NewRequestFormProps {
   initialRequest?: CommercialRequest;
+}
+
+interface RequestOrganizationProfile {
+  id:
+    string;
+
+  name:
+    string;
+
+  primaryContactName:
+    string;
+
+  primaryContactEmail:
+    string;
+
+  website:
+    string;
+}
+
+const EMPTY_REQUEST_ORGANIZATION_PROFILE:
+  RequestOrganizationProfile = {
+  id:
+    "",
+
+  name:
+    "",
+
+  primaryContactName:
+    "",
+
+  primaryContactEmail:
+    "",
+
+  website:
+    "",
+};
+
+function mapClientAccountToRequestOrganization(
+  account:
+    ClientAccount |
+    null
+): RequestOrganizationProfile | null {
+  if (!account) {
+    return null;
+  }
+
+  const organization =
+    account.organization;
+
+  const user =
+    account.user;
+
+  return {
+    id:
+      organization.id,
+
+    name:
+      (
+        organization.displayName ??
+        organization.name ??
+        organization.legalName ??
+        ""
+      ).trim(),
+
+    primaryContactName:
+      (
+        user.fullName ??
+        ""
+      ).trim(),
+
+    primaryContactEmail:
+      (
+        user.email ??
+        ""
+      ).trim(),
+
+    website:
+      (
+        organization.websiteUrl ??
+        ""
+      ).trim(),
+  };
 }
 
 interface FormState {
@@ -150,7 +237,7 @@ function createInitialState(
     CommercialRequest |
     undefined,
   organization:
-    ReturnType<typeof getCurrentOrganization>
+    RequestOrganizationProfile
 ):
   FormState {
   return {
@@ -462,8 +549,24 @@ function getRequestSubmissionErrorMessage(
 export default function NewRequestForm({
   initialRequest,
 }: NewRequestFormProps) {
+  const {
+    account,
+    isLoading:
+      isAccountLoading,
+  } =
+    useClientAccount();
+
   const currentOrganization =
-    getCurrentOrganization();
+    useMemo(
+      () =>
+        mapClientAccountToRequestOrganization(
+          account
+        ) ??
+        EMPTY_REQUEST_ORGANIZATION_PROFILE,
+      [
+        account,
+      ]
+    );
 
   const [
     isSubmitting,
@@ -516,6 +619,61 @@ export default function NewRequestForm({
     useState<FormState>(
       initialState
     );
+
+  useEffect(
+    () => {
+      if (
+        initialRequest ||
+        isAccountLoading ||
+        !currentOrganization.id
+      ) {
+        return;
+      }
+
+      const hydrationTimer =
+        window.setTimeout(
+          () => {
+            setForm(
+              current => ({
+                ...current,
+
+                organizationName:
+                  current.organizationName.trim()
+                    ? current.organizationName
+                    : currentOrganization.name,
+
+                contactName:
+                  current.contactName.trim()
+                    ? current.contactName
+                    : currentOrganization.primaryContactName,
+
+                businessEmail:
+                  current.businessEmail.trim()
+                    ? current.businessEmail
+                    : currentOrganization.primaryContactEmail,
+
+                website:
+                  current.website.trim()
+                    ? current.website
+                    : currentOrganization.website,
+              })
+            );
+          },
+          0
+        );
+
+      return () => {
+        window.clearTimeout(
+          hydrationTimer
+        );
+      };
+    },
+    [
+      currentOrganization,
+      initialRequest,
+      isAccountLoading,
+    ]
+  );
 
   const [
     placements,
