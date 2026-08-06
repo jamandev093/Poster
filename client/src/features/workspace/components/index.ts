@@ -15,9 +15,7 @@
 
 export * from "./DashboardState";
 
-export * from "./AnalyticsMetricCard";
 
-export * from "./AnalyticsMetricGrid";
 
 export * from "./FinancialSummaryCard";
 
@@ -25,11 +23,9 @@ export * from "./FinancialSummaryGrid";
 
 export * from "./DashboardSectionHeader";
 
-export * from "./AnalyticsDashboardSummary";
 
 export * from "./PaymentDashboardSummary";
 
-export * from "./AnalyticsDashboardPanel";
 
 export * from "./PaymentDashboardPanel";
 export * from "./PaymentsNavigation";

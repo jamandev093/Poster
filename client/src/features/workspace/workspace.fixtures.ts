@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Development-only Poster workspace fixtures.
  *
  * This file is a fixture export boundary only.
@@ -37,14 +37,6 @@ export {
 /* =========================================================
    TRUSTED-SHAPE ANALYTICS FIXTURES
    ========================================================= */
-
-export {
-  analyticsBreakdownRows,
-  campaignAnalyticsSnapshots,
-  getMockCampaignAnalyticsSnapshot,
-  getMockCampaignBreakdowns,
-  organizationAnalyticsReport,
-} from "./analytics/analytics.mock";
 
 /* =========================================================
    PAYMENT AND FINANCIAL FIXTURES

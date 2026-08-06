@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Poster workspace adapter exports.
  *
  * This file is an adapter import boundary only.
@@ -17,7 +17,7 @@
    DASHBOARD VIEW-MODEL ADAPTERS
    ========================================================= */
 
-export * from "./analytics-dashboard.adapter";
+
 
 export * from "./payment-dashboard.adapter";
 
