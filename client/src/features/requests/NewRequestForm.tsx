@@ -19,10 +19,6 @@ import {
 } from "@/features/workspace/creative.rules";
 
 import {
-  currentOrganization,
-} from "@/features/workspace/workspace.mock";
-
-import {
   getRequestTypeLabel,
 } from "@/features/workspace/workspace.formatters";
 
@@ -150,7 +146,11 @@ const MAX_VIDEO_BYTES =
   1024;
 
 function createInitialState(
-  request?: CommercialRequest
+  request:
+    CommercialRequest |
+    undefined,
+  organization:
+    ReturnType<typeof getCurrentOrganization>
 ):
   FormState {
   return {
@@ -160,19 +160,19 @@ function createInitialState(
 
     organizationName:
       request?.organizationName ??
-      currentOrganization.name,
+      organization.name,
 
     contactName:
       request?.contactName ??
-      currentOrganization.primaryContactName,
+      organization.primaryContactName,
 
     businessEmail:
       request?.businessEmail ??
-      currentOrganization.primaryContactEmail,
+      organization.primaryContactEmail,
 
     website:
       request?.website ??
-      currentOrganization.website,
+      organization.website,
 
     campaignName:
       request?.campaignName ??
@@ -502,9 +502,7 @@ export default function NewRequestForm({
   const initialState =
     useMemo(
       () =>
-        createInitialState(
-          initialRequest
-        ),
+        createInitialState(initialRequest, currentOrganization),
       [
         initialRequest,
       ]
