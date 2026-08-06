@@ -18,23 +18,6 @@
  */
 
 /* =========================================================
-   LEGACY WORKSPACE FIXTURES
-   ========================================================= */
-
-/**
- * Existing request, campaign, and organization fixtures.
- *
- * These remain exported temporarily while the legacy workspace
- * records are migrated to the canonical advertising and media
- * contracts.
- */
-export {
-  campaigns as legacyCampaigns,
-  commercialRequests as legacyCommercialRequests,
-  currentOrganization as legacyCurrentOrganization,
-} from "./workspace.mock";
-
-/* =========================================================
    TRUSTED-SHAPE ANALYTICS FIXTURES
    ========================================================= */
 
