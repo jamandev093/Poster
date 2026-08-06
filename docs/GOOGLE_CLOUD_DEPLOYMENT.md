@@ -29,7 +29,7 @@ This guide documents the planned Google Cloud production deployment. It contains
 1. Create or select the Google Cloud project.
 2. Enable Cloud Run, Artifact Registry, Cloud SQL, Secret Manager, Cloud Build, Certificate Manager, and Cloud Logging.
 3. Create Artifact Registry repository.
-4. Build and push Backend image.
+4. Build and push Backend, Website, Admin, Client, and Copyright images.
 5. Configure Secret Manager values.
 6. Create Cloud SQL PostgreSQL instance and database.
 7. Run Backend migration status.
@@ -40,13 +40,19 @@ This guide documents the planned Google Cloud production deployment. It contains
 12. Configure DNS, TLS, and routing.
 13. Run post-deploy smoke checks.
 
-## Backend image build
+## Image build
 
-Use backend/Dockerfile.
+Use these Dockerfiles:
+
+- backend/Dockerfile
+- website/Dockerfile
+- admin/Dockerfile
+- client/Dockerfile
+- copyright/Dockerfile
 
 Example command shape:
 
-gcloud builds submit --config cloudbuild.yaml --substitutions _AR_REGION=REGION,_REPOSITORY=poster,_IMAGE_NAME=poster-backend-api
+gcloud builds submit --config cloudbuild.yaml --substitutions _AR_REGION=REGION,_REPOSITORY=poster
 
 ## Migration rule
 

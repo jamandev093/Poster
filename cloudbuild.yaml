@@ -1,4 +1,4 @@
-# Poster Backend Cloud Build template.
+# Poster Cloud Build template for Cloud Run container images.
 # Replace PROJECT_ID, AR_REGION, and REPOSITORY through Cloud Build substitutions.
 steps:
   - name: gcr.io/cloud-builders/docker
@@ -7,15 +7,66 @@ steps:
       - -f
       - backend/Dockerfile
       - -t
-      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-backend-api:$SHORT_SHA
       - backend
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-backend-api:$SHORT_SHA
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - admin/Dockerfile
+      - -t
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-admin:$SHORT_SHA
+      - admin
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-admin:$SHORT_SHA
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - client/Dockerfile
+      - -t
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-client:$SHORT_SHA
+      - client
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-client:$SHORT_SHA
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - copyright/Dockerfile
+      - -t
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-copyright:$SHORT_SHA
+      - copyright
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-copyright:$SHORT_SHA
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - website/Dockerfile
+      - -t
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-website:$SHORT_SHA
+      - website
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-website:$SHORT_SHA
 images:
-  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-backend-api:$SHORT_SHA
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-admin:$SHORT_SHA
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-client:$SHORT_SHA
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-copyright:$SHORT_SHA
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/poster-website:$SHORT_SHA
 substitutions:
   _AR_REGION: asia-south1
   _REPOSITORY: poster
-  _IMAGE_NAME: poster-backend-api

@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   NextConfig,
 } from "next";
 
@@ -81,6 +81,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+
   poweredByHeader: false,
 
   reactStrictMode: true,
@@ -96,5 +98,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
 
