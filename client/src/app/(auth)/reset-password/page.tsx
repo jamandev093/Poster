@@ -4,13 +4,31 @@ import {
   ResetPasswordForm,
 } from "@/features/auth/AuthForms";
 
-export default function ResetPasswordPage() {
+interface ResetPasswordPageProps {
+  searchParams?: Promise<{
+    token?: string | string[];
+  }>;
+}
+
+export default async function ResetPasswordPage({
+  searchParams,
+}: ResetPasswordPageProps) {
+  const resolvedSearchParams =
+    await searchParams;
+
+  const token =
+    Array.isArray(
+      resolvedSearchParams?.token
+    )
+      ? resolvedSearchParams?.token[0] ?? ""
+      : resolvedSearchParams?.token ?? "";
+
   return (
     <AuthShell
       title="Choose a new password"
       description="Set a new password for your Poster Client account."
     >
-      <ResetPasswordForm />
+      <ResetPasswordForm token={token} />
     </AuthShell>
   );
 }

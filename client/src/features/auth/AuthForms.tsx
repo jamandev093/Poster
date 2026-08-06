@@ -20,12 +20,12 @@ import {
 import styles from "./AuthForms.module.css";
 
 import {
+  confirmClientPasswordReset,
   loginClient,
   requestClientPasswordReset,
   signupClient,
   verifyClientSignupEmail,
 } from "./client-auth.service";
-
 interface VerifyEmailFormProps {
   email?: string;
 }
@@ -1462,7 +1462,11 @@ export function ForgotPasswordForm() {
   );
 }
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({
+  token = "",
+}: {
+  token?: string;
+}) {
   const router =
     useRouter();
 
@@ -1484,11 +1488,32 @@ export function ResetPasswordForm() {
   ] =
     useState("");
 
-  const submit = (
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const submit = async (
     event:
       FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
+    const normalizedToken =
+      token.trim();
+
+    if (!normalizedToken) {
+      setError(
+        "Open the latest password reset link from your email."
+      );
+
+      return;
+    }
 
     if (
       password.length <
@@ -1513,10 +1538,27 @@ export function ResetPasswordForm() {
     }
 
     setError("");
+    setIsSubmitting(true);
 
-    router.push(
-      "/login"
-    );
+    try {
+      await confirmClientPasswordReset({
+        token:
+          normalizedToken,
+        password,
+      });
+
+      router.push(
+        "/login"
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Poster could not reset this password. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -1528,21 +1570,6 @@ export function ResetPasswordForm() {
         submit
       }
     >
-      <div
-        className={
-          styles.scopeNote
-        }
-      >
-        <strong>
-          Frontend test route
-        </strong>
-
-        <span>
-          Production password reset will require a valid,
-          time-limited recovery token before this form can open.
-        </span>
-      </div>
-
       <PasswordField
         id="reset-password"
         label="New password"
@@ -1593,8 +1620,13 @@ export function ResetPasswordForm() {
         className={
           styles.primaryAction
         }
+        disabled={
+          isSubmitting
+        }
       >
-        Save new password
+        {isSubmitting
+          ? "Resetting password..."
+          : "Save new password"}
       </button>
     </form>
   );
