@@ -1,0 +1,17 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: poster-admin
+spec:
+  template:
+    spec:
+      serviceAccountName: SERVICE_ACCOUNT
+      containers:
+        - image: AR_REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/poster-admin:SHORT_SHA
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: NEXT_PUBLIC_POSTER_API_BASE_URL
+              value: https://api.getpostar.com/api/v1

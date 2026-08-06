@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: poster-website
+spec:
+  template:
+    spec:
+      serviceAccountName: SERVICE_ACCOUNT
+      containers:
+        - image: AR_REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/poster-website:SHORT_SHA
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: POSTER_PUBLIC_API_BASE_URL
+              value: https://api.getpostar.com
+            - name: NEXT_PUBLIC_POSTER_API_BASE_URL
+              value: https://api.getpostar.com
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: ""

@@ -1,0 +1,57 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: poster-backend-api
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/cloudsql-instances: PROJECT_ID:REGION:CLOUD_SQL_INSTANCE
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "20"
+    spec:
+      serviceAccountName: SERVICE_ACCOUNT
+      containers:
+        - image: AR_REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/poster-backend-api:SHORT_SHA
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "4000"
+            - name: CLIENT_WEB_ORIGIN
+              value: https://client.getpostar.com
+            - name: ADMIN_WEB_ORIGIN
+              value: https://admin.getpostar.com
+            - name: COPYRIGHT_WEB_ORIGIN
+              value: https://copyright.getpostar.com
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: poster-backend-database-url
+                  key: latest
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: poster-backend-session-secret
+                  key: latest
+            - name: RAZORPAY_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: poster-razorpay-key-id
+                  key: latest
+            - name: RAZORPAY_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: poster-razorpay-key-secret
+                  key: latest
+            - name: RAZORPAY_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: poster-razorpay-webhook-secret
+                  key: latest

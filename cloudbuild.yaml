@@ -1,0 +1,21 @@
+# Poster Backend Cloud Build template.
+# Replace PROJECT_ID, AR_REGION, and REPOSITORY through Cloud Build substitutions.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - backend/Dockerfile
+      - -t
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - backend
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+images:
+  - ${_AR_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+substitutions:
+  _AR_REGION: asia-south1
+  _REPOSITORY: poster
+  _IMAGE_NAME: poster-backend-api
