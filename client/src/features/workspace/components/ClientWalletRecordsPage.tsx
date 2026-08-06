@@ -190,6 +190,31 @@ function formatDateTime(
   );
 }
 
+function getEmptyStateMessage(
+  view:
+    ClientWalletRecordsPageProps["view"]
+): string {
+  switch (view) {
+    case "payments":
+      return "No Backend payment records have been returned for this Client organization yet.";
+
+    case "balances":
+      return "No Backend balance movement records have been returned for this Client organization yet.";
+
+    case "history":
+      return "No Backend payment history records have been returned for this Client organization yet.";
+
+    case "invoices":
+      return "No Backend invoice records have been returned for this Client organization yet.";
+
+    case "ledger":
+      return "No Backend ledger records have been returned for this Client organization yet.";
+
+    case "refunds":
+      return "No Backend refund records have been returned for this Client organization yet.";
+  }
+}
+
 function formatStatus(
   value:
     string
@@ -921,8 +946,9 @@ export default function ClientWalletRecordsPage(
                       styles.empty
                     }
                   >
-                    No records were returned for this
-                    section yet.
+                    {getEmptyStateMessage(
+                      props.view
+                    )}
                   </div>
                 )}
               </div>
