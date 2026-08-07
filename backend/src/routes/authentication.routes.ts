@@ -23,6 +23,9 @@ import type {
 import type {
   AccountProfileService,
 } from "../application/authentication/account-profile.service.js";
+import type {
+  UpdateAccountProfileInput,
+} from "../application/authentication/account-profile.types.js";
 
 import type {
   AuthenticationSessionSummary,
@@ -338,6 +341,54 @@ interface VerifySignupEmailHttpResponse {
   verifiedAt: string;
 }
 
+const ProfileStringListSchema =
+  z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(
+          1
+        )
+        .max(
+          120
+        )
+    )
+    .max(
+      50
+    );
+
+const AccountProfileInterestsRequestSchema =
+  z
+    .object({
+      topicIds:
+        ProfileStringListSchema,
+
+      topicNames:
+        ProfileStringListSchema,
+
+      unresolvedValues:
+        ProfileStringListSchema,
+
+      displayValues:
+        ProfileStringListSchema,
+    })
+    .strict();
+
+const AccountProfilePreferencesRequestSchema =
+  z
+    .object({
+      darkMode:
+        z.boolean(),
+
+      notifications:
+        z.boolean(),
+
+      personalizedAds:
+        z.boolean(),
+    })
+    .strict();
+
 const AccountProfileUpdateRequestSchema =
   z
     .object({
@@ -352,9 +403,56 @@ const AccountProfileUpdateRequestSchema =
           .max(
             FULL_NAME_MAXIMUM_LENGTH,
             "Full name must be 200 characters or fewer."
-          ),
+          )
+          .optional(),
+
+      username:
+        z
+          .string()
+          .trim()
+          .toLowerCase()
+          .regex(
+            /^[a-z0-9_]{3,30}$/,
+            "Username must be 3 to 30 characters and use lowercase letters, numbers, or underscores."
+          )
+          .nullable()
+          .optional(),
+
+      profileImageUrl:
+        z
+          .string()
+          .trim()
+          .url(
+            "Profile image URL must be a valid URL."
+          )
+          .max(
+            2048,
+            "Profile image URL must be 2048 characters or fewer."
+          )
+          .nullable()
+          .optional(),
+
+      interests:
+        AccountProfileInterestsRequestSchema
+          .optional(),
+
+      preferences:
+        AccountProfilePreferencesRequestSchema
+          .optional(),
     })
-    .strict();
+    .strict()
+    .refine(
+      value =>
+        value.fullName !== undefined ||
+        value.username !== undefined ||
+        value.profileImageUrl !== undefined ||
+        value.interests !== undefined ||
+        value.preferences !== undefined,
+      {
+        message:
+          "At least one profile field is required.",
+      }
+    );
 
 export type VerifySignupEmailOperation =
   (
@@ -780,16 +878,43 @@ export const authenticationRoutes:
             request.body
           );
 
+        const updateInput:
+          UpdateAccountProfileInput = {
+          userId:
+            authorization.userId,
+        };
+
+        if (input.fullName !== undefined) {
+          updateInput.fullName =
+            input.fullName;
+        }
+
+        if (input.username !== undefined) {
+          updateInput.username =
+            input.username;
+        }
+
+        if (input.profileImageUrl !== undefined) {
+          updateInput.profileImageUrl =
+            input.profileImageUrl;
+        }
+
+        if (input.interests !== undefined) {
+          updateInput.interests =
+            input.interests;
+        }
+
+        if (input.preferences !== undefined) {
+          updateInput.preferences =
+            input.preferences;
+        }
+
         const response =
           await options
             .accountProfileService
-            .updateProfile({
-              userId:
-                authorization.userId,
-
-              fullName:
-                input.fullName,
-            });
+            .updateProfile(
+              updateInput
+            );
 
         return reply
           .status(

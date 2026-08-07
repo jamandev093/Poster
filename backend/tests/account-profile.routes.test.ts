@@ -24,6 +24,39 @@ const ACCOUNT_PROFILE_RESPONSE = {
     fullName:
       "Poster Person",
 
+    username:
+      "poster_person",
+
+    profileImageUrl:
+      "https://cdn.example.com/profile/person.jpg",
+
+    interests: {
+      topicIds: [
+        "technology",
+      ],
+
+      topicNames: [
+        "Technology",
+      ],
+
+      unresolvedValues: [],
+
+      displayValues: [
+        "Technology",
+      ],
+    },
+
+    preferences: {
+      darkMode:
+        false,
+
+      notifications:
+        true,
+
+      personalizedAds:
+        true,
+    },
+
     status:
       "active",
 
@@ -47,6 +80,45 @@ const UPDATED_ACCOUNT_PROFILE_RESPONSE = {
 
     fullName:
       "Updated Poster Person",
+
+    username:
+      "updated_person",
+
+    profileImageUrl:
+      "https://cdn.example.com/profile/updated.jpg",
+
+    interests: {
+      topicIds: [
+        "technology",
+        "business",
+      ],
+
+      topicNames: [
+        "Technology",
+        "Business",
+      ],
+
+      unresolvedValues: [
+        "AI policy",
+      ],
+
+      displayValues: [
+        "Technology",
+        "Business",
+        "AI policy",
+      ],
+    },
+
+    preferences: {
+      darkMode:
+        true,
+
+      notifications:
+        false,
+
+      personalizedAds:
+        false,
+    },
 
     updatedAt:
       "2026-08-07T10:00:00.000Z",
@@ -98,7 +170,7 @@ describe(
     );
 
     it(
-      "returns the authenticated account profile",
+      "returns the authenticated full account profile",
       async () => {
         const accountProfileService =
           createAccountProfileService();
@@ -161,7 +233,7 @@ describe(
     );
 
     it(
-      "updates the authenticated account full name",
+      "updates the authenticated full account profile",
       async () => {
         const accountProfileService =
           createAccountProfileService();
@@ -203,6 +275,43 @@ describe(
             payload: {
               fullName:
                 "  Updated   Poster   Person  ",
+
+              username:
+                "UPDATED_PERSON",
+
+              profileImageUrl:
+                "https://cdn.example.com/profile/updated.jpg",
+
+              interests: {
+                topicIds: [
+                  "technology",
+                  "business",
+                ],
+
+                topicNames: [
+                  "Technology",
+                  "Business",
+                ],
+
+                unresolvedValues: [
+                  "AI policy",
+                ],
+
+                displayValues: [
+                  "Technology",
+                ],
+              },
+
+              preferences: {
+                darkMode:
+                  true,
+
+                notifications:
+                  false,
+
+                personalizedAds:
+                  false,
+              },
             },
           });
 
@@ -228,6 +337,115 @@ describe(
 
           fullName:
             "Updated   Poster   Person",
+
+          username:
+            "updated_person",
+
+          profileImageUrl:
+            "https://cdn.example.com/profile/updated.jpg",
+
+          interests: {
+            topicIds: [
+              "technology",
+              "business",
+            ],
+
+            topicNames: [
+              "Technology",
+              "Business",
+            ],
+
+            unresolvedValues: [
+              "AI policy",
+            ],
+
+            displayValues: [
+              "Technology",
+            ],
+          },
+
+          preferences: {
+            darkMode:
+              true,
+
+            notifications:
+              false,
+
+            personalizedAds:
+              false,
+          },
+        });
+
+        await app.close();
+      }
+    );
+
+    it(
+      "updates nullable account profile fields",
+      async () => {
+        const accountProfileService =
+          createAccountProfileService();
+
+        const app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService({
+                userId:
+                  USER_ID,
+
+                organizationId:
+                  null,
+
+                sessionId:
+                  "session-profile-nullable-update",
+              }),
+
+            accountProfileService:
+              accountProfileService as never,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "PATCH",
+
+            url:
+              "/api/v1/auth/account/profile",
+
+            headers: {
+              authorization:
+                "Bearer valid.profile",
+
+              "content-type":
+                "application/json",
+            },
+
+            payload: {
+              username:
+                null,
+
+              profileImageUrl:
+                null,
+            },
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          200
+        );
+
+        expect(
+          accountProfileService.updateProfile
+        ).toHaveBeenCalledWith({
+          userId:
+            USER_ID,
+
+          username:
+            null,
+
+          profileImageUrl:
+            null,
         });
 
         await app.close();
@@ -275,6 +493,63 @@ describe(
     );
 
     it(
+      "rejects empty account profile update payloads",
+      async () => {
+        const accountProfileService =
+          createAccountProfileService();
+
+        const app =
+          await buildApp({
+            authorizationContextService:
+              createAuthorizationContextService({
+                userId:
+                  USER_ID,
+
+                organizationId:
+                  null,
+
+                sessionId:
+                  "session-profile-empty",
+              }),
+
+            accountProfileService:
+              accountProfileService as never,
+          });
+
+        const response =
+          await app.inject({
+            method:
+              "PATCH",
+
+            url:
+              "/api/v1/auth/account/profile",
+
+            headers: {
+              authorization:
+                "Bearer valid.profile",
+
+              "content-type":
+                "application/json",
+            },
+
+            payload: {},
+          });
+
+        expect(
+          response.statusCode
+        ).toBe(
+          400
+        );
+
+        expect(
+          accountProfileService.updateProfile
+        ).not.toHaveBeenCalled();
+
+        await app.close();
+      }
+    );
+
+    it(
       "rejects invalid account profile update payloads",
       async () => {
         const accountProfileService =
@@ -315,8 +590,8 @@ describe(
             },
 
             payload: {
-              fullName:
-                "",
+              username:
+                "Invalid Username",
             },
           });
 
