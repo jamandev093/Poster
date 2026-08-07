@@ -25,6 +25,8 @@ import {
 
 import PrimaryButton from "../../components/buttons/PrimaryButton";
 
+import AuthService from "../../services/AuthService";
+
 import {
   RootStackParamList,
 } from "../../navigation/AppNavigator";
@@ -60,8 +62,13 @@ export default function OtpVerificationScreen({
 }: Props) {
   const { colors } = useTheme();
 
+  const verificationEmail =
+    route.params?.email
+      ?.trim()
+      .toLowerCase() ?? "";
+
   const email =
-    route.params?.email ??
+    verificationEmail ||
     "your email address";
 
   const [otp, setOtp] =
@@ -369,20 +376,30 @@ export default function OtpVerificationScreen({
       setSuccess(false);
 
       try {
-        // TODO:
-        // await AuthService.verifyOtp({
-        //   email,
-        //   code: completedCode,
-        // });
+        if (!verificationEmail) {
+          throw new Error(
+            "Start signup again to verify your email."
+          );
+        }
+
+        await AuthService.verifySignupEmail({
+          email:
+            verificationEmail,
+
+          code:
+            completedCode,
+        });
 
         setSuccess(true);
 
         navigation.replace(
           "Username"
         );
-      } catch {
+      } catch (error) {
         setError(
-          "The code is incorrect or expired."
+          error instanceof Error
+            ? error.message
+            : "The code is incorrect or expired."
         );
       } finally {
         requestInFlightRef.current =
@@ -393,8 +410,8 @@ export default function OtpVerificationScreen({
     }, [
       codeComplete,
       completedCode,
-      email,
       navigation,
+      verificationEmail,
     ]);
 
   const handleResend =
@@ -414,10 +431,16 @@ export default function OtpVerificationScreen({
       setSuccess(false);
 
       try {
-        // TODO:
-        // await AuthService.resendOtp({
-        //   email,
-        // });
+        if (!verificationEmail) {
+          throw new Error(
+            "Start signup again to request a new code."
+          );
+        }
+
+        await AuthService.resendSignupVerification({
+          email:
+            verificationEmail,
+        });
 
         setOtp(
           createEmptyOtp()
@@ -444,9 +467,11 @@ export default function OtpVerificationScreen({
             resendFocusTimerRef.current =
               null;
           }, 100);
-      } catch {
+      } catch (error) {
         setError(
-          "Could not resend the code. Try again."
+          error instanceof Error
+            ? error.message
+            : "Could not resend the code. Try again."
         );
       } finally {
         requestInFlightRef.current =
@@ -455,9 +480,9 @@ export default function OtpVerificationScreen({
         setResending(false);
       }
     }, [
-      email,
       focusInput,
       seconds,
+      verificationEmail,
     ]);
 
   const getInputBorderColor =

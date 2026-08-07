@@ -24,6 +24,8 @@ import {
 
 import PrimaryButton from "../../components/buttons/PrimaryButton";
 import SocialButton from "../../components/buttons/SocialButton";
+
+import AuthService from "../../services/AuthService";
 import Divider from "../../components/common/Divider";
 
 import {
@@ -483,14 +485,15 @@ export default function SignupScreen({
       setErrors({});
 
       try {
-        // TODO:
-        // POST /auth/signup
-        //
-        // await AuthService.signup({
-        //   name: normalizedName,
-        //   email: normalizedEmail,
-        //   password,
-        // });
+        await AuthService.signup({
+          fullName:
+            normalizedName,
+
+          email:
+            normalizedEmail,
+
+          password,
+        });
 
         navigation.navigate(
           "OtpVerification",
@@ -499,10 +502,12 @@ export default function SignupScreen({
               normalizedEmail,
           }
         );
-      } catch {
+      } catch (error) {
         setErrors({
           form:
-            "We couldn't create your account. Please try again.",
+            error instanceof Error
+              ? error.message
+              : "We couldn't create your account. Please try again.",
         });
       } finally {
         signupRequestRef.current =
