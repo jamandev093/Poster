@@ -937,7 +937,19 @@ export default function HomeScreen() {
         try {
           await FeedbackService.submit(
             article.id,
-            reason.id
+            reason.id,
+            {
+              surface:
+                "home",
+
+              reportContext: {
+                source:
+                  "feedback_bottom_sheet",
+
+                signalType:
+                  "report_or_hide",
+              },
+            }
           );
 
           showSuccess(

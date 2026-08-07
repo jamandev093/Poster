@@ -10,6 +10,10 @@ import {
 
 import MobileActionsApiService from "./MobileActionsApiService";
 
+import type {
+  MobileActionEngagementMetadata,
+} from "./MobileActionsApiService";
+
 const MAX_FEEDBACK_EVENTS =
   500;
 
@@ -35,11 +39,29 @@ export interface ArticleFeedbackEvent {
     string;
 }
 
+export interface FeedbackSubmitOptions {
+  surface?:
+    string;
+
+  details?:
+    string |
+    null;
+
+  reportContext?:
+    MobileActionEngagementMetadata;
+}
+
 export interface FeedbackSubmitResult {
   success:
     boolean;
 
   duplicate:
+    boolean;
+
+  reportRecorded?:
+    boolean;
+
+  reportDuplicate?:
     boolean;
 }
 
@@ -166,12 +188,75 @@ function createFeedbackEvent(
   };
 }
 
+function normalizeOptionalDetails(
+  value:
+    string |
+    null |
+    undefined
+): string | null {
+  if (
+    value === undefined ||
+    value === null
+  ) {
+    return null;
+  }
+
+  const normalized =
+    value
+      .trim()
+      .replace(/\s+/g, " ");
+
+  return normalized.length > 0
+    ? normalized
+    : null;
+}
+
+function buildReportContext(
+  options:
+    FeedbackSubmitOptions
+): MobileActionEngagementMetadata {
+  const inputContext =
+    options.reportContext ??
+    {};
+
+  const contextSurface =
+    typeof inputContext.surface ===
+      "string" &&
+    inputContext.surface.trim()
+      .length > 0
+      ? inputContext.surface.trim()
+      : null;
+
+  return {
+    ...inputContext,
+
+    surface:
+      options.surface ??
+      contextSurface ??
+      "unknown",
+
+    source:
+      typeof inputContext.source ===
+        "string"
+        ? inputContext.source
+        : "feedback_bottom_sheet",
+
+    signalType:
+      typeof inputContext.signalType ===
+        "string"
+        ? inputContext.signalType
+        : "report_or_hide",
+  };
+}
+
 export default class FeedbackService {
   /**
    * AsyncStorage remains the local
    * compatibility cache and offline
-   * fallback. Backend is authoritative
-   * when authenticated and reachable.
+   * fallback. Backend article feedback
+   * and moderation report/hide events
+   * are best-effort so UI feedback is
+   * never blocked by network failures.
    */
   private static mutationQueue:
     Promise<void> =
@@ -232,13 +317,18 @@ export default class FeedbackService {
     articleId:
       string,
     reason:
-      string
+      string,
+    options:
+      FeedbackSubmitOptions =
+      {}
   ): Promise<FeedbackSubmitResult> {
     const normalizedArticleId =
       articleId.trim();
 
     const normalizedReason =
-      reason.trim();
+      reason
+        .trim()
+        .toLowerCase();
 
     if (!normalizedArticleId) {
       throw new Error(
@@ -283,18 +373,74 @@ export default class FeedbackService {
               ]);
           }
 
+          let feedbackResult:
+            FeedbackSubmitResult = {
+            success:
+              true,
+
+            duplicate,
+          };
+
           try {
-            return await MobileActionsApiService
-              .submitFeedback(
-                normalizedArticleId,
-                normalizedReason
-              );
+            const backendFeedback =
+              await MobileActionsApiService
+                .submitFeedback(
+                  normalizedArticleId,
+                  normalizedReason
+                );
+
+            feedbackResult = {
+              success:
+                backendFeedback.success,
+
+              duplicate:
+                backendFeedback.duplicate,
+            };
           } catch {
-            return {
+            feedbackResult = {
               success:
                 true,
 
               duplicate,
+            };
+          }
+
+          try {
+            const reportResult =
+              await MobileActionsApiService
+                .recordReportEvent({
+                  contentId:
+                    normalizedArticleId,
+
+                  reasonId:
+                    normalizedReason,
+
+                  details:
+                    normalizeOptionalDetails(
+                      options.details
+                    ),
+
+                  reportContext:
+                    buildReportContext(
+                      options
+                    ),
+                });
+
+            return {
+              ...feedbackResult,
+
+              reportRecorded:
+                !reportResult.duplicate,
+
+              reportDuplicate:
+                reportResult.duplicate,
+            };
+          } catch {
+            return {
+              ...feedbackResult,
+
+              reportRecorded:
+                false,
             };
           }
         }
@@ -340,6 +486,7 @@ export default class FeedbackService {
           reason === undefined ||
           event.reasonId ===
             reason.trim()
+              .toLowerCase()
         )
     );
   }

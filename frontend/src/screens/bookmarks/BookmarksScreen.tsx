@@ -514,7 +514,19 @@ export default function BookmarksScreen() {
         try {
           await FeedbackService.submit(
             article.id,
-            reason.id
+            reason.id,
+            {
+              surface:
+                "bookmarks",
+
+              reportContext: {
+                source:
+                  "feedback_bottom_sheet",
+
+                signalType:
+                  "report_or_hide",
+              },
+            }
           );
 
           showSuccess(

@@ -1383,7 +1383,19 @@ export default function TrendingScreen() {
         try {
           await FeedbackService.submit(
             article.id,
-            reason.id
+            reason.id,
+            {
+              surface:
+                "trending",
+
+              reportContext: {
+                source:
+                  "feedback_bottom_sheet",
+
+                signalType:
+                  "report_or_hide",
+              },
+            }
           );
 
           showSuccess(

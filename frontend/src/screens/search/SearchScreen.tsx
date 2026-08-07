@@ -2150,7 +2150,19 @@ export default function SearchScreen() {
         try {
           await FeedbackService.submit(
             article.id,
-            reason.id
+            reason.id,
+            {
+              surface:
+                "search",
+
+              reportContext: {
+                source:
+                  "feedback_bottom_sheet",
+
+                signalType:
+                  "report_or_hide",
+              },
+            }
           );
 
           showSuccess(
