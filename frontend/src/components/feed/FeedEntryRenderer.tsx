@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   useCallback,
 } from "react";
 
@@ -20,6 +20,7 @@ import {
 
 import useFeedback from "../../context/FeedbackContext";
 
+import MobileAdInteractionService from "../../services/MobileAdInteractionService";
 import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";
 
 import {
@@ -257,7 +258,11 @@ export default function FeedEntryRenderer({
             entry.promotion.id
           );
 
-          void MonetizationAnalyticsService
+
+          void MobileAdInteractionService.recordClick(
+            entry
+          );
+void MonetizationAnalyticsService
             .recordClick({
               itemId:
                 entry.promotion.id,
@@ -339,7 +344,11 @@ export default function FeedEntryRenderer({
             entry.promotion.id
           );
 
-          void MonetizationAnalyticsService
+
+          void MobileAdInteractionService.recordClick(
+            entry
+          );
+void MonetizationAnalyticsService
             .recordClick({
               itemId:
                 entry.promotion.id,
@@ -422,7 +431,11 @@ export default function FeedEntryRenderer({
               .campaignId
           );
 
-          void MonetizationAnalyticsService
+
+          void MobileAdInteractionService.recordClick(
+            entry
+          );
+void MonetizationAnalyticsService
             .recordClick({
               itemId:
                 entry.campaign.id,

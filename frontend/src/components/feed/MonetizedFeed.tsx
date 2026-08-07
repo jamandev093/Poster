@@ -35,6 +35,7 @@ import MonetizationFeedbackController from "./MonetizationFeedbackController";
 import useFeedback from "../../context/FeedbackContext";
 
 import AdvertisingPreferenceService from "../../services/AdvertisingPreferenceService";
+import MobileAdInteractionService from "../../services/MobileAdInteractionService";
 
 import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";
 import MonetizationService from "../../services/MonetizationService";
@@ -114,6 +115,10 @@ interface MonetizedFeedProps
 function recordEntryImpression(
   entry: FeedEntry
 ): void {
+  void MobileAdInteractionService.recordImpression(
+    entry
+  );
+
   switch (entry.type) {
     case "poster_promotion":
       void MonetizationAnalyticsService.recordImpression(
@@ -361,6 +366,13 @@ function MonetizedFeedComponent(
           await AdvertisingPreferenceService.hideItem(
             normalizedItemId
           );
+
+          void MobileAdInteractionService.recordHideForItem({
+            itemId:
+              normalizedItemId,
+
+            placement,
+          });
         } catch {
           setHiddenItemIds(
             (currentItemIds) => {
@@ -388,7 +400,7 @@ function MonetizedFeedComponent(
           );
         }
       },
-      [showError]
+      [placement, showError]
     );
 
   const entries =
