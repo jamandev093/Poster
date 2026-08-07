@@ -696,7 +696,7 @@ export default function ProfileScreen() {
       } catch {
         Alert.alert(
           "Account not deleted",
-          "Poster could not delete your local account information."
+          "Poster could not delete your account. Check your connection and try again."
         );
       } finally {
         setConfirmationLoading(

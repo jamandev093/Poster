@@ -333,12 +333,9 @@ class ProfileService {
     );
   }
 
-  async clearLocalSession(): Promise<void> {
-    await AuthService.clearSession();
-  }
 
   async deleteAccountData(): Promise<void> {
-    await AuthService.clearSession();
+    await AuthService.deleteAccount();
 
     const directory =
       getProfileDirectory();
@@ -360,9 +357,6 @@ class ProfileService {
     await AsyncStorage.multiRemove(
       posterStorageKeys
     );
-
-    // TODO:
-    // DELETE /user/account
   }
 }
 

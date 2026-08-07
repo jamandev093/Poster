@@ -595,6 +595,69 @@ async function postAuthenticationLogout(): Promise<void> {
   );
 }
 
+
+async function deleteAuthenticationAccount(
+  accessToken: string | null
+): Promise<void> {
+  const normalizedAccessToken =
+    accessToken?.trim() ?? "";
+
+  if (
+    !normalizedAccessToken
+  ) {
+    throw new AuthenticationApiError(
+      "Sign in again to delete your account.",
+      401,
+      "AUTHENTICATION_REQUIRED"
+    );
+  }
+
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/account"
+      ),
+      {
+        method:
+          "DELETE",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          Authorization:
+            `Bearer ${normalizedAccessToken}`,
+        },
+
+        credentials:
+          "include",
+      }
+    );
+
+  if (
+    response.ok
+  ) {
+    return;
+  }
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  const errorDetails =
+    getErrorMessageFromBody(
+      responseBody
+    );
+
+  throw new AuthenticationApiError(
+    errorDetails.message ??
+      "Poster could not delete your account. Please try again.",
+    response.status,
+    errorDetails.code
+  );
+}
+
 async function ensureSecureStorageAvailable(): Promise<void> {
   const available =
     await SecureStore.isAvailableAsync();
@@ -646,6 +709,19 @@ class AuthService {
   async logout(): Promise<void> {
     try {
       await postAuthenticationLogout();
+    } finally {
+      await this.clearSession();
+    }
+  }
+
+  async deleteAccount(): Promise<void> {
+    const accessToken =
+      await this.getAccessToken();
+
+    try {
+      await deleteAuthenticationAccount(
+        accessToken
+      );
     } finally {
       await this.clearSession();
     }
