@@ -59,6 +59,40 @@ function EmailLink(
   );
 }
 
+function SignalLink(
+  props: {
+    url:
+      string | null | undefined;
+
+    label:
+      string;
+  }
+) {
+  if (
+    !props.url
+  ) {
+    return (
+      <span className={styles.unavailableContact}>
+        Official Signal contact is loading from Poster Business Identity.
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={
+        props.url
+      }
+      target="_blank"
+      rel="noreferrer"
+    >
+      {
+        props.label
+      }
+    </a>
+  );
+}
+
 export default async function ContactPage() {
   const identity =
     await getPublicBusinessIdentity();
@@ -80,6 +114,14 @@ export default async function ContactPage() {
     identity?.copyrightEmail ??
     null;
 
+  const signalUrl =
+    identity?.signalUrl ??
+    null;
+
+  const signalLabel =
+    identity?.signalLabel ??
+    "Message Poster on Signal";
+
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
@@ -99,6 +141,32 @@ export default async function ContactPage() {
       </section>
 
       <section className={styles.contacts}>
+        <article>
+          <span>
+            Signal
+          </span>
+
+          <div>
+            <h2>
+              Official Signal business contact
+            </h2>
+
+            <p>
+              Use Poster&apos;s official Signal contact for business
+              conversations that should continue outside email.
+            </p>
+
+            <SignalLink
+              url={
+                signalUrl
+              }
+              label={
+                signalLabel
+              }
+            />
+          </div>
+        </article>
+
         <article>
           <span>
             General
@@ -169,7 +237,7 @@ export default async function ContactPage() {
               </a>
             ) : (
               <Link href="/advertisers">
-                Advertising information →
+                Advertising information &rarr;
               </Link>
             )}
           </div>
@@ -198,7 +266,7 @@ export default async function ContactPage() {
               </a>
             ) : (
               <Link href="/copyright">
-                Copyright &amp; Rights →
+                Copyright &amp; Rights &rarr;
               </Link>
             )}
           </div>

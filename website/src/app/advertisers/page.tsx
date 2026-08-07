@@ -1,3 +1,7 @@
+import {
+  getPublicBusinessIdentity,
+} from "../../features/business-identity";
+
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -20,7 +24,45 @@ export const metadata = {
   },
 };
 
-export default function AdvertisersPage() {
+function AdvertiserPortalAction(
+  props: {
+    url:
+      string | null | undefined;
+  }
+) {
+  if (
+    !props.url
+  ) {
+    return (
+      <span
+        className={styles.portalAction}
+        aria-disabled="true"
+      >
+        Advertiser Portal destination is loading from Poster Business Identity.
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={
+        props.url
+      }
+      className={styles.portalAction}
+    >
+      Open Advertiser Portal &rarr;
+    </a>
+  );
+}
+
+export default async function AdvertisersPage() {
+  const identity =
+    await getPublicBusinessIdentity();
+
+  const clientPortalUrl =
+    identity?.clientPortalUrl ??
+    null;
+
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
@@ -57,12 +99,11 @@ export default function AdvertisersPage() {
             from the dedicated Client workspace.
           </p>
 
-          <a
-            href="https://client.getpostar.com"
-            className={styles.portalAction}
-          >
-            Open Advertiser Portal →
-          </a>
+          <AdvertiserPortalAction
+            url={
+              clientPortalUrl
+            }
+          />
         </aside>
       </section>
 
@@ -259,12 +300,11 @@ export default function AdvertisersPage() {
             </p>
           </div>
 
-          <a
-            href="https://client.getpostar.com"
-            className={styles.portalAction}
-          >
-            Open Advertiser Portal →
-          </a>
+          <AdvertiserPortalAction
+            url={
+              clientPortalUrl
+            }
+          />
         </aside>
       </section>
     </div>
