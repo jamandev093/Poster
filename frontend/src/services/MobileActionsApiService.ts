@@ -126,6 +126,132 @@ function normalizeApiBaseUrl(
     DEFAULT_POSTER_API_BASE_URL;
 }
 
+export type MobileActionEngagementMetadata =
+  Record<string, unknown>;
+
+export type MobileActionAdInteractionEventType =
+  | "impression"
+  | "view"
+  | "click"
+  | "dismiss"
+  | "hide";
+
+export interface MobileActionShareEventInput {
+  contentId:
+    string;
+
+  originalUrl:
+    string;
+
+  publisher:
+    string;
+
+  shareTarget?:
+    string |
+    null;
+
+  activityType?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata;
+}
+
+export interface MobileActionShareEventOptions {
+  shareTarget?:
+    string |
+    null;
+
+  activityType?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata;
+}
+
+export interface MobileActionShareEventResult {
+  success:
+    true;
+
+  eventId:
+    string;
+}
+
+export interface MobileActionReportEventInput {
+  contentId:
+    string;
+
+  reasonId:
+    string;
+
+  details?:
+    string |
+    null;
+
+  reportContext?:
+    MobileActionEngagementMetadata;
+}
+
+export interface MobileActionReportEventResult {
+  success:
+    true;
+
+  duplicate:
+    boolean;
+
+  reportId:
+    string |
+    null;
+}
+
+export interface MobileActionAdInteractionInput {
+  eventType:
+    MobileActionAdInteractionEventType;
+
+  placement:
+    string;
+
+  adSlotId?:
+    string |
+    null;
+
+  campaignId?:
+    string |
+    null;
+
+  creativeId?:
+    string |
+    null;
+
+  contentId?:
+    string |
+    null;
+
+  deduplicationKey?:
+    string |
+    null;
+
+  occurredAt?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata;
+}
+
+export interface MobileActionAdInteractionResult {
+  success:
+    true;
+
+  duplicate:
+    boolean;
+
+  interactionId:
+    string |
+    null;
+}
 function buildMobileActionsUrl(
   path:
     string
@@ -141,7 +267,14 @@ function buildMobileActionsUrl(
       ? path
       : `/${path}`;
 
-  return `${baseUrl}${API_VERSION_PREFIX}/mobile/actions${normalizedPath}`;
+  const mobilePath =
+    normalizedPath.startsWith(
+      "/ads/"
+    )
+      ? `/mobile${normalizedPath}`
+      : `/mobile/actions${normalizedPath}`;
+
+  return `${baseUrl}${API_VERSION_PREFIX}${mobilePath}`;
 }
 
 function isRecord(
@@ -678,6 +811,108 @@ async function requestMobileActionsJson<TResponse>(
   );
 }
 
+function isMobileEngagementRecord(
+  value:
+    unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(
+      value
+    )
+  );
+}
+
+function parseShareEventResult(
+  value:
+    unknown
+): MobileActionShareEventResult {
+  if (
+    !isMobileEngagementRecord(
+      value
+    ) ||
+    value.success !== true ||
+    typeof value.eventId !== "string" ||
+    value.eventId.length === 0
+  ) {
+    throw new Error(
+      "Share event response contract is invalid."
+    );
+  }
+
+  return {
+    success:
+      true,
+
+    eventId:
+      value.eventId,
+  };
+}
+
+function parseReportEventResult(
+  value:
+    unknown
+): MobileActionReportEventResult {
+  if (
+    !isMobileEngagementRecord(
+      value
+    ) ||
+    value.success !== true ||
+    typeof value.duplicate !== "boolean" ||
+    (
+      value.reportId !== null &&
+      typeof value.reportId !== "string"
+    )
+  ) {
+    throw new Error(
+      "Report event response contract is invalid."
+    );
+  }
+
+  return {
+    success:
+      true,
+
+    duplicate:
+      value.duplicate,
+
+    reportId:
+      value.reportId,
+  };
+}
+
+function parseAdInteractionResult(
+  value:
+    unknown
+): MobileActionAdInteractionResult {
+  if (
+    !isMobileEngagementRecord(
+      value
+    ) ||
+    value.success !== true ||
+    typeof value.duplicate !== "boolean" ||
+    (
+      value.interactionId !== null &&
+      typeof value.interactionId !== "string"
+    )
+  ) {
+    throw new Error(
+      "Ad interaction response contract is invalid."
+    );
+  }
+
+  return {
+    success:
+      true,
+
+    duplicate:
+      value.duplicate,
+
+    interactionId:
+      value.interactionId,
+  };
+}
 export default class MobileActionsApiService {
   static buildArticleSnapshot(
     article:
@@ -869,6 +1104,173 @@ export default class MobileActionsApiService {
         },
       },
       parseFeedbackResult
+    );
+  }
+  static buildShareEventInput(
+    article:
+      Article,
+    options:
+      MobileActionShareEventOptions =
+      {}
+  ): MobileActionShareEventInput {
+    return {
+      contentId:
+        article.id,
+
+      originalUrl:
+        article.originalUrl,
+
+      publisher:
+        article.publisher,
+
+      shareTarget:
+        options.shareTarget ??
+        null,
+
+      activityType:
+        options.activityType ??
+        null,
+
+      metadata:
+        options.metadata ??
+        {},
+    };
+  }
+
+  static async recordShareEvent(
+    input:
+      MobileActionShareEventInput
+  ): Promise<MobileActionShareEventResult> {
+    return requestMobileActionsJson(
+      "/share",
+      {
+        method:
+          "POST",
+
+        body:
+          {
+            contentId:
+              input.contentId,
+
+            originalUrl:
+              input.originalUrl,
+
+            publisher:
+              input.publisher,
+
+            shareTarget:
+              input.shareTarget ??
+              null,
+
+            activityType:
+              input.activityType ??
+              null,
+
+            metadata:
+              input.metadata ??
+              {},
+          },
+      },
+      parseShareEventResult
+    );
+  }
+
+  static async recordArticleShare(
+    article:
+      Article,
+    options:
+      MobileActionShareEventOptions =
+      {}
+  ): Promise<MobileActionShareEventResult> {
+    return MobileActionsApiService
+      .recordShareEvent(
+        MobileActionsApiService
+          .buildShareEventInput(
+            article,
+            options
+          )
+      );
+  }
+
+  static async recordReportEvent(
+    input:
+      MobileActionReportEventInput
+  ): Promise<MobileActionReportEventResult> {
+    return requestMobileActionsJson(
+      "/report",
+      {
+        method:
+          "POST",
+
+        body:
+          {
+            contentId:
+              input.contentId,
+
+            reasonId:
+              input.reasonId,
+
+            details:
+              input.details ??
+              null,
+
+            reportContext:
+              input.reportContext ??
+              {},
+          },
+      },
+      parseReportEventResult
+    );
+  }
+
+  static async recordAdInteraction(
+    input:
+      MobileActionAdInteractionInput
+  ): Promise<MobileActionAdInteractionResult> {
+    return requestMobileActionsJson(
+      "/ads/interactions",
+      {
+        method:
+          "POST",
+
+        body:
+          {
+            eventType:
+              input.eventType,
+
+            placement:
+              input.placement,
+
+            adSlotId:
+              input.adSlotId ??
+              null,
+
+            campaignId:
+              input.campaignId ??
+              null,
+
+            creativeId:
+              input.creativeId ??
+              null,
+
+            contentId:
+              input.contentId ??
+              null,
+
+            deduplicationKey:
+              input.deduplicationKey ??
+              null,
+
+            occurredAt:
+              input.occurredAt ??
+              null,
+
+            metadata:
+              input.metadata ??
+              {},
+          },
+      },
+      parseAdInteractionResult
     );
   }
 }
