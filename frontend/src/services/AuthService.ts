@@ -136,6 +136,9 @@ export interface SignupVerificationResponse {
   };
 }
 
+export type RefreshSessionResponse =
+  LoginResponse;
+
 export interface RequestPasswordResetInput {
   email: string;
 }
@@ -477,6 +480,121 @@ async function postAuthenticationLogin(
   };
 }
 
+async function postAuthenticationRefreshSession(): Promise<RefreshSessionResponse> {
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/refresh"
+      ),
+      {
+        method:
+          "POST",
+
+        headers: {
+          Accept:
+            "application/json",
+        },
+
+        credentials:
+          "include",
+      }
+    );
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  if (!response.ok) {
+    const errorDetails =
+      getErrorMessageFromBody(
+        responseBody
+      );
+
+    throw new AuthenticationApiError(
+      errorDetails.message ??
+        "Authentication session refresh failed. Please sign in again.",
+      response.status,
+      errorDetails.code
+    );
+  }
+
+  const accessToken =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_HEADER
+    );
+
+  const accessTokenExpiresAt =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER
+    );
+
+  if (
+    !accessToken ||
+    !accessTokenExpiresAt
+  ) {
+    throw new AuthenticationApiError(
+      "The refresh response did not include an access token.",
+      response.status,
+      null
+    );
+  }
+
+  return {
+    ...(responseBody as Omit<
+      RefreshSessionResponse,
+      | "accessToken"
+      | "accessTokenExpiresAt"
+    >),
+
+    accessToken,
+
+    accessTokenExpiresAt,
+  };
+}
+
+async function postAuthenticationLogout(): Promise<void> {
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/logout"
+      ),
+      {
+        method:
+          "POST",
+
+        headers: {
+          Accept:
+            "application/json",
+        },
+
+        credentials:
+          "include",
+      }
+    );
+
+  if (response.ok) {
+    return;
+  }
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  const errorDetails =
+    getErrorMessageFromBody(
+      responseBody
+    );
+
+  throw new AuthenticationApiError(
+    errorDetails.message ??
+      "Poster could not complete logout. Your local session was cleared.",
+    response.status,
+    errorDetails.code
+  );
+}
+
 async function ensureSecureStorageAvailable(): Promise<void> {
   const available =
     await SecureStore.isAvailableAsync();
@@ -508,6 +626,29 @@ class AuthService {
       );
 
     return operation;
+  }
+
+  async refreshSession(): Promise<RefreshSessionResponse> {
+    const result =
+      await postAuthenticationRefreshSession();
+
+    await this.saveAccessSession({
+      accessToken:
+        result.accessToken,
+
+      accessTokenExpiresAt:
+        result.accessTokenExpiresAt,
+    });
+
+    return result;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await postAuthenticationLogout();
+    } finally {
+      await this.clearSession();
+    }
   }
 
   async requestPasswordReset(
