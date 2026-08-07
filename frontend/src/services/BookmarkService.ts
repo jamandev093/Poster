@@ -1,17 +1,26 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { STORAGE_KEYS } from "../constants/storage";
+import {
+  STORAGE_KEYS,
+} from "../constants/storage";
 
-import { Article } from "../types/article";
+import {
+  Article,
+} from "../types/article";
+
+import MobileActionsApiService from "./MobileActionsApiService";
 
 export interface BookmarkToggleResult {
-  success: boolean;
+  success:
+    boolean;
 
-  bookmarked: boolean;
+  bookmarked:
+    boolean;
 }
 
 function isArticle(
-  value: unknown
+  value:
+    unknown
 ): value is Article {
   if (
     typeof value !== "object" ||
@@ -42,22 +51,29 @@ function isArticle(
 }
 
 function parseArticles(
-  value: string | null
+  value:
+    string |
+    null
 ): Article[] {
   if (!value) {
     return [];
   }
 
   try {
-    const parsed: unknown =
-      JSON.parse(value);
+    const parsed:
+      unknown =
+      JSON.parse(
+        value
+      );
 
     if (!Array.isArray(parsed)) {
       return [];
     }
 
     const validArticles =
-      parsed.filter(isArticle);
+      parsed.filter(
+        isArticle
+      );
 
     return Array.from(
       new Map(
@@ -74,14 +90,74 @@ function parseArticles(
   }
 }
 
+function mergeArticleIntoList(
+  articles:
+    readonly Article[],
+  article:
+    Article
+): Article[] {
+  const existingIndex =
+    articles.findIndex(
+      (item) =>
+        item.id === article.id
+    );
+
+  if (existingIndex >= 0) {
+    return articles.map(
+      (item) =>
+        item.id === article.id
+          ? article
+          : item
+    );
+  }
+
+  return [
+    article,
+    ...articles,
+  ];
+}
+
+function removeArticleFromList(
+  articles:
+    readonly Article[],
+  articleId:
+    string
+): Article[] {
+  return articles.filter(
+    (article) =>
+      article.id !== articleId
+  );
+}
+
+function mapBackendBookmarksToArticles(
+  bookmarks:
+    Awaited<
+      ReturnType<
+        typeof MobileActionsApiService.listBookmarks
+      >
+    >
+): Article[] {
+  return bookmarks.flatMap(
+    (bookmark) => {
+      const article =
+        MobileActionsApiService
+          .mapBookmarkRecordToArticle(
+            bookmark
+          );
+
+      return article
+        ? [article]
+        : [];
+    }
+  );
+}
+
 export default class BookmarkService {
   /**
-   * AsyncStorage has no atomic
-   * read-modify-write operation.
-   *
-   * All bookmark mutations are therefore
-   * serialized to prevent rapid actions
-   * from overwriting one another.
+   * AsyncStorage remains the local
+   * compatibility cache and offline
+   * fallback. Backend is authoritative
+   * when authenticated and reachable.
    */
   private static mutationQueue:
     Promise<void> =
@@ -95,33 +171,37 @@ export default class BookmarkService {
         STORAGE_KEYS.BOOKMARKED_ARTICLES
       );
 
-    return parseArticles(value);
+    return parseArticles(
+      value
+    );
   }
 
   private static async writeArticles(
-    articles: Article[]
+    articles:
+      Article[]
   ): Promise<void> {
     await AsyncStorage.setItem(
       STORAGE_KEYS.BOOKMARKED_ARTICLES,
-      JSON.stringify(articles)
+      JSON.stringify(
+        articles
+      )
     );
 
-    /*
-     * Remove the obsolete ID-only format
-     * after every successful mutation.
-     */
     await AsyncStorage.removeItem(
       STORAGE_KEYS.BOOKMARKED_ARTICLE_IDS
     );
   }
 
   private static runMutation<T>(
-    mutation: () => Promise<T>
+    mutation:
+      () => Promise<T>
   ): Promise<T> {
     const operation =
-      BookmarkService.mutationQueue.then(
-        mutation
-      );
+      BookmarkService
+        .mutationQueue
+        .then(
+          mutation
+        );
 
     BookmarkService.mutationQueue =
       operation.then(
@@ -132,6 +212,17 @@ export default class BookmarkService {
     return operation;
   }
 
+  private static async readBackendArticles():
+    Promise<Article[]> {
+    const bookmarks =
+      await MobileActionsApiService
+        .listBookmarks();
+
+    return mapBackendBookmarksToArticles(
+      bookmarks
+    );
+  }
+
   static async getBookmarkedArticles(): Promise<
     Article[]
   > {
@@ -139,9 +230,23 @@ export default class BookmarkService {
       await BookmarkService
         .mutationQueue;
 
-      return await BookmarkService.readArticles();
+      const backendArticles =
+        await BookmarkService
+          .readBackendArticles();
+
+      await BookmarkService
+        .writeArticles(
+          backendArticles
+        );
+
+      return backendArticles;
     } catch {
-      return [];
+      try {
+        return await BookmarkService
+          .readArticles();
+      } catch {
+        return [];
+      }
     }
   }
 
@@ -149,18 +254,22 @@ export default class BookmarkService {
     string[]
   > {
     const articles =
-      await BookmarkService.getBookmarkedArticles();
+      await BookmarkService
+        .getBookmarkedArticles();
 
     return articles.map(
-      (article) => article.id
+      (article) =>
+        article.id
     );
   }
 
   static async isBookmarked(
-    articleId: string
+    articleId:
+      string
   ): Promise<boolean> {
     const articles =
-      await BookmarkService.getBookmarkedArticles();
+      await BookmarkService
+        .getBookmarkedArticles();
 
     return articles.some(
       (article) =>
@@ -169,103 +278,207 @@ export default class BookmarkService {
   }
 
   static async add(
-    article: Article
+    article:
+      Article
   ): Promise<void> {
     await BookmarkService.runMutation(
       async () => {
-        const articles =
-          await BookmarkService.readArticles();
+        const currentArticles =
+          await BookmarkService
+            .readArticles();
 
-        const existingIndex =
-          articles.findIndex(
-            (item) =>
-              item.id === article.id
+        await BookmarkService
+          .writeArticles(
+            mergeArticleIntoList(
+              currentArticles,
+              article
+            )
           );
 
-        const nextArticles =
-          existingIndex >= 0
-            ? articles.map((item) =>
-                item.id === article.id
-                  ? article
-                  : item
+        try {
+          const backendState =
+            await MobileActionsApiService
+              .getInteractionState();
+
+          if (
+            backendState.bookmarkedIds
+              .includes(
+                article.id
               )
-            : [
-                article,
-                ...articles,
-              ];
+          ) {
+            return;
+          }
 
-        await BookmarkService.writeArticles(
-          nextArticles
-        );
+          const result =
+            await MobileActionsApiService
+              .toggleBookmark(
+                article
+              );
 
-        // TODO:
-        // POST /bookmarks
+          if (!result.bookmarked) {
+            await BookmarkService
+              .writeArticles(
+                removeArticleFromList(
+                  await BookmarkService
+                    .readArticles(),
+                  article.id
+                )
+              );
+          }
+        } catch {
+          /*
+           * Keep the local cache as an
+           * offline/unauthenticated
+           * compatibility fallback.
+           */
+        }
       }
     );
   }
 
   static async remove(
-    articleId: string
+    articleId:
+      string
   ): Promise<void> {
     await BookmarkService.runMutation(
       async () => {
-        const articles =
-          await BookmarkService.readArticles();
+        const currentArticles =
+          await BookmarkService
+            .readArticles();
 
-        const nextArticles =
-          articles.filter(
+        const removedArticle =
+          currentArticles.find(
             (article) =>
-              article.id !== articleId
+              article.id === articleId
+          ) ?? null;
+
+        await BookmarkService
+          .writeArticles(
+            removeArticleFromList(
+              currentArticles,
+              articleId
+            )
           );
 
-        await BookmarkService.writeArticles(
-          nextArticles
-        );
+        if (!removedArticle) {
+          return;
+        }
 
-        // TODO:
-        // DELETE /bookmarks/:articleId
+        try {
+          const backendState =
+            await MobileActionsApiService
+              .getInteractionState();
+
+          if (
+            !backendState.bookmarkedIds
+              .includes(
+                articleId
+              )
+          ) {
+            return;
+          }
+
+          const result =
+            await MobileActionsApiService
+              .toggleBookmark(
+                removedArticle
+              );
+
+          if (result.bookmarked) {
+            await BookmarkService
+              .writeArticles(
+                mergeArticleIntoList(
+                  await BookmarkService
+                    .readArticles(),
+                  removedArticle
+                )
+              );
+          }
+        } catch {
+          /*
+           * Keep local removal as the
+           * fallback. The next successful
+           * authenticated refresh will
+           * resync the cache.
+           */
+        }
       }
     );
   }
 
   static async toggle(
-    article: Article
+    article:
+      Article
   ): Promise<BookmarkToggleResult> {
     return BookmarkService.runMutation(
       async () => {
-        const articles =
-          await BookmarkService.readArticles();
+        const currentArticles =
+          await BookmarkService
+            .readArticles();
 
         const currentlyBookmarked =
-          articles.some(
+          currentArticles.some(
             (item) =>
               item.id === article.id
           );
 
-        const nextArticles =
+        const optimisticArticles =
           currentlyBookmarked
-            ? articles.filter(
-                (item) =>
-                  item.id !== article.id
+            ? removeArticleFromList(
+                currentArticles,
+                article.id
               )
-            : [
-                article,
-                ...articles,
-              ];
+            : mergeArticleIntoList(
+                currentArticles,
+                article
+              );
 
-        await BookmarkService.writeArticles(
-          nextArticles
-        );
+        await BookmarkService
+          .writeArticles(
+            optimisticArticles
+          );
 
-        // TODO:
-        // Synchronize with backend.
+        try {
+          const result =
+            await MobileActionsApiService
+              .toggleBookmark(
+                article
+              );
 
-        return {
-          success: true,
+          const confirmedArticles =
+            result.bookmarked
+              ? mergeArticleIntoList(
+                  await BookmarkService
+                    .readArticles(),
+                  article
+                )
+              : removeArticleFromList(
+                  await BookmarkService
+                    .readArticles(),
+                  article.id
+                );
 
-          bookmarked:
-            !currentlyBookmarked,
-        };
+          await BookmarkService
+            .writeArticles(
+              confirmedArticles
+            );
+
+          return {
+            success:
+              true,
+
+            bookmarked:
+              result.bookmarked,
+          };
+        } catch {
+          return {
+            success:
+              true,
+
+            bookmarked:
+              !currentlyBookmarked,
+          };
+        }
       }
     );
   }

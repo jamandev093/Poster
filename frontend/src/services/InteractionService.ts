@@ -4,22 +4,31 @@ import {
   STORAGE_KEYS,
 } from "../constants/storage";
 
-interface ArticleInteractionState {
-  recommendedIds: string[];
+import MobileActionsApiService from "./MobileActionsApiService";
 
-  helpfulIds: string[];
+interface ArticleInteractionState {
+  recommendedIds:
+    string[];
+
+  helpfulIds:
+    string[];
 }
 
 function parseArticleIds(
-  value: string | null
+  value:
+    string |
+    null
 ): string[] {
   if (!value) {
     return [];
   }
 
   try {
-    const parsed: unknown =
-      JSON.parse(value);
+    const parsed:
+      unknown =
+      JSON.parse(
+        value
+      );
 
     if (!Array.isArray(parsed)) {
       return [];
@@ -36,7 +45,9 @@ function parseArticleIds(
       );
 
     return Array.from(
-      new Set(validIds)
+      new Set(
+        validIds
+      )
     );
   } catch {
     return [];
@@ -45,24 +56,25 @@ function parseArticleIds(
 
 export default class InteractionService {
   /**
-   * AsyncStorage does not provide an
-   * atomic read-modify-write operation.
-   *
-   * Serializing mutations prevents rapid
-   * reaction taps from overwriting one
-   * another.
+   * AsyncStorage remains the local
+   * compatibility cache and offline
+   * fallback. Backend is authoritative
+   * when authenticated and reachable.
    */
   private static mutationQueue:
     Promise<void> =
     Promise.resolve();
 
   private static runMutation<T>(
-    mutation: () => Promise<T>
+    mutation:
+      () => Promise<T>
   ): Promise<T> {
     const operation =
       InteractionService
         .mutationQueue
-        .then(mutation);
+        .then(
+          mutation
+        );
 
     InteractionService
       .mutationQueue =
@@ -75,7 +87,8 @@ export default class InteractionService {
   }
 
   private static async readIds(
-    storageKey: string
+    storageKey:
+      string
   ): Promise<string[]> {
     const value =
       await AsyncStorage.getItem(
@@ -88,12 +101,16 @@ export default class InteractionService {
   }
 
   private static async writeIds(
-    storageKey: string,
-    ids: string[]
+    storageKey:
+      string,
+    ids:
+      string[]
   ): Promise<void> {
     const uniqueIds =
       Array.from(
-        new Set(ids)
+        new Set(
+          ids
+        )
       );
 
     await AsyncStorage.setItem(
@@ -104,9 +121,53 @@ export default class InteractionService {
     );
   }
 
+  private static async writeState(
+    state:
+      ArticleInteractionState
+  ): Promise<void> {
+    await Promise.all([
+      InteractionService.writeIds(
+        STORAGE_KEYS
+          .RECOMMENDED_ARTICLE_IDS,
+        state.recommendedIds
+      ),
+
+      InteractionService.writeIds(
+        STORAGE_KEYS
+          .HELPFUL_ARTICLE_IDS,
+        state.helpfulIds
+      ),
+    ]);
+  }
+
+  private static async readLocalState():
+    Promise<ArticleInteractionState> {
+    const [
+      recommendedIds,
+      helpfulIds,
+    ] = await Promise.all([
+      InteractionService.readIds(
+        STORAGE_KEYS
+          .RECOMMENDED_ARTICLE_IDS
+      ),
+
+      InteractionService.readIds(
+        STORAGE_KEYS
+          .HELPFUL_ARTICLE_IDS
+      ),
+    ]);
+
+    return {
+      recommendedIds,
+      helpfulIds,
+    };
+  }
+
   private static async addId(
-    storageKey: string,
-    articleId: string
+    storageKey:
+      string,
+    articleId:
+      string
   ): Promise<boolean> {
     const normalizedId =
       articleId.trim();
@@ -115,64 +176,55 @@ export default class InteractionService {
       return false;
     }
 
-    return InteractionService.runMutation(
-      async () => {
-        const currentIds =
-          await InteractionService.readIds(
-            storageKey
-          );
+    return InteractionService
+      .runMutation(
+        async () => {
+          const currentIds =
+            await InteractionService
+              .readIds(
+                storageKey
+              );
 
-        if (
-          currentIds.includes(
-            normalizedId
-          )
-        ) {
+          if (
+            currentIds.includes(
+              normalizedId
+            )
+          ) {
+            return true;
+          }
+
+          await InteractionService
+            .writeIds(
+              storageKey,
+              [
+                normalizedId,
+                ...currentIds,
+              ]
+            );
+
           return true;
         }
-
-        await InteractionService.writeIds(
-          storageKey,
-          [
-            normalizedId,
-            ...currentIds,
-          ]
-        );
-
-        return true;
-      }
-    );
+      );
   }
 
   static async getRecommendedIds(): Promise<
     string[]
   > {
-    try {
+    const state =
       await InteractionService
-        .mutationQueue;
+        .getState();
 
-      return await InteractionService.readIds(
-        STORAGE_KEYS
-          .RECOMMENDED_ARTICLE_IDS
-      );
-    } catch {
-      return [];
-    }
+    return state.recommendedIds;
   }
 
   static async getHelpfulIds(): Promise<
     string[]
   > {
-    try {
+    const state =
       await InteractionService
-        .mutationQueue;
+        .getState();
 
-      return await InteractionService.readIds(
-        STORAGE_KEYS
-          .HELPFUL_ARTICLE_IDS
-      );
-    } catch {
-      return [];
-    }
+    return state.helpfulIds;
   }
 
   static async getState(): Promise<
@@ -182,38 +234,44 @@ export default class InteractionService {
       await InteractionService
         .mutationQueue;
 
-      const [
-        recommendedIds,
-        helpfulIds,
-      ] = await Promise.all([
-        InteractionService.readIds(
-          STORAGE_KEYS
-            .RECOMMENDED_ARTICLE_IDS
-        ),
+      const backendState =
+        await MobileActionsApiService
+          .getInteractionState();
 
-        InteractionService.readIds(
-          STORAGE_KEYS
-            .HELPFUL_ARTICLE_IDS
-        ),
-      ]);
+      const state = {
+        recommendedIds:
+          backendState.recommendedIds,
 
-      return {
-        recommendedIds,
-        helpfulIds,
+        helpfulIds:
+          backendState.helpfulIds,
       };
+
+      await InteractionService
+        .writeState(
+          state
+        );
+
+      return state;
     } catch {
-      return {
-        recommendedIds: [],
-        helpfulIds: [],
-      };
+      try {
+        return await InteractionService
+          .readLocalState();
+      } catch {
+        return {
+          recommendedIds: [],
+          helpfulIds: [],
+        };
+      }
     }
   }
 
   static async isRecommended(
-    articleId: string
+    articleId:
+      string
   ): Promise<boolean> {
     const ids =
-      await InteractionService.getRecommendedIds();
+      await InteractionService
+        .getRecommendedIds();
 
     return ids.includes(
       articleId
@@ -221,10 +279,12 @@ export default class InteractionService {
   }
 
   static async isHelpful(
-    articleId: string
+    articleId:
+      string
   ): Promise<boolean> {
     const ids =
-      await InteractionService.getHelpfulIds();
+      await InteractionService
+        .getHelpfulIds();
 
     return ids.includes(
       articleId
@@ -232,48 +292,79 @@ export default class InteractionService {
   }
 
   static async worthReading(
-    articleId: string
+    articleId:
+      string
   ): Promise<boolean> {
     const saved =
-      await InteractionService.addId(
-        STORAGE_KEYS
-          .RECOMMENDED_ARTICLE_IDS,
-        articleId
-      );
+      await InteractionService
+        .addId(
+          STORAGE_KEYS
+            .RECOMMENDED_ARTICLE_IDS,
+          articleId
+        );
 
-    // TODO:
-    // POST /interactions/recommend
+    if (!saved) {
+      return false;
+    }
 
-    return saved;
+    try {
+      await MobileActionsApiService
+        .markWorthReading(
+          articleId
+        );
+    } catch {
+      /*
+       * Keep local recommendation as an
+       * offline/unauthenticated fallback.
+       */
+    }
+
+    return true;
   }
 
   static async helpful(
-    articleId: string
+    articleId:
+      string
   ): Promise<boolean> {
     const saved =
-      await InteractionService.addId(
-        STORAGE_KEYS
-          .HELPFUL_ARTICLE_IDS,
-        articleId
-      );
+      await InteractionService
+        .addId(
+          STORAGE_KEYS
+            .HELPFUL_ARTICLE_IDS,
+          articleId
+        );
 
-    // TODO:
-    // POST /interactions/helpful
+    if (!saved) {
+      return false;
+    }
 
-    return saved;
+    try {
+      await MobileActionsApiService
+        .markHelpful(
+          articleId
+        );
+    } catch {
+      /*
+       * Keep local helpful signal as an
+       * offline/unauthenticated fallback.
+       */
+    }
+
+    return true;
   }
 
   static async clear(): Promise<void> {
-    await InteractionService.runMutation(
-      async () => {
-        await AsyncStorage.multiRemove([
-          STORAGE_KEYS
-            .RECOMMENDED_ARTICLE_IDS,
+    await InteractionService
+      .runMutation(
+        async () => {
+          await AsyncStorage.multiRemove([
+            STORAGE_KEYS
+              .RECOMMENDED_ARTICLE_IDS,
 
-          STORAGE_KEYS
-            .HELPFUL_ARTICLE_IDS,
-        ]);
-      }
-    );
+            STORAGE_KEYS
+              .HELPFUL_ARTICLE_IDS,
+          ]);
+        }
+      );
   }
 }

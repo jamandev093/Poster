@@ -8,33 +8,44 @@ import {
   STORAGE_KEYS,
 } from "../constants/storage";
 
-const MAX_FEEDBACK_EVENTS = 500;
+import MobileActionsApiService from "./MobileActionsApiService";
+
+const MAX_FEEDBACK_EVENTS =
+  500;
 
 const VALID_REASON_IDS =
   new Set(
     feedbackReasons.map(
-      (reason) => reason.id
+      (reason) =>
+        reason.id
     )
   );
 
 export interface ArticleFeedbackEvent {
-  id: string;
+  id:
+    string;
 
-  articleId: string;
+  articleId:
+    string;
 
-  reasonId: string;
+  reasonId:
+    string;
 
-  submittedAt: string;
+  submittedAt:
+    string;
 }
 
 export interface FeedbackSubmitResult {
-  success: boolean;
+  success:
+    boolean;
 
-  duplicate: boolean;
+  duplicate:
+    boolean;
 }
 
 function isArticleFeedbackEvent(
-  value: unknown
+  value:
+    unknown
 ): value is ArticleFeedbackEvent {
   if (
     typeof value !== "object" ||
@@ -68,15 +79,20 @@ function isArticleFeedbackEvent(
 }
 
 function parseFeedbackEvents(
-  value: string | null
+  value:
+    string |
+    null
 ): ArticleFeedbackEvent[] {
   if (!value) {
     return [];
   }
 
   try {
-    const parsed: unknown =
-      JSON.parse(value);
+    const parsed:
+      unknown =
+      JSON.parse(
+        value
+      );
 
     if (!Array.isArray(parsed)) {
       return [];
@@ -131,25 +147,46 @@ function createFeedbackId(): string {
   ].join("-");
 }
 
+function createFeedbackEvent(
+  articleId:
+    string,
+  reasonId:
+    string
+): ArticleFeedbackEvent {
+  return {
+    id:
+      createFeedbackId(),
+
+    articleId,
+
+    reasonId,
+
+    submittedAt:
+      new Date().toISOString(),
+  };
+}
+
 export default class FeedbackService {
   /**
-   * AsyncStorage does not provide an
-   * atomic append operation. Serializing
-   * writes prevents concurrent feedback
-   * submissions from overwriting one
-   * another.
+   * AsyncStorage remains the local
+   * compatibility cache and offline
+   * fallback. Backend is authoritative
+   * when authenticated and reachable.
    */
   private static mutationQueue:
     Promise<void> =
     Promise.resolve();
 
   private static runMutation<T>(
-    mutation: () => Promise<T>
+    mutation:
+      () => Promise<T>
   ): Promise<T> {
     const operation =
       FeedbackService
         .mutationQueue
-        .then(mutation);
+        .then(
+          mutation
+        );
 
     FeedbackService
       .mutationQueue =
@@ -192,8 +229,10 @@ export default class FeedbackService {
   }
 
   static async submit(
-    articleId: string,
-    reason: string
+    articleId:
+      string,
+    reason:
+      string
   ): Promise<FeedbackSubmitResult> {
     const normalizedArticleId =
       articleId.trim();
@@ -217,59 +256,49 @@ export default class FeedbackService {
       );
     }
 
-    return FeedbackService.runMutation(
-      async () => {
-        const currentEvents =
-          await FeedbackService.readEvents();
+    return FeedbackService
+      .runMutation(
+        async () => {
+          const currentEvents =
+            await FeedbackService
+              .readEvents();
 
-        const duplicate =
-          currentEvents.some(
-            (event) =>
-              event.articleId ===
-                normalizedArticleId &&
-              event.reasonId ===
+          const duplicate =
+            currentEvents.some(
+              (event) =>
+                event.articleId ===
+                  normalizedArticleId &&
+                event.reasonId ===
+                  normalizedReason
+            );
+
+          if (!duplicate) {
+            await FeedbackService
+              .writeEvents([
+                ...currentEvents,
+                createFeedbackEvent(
+                  normalizedArticleId,
+                  normalizedReason
+                ),
+              ]);
+          }
+
+          try {
+            return await MobileActionsApiService
+              .submitFeedback(
+                normalizedArticleId,
                 normalizedReason
-          );
+              );
+          } catch {
+            return {
+              success:
+                true,
 
-        if (duplicate) {
-          return {
-            success: true,
-            duplicate: true,
-          };
+              duplicate,
+            };
+          }
         }
-
-        const event:
-          ArticleFeedbackEvent = {
-            id: createFeedbackId(),
-
-            articleId:
-              normalizedArticleId,
-
-            reasonId:
-              normalizedReason,
-
-            submittedAt:
-              new Date().toISOString(),
-          };
-
-        await FeedbackService.writeEvents([
-          ...currentEvents,
-          event,
-        ]);
-
-        // TODO:
-        // POST /feedback
-        //
-        // Send queued feedback events to
-        // the backend when API integration
-        // begins.
-
-        return {
-          success: true,
-          duplicate: false,
-        };
-      }
-    );
+      );
   }
 
   static async getSubmittedFeedback(): Promise<
@@ -279,15 +308,18 @@ export default class FeedbackService {
       await FeedbackService
         .mutationQueue;
 
-      return await FeedbackService.readEvents();
+      return await FeedbackService
+        .readEvents();
     } catch {
       return [];
     }
   }
 
   static async hasSubmitted(
-    articleId: string,
-    reason?: string
+    articleId:
+      string,
+    reason?:
+      string
   ): Promise<boolean> {
     const normalizedArticleId =
       articleId.trim();
@@ -297,7 +329,8 @@ export default class FeedbackService {
     }
 
     const events =
-      await FeedbackService.getSubmittedFeedback();
+      await FeedbackService
+        .getSubmittedFeedback();
 
     return events.some(
       (event) =>
@@ -312,12 +345,13 @@ export default class FeedbackService {
   }
 
   static async clear(): Promise<void> {
-    await FeedbackService.runMutation(
-      async () => {
-        await AsyncStorage.removeItem(
-          STORAGE_KEYS.ARTICLE_FEEDBACK
-        );
-      }
-    );
+    await FeedbackService
+      .runMutation(
+        async () => {
+          await AsyncStorage.removeItem(
+            STORAGE_KEYS.ARTICLE_FEEDBACK
+          );
+        }
+      );
   }
 }
