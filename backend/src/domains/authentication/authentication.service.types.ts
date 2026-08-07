@@ -64,6 +64,28 @@ export interface RegisterAuthenticationAccountResult {
     SignupEmailVerificationChallenge;
 }
 
+export interface ResendSignupEmailInput {
+  email: string;
+}
+
+export interface ResendSignupEmailResult {
+  account:
+    AuthenticationAccountSummary;
+
+  emailVerification: {
+    purpose: "signup";
+
+    tokenId: string;
+
+    /**
+     * Raw verification code that must be passed directly to the
+     * email-delivery boundary.
+     */
+    code: string;
+
+    expiresAt: Date;
+  };
+}
 export interface VerifySignupEmailInput {
   email: string;
 

@@ -1,5 +1,6 @@
 import {
   registerAuthenticationAccount,
+  resendSignupEmail,
 } from "../../domains/authentication/authentication.service.js";
 
 import {
@@ -11,8 +12,15 @@ import type {
 } from "../../services/email/email-delivery.types.js";
 
 import type {
+  RegisterAuthenticationAccountResult,
+  ResendSignupEmailResult,
+} from "../../domains/authentication/authentication.service.types.js";
+
+import type {
   SignupRegistrationInput,
   SignupRegistrationResult,
+  SignupVerificationResendInput,
+  SignupVerificationResendResult,
 } from "./signup-registration.types.js";
 
 export interface CreateSignupRegistrationServiceOptions {
@@ -21,6 +29,9 @@ export interface CreateSignupRegistrationServiceOptions {
 
   registerAuthenticationAccount?:
     typeof registerAuthenticationAccount;
+
+  resendSignupEmail?:
+    typeof resendSignupEmail;
 
   createSignupVerificationEmailMessage?:
     typeof createSignupVerificationEmailMessage;
@@ -34,6 +45,94 @@ export interface SignupRegistrationService {
     ) => Promise<
       SignupRegistrationResult
     >;
+
+  resend?:
+    (
+      input:
+        SignupVerificationResendInput
+    ) => Promise<
+      SignupVerificationResendResult
+    >;
+}
+
+async function deliverSignupVerification(
+  input:
+    | RegisterAuthenticationAccountResult
+    | ResendSignupEmailResult,
+  options:
+    Pick<
+      CreateSignupRegistrationServiceOptions,
+      | "emailDeliveryProvider"
+      | "createSignupVerificationEmailMessage"
+    >
+): Promise<SignupRegistrationResult> {
+  const createVerificationMessage =
+    options.createSignupVerificationEmailMessage ??
+    createSignupVerificationEmailMessage;
+
+  const message =
+    createVerificationMessage({
+      recipientEmail:
+        input.account.email,
+
+      recipientName:
+        input.account.fullName,
+
+      verificationCode:
+        input
+          .emailVerification
+          .code,
+
+      expiresAt:
+        input
+          .emailVerification
+          .expiresAt,
+
+      idempotencyKey:
+        input
+          .emailVerification
+          .tokenId,
+    });
+
+  const delivery =
+    await options
+      .emailDeliveryProvider
+      .sendEmail(
+        message
+      );
+
+  return {
+    account:
+      input.account,
+
+    emailVerification: {
+      purpose:
+        "signup",
+
+      expiresAt:
+        new Date(
+          input
+            .emailVerification
+            .expiresAt
+            .getTime()
+        ),
+
+      delivery: {
+        provider:
+          delivery.provider,
+
+        messageId:
+          delivery.messageId,
+
+        acceptedAt:
+          new Date(
+            delivery
+              .acceptedAt
+              .getTime()
+          ),
+      },
+    },
+  };
 }
 
 /**
@@ -45,7 +144,7 @@ export interface SignupRegistrationService {
  *
  * A delivery failure is propagated to the caller. The account
  * remains pending verification and the persisted token remains
- * available for the future resend workflow.
+ * available for the resend workflow.
  */
 export function createSignupRegistrationService(
   options:
@@ -55,95 +154,37 @@ export function createSignupRegistrationService(
     options.registerAuthenticationAccount ??
     registerAuthenticationAccount;
 
-  const createVerificationMessage =
-    options.createSignupVerificationEmailMessage ??
-    createSignupVerificationEmailMessage;
+  const resendVerification =
+    options.resendSignupEmail ??
+    resendSignupEmail;
 
   return {
     async register(
       input
     ) {
-      /*
-       * This call owns the authoritative atomic PostgreSQL
-       * registration transaction.
-       */
       const registration =
         await registerAccount(
           input
         );
 
-      /*
-       * External provider delivery begins only after the
-       * registration transaction has committed.
-       */
-      const message =
-        createVerificationMessage({
-          recipientEmail:
-            registration.account.email,
+      return await deliverSignupVerification(
+        registration,
+        options
+      );
+    },
 
-          recipientName:
-            registration.account.fullName,
+    async resend(
+      input
+    ) {
+      const resend =
+        await resendVerification(
+          input
+        );
 
-          verificationCode:
-            registration
-              .emailVerification
-              .code,
-
-          expiresAt:
-            registration
-              .emailVerification
-              .expiresAt,
-
-          idempotencyKey:
-            registration
-              .emailVerification
-              .tokenId,
-        });
-
-      const delivery =
-        await options
-          .emailDeliveryProvider
-          .sendEmail(
-            message
-          );
-
-      /*
-       * Return only safe account, expiry, and provider receipt
-       * data. The raw code must not escape this orchestration
-       * boundary.
-       */
-      return {
-        account:
-          registration.account,
-
-        emailVerification: {
-          purpose:
-            "signup",
-
-          expiresAt:
-            new Date(
-              registration
-                .emailVerification
-                .expiresAt
-                .getTime()
-            ),
-
-          delivery: {
-            provider:
-              delivery.provider,
-
-            messageId:
-              delivery.messageId,
-
-            acceptedAt:
-              new Date(
-                delivery
-                  .acceptedAt
-                  .getTime()
-              ),
-          },
-        },
-      };
+      return await deliverSignupVerification(
+        resend,
+        options
+      );
     },
   };
 }

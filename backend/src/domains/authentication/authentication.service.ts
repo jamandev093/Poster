@@ -41,6 +41,8 @@ import type {
   AuthenticationAccountSummary,
   RegisterAuthenticationAccountInput,
   RegisterAuthenticationAccountResult,
+  ResendSignupEmailInput,
+  ResendSignupEmailResult,
   VerifySignupEmailInput,
   VerifySignupEmailResult,
 } from "./authentication.service.types.js";
@@ -106,6 +108,13 @@ export interface AuthenticationService {
       RegisterAuthenticationAccountResult
     >;
 
+  resendSignupEmail:
+    (
+      input:
+        ResendSignupEmailInput
+    ) => Promise<
+      ResendSignupEmailResult
+    >;
   verifySignupEmail:
     (
       input:
@@ -260,6 +269,21 @@ function isPostgreSqlUniqueViolation(
     "23505";
 }
 
+/**
+ * Issues a new signup email-verification challenge for one
+ * still-pending account.
+ */
+export async function resendSignupEmail(
+  input:
+    ResendSignupEmailInput
+): Promise<
+  ResendSignupEmailResult
+> {
+  return await defaultAuthenticationService
+    .resendSignupEmail(
+      input
+    );
+}
 /**
  * Creates an authentication service with replaceable
  * dependencies.
@@ -447,6 +471,109 @@ export function createAuthenticationService(
       }
     },
 
+    async resendSignupEmail(
+      input
+    ) {
+      const email =
+        normalizeRegistrationEmail(
+          input.email
+        );
+
+      const verificationCodePair =
+        dependencies
+          .createNumericVerificationCodePair();
+
+      const requestedAt =
+        dependencies.now();
+
+      assertValidServiceDate(
+        requestedAt
+      );
+
+      const expiresAt =
+        new Date(
+          requestedAt.getTime() +
+            AUTHENTICATION_SERVICE_POLICY
+              .signupVerificationLifetimeMilliseconds
+        );
+
+      const resend =
+        await dependencies
+          .runDatabaseTransaction(
+            async (
+              executor
+            ) => {
+              const user =
+                await dependencies
+                  .findUserByEmail(
+                    email,
+                    executor
+                  );
+
+              if (
+                !user ||
+                user.status !==
+                  "pending_verification" ||
+                user.emailVerifiedAt !==
+                  null
+              ) {
+                throw new AuthenticationTokenInvalidError();
+              }
+
+              const verificationToken =
+                await dependencies
+                  .createEmailVerificationToken(
+                    {
+                      userId:
+                        user.id,
+
+                      tokenDigest:
+                        verificationCodePair.digest,
+
+                      purpose:
+                        "signup",
+
+                      createdAt:
+                        requestedAt,
+
+                      expiresAt,
+                    },
+                    executor
+                  );
+
+              return {
+                user,
+
+                verificationToken,
+              };
+            }
+          );
+
+      return {
+        account:
+          mapAuthenticationAccountSummary(
+            resend.user
+          ),
+
+        emailVerification: {
+          purpose:
+            "signup",
+
+          tokenId:
+            resend
+              .verificationToken
+              .id,
+
+          code:
+            verificationCodePair.code,
+
+          expiresAt:
+            resend
+              .verificationToken
+              .expiresAt,
+        },
+      };
+    },
     async verifySignupEmail(
       input
     ) {

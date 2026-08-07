@@ -1,31 +1,36 @@
 import type {
   AuthenticationAccountSummary,
   RegisterAuthenticationAccountInput,
+  ResendSignupEmailInput,
 } from "../../domains/authentication/authentication.service.types.js";
-
-import type {
-  EmailDeliveryReceipt,
-} from "../../services/email/email-delivery.types.js";
 
 export type SignupRegistrationInput =
   RegisterAuthenticationAccountInput;
 
-/**
- * Safe signup result returned after the verification email has
- * been accepted by the configured delivery provider.
- *
- * The raw verification code is intentionally excluded.
- */
+export type SignupVerificationResendInput =
+  ResendSignupEmailInput;
+
+export interface SignupVerificationDeliveryResult {
+  purpose: "signup";
+
+  expiresAt: Date;
+
+  delivery: {
+    provider: string;
+
+    messageId: string;
+
+    acceptedAt: Date;
+  };
+}
+
 export interface SignupRegistrationResult {
   account:
     AuthenticationAccountSummary;
 
-  emailVerification: {
-    purpose: "signup";
-
-    expiresAt: Date;
-
-    delivery:
-      EmailDeliveryReceipt;
-  };
+  emailVerification:
+    SignupVerificationDeliveryResult;
 }
+
+export type SignupVerificationResendResult =
+  SignupRegistrationResult;

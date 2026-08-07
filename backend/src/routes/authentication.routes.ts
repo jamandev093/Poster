@@ -175,6 +175,26 @@ const VerifySignupEmailRequestSchema =
     })
     .strict();
 
+const ResendSignupVerificationRequestSchema =
+  z
+    .object({
+      email:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Email is required."
+          )
+          .max(
+            EMAIL_MAXIMUM_LENGTH,
+            "Email is too long."
+          )
+          .email(
+            "Email must be valid."
+          ),
+    })
+    .strict();
 const PasswordResetRequestSchema =
   z
     .object({
@@ -850,6 +870,84 @@ export const authenticationRoutes:
             mapVerificationResult(
               result
             )
+          );
+      }
+    );
+    app.post(
+      "/signup/resend",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            ResendSignupVerificationRequestSchema,
+            request.body
+          );
+
+        if (
+          !options
+            .signupRegistrationService
+            .resend
+        ) {
+          throw new Error(
+            "Signup verification resend service is unavailable."
+          );
+        }
+
+        const result =
+          await options
+            .signupRegistrationService
+            .resend(
+              input
+            );
+
+        const response:
+          SignupHttpResponse = {
+            account:
+              mapAuthenticationAccount(
+                result.account
+              ),
+
+            emailVerification: {
+              purpose:
+                "signup",
+
+              expiresAt:
+                result
+                  .emailVerification
+                  .expiresAt
+                  .toISOString(),
+
+              delivery: {
+                provider:
+                  result
+                    .emailVerification
+                    .delivery
+                    .provider,
+
+                messageId:
+                  result
+                    .emailVerification
+                    .delivery
+                    .messageId,
+
+                acceptedAt:
+                  result
+                    .emailVerification
+                    .delivery
+                    .acceptedAt
+                    .toISOString(),
+              },
+            },
+          };
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
           );
       }
     );
