@@ -24,9 +24,6 @@ import InterestManager from "../../components/profile/InterestManager";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import ProfileSettingsSection from "../../components/profile/ProfileSettingsSection";
 
-import {
-  profile as mockProfile,
-} from "../../data/mockProfile";
 
 import {
   RootStackParamList,
@@ -55,8 +52,14 @@ type ConfirmationType =
   | null;
 
 const DEFAULT_PROFILE: UserProfile = {
-  name: mockProfile.name,
-  email: mockProfile.email,
+  name: "Poster User",
+  email: "user@example.com",
+  interests: [],
+  preferences: {
+    darkMode: false,
+    notifications: true,
+    personalizedAds: true,
+  },
 };
 
 function normalizeInterestValue(
@@ -210,30 +213,42 @@ export default function ProfileScreen() {
       }
 
       try {
-        const [
-          savedProfile,
-          savedImage,
-          savedInterests,
-        ] = await Promise.all([
-          ProfileService.getProfile(),
-          ProfileService.getProfileImage(),
-          PreferenceService.getInterests(),
-        ]);
+        const savedProfile =
+          await ProfileService.getProfile();
 
-        const hasSavedProfile =
-          savedProfile.name !==
-            "Poster User" ||
-          savedProfile.email !==
-            "user@example.com" ||
-          Boolean(
-            savedProfile.username
-              ?.trim()
+        const savedImage =
+          await ProfileService.getProfileImage();
+
+        const profileInterests =
+          savedProfile.interests ?? [];
+
+        const legacyInterests =
+          profileInterests.length > 0
+            ? profileInterests
+            : await PreferenceService.getInterests();
+
+        const resolvedInterests =
+          await resolveLivingInterestNames(
+            legacyInterests
           );
 
-        const resolvedProfile =
-          hasSavedProfile
-            ? savedProfile
-            : DEFAULT_PROFILE;
+        const resolvedProfile:
+          UserProfile = {
+          ...savedProfile,
+
+          interests:
+            resolvedInterests,
+
+          preferences:
+            savedProfile.preferences ??
+            DEFAULT_PROFILE.preferences,
+        };
+
+        const resolvedDarkMode =
+          resolvedProfile
+            .preferences
+            ?.darkMode ??
+          dark;
 
         setProfile(
           resolvedProfile
@@ -245,13 +260,18 @@ export default function ProfileScreen() {
             null
         );
 
-        const resolvedInterests =
-          await resolveLivingInterestNames(
-            savedInterests
-          );
-
         setInterests(
           resolvedInterests
+        );
+
+        setDarkModeEnabled(
+          resolvedDarkMode
+        );
+
+        ThemeManager.setTheme(
+          resolvedDarkMode
+            ? "dark"
+            : "light"
         );
       } catch {
         Alert.alert(
@@ -274,26 +294,24 @@ export default function ProfileScreen() {
             );
 
           if (remainingTime > 0) {
-            await new Promise(
-              (resolve) =>
-                setTimeout(
-                  resolve,
-                  remainingTime
-                )
-            );
+            await new Promise(resolve => {
+              setTimeout(
+                resolve,
+                remainingTime
+              );
+            });
           }
-
-          hasLoadedOnceRef.current =
-            true;
 
           setLoading(false);
         }
 
+        hasLoadedOnceRef.current =
+          true;
+
         loadingRequestRef.current =
           false;
       }
-    }, []);
-
+    }, [dark]);
   useFocusEffect(
     useCallback(() => {
       void loadProfileData();
@@ -492,8 +510,37 @@ export default function ProfileScreen() {
         const previousEnabled =
           darkModeEnabled;
 
+        const previousProfile =
+          profile;
+
+        const updatedProfile:
+          UserProfile = {
+          ...profile,
+
+          preferences: {
+            darkMode:
+              enabled,
+
+            notifications:
+              profile
+                .preferences
+                ?.notifications ??
+              true,
+
+            personalizedAds:
+              profile
+                .preferences
+                ?.personalizedAds ??
+              true,
+          },
+        };
+
         setDarkModeEnabled(
           enabled
+        );
+
+        setProfile(
+          updatedProfile
         );
 
         ThemeManager.setTheme(
@@ -502,11 +549,21 @@ export default function ProfileScreen() {
             : "light"
         );
 
-        void PreferenceService.setDarkMode(
-          enabled
-        ).catch(() => {
+        void Promise.all([
+          PreferenceService.setDarkMode(
+            enabled
+          ),
+
+          ProfileService.saveProfile(
+            updatedProfile
+          ),
+        ]).catch(() => {
           setDarkModeEnabled(
             previousEnabled
+          );
+
+          setProfile(
+            previousProfile
           );
 
           ThemeManager.setTheme(
@@ -521,9 +578,11 @@ export default function ProfileScreen() {
           );
         });
       },
-      [darkModeEnabled]
+      [
+        darkModeEnabled,
+        profile,
+      ]
     );
-
   const saveInterests =
     useCallback(
       async (
@@ -532,17 +591,42 @@ export default function ProfileScreen() {
         const previousInterests =
           interests;
 
+        const previousProfile =
+          profile;
+
+        const updatedProfile:
+          UserProfile = {
+          ...profile,
+
+          interests:
+            nextInterests,
+        };
+
         setInterests(
           nextInterests
         );
 
+        setProfile(
+          updatedProfile
+        );
+
         try {
-          await PreferenceService.saveInterests(
-            nextInterests
-          );
+          await Promise.all([
+            PreferenceService.saveInterests(
+              nextInterests
+            ),
+
+            ProfileService.saveProfile(
+              updatedProfile
+            ),
+          ]);
         } catch {
           setInterests(
             previousInterests
+          );
+
+          setProfile(
+            previousProfile
           );
 
           Alert.alert(
@@ -551,9 +635,11 @@ export default function ProfileScreen() {
           );
         }
       },
-      [interests]
+      [
+        interests,
+        profile,
+      ]
     );
-
   const handleAddInterest =
     useCallback(
       (interest: string) => {
