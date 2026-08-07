@@ -157,6 +157,11 @@ import {
 } from "./application/mobile-discovery/index.js";
 
 import {
+  createProductionMobileUserActionsService,
+  type MobileUserActionsService,
+} from "./application/mobile-actions/index.js";
+
+import {
   createSessionLifecycleService,
   type SessionLifecycleService,
 } from "./application/authentication/session-lifecycle.service.js";
@@ -203,6 +208,7 @@ import {
   clientCommercialRequestRoutes,
   healthRoutes,
   mobileDiscoveryRoutes,
+  mobileUserActionsRoutes,
   type AuthenticationRoutesOptions,
 } from "./routes/index.js";
 
@@ -349,6 +355,9 @@ export interface BuildAppOptions {
 
   mobileDiscoveryService?:
     MobileDiscoveryService;
+
+  mobileUserActionsService?:
+    MobileUserActionsService;
 }
 
 const CLIENT_WALLET_ORGANIZATION_ROLES =
@@ -755,6 +764,11 @@ await app.register(
       .mobileDiscoveryService ??
     createMobileDiscoveryService();
 
+  const mobileUserActionsService =
+    options
+      .mobileUserActionsService ??
+    createProductionMobileUserActionsService();
+
   await app.register(
     authenticationRoutes,
     {
@@ -799,6 +813,17 @@ await app.register(
 
       service:
         mobileDiscoveryService,
+    }
+  );
+
+  await app.register(
+    mobileUserActionsRoutes,
+    {
+      prefix:
+        "/api/v1/mobile",
+
+      service:
+        mobileUserActionsService,
     }
   );
 
