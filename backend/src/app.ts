@@ -152,6 +152,11 @@ import {
 } from "./application/authentication/account-profile.service.js";
 
 import {
+  createMobileDiscoveryService,
+  type MobileDiscoveryService,
+} from "./application/mobile-discovery/index.js";
+
+import {
   createSessionLifecycleService,
   type SessionLifecycleService,
 } from "./application/authentication/session-lifecycle.service.js";
@@ -197,6 +202,7 @@ import {
   authenticationRoutes,
   clientCommercialRequestRoutes,
   healthRoutes,
+  mobileDiscoveryRoutes,
   type AuthenticationRoutesOptions,
 } from "./routes/index.js";
 
@@ -340,6 +346,9 @@ export interface BuildAppOptions {
 
   accountProfileService?:
     AccountProfileService;
+
+  mobileDiscoveryService?:
+    MobileDiscoveryService;
 }
 
 const CLIENT_WALLET_ORGANIZATION_ROLES =
@@ -741,6 +750,11 @@ await app.register(
       .accountProfileService ??
     createAccountProfileService();
 
+  const mobileDiscoveryService =
+    options
+      .mobileDiscoveryService ??
+    createMobileDiscoveryService();
+
   await app.register(
     authenticationRoutes,
     {
@@ -774,6 +788,17 @@ await app.register(
       isProduction:
         environment.NODE_ENV ===
         "production",
+    }
+  );
+
+  await app.register(
+    mobileDiscoveryRoutes,
+    {
+      prefix:
+        "/api/v1/mobile",
+
+      service:
+        mobileDiscoveryService,
     }
   );
 

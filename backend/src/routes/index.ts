@@ -27,3 +27,4 @@ export * from "./admin-campaign.routes.js";
 export * from "./admin-analytics.routes.js";
 export * from "./admin-wallet-operations.routes.js";
 export * from "./public-copyright.routes.js";
+export * from "./mobile-discovery.routes.js";
