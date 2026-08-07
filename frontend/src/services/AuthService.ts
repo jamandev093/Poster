@@ -136,6 +136,26 @@ export interface SignupVerificationResponse {
   };
 }
 
+export interface RequestPasswordResetInput {
+  email: string;
+}
+
+export interface RequestPasswordResetResponse {
+  status: "accepted";
+}
+
+export interface ConfirmPasswordResetInput {
+  email: string;
+
+  code: string;
+
+  password: string;
+}
+
+export interface ConfirmPasswordResetResponse {
+  status: "password_updated";
+}
+
 export class AuthenticationApiError extends Error {
   readonly statusCode:
     number;
@@ -488,6 +508,42 @@ class AuthService {
       );
 
     return operation;
+  }
+
+  async requestPasswordReset(
+    input: RequestPasswordResetInput
+  ): Promise<RequestPasswordResetResponse> {
+    return postAuthenticationJson<RequestPasswordResetResponse>(
+      "/password-reset/request",
+      {
+        email:
+          normalizeEmail(
+            input.email
+          ),
+      }
+    );
+  }
+
+  async confirmPasswordReset(
+    input: ConfirmPasswordResetInput
+  ): Promise<ConfirmPasswordResetResponse> {
+    return postAuthenticationJson<ConfirmPasswordResetResponse>(
+      "/password-reset/confirm",
+      {
+        email:
+          normalizeEmail(
+            input.email
+          ),
+
+        code:
+          normalizeRequiredText(
+            input.code
+          ),
+
+        password:
+          input.password,
+      }
+    );
   }
 
   async login(
