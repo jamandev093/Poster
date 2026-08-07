@@ -23,6 +23,8 @@ import {
 import PrimaryButton from "../../components/buttons/PrimaryButton";
 import SocialButton from "../../components/buttons/SocialButton";
 import Card from "../../components/cards/Card";
+
+import AuthService from "../../services/AuthService";
 import Divider from "../../components/common/Divider";
 import Logo from "../../components/common/Logo";
 import Input from "../../components/forms/Input";
@@ -169,7 +171,9 @@ export default function LoginScreen({
         return;
       }
 
-      if (!validate()) {
+      if (
+        !validate()
+      ) {
         return;
       }
 
@@ -180,23 +184,22 @@ export default function LoginScreen({
       setErrors({});
 
       try {
-        // TODO:
-        // Connect to AuthService when
-        // backend authentication exists.
-        //
-        // await AuthService.login({
-        //   email: normalizedEmail,
-        //   password,
-        //   rememberAccount,
-        // });
+        await AuthService.login({
+          email:
+            normalizedEmail,
+
+          password,
+        });
 
         navigation.replace(
           "Main"
         );
-      } catch {
+      } catch (error) {
         setErrors({
           form:
-            "We couldn't sign you in. Check your details and try again.",
+            error instanceof Error
+              ? error.message
+              : "We couldn't sign you in. Please try again.",
         });
       } finally {
         authRequestRef.current =
@@ -208,7 +211,6 @@ export default function LoginScreen({
       navigation,
       normalizedEmail,
       password,
-      rememberAccount,
       validate,
     ]);
 
