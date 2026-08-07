@@ -109,6 +109,9 @@ describe(
             accountDeletionService:
               createUnusedService() as never,
 
+            accountProfileService:
+              createUnusedService() as never,
+
             isProduction:
               false,
           }
@@ -238,6 +241,9 @@ describe(
               createUnusedService() as never,
 
             accountDeletionService:
+              createUnusedService() as never,
+
+            accountProfileService:
               createUnusedService() as never,
 
             isProduction:

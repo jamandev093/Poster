@@ -19,6 +19,11 @@ import type {
   AccountDeletionService,
 } from "../application/authentication/account-deletion.service.js";
 
+
+import type {
+  AccountProfileService,
+} from "../application/authentication/account-profile.service.js";
+
 import type {
   AuthenticationSessionSummary,
 } from "../application/authentication/login-session.types.js";
@@ -333,6 +338,24 @@ interface VerifySignupEmailHttpResponse {
   verifiedAt: string;
 }
 
+const AccountProfileUpdateRequestSchema =
+  z
+    .object({
+      fullName:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Full name is required."
+          )
+          .max(
+            FULL_NAME_MAXIMUM_LENGTH,
+            "Full name must be 200 characters or fewer."
+          ),
+    })
+    .strict();
+
 export type VerifySignupEmailOperation =
   (
     input:
@@ -362,6 +385,10 @@ export interface AuthenticationRoutesOptions {
 
   accountDeletionService:
     AccountDeletionService;
+
+
+  accountProfileService:
+    AccountProfileService;
 
   isProduction: boolean;
 }
@@ -706,6 +733,73 @@ export const authenticationRoutes:
       }
     );
 
+
+    app.get(
+      "/account/profile",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requireAuthenticatedRequest(
+            request
+          );
+
+        const response =
+          await options
+            .accountProfileService
+            .getProfile({
+              userId:
+                authorization.userId,
+            });
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
+
+    app.patch(
+      "/account/profile",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requireAuthenticatedRequest(
+            request
+          );
+
+        const input =
+          parseHttpRequestBody(
+            AccountProfileUpdateRequestSchema,
+            request.body
+          );
+
+        const response =
+          await options
+            .accountProfileService
+            .updateProfile({
+              userId:
+                authorization.userId,
+
+              fullName:
+                input.fullName,
+            });
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
 
     app.delete(
       "/account",
