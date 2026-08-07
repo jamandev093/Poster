@@ -4,7 +4,7 @@ export const metadata = {
   title: "Privacy Policy",
 
   description:
-    "Read Poster’s privacy information covering data collection, usage, service providers, retention, security, and privacy rights.",
+    "Read Poster's privacy information covering data collection, cookies, analytics, service providers, retention, security, and privacy rights.",
 
   alternates: {
     canonical: "/privacy",
@@ -14,7 +14,7 @@ export const metadata = {
     title: "Privacy Policy",
 
     description:
-      "Read Poster’s public privacy information.",
+      "Read Poster's public privacy information, including current website analytics and cookie status.",
 
     url: "/privacy",
   },
@@ -62,6 +62,25 @@ export default function PrivacyPage() {
         </section>
 
         <section>
+          <h2>Website analytics and cookies</h2>
+
+          <p>
+            The public Poster website does not currently
+            load a third-party analytics provider, tracking
+            pixel, advertising tag, or non-essential cookie
+            banner.
+          </p>
+
+          <p>
+            If Poster later enables optional analytics or
+            non-essential tracking on the public website,
+            Poster will update this policy and add an
+            appropriate consent or preference control before
+            those optional tools are used.
+          </p>
+        </section>
+
+        <section>
           <h2>How information may be used</h2>
 
           <p>
@@ -78,7 +97,8 @@ export default function PrivacyPage() {
           <p>
             Poster may use trusted third-party providers for
             infrastructure, authentication, communications,
-            analytics, payments, and other operational needs.
+            analytics where enabled, payments, and other
+            operational needs.
           </p>
         </section>
 
@@ -106,8 +126,8 @@ export default function PrivacyPage() {
           <h2>Contact</h2>
 
           <p>
-            Privacy-related enquiries may be sent to
-            privacy@getpostar.com.
+            Privacy-related enquiries may be submitted through
+            Poster&apos;s public contact page.
           </p>
         </section>
       </div>
