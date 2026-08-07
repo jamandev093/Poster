@@ -1246,7 +1246,13 @@ export default function TrendingScreen() {
         try {
           await ShareService.article(
             article.title,
-            article.originalUrl
+            article.originalUrl,
+            {
+              article,
+
+              surface:
+                "trending",
+            }
           );
         } catch {
           showError(

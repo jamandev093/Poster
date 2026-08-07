@@ -487,7 +487,13 @@ export default function BookmarksScreen() {
         try {
           await ShareService.article(
             article.title,
-            article.originalUrl
+            article.originalUrl,
+            {
+              article,
+
+              surface:
+                "bookmarks",
+            }
           );
         } catch {
           showError(

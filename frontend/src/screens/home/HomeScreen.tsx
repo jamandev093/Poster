@@ -804,7 +804,13 @@ export default function HomeScreen() {
         try {
           await ShareService.article(
             article.title,
-            article.originalUrl
+            article.originalUrl,
+            {
+              article,
+
+              surface:
+                "home",
+            }
           );
         } catch {
           showError(

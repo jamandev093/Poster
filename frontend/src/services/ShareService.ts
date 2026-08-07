@@ -1,18 +1,49 @@
 import {
   Share,
-  ShareAction,
 } from "react-native";
 
+import type {
+  Article,
+} from "../types/article";
+
+import MobileActionsApiService from "./MobileActionsApiService";
+
+import type {
+  MobileActionEngagementMetadata,
+} from "./MobileActionsApiService";
+
 export interface ArticleShareResult {
-  shared: boolean;
+  shared:
+    boolean;
 
-  dismissed: boolean;
+  dismissed:
+    boolean;
 
-  activityType?: string;
+  activityType?:
+    string;
+
+  backendEventRecorded?:
+    boolean;
+}
+
+export interface ArticleShareOptions {
+  article?:
+    Article;
+
+  surface?:
+    string;
+
+  shareTarget?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata;
 }
 
 function normalizeTitle(
-  value: string
+  value:
+    string
 ): string {
   return value
     .trim()
@@ -20,17 +51,21 @@ function normalizeTitle(
 }
 
 function normalizeUrl(
-  value: string
+  value:
+    string
 ): string {
   return value.trim();
 }
 
 function isSupportedWebUrl(
-  value: string
+  value:
+    string
 ): boolean {
   try {
     const parsedUrl =
-      new URL(value);
+      new URL(
+        value
+      );
 
     return (
       parsedUrl.protocol ===
@@ -43,16 +78,43 @@ function isSupportedWebUrl(
   }
 }
 
+function buildShareMetadata(
+  options:
+    ArticleShareOptions
+): MobileActionEngagementMetadata {
+  return {
+    ...(options.metadata ?? {}),
+
+    surface:
+      options.surface ??
+      options.metadata?.surface ??
+      "unknown",
+  };
+}
+
 export default class ShareService {
+  /**
+   * Opens the native device share sheet first. Backend
+   * recording is best-effort and never blocks sharing.
+   */
   static async article(
-    title: string,
-    url: string
+    title:
+      string,
+    url:
+      string,
+    options:
+      ArticleShareOptions =
+      {}
   ): Promise<ArticleShareResult> {
     const normalizedTitle =
-      normalizeTitle(title);
+      normalizeTitle(
+        title
+      );
 
     const normalizedUrl =
-      normalizeUrl(url);
+      normalizeUrl(
+        url
+      );
 
     if (!normalizedTitle) {
       throw new Error(
@@ -87,22 +149,68 @@ export default class ShareService {
       Share.dismissedAction
     ) {
       return {
-        shared: false,
+        shared:
+          false,
 
-        dismissed: true,
+        dismissed:
+          true,
       };
     }
 
-    return {
-      shared:
-        result.action ===
-        Share.sharedAction,
+    const shared =
+      result.action ===
+      Share.sharedAction;
 
-      dismissed: false,
+    let backendEventRecorded =
+      false;
+
+    if (
+      shared &&
+      options.article
+    ) {
+      try {
+        await MobileActionsApiService
+          .recordArticleShare(
+            options.article,
+            {
+              shareTarget:
+                options.shareTarget ??
+                "system_share_sheet",
+
+              activityType:
+                result.activityType ??
+                null,
+
+              metadata:
+                buildShareMetadata(
+                  options
+                ),
+            }
+          );
+
+        backendEventRecorded =
+          true;
+      } catch {
+        /*
+         * Native sharing already succeeded. Backend
+         * event recording is best-effort so users are
+         * never shown a share failure because analytics
+         * persistence is unavailable.
+         */
+      }
+    }
+
+    return {
+      shared,
+
+      dismissed:
+        false,
 
       activityType:
         result.activityType ??
         undefined,
+
+      backendEventRecorded,
     };
   }
 }

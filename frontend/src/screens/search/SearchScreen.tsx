@@ -2014,7 +2014,13 @@ export default function SearchScreen() {
         try {
           await ShareService.article(
             article.title,
-            article.originalUrl
+            article.originalUrl,
+            {
+              article,
+
+              surface:
+                "search",
+            }
           );
         } catch {
           showError(
