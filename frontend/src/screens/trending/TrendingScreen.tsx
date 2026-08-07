@@ -40,7 +40,6 @@ import {
   getFeaturedInterestCategories,
   getSearchableInterestTopics,
 } from "../../data/interests";
-import { mockFeed } from "../../data/mockFeed";
 
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
@@ -48,6 +47,10 @@ import InteractionService from "../../services/InteractionService";
 import InterestCatalogService, {
   InterestCatalogTopic,
 } from "../../services/InterestCatalogService";
+import MobileDiscoveryService, {
+  MobileDiscoveryFeedResponse,
+  MobileDiscoveryRefreshMode,
+} from "../../services/MobileDiscoveryService";
 import ScreenRefreshService from "../../services/ScreenRefreshService";
 import ShareService from "../../services/ShareService";
 
@@ -76,8 +79,48 @@ interface TrendingTopicOption {
   matchingTerms: readonly string[];
 }
 
+interface ArticleInteractionState {
+  bookmarkedIds:
+    readonly string[];
+
+  recommendedIds:
+    readonly string[];
+
+  helpfulIds:
+    readonly string[];
+}
+
+interface TrendingFeedLoadInput {
+  refreshMode:
+    MobileDiscoveryRefreshMode;
+
+  cursor?:
+    | string
+    | null;
+
+  category?:
+    | string
+    | null;
+}
+
+interface RefreshOptions {
+  silent?: boolean;
+}
+
 const EVOLVING_TRENDING_TOPIC_LIMIT =
   6;
+
+const TRENDING_FEED_PAGE_SIZE =
+  20;
+
+const MINIMUM_INITIAL_LOADING_DURATION_MS =
+  1000;
+
+const MINIMUM_LOAD_MORE_DURATION_MS =
+  1000;
+
+const MINIMUM_REFRESH_AFTER_SECONDS =
+  30;
 
 function normalizeText(
   value: string
@@ -164,6 +207,69 @@ function matchesTopic(
   );
 }
 
+function mergeFeedItems(
+  currentItems:
+    readonly FeedItem[],
+  incomingItems:
+    readonly FeedItem[]
+): FeedItem[] {
+  const byId =
+    new Map<
+      string,
+      FeedItem
+    >();
+
+  currentItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  incomingItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  return Array.from(
+    byId.values()
+  );
+}
+
+function normalizeRefreshAfterSeconds(
+  value: number
+): number {
+  if (
+    !Number.isFinite(value) ||
+    value < MINIMUM_REFRESH_AFTER_SECONDS
+  ) {
+    return MINIMUM_REFRESH_AFTER_SECONDS;
+  }
+
+  return Math.trunc(
+    value
+  );
+}
+
+function delay(
+  milliseconds: number
+): Promise<void> {
+  return new Promise(
+    (resolve) => {
+      setTimeout(
+        resolve,
+        milliseconds
+      );
+    }
+  );
+}
+
 export default function TrendingScreen() {
   const { colors } = useTheme();
 
@@ -185,10 +291,33 @@ export default function TrendingScreen() {
   const completedInitialFocusRef =
     useRef(false);
 
+  const nextCursorRef =
+    useRef<string | null>(
+      null
+    );
+
+  const refreshAfterSecondsRef =
+    useRef(
+      60
+    );
+
+  const hasMoreRef =
+    useRef(
+      false
+    );
+
+  const initialLoadingRef =
+    useRef(
+      true
+    );
+
+  const articlesRef =
+    useRef<FeedItem[]>([]);
+
   useScrollToTop(listRef);
 
   const [articles, setArticles] =
-    useState<FeedItem[]>(mockFeed);
+    useState<FeedItem[]>([]);
 
   const [
     evolvingTopics,
@@ -206,6 +335,9 @@ export default function TrendingScreen() {
     useState(false);
 
   const [loadingMore, setLoadingMore] =
+    useState(false);
+
+  const [hasMore, setHasMore] =
     useState(false);
 
   const [
@@ -442,6 +574,16 @@ export default function TrendingScreen() {
     ]);
 
   useEffect(() => {
+    articlesRef.current =
+      articles;
+  }, [articles]);
+
+  useEffect(() => {
+    initialLoadingRef.current =
+      initialLoading;
+  }, [initialLoading]);
+
+  useEffect(() => {
     const selectedStillExists =
       topicOptions.some(
         (topic) =>
@@ -490,6 +632,17 @@ export default function TrendingScreen() {
       return selectedTopic.label;
     }, [selectedTopic]);
 
+  const getSelectedCategory =
+    useCallback(() => {
+      if (
+        !selectedTopic ||
+        selectedTopic.id === "all"
+      ) {
+        return null;
+      }
+
+      return selectedTopic.label;
+    }, [selectedTopic]);
 
   const synchronizeTrendingTaxonomy =
     useCallback(async () => {
@@ -514,7 +667,7 @@ export default function TrendingScreen() {
     }, []);
 
   const getInteractionState =
-    useCallback(async () => {
+    useCallback(async (): Promise<ArticleInteractionState> => {
       const [
         bookmarkedIds,
         interactionState,
@@ -533,6 +686,100 @@ export default function TrendingScreen() {
           interactionState.helpfulIds,
       };
     }, []);
+
+  const applyDiscoveryResponse =
+    useCallback(
+      async (
+        response:
+          MobileDiscoveryFeedResponse,
+        refreshMode:
+          MobileDiscoveryRefreshMode
+      ) => {
+        const interactionState =
+          await getInteractionState();
+
+        const discoveryArticles =
+          MobileDiscoveryService
+            .mapToArticles(
+              response,
+              interactionState
+            );
+
+        const nextSourceArticles =
+          refreshMode === "older"
+            ? mergeFeedItems(
+                articlesRef.current,
+                discoveryArticles
+              )
+            : discoveryArticles;
+
+        const synchronizedArticles =
+          applyArticleInteractionState(
+            nextSourceArticles,
+            interactionState
+          );
+
+        setArticles(
+          synchronizedArticles
+        );
+
+        nextCursorRef.current =
+          response.pagination.nextCursor;
+
+        hasMoreRef.current =
+          response.pagination.hasMore;
+
+        setHasMore(
+          response.pagination.hasMore
+        );
+
+        refreshAfterSecondsRef.current =
+          normalizeRefreshAfterSeconds(
+            response.pagination.refreshAfterSeconds
+          );
+
+        ScreenRefreshService.markRefreshed(
+          "trending"
+        );
+      },
+      [
+        getInteractionState,
+      ]
+    );
+
+  const loadTrendingFeed =
+    useCallback(
+      async (
+        input:
+          TrendingFeedLoadInput
+      ) => {
+        const response =
+          await MobileDiscoveryService
+            .getTrendingFeed({
+              limit:
+                TRENDING_FEED_PAGE_SIZE,
+
+              cursor:
+                input.cursor ??
+                null,
+
+              refreshMode:
+                input.refreshMode,
+
+              category:
+                input.category ??
+                null,
+            });
+
+        await applyDiscoveryResponse(
+          response,
+          input.refreshMode
+        );
+      },
+      [
+        applyDiscoveryResponse,
+      ]
+    );
 
   const synchronizeInteractionState =
     useCallback(async () => {
@@ -558,40 +805,28 @@ export default function TrendingScreen() {
     }, [
       getInteractionState,
       showError,
+      synchronizeTrendingTaxonomy,
     ]);
+
   const loadInitial =
     useCallback(async () => {
       const loadingStartedAt =
         Date.now();
 
-      const minimumLoadingDuration =
-        1000;
-
       setInitialLoading(true);
+      initialLoadingRef.current =
+        true;
 
       try {
-        // TODO:
-        // GET /trending
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 500)
-        );
-
-        const interactionState =
-          await getInteractionState();
-
         await synchronizeTrendingTaxonomy();
 
-        setArticles(
-          applyArticleInteractionState(
-            mockFeed,
-            interactionState
-          )
-        );
+        await loadTrendingFeed({
+          refreshMode:
+            "initial",
 
-        ScreenRefreshService.markRefreshed(
-          "trending"
-        );
+          category:
+            getSelectedCategory(),
+        });
       } catch {
         showError(
           "Trending unavailable",
@@ -612,95 +847,156 @@ export default function TrendingScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_INITIAL_LOADING_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
+
+        initialLoadingRef.current =
+          false;
 
         setInitialLoading(false);
       }
     }, [
-      getInteractionState,
+      getSelectedCategory,
+      loadTrendingFeed,
       showError,
       synchronizeTrendingTaxonomy,
     ]);
 
   const refreshScreen =
-    useCallback(async () => {
-      if (
-        refreshRequestRef.current
-      ) {
-        return;
-      }
+    useCallback(
+      async (
+        options:
+          RefreshOptions =
+          {}
+      ) => {
+        if (
+          refreshRequestRef.current
+        ) {
+          return;
+        }
 
-      refreshRequestRef.current =
-        true;
-
-      setRefreshing(true);
-
-      try {
-        // TODO:
-        // GET /trending
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 800)
-        );
-
-        const interactionState =
-          await getInteractionState();
-
-        setArticles(
-          applyArticleInteractionState(
-            mockFeed,
-            interactionState
-          )
-        );
-
-        ScreenRefreshService.markRefreshed(
-          "trending"
-        );
-
-        showSuccess(
-          "Trending refreshed",
-          "The latest popular stories are ready."
-        );
-      } catch {
-        showError(
-          "Refresh failed",
-          "Poster could not update Trending.",
-          {
-            label: "Retry",
-
-            onPress: () => {
-              void refreshScreen();
-            },
-          }
-        );
-      } finally {
         refreshRequestRef.current =
-          false;
+          true;
 
-        setRefreshing(false);
-      }
-    }, [
-      getInteractionState,
-      showError,
-      showSuccess,
-      synchronizeTrendingTaxonomy,
-    ]);
+        setRefreshing(true);
+
+        try {
+          await synchronizeTrendingTaxonomy();
+
+          await loadTrendingFeed({
+            refreshMode:
+              "refresh",
+
+            category:
+              getSelectedCategory(),
+          });
+
+          if (!options.silent) {
+            showSuccess(
+              "Trending refreshed",
+              "The latest popular stories are ready."
+            );
+          }
+        } catch {
+          if (!options.silent) {
+            showError(
+              "Refresh failed",
+              "Poster could not update Trending.",
+              {
+                label: "Retry",
+
+                onPress: () => {
+                  void refreshScreen();
+                },
+              }
+            );
+          }
+        } finally {
+          refreshRequestRef.current =
+            false;
+
+          setRefreshing(false);
+        }
+      },
+      [
+        getSelectedCategory,
+        loadTrendingFeed,
+        showError,
+        showSuccess,
+        synchronizeTrendingTaxonomy,
+      ]
+    );
 
   useEffect(() => {
     void loadInitial();
   }, [loadInitial]);
+
+  useEffect(() => {
+    let active =
+      true;
+
+    let timeoutId:
+      | ReturnType<typeof setTimeout>
+      | null =
+      null;
+
+    const scheduleRefresh = () => {
+      const delayMs =
+        refreshAfterSecondsRef.current *
+        1000;
+
+      timeoutId =
+        setTimeout(
+          () => {
+            if (!active) {
+              return;
+            }
+
+            const canRefresh =
+              !initialLoadingRef.current &&
+              !refreshRequestRef.current &&
+              !loadMoreRequestRef.current;
+
+            const refreshOperation =
+              canRefresh
+                ? refreshScreen({
+                    silent:
+                      true,
+                  })
+                : Promise.resolve();
+
+            void refreshOperation.finally(
+              () => {
+                if (active) {
+                  scheduleRefresh();
+                }
+              }
+            );
+          },
+          delayMs
+        );
+    };
+
+    scheduleRefresh();
+
+    return () => {
+      active =
+        false;
+
+      if (timeoutId) {
+        clearTimeout(
+          timeoutId
+        );
+      }
+    };
+  }, [refreshScreen]);
 
   useFocusEffect(
     useCallback(() => {
@@ -725,10 +1021,45 @@ export default function TrendingScreen() {
     ])
   );
 
+  const handleTopicSelect =
+    useCallback(
+      (
+        topic:
+          TrendingTopicOption
+      ) => {
+        setSelectedTopicId(
+          topic.id
+        );
+
+        nextCursorRef.current =
+          null;
+
+        hasMoreRef.current =
+          false;
+
+        setHasMore(false);
+
+        void loadTrendingFeed({
+          refreshMode:
+            "initial",
+
+          category:
+            topic.id === "all"
+              ? null
+              : topic.label,
+        });
+      },
+      [
+        loadTrendingFeed,
+      ]
+    );
+
   const handleLoadMore =
     useCallback(async () => {
       if (
-        loadMoreRequestRef.current
+        loadMoreRequestRef.current ||
+        !hasMoreRef.current ||
+        !nextCursorRef.current
       ) {
         return;
       }
@@ -739,21 +1070,19 @@ export default function TrendingScreen() {
       const loadingStartedAt =
         Date.now();
 
-      const minimumLoadingDuration =
-        1000;
-
       setLoadingMore(true);
 
       try {
-        // TODO:
-        // GET /trending?cursor=...
-        //
-        // Mock data contains one page.
-        // Do not append mockFeed again.
+        await loadTrendingFeed({
+          refreshMode:
+            "older",
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, 400)
-        );
+          cursor:
+            nextCursorRef.current,
+
+          category:
+            getSelectedCategory(),
+        });
       } catch {
         showError(
           "More trends unavailable",
@@ -767,17 +1096,13 @@ export default function TrendingScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_LOAD_MORE_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
 
@@ -786,7 +1111,11 @@ export default function TrendingScreen() {
         loadMoreRequestRef.current =
           false;
       }
-    }, [showError]);
+    }, [
+      getSelectedCategory,
+      loadTrendingFeed,
+      showError,
+    ]);
 
   const handleOpenArticle =
     useCallback(
@@ -929,7 +1258,6 @@ export default function TrendingScreen() {
       [showError]
     );
 
-
   const handleWorthReading =
     useCallback(
       async (article: Article) => {
@@ -984,6 +1312,7 @@ export default function TrendingScreen() {
         showInfo,
       ]
     );
+
   const handleHelpful =
     useCallback(
       async (article: Article) => {
@@ -1038,6 +1367,7 @@ export default function TrendingScreen() {
         showInfo,
       ]
     );
+
   const handleArticleFeedback =
     useCallback(
       async (
@@ -1256,8 +1586,8 @@ export default function TrendingScreen() {
                       },
                     ]}
                     onPress={() => {
-                      setSelectedTopicId(
-                        topic.id
+                      handleTopicSelect(
+                        topic
                       );
                     }}
                   >
@@ -1324,6 +1654,7 @@ export default function TrendingScreen() {
       colors.primary,
       colors.text,
       colors.textSecondary,
+      handleTopicSelect,
       selectedTopic,
       selectedTopicId,
       topicOptions,
@@ -1335,12 +1666,16 @@ export default function TrendingScreen() {
       return (
         <View style={styles.footer}>
           <ActivityIndicator
-            animating={loadingMore}
+            animating={
+              loadingMore &&
+              hasMore
+            }
             size="small"
             color={colors.primary}
             style={{
               opacity:
-                loadingMore
+                loadingMore &&
+                hasMore
                   ? 1
                   : 0,
             }}
@@ -1349,6 +1684,7 @@ export default function TrendingScreen() {
       );
     }, [
       colors.primary,
+      hasMore,
       loadingMore,
     ]);
 
@@ -1359,13 +1695,17 @@ export default function TrendingScreen() {
           variant="trending"
           actionLabel="Show All Trends"
           onAction={() => {
-            setSelectedTopicId(
-              "all"
-            );
+            handleTopicSelect({
+              id: "all",
+
+              label: "All",
+
+              matchingTerms: [],
+            });
           }}
         />
       );
-    }, []);
+    }, [handleTopicSelect]);
 
   if (initialLoading) {
     return (
@@ -1434,9 +1774,9 @@ export default function TrendingScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={
-              refreshScreen
-            }
+            onRefresh={() => {
+              void refreshScreen();
+            }}
             tintColor={
               colors.primary
             }
