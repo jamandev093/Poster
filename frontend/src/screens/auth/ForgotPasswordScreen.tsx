@@ -105,6 +105,14 @@ export default function ForgotPasswordScreen({
         });
 
         setSuccess(true);
+
+        navigation.navigate(
+          "ResetPasswordConfirm",
+          {
+            email:
+              normalizedEmail,
+          }
+        );
       } catch (error) {
         showError(
           "Reset request failed",
@@ -120,6 +128,7 @@ export default function ForgotPasswordScreen({
       }
     }, [
       isValidEmail,
+      navigation,
       normalizedEmail,
       showError,
     ]);
