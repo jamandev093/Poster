@@ -40,6 +40,8 @@ import Card from "../../components/cards/Card";
 import Input from "../../components/forms/Input";
 import PrimaryButton from "../../components/buttons/PrimaryButton";
 
+import AuthService from "../../services/AuthService";
+
 type Props = NativeStackScreenProps<
   RootStackParamList,
   "ForgotPassword"
@@ -97,16 +99,18 @@ export default function ForgotPasswordScreen({
       setSubmitting(true);
 
       try {
-        // TODO:
-        // await AuthService.forgotPassword({
-        //   email: normalizedEmail,
-        // });
+        await AuthService.requestPasswordReset({
+          email:
+            normalizedEmail,
+        });
 
         setSuccess(true);
-      } catch {
+      } catch (error) {
         showError(
           "Reset request failed",
-          "Poster could not send the password reset link. Please try again."
+          error instanceof Error
+            ? error.message
+            : "Poster could not send the password reset email. Please try again."
         );
       } finally {
         submitRequestRef.current =
