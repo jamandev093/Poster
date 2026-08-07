@@ -31,11 +31,13 @@ import MonetizedFeed from "../../components/feed/MonetizedFeed";
 
 import useFeedback from "../../context/FeedbackContext";
 
-import { mockFeed } from "../../data/mockFeed";
-
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
 import InteractionService from "../../services/InteractionService";
+import MobileDiscoveryService, {
+  MobileDiscoveryFeedResponse,
+  MobileDiscoveryRefreshMode,
+} from "../../services/MobileDiscoveryService";
 import RecommendationRankingService from "../../services/RecommendationRankingService";
 import ScreenRefreshService from "../../services/ScreenRefreshService";
 import ShareService from "../../services/ShareService";
@@ -55,6 +57,96 @@ import {
 
 import applyArticleInteractionState from "../../utils/applyArticleInteractionState";
 
+const HOME_FEED_PAGE_SIZE =
+  20;
+
+const MINIMUM_INITIAL_LOADING_DURATION_MS =
+  1000;
+
+const MINIMUM_LOAD_MORE_DURATION_MS =
+  1000;
+
+const MINIMUM_REFRESH_AFTER_SECONDS =
+  30;
+
+interface ArticleInteractionState {
+  bookmarkedIds:
+    readonly string[];
+
+  recommendedIds:
+    readonly string[];
+
+  helpfulIds:
+    readonly string[];
+}
+
+interface RefreshOptions {
+  silent?: boolean;
+}
+
+function mergeFeedItems(
+  currentItems:
+    readonly FeedItem[],
+  incomingItems:
+    readonly FeedItem[]
+): FeedItem[] {
+  const byId =
+    new Map<
+      string,
+      FeedItem
+    >();
+
+  currentItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  incomingItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  return Array.from(
+    byId.values()
+  );
+}
+
+function normalizeRefreshAfterSeconds(
+  value: number
+): number {
+  if (
+    !Number.isFinite(value) ||
+    value < MINIMUM_REFRESH_AFTER_SECONDS
+  ) {
+    return MINIMUM_REFRESH_AFTER_SECONDS;
+  }
+
+  return Math.trunc(
+    value
+  );
+}
+
+function delay(
+  milliseconds: number
+): Promise<void> {
+  return new Promise(
+    (resolve) => {
+      setTimeout(
+        resolve,
+        milliseconds
+      );
+    }
+  );
+}
+
 export default function HomeScreen() {
   const { colors } = useTheme();
 
@@ -70,10 +162,40 @@ export default function HomeScreen() {
   useScrollToTop(listRef);
 
   const [articles, setArticles] =
-    useState<FeedItem[]>(mockFeed);
+    useState<FeedItem[]>([]);
 
   const articlesRef =
-    useRef<FeedItem[]>(mockFeed);
+    useRef<FeedItem[]>([]);
+
+  const nextCursorRef =
+    useRef<string | null>(
+      null
+    );
+
+  const refreshAfterSecondsRef =
+    useRef(
+      90
+    );
+
+  const hasMoreRef =
+    useRef(
+      false
+    );
+
+  const refreshingRef =
+    useRef(
+      false
+    );
+
+  const loadingMoreRef =
+    useRef(
+      false
+    );
+
+  const initialLoadingRef =
+    useRef(
+      true
+    );
 
   const [refreshing, setRefreshing] =
     useState(false);
@@ -81,6 +203,8 @@ export default function HomeScreen() {
   const [loadingMore, setLoadingMore] =
     useState(false);
 
+  const [hasMore, setHasMore] =
+    useState(false);
 
   const [
     initialLoading,
@@ -122,8 +246,13 @@ export default function HomeScreen() {
       articles;
   }, [articles]);
 
+  useEffect(() => {
+    initialLoadingRef.current =
+      initialLoading;
+  }, [initialLoading]);
+
   const getInteractionState =
-    useCallback(async () => {
+    useCallback(async (): Promise<ArticleInteractionState> => {
       const [
         bookmarkedIds,
         interactionState,
@@ -148,16 +277,8 @@ export default function HomeScreen() {
       async (
         sourceArticles:
           FeedItem[],
-        interactionState: {
-          bookmarkedIds:
-            readonly string[];
-
-          recommendedIds:
-            readonly string[];
-
-          helpfulIds:
-            readonly string[];
-        }
+        interactionState:
+          ArticleInteractionState
       ): Promise<FeedItem[]> => {
         const synchronizedArticles =
           applyArticleInteractionState(
@@ -192,6 +313,103 @@ export default function HomeScreen() {
       []
     );
 
+  const applyDiscoveryResponse =
+    useCallback(
+      async (
+        response:
+          MobileDiscoveryFeedResponse,
+        refreshMode:
+          MobileDiscoveryRefreshMode
+      ) => {
+        const interactionState =
+          await getInteractionState();
+
+        const discoveryArticles =
+          MobileDiscoveryService
+            .mapToArticles(
+              response,
+              interactionState
+            );
+
+        const nextSourceArticles =
+          refreshMode === "older"
+            ? mergeFeedItems(
+                articlesRef.current,
+                discoveryArticles
+              )
+            : discoveryArticles;
+
+        const personalizedArticles =
+          await buildPersonalizedArticles(
+            nextSourceArticles,
+            interactionState
+          );
+
+        setArticles(
+          personalizedArticles
+        );
+
+        nextCursorRef.current =
+          response.pagination.nextCursor;
+
+        hasMoreRef.current =
+          response.pagination.hasMore;
+
+        setHasMore(
+          response.pagination.hasMore
+        );
+
+        refreshAfterSecondsRef.current =
+          normalizeRefreshAfterSeconds(
+            response.pagination.refreshAfterSeconds
+          );
+
+        ScreenRefreshService.markRefreshed(
+          "home"
+        );
+      },
+      [
+        buildPersonalizedArticles,
+        getInteractionState,
+      ]
+    );
+
+  const loadHomeFeed =
+    useCallback(
+      async (
+        input: {
+          refreshMode:
+            MobileDiscoveryRefreshMode;
+
+          cursor?:
+            | string
+            | null;
+        }
+      ) => {
+        const response =
+          await MobileDiscoveryService
+            .getHomeFeed({
+              limit:
+                HOME_FEED_PAGE_SIZE,
+
+              cursor:
+                input.cursor ??
+                null,
+
+              refreshMode:
+                input.refreshMode,
+            });
+
+        await applyDiscoveryResponse(
+          response,
+          input.refreshMode
+        );
+      },
+      [
+        applyDiscoveryResponse,
+      ]
+    );
+
   const synchronizeInteractionState =
     useCallback(async () => {
       try {
@@ -220,99 +438,77 @@ export default function HomeScreen() {
     ]);
 
   const refreshScreen =
-    useCallback(async () => {
-      if (refreshing) {
-        return;
-      }
+    useCallback(
+      async (
+        options:
+          RefreshOptions =
+          {}
+      ) => {
+        if (
+          refreshingRef.current
+        ) {
+          return;
+        }
 
-      setRefreshing(true);
+        refreshingRef.current =
+          true;
 
-      try {
-        // TODO:
-        // GET /home
+        setRefreshing(true);
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, 800)
-        );
+        try {
+          await loadHomeFeed({
+            refreshMode:
+              "refresh",
+          });
 
-        const interactionState =
-          await getInteractionState();
-
-        const personalizedArticles =
-          await buildPersonalizedArticles(
-            mockFeed,
-            interactionState
-          );
-
-        setArticles(
-          personalizedArticles
-        );
-
-        ScreenRefreshService.markRefreshed(
-          "home"
-        );
-
-        showSuccess(
-          "Feed refreshed",
-          "Your latest stories are ready."
-        );
-      } catch {
-        showError(
-          "Refresh failed",
-          "Poster could not update your Home feed.",
-          {
-            label: "Retry",
-
-            onPress: () => {
-              void refreshScreen();
-            },
+          if (!options.silent) {
+            showSuccess(
+              "Feed refreshed",
+              "Your latest stories are ready."
+            );
           }
-        );
-      } finally {
-        setRefreshing(false);
-      }
-    }, [
-      buildPersonalizedArticles,
-      getInteractionState,
-      refreshing,
-      showError,
-      showSuccess,
-    ]);
+        } catch {
+          if (!options.silent) {
+            showError(
+              "Refresh failed",
+              "Poster could not update your Home feed.",
+              {
+                label: "Retry",
+
+                onPress: () => {
+                  void refreshScreen();
+                },
+              }
+            );
+          }
+        } finally {
+          refreshingRef.current =
+            false;
+
+          setRefreshing(false);
+        }
+      },
+      [
+        loadHomeFeed,
+        showError,
+        showSuccess,
+      ]
+    );
 
   const loadInitial =
     useCallback(async () => {
       const loadingStartedAt =
         Date.now();
 
-      const minimumLoadingDuration =
-        1000;
-
       setInitialLoading(true);
+      initialLoadingRef.current =
+        true;
 
       try {
-        // TODO:
-        // GET /home
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 500)
-        );
-
-        const interactionState =
-          await getInteractionState();
-
-        const personalizedArticles =
-          await buildPersonalizedArticles(
-            mockFeed,
-            interactionState
-          );
-
-        setArticles(
-          personalizedArticles
-        );
-
-        ScreenRefreshService.markRefreshed(
-          "home"
-        );
+        await loadHomeFeed({
+          refreshMode:
+            "initial",
+        });
       } catch {
         showError(
           "Home feed unavailable",
@@ -333,25 +529,23 @@ export default function HomeScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_INITIAL_LOADING_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
+
+        initialLoadingRef.current =
+          false;
 
         setInitialLoading(false);
       }
     }, [
-      buildPersonalizedArticles,
-      getInteractionState,
+      loadHomeFeed,
       showError,
     ]);
 
@@ -359,6 +553,65 @@ export default function HomeScreen() {
     void loadInitial();
   }, [loadInitial]);
 
+  useEffect(() => {
+    let active =
+      true;
+
+    let timeoutId:
+      | ReturnType<typeof setTimeout>
+      | null =
+      null;
+
+    const scheduleRefresh = () => {
+      const delayMs =
+        refreshAfterSecondsRef.current *
+        1000;
+
+      timeoutId =
+        setTimeout(
+          () => {
+            if (!active) {
+              return;
+            }
+
+            const canRefresh =
+              !initialLoadingRef.current &&
+              !refreshingRef.current &&
+              !loadingMoreRef.current;
+
+            const refreshOperation =
+              canRefresh
+                ? refreshScreen({
+                    silent:
+                      true,
+                  })
+                : Promise.resolve();
+
+            void refreshOperation.finally(
+              () => {
+                if (active) {
+                  scheduleRefresh();
+                }
+              }
+            );
+          },
+          delayMs
+        );
+    };
+
+    scheduleRefresh();
+
+    return () => {
+      active =
+        false;
+
+      if (timeoutId) {
+        clearTimeout(
+          timeoutId
+        );
+      }
+    };
+  }, [refreshScreen]);
 
   useFocusEffect(
     useCallback(() => {
@@ -366,31 +619,32 @@ export default function HomeScreen() {
     }, [synchronizeInteractionState])
   );
 
-
   const handleLoadMore =
     useCallback(async () => {
-      if (loadingMore) {
+      if (
+        loadingMoreRef.current ||
+        !hasMoreRef.current ||
+        !nextCursorRef.current
+      ) {
         return;
       }
 
       const loadingStartedAt =
         Date.now();
 
-      const minimumLoadingDuration =
-        1000;
+      loadingMoreRef.current =
+        true;
 
       setLoadingMore(true);
 
       try {
-        // TODO:
-        // GET /home?cursor=...
-        //
-        // Replace this delay with the
-        // backend pagination request.
+        await loadHomeFeed({
+          refreshMode:
+            "older",
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, 400)
-        );
+          cursor:
+            nextCursorRef.current,
+        });
       } catch {
         showError(
           "More stories unavailable",
@@ -404,24 +658,23 @@ export default function HomeScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_LOAD_MORE_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
+
+        loadingMoreRef.current =
+          false;
 
         setLoadingMore(false);
       }
     }, [
-      loadingMore,
+      loadHomeFeed,
       showError,
     ]);
 
@@ -821,12 +1074,16 @@ export default function HomeScreen() {
       return (
         <View style={styles.footer}>
           <ActivityIndicator
-            animating={loadingMore}
+            animating={
+              loadingMore &&
+              hasMore
+            }
             size="small"
             color={colors.primary}
             style={{
               opacity:
-                loadingMore
+                loadingMore &&
+                hasMore
                   ? 1
                   : 0,
             }}
@@ -835,6 +1092,7 @@ export default function HomeScreen() {
       );
     }, [
       colors.primary,
+      hasMore,
       loadingMore,
     ]);
 
@@ -917,9 +1175,9 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={
-              refreshScreen
-            }
+            onRefresh={() => {
+              void refreshScreen();
+            }}
             tintColor={
               colors.primary
             }
