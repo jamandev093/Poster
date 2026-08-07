@@ -13,3 +13,8 @@ export * from "./session-lifecycle.service.js";
 export * from "./password-reset.types.js";
 
 export * from "./password-reset.service.js";
+
+
+export * from "./account-deletion.types.js";
+
+export * from "./account-deletion.service.js";

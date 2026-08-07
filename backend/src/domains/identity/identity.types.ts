@@ -234,6 +234,15 @@ export interface UpdateUserStatusInput {
   status: MutableUserStatus;
 }
 
+
+export interface SoftDeleteUserInput {
+  userId: string;
+
+  expectedRowVersion: string;
+
+  deletedAt: Date;
+}
+
 export interface CreateOrganizationInput {
   legalName: string;
 

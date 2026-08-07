@@ -13,6 +13,7 @@ import {
   type CreateUserInput,
   type MarkUserEmailVerifiedInput,
   type RecordSuccessfulUserLoginInput,
+  type SoftDeleteUserInput,
   type UpdateUserPasswordInput,
   type UpdateUserStatusInput,
   type UserIdentityRecord,
@@ -419,6 +420,46 @@ export async function updateUserStatus(
         input.userId,
         input.expectedRowVersion,
         input.status,
+      ],
+      executor
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Permanently marks a user identity as soft-deleted.
+ *
+ * This operation is intentionally separate from mutable status
+ * changes because deleted accounts must not be restored through
+ * normal account-status flows.
+ */
+export async function softDeleteUser(
+  input: SoftDeleteUserInput,
+  executor?: DatabaseQueryExecutor
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          status = 'deleted',
+          deleted_at = $3
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+        input.deletedAt,
       ],
       executor
     );
