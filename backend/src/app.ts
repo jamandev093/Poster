@@ -162,6 +162,11 @@ import {
 } from "./application/mobile-actions/index.js";
 
 import {
+  createProductionMobileEngagementService,
+  type MobileEngagementService,
+} from "./application/mobile-engagement/index.js";
+
+import {
   createSessionLifecycleService,
   type SessionLifecycleService,
 } from "./application/authentication/session-lifecycle.service.js";
@@ -209,6 +214,7 @@ import {
   healthRoutes,
   mobileDiscoveryRoutes,
   mobileUserActionsRoutes,
+  mobileEngagementRoutes,
   type AuthenticationRoutesOptions,
 } from "./routes/index.js";
 
@@ -358,6 +364,9 @@ export interface BuildAppOptions {
 
   mobileUserActionsService?:
     MobileUserActionsService;
+
+  mobileEngagementService?:
+    MobileEngagementService;
 }
 
 const CLIENT_WALLET_ORGANIZATION_ROLES =
@@ -769,6 +778,11 @@ await app.register(
       .mobileUserActionsService ??
     createProductionMobileUserActionsService();
 
+  const mobileEngagementService =
+    options
+      .mobileEngagementService ??
+    createProductionMobileEngagementService();
+
   await app.register(
     authenticationRoutes,
     {
@@ -824,6 +838,17 @@ await app.register(
 
       service:
         mobileUserActionsService,
+    }
+  );
+
+  await app.register(
+    mobileEngagementRoutes,
+    {
+      prefix:
+        "/api/v1/mobile",
+
+      service:
+        mobileEngagementService,
     }
   );
 

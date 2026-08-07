@@ -29,3 +29,4 @@ export * from "./admin-wallet-operations.routes.js";
 export * from "./public-copyright.routes.js";
 export * from "./mobile-discovery.routes.js";
 export { mobileUserActionsRoutes } from "./mobile-actions.routes.js";
+export { mobileEngagementRoutes } from "./mobile-engagement.routes.js";
