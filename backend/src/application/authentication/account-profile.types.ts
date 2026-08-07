@@ -1,3 +1,8 @@
+import type {
+  UserProfileInterests,
+  UserProfilePreferences,
+} from "../../domains/identity/index.js";
+
 export interface AccountProfileResponse {
   account: {
     id: string;
@@ -5,6 +10,20 @@ export interface AccountProfileResponse {
     email: string;
 
     fullName: string;
+
+    username:
+      | string
+      | null;
+
+    profileImageUrl:
+      | string
+      | null;
+
+    interests:
+      UserProfileInterests;
+
+    preferences:
+      UserProfilePreferences;
 
     status: string;
 
@@ -25,5 +44,19 @@ export interface GetAccountProfileInput {
 export interface UpdateAccountProfileInput {
   userId: string;
 
-  fullName: string;
+  fullName?: string;
+
+  username?:
+    | string
+    | null;
+
+  profileImageUrl?:
+    | string
+    | null;
+
+  interests?:
+    UserProfileInterests;
+
+  preferences?:
+    UserProfilePreferences;
 }

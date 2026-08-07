@@ -19,6 +19,8 @@ import type {
 
 import type {
   UserIdentityRecord,
+  UserProfileInterests,
+  UserProfilePreferences,
 } from "../src/domains/identity/index.js";
 
 const USER_ID =
@@ -26,6 +28,70 @@ const USER_ID =
 
 const EXECUTOR =
   {} as DatabaseQueryExecutor;
+
+const PROFILE_INTERESTS:
+  UserProfileInterests = {
+  topicIds: [
+    "technology",
+  ],
+
+  topicNames: [
+    "Technology",
+  ],
+
+  unresolvedValues: [],
+
+  displayValues: [
+    "Technology",
+  ],
+};
+
+const PROFILE_PREFERENCES:
+  UserProfilePreferences = {
+  darkMode:
+    false,
+
+  notifications:
+    true,
+
+  personalizedAds:
+    true,
+};
+
+const UPDATED_PROFILE_INTERESTS:
+  UserProfileInterests = {
+  topicIds: [
+    "technology",
+    "business",
+  ],
+
+  topicNames: [
+    "Technology",
+    "Business",
+  ],
+
+  unresolvedValues: [
+    "AI policy",
+  ],
+
+  displayValues: [
+    "Technology",
+    "Business",
+    "AI policy",
+  ],
+};
+
+const UPDATED_PROFILE_PREFERENCES:
+  UserProfilePreferences = {
+  darkMode:
+    true,
+
+  notifications:
+    false,
+
+  personalizedAds:
+    false,
+};
 
 const ACCOUNT:
   UserIdentityRecord = {
@@ -40,6 +106,18 @@ const ACCOUNT:
 
   fullName:
     "Poster Person",
+
+  username:
+    "poster_person",
+
+  profileImageUrl:
+    "https://cdn.example.com/profile/person.jpg",
+
+  profileInterests:
+    PROFILE_INTERESTS,
+
+  profilePreferences:
+    PROFILE_PREFERENCES,
 
   status:
     "active",
@@ -84,6 +162,18 @@ const UPDATED_ACCOUNT:
   fullName:
     "Updated Poster Person",
 
+  username:
+    "updated_person",
+
+  profileImageUrl:
+    "https://cdn.example.com/profile/updated.jpg",
+
+  profileInterests:
+    UPDATED_PROFILE_INTERESTS,
+
+  profilePreferences:
+    UPDATED_PROFILE_PREFERENCES,
+
   updatedAt:
     new Date(
       "2026-08-07T10:00:00.000Z"
@@ -97,7 +187,7 @@ describe(
   "AccountProfileService",
   () => {
     it(
-      "returns the authenticated account profile",
+      "returns the authenticated full account profile",
       async () => {
         const service =
           createAccountProfileService({
@@ -124,6 +214,18 @@ describe(
             fullName:
               "Poster Person",
 
+            username:
+              "poster_person",
+
+            profileImageUrl:
+              "https://cdn.example.com/profile/person.jpg",
+
+            interests:
+              PROFILE_INTERESTS,
+
+            preferences:
+              PROFILE_PREFERENCES,
+
             status:
               "active",
 
@@ -144,7 +246,7 @@ describe(
     );
 
     it(
-      "updates the authenticated account full name inside a transaction",
+      "updates full account profile data inside a transaction",
       async () => {
         const findUserById =
           vi.fn()
@@ -182,12 +284,60 @@ describe(
 
             fullName:
               "  Updated   Poster   Person  ",
+
+            username:
+              "  Updated_Person  ",
+
+            profileImageUrl:
+              "  https://cdn.example.com/profile/updated.jpg  ",
+
+            interests: {
+              topicIds: [
+                "technology",
+                "business",
+                "technology",
+              ],
+
+              topicNames: [
+                "Technology",
+                "Business",
+              ],
+
+              unresolvedValues: [
+                "AI policy",
+              ],
+
+              displayValues: [
+                "Technology",
+              ],
+            },
+
+            preferences:
+              UPDATED_PROFILE_PREFERENCES,
           });
 
         expect(
           result.account.fullName
         ).toBe(
           "Updated Poster Person"
+        );
+
+        expect(
+          result.account.username
+        ).toBe(
+          "updated_person"
+        );
+
+        expect(
+          result.account.interests
+        ).toEqual(
+          UPDATED_PROFILE_INTERESTS
+        );
+
+        expect(
+          result.account.preferences
+        ).toEqual(
+          UPDATED_PROFILE_PREFERENCES
         );
 
         expect(
@@ -202,6 +352,80 @@ describe(
           USER_ID,
           EXECUTOR
         );
+
+        expect(
+          updateUserProfile
+        ).toHaveBeenCalledWith(
+          {
+            userId:
+              USER_ID,
+
+            expectedRowVersion:
+              "7",
+
+            fullName:
+              "Updated Poster Person",
+
+            username:
+              "updated_person",
+
+            profileImageUrl:
+              "https://cdn.example.com/profile/updated.jpg",
+
+            profileInterests:
+              UPDATED_PROFILE_INTERESTS,
+
+            profilePreferences:
+              UPDATED_PROFILE_PREFERENCES,
+          },
+          EXECUTOR
+        );
+      }
+    );
+
+    it(
+      "updates only provided profile fields",
+      async () => {
+        const findUserById =
+          vi.fn()
+            .mockResolvedValue(
+              ACCOUNT
+            );
+
+        const updateUserProfile =
+          vi.fn()
+            .mockResolvedValue({
+              ...ACCOUNT,
+
+              fullName:
+                "Updated Poster Person",
+
+              rowVersion:
+                "8",
+            });
+
+        const service =
+          createAccountProfileService({
+            findUserById,
+
+            updateUserProfile,
+
+            runDatabaseTransaction:
+              vi.fn(
+                async operation =>
+                  await operation(
+                    EXECUTOR
+                  )
+              ),
+          });
+
+        await service.updateProfile({
+          userId:
+            USER_ID,
+
+          fullName:
+            "Updated Poster Person",
+        });
 
         expect(
           updateUserProfile

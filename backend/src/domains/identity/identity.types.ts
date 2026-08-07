@@ -14,6 +14,23 @@ export type MutableUserStatus =
     UserStatus,
     "deleted"
   >;
+export interface UserProfileInterests {
+  topicIds: string[];
+
+  topicNames: string[];
+
+  unresolvedValues: string[];
+
+  displayValues: string[];
+}
+
+export interface UserProfilePreferences {
+  darkMode: boolean;
+
+  notifications: boolean;
+
+  personalizedAds: boolean;
+}
 
 export const ORGANIZATION_STATUSES = [
   "pending",
@@ -54,6 +71,19 @@ export interface UserIdentityRecord {
   passwordHash: string;
 
   fullName: string;
+  username?:
+    | string
+    | null;
+
+  profileImageUrl?:
+    | string
+    | null;
+
+  profileInterests?:
+    UserProfileInterests;
+
+  profilePreferences?:
+    UserProfilePreferences;
 
   status: UserStatus;
 
@@ -240,7 +270,21 @@ export interface UpdateUserProfileInput {
 
   expectedRowVersion: string;
 
-  fullName: string;
+  fullName?: string;
+
+  username?:
+    | string
+    | null;
+
+  profileImageUrl?:
+    | string
+    | null;
+
+  profileInterests?:
+    UserProfileInterests;
+
+  profilePreferences?:
+    UserProfilePreferences;
 }
 
 

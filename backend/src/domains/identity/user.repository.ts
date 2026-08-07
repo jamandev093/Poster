@@ -15,6 +15,8 @@ import {
   type RecordSuccessfulUserLoginInput,
   type SoftDeleteUserInput,
   type UpdateUserProfileInput,
+  type UserProfileInterests,
+  type UserProfilePreferences,
   type UpdateUserPasswordInput,
   type UpdateUserStatusInput,
   type UserIdentityRecord,
@@ -30,6 +32,19 @@ interface UserDatabaseRow
   password_hash: string;
 
   full_name: string;
+  username:
+    | string
+    | null;
+
+  profile_image_url:
+    | string
+    | null;
+
+  profile_interests:
+    unknown;
+
+  profile_preferences:
+    unknown;
 
   status: UserStatus;
 
@@ -63,6 +78,10 @@ const USER_RETURNING_COLUMNS = `
   email,
   password_hash,
   full_name,
+  username,
+  profile_image_url,
+  profile_interests,
+  profile_preferences,
   status,
   email_verified_at,
   last_login_at,
@@ -75,6 +94,112 @@ const USER_RETURNING_COLUMNS = `
     AS row_version
 `;
 
+const DEFAULT_PROFILE_INTERESTS:
+  UserProfileInterests = {
+  topicIds: [],
+
+  topicNames: [],
+
+  unresolvedValues: [],
+
+  displayValues: [],
+};
+
+const DEFAULT_PROFILE_PREFERENCES:
+  UserProfilePreferences = {
+  darkMode:
+    false,
+
+  notifications:
+    true,
+
+  personalizedAds:
+    true,
+};
+
+function asRecord(
+  value: unknown
+): Record<string, unknown> | null {
+  return typeof value === "object" &&
+    value !== null
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function parseStringList(
+  value: unknown
+): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (item): item is string =>
+      typeof item === "string" &&
+      item.trim().length > 0
+  );
+}
+
+function parseProfileInterests(
+  value: unknown
+): UserProfileInterests {
+  const record =
+    asRecord(value);
+
+  if (!record) {
+    return DEFAULT_PROFILE_INTERESTS;
+  }
+
+  return {
+    topicIds:
+      parseStringList(
+        record.topicIds
+      ),
+
+    topicNames:
+      parseStringList(
+        record.topicNames
+      ),
+
+    unresolvedValues:
+      parseStringList(
+        record.unresolvedValues
+      ),
+
+    displayValues:
+      parseStringList(
+        record.displayValues
+      ),
+  };
+}
+
+function parseProfilePreferences(
+  value: unknown
+): UserProfilePreferences {
+  const record =
+    asRecord(value);
+
+  if (!record) {
+    return DEFAULT_PROFILE_PREFERENCES;
+  }
+
+  return {
+    darkMode:
+      typeof record.darkMode === "boolean"
+        ? record.darkMode
+        : DEFAULT_PROFILE_PREFERENCES.darkMode,
+
+    notifications:
+      typeof record.notifications === "boolean"
+        ? record.notifications
+        : DEFAULT_PROFILE_PREFERENCES.notifications,
+
+    personalizedAds:
+      typeof record.personalizedAds === "boolean"
+        ? record.personalizedAds
+        : DEFAULT_PROFILE_PREFERENCES.personalizedAds,
+  };
+}
 function mapUserDatabaseRow(
   row: UserDatabaseRow
 ): UserIdentityRecord {
@@ -90,6 +215,21 @@ function mapUserDatabaseRow(
 
     fullName:
       row.full_name,
+    username:
+      row.username,
+
+    profileImageUrl:
+      row.profile_image_url,
+
+    profileInterests:
+      parseProfileInterests(
+        row.profile_interests
+      ),
+
+    profilePreferences:
+      parseProfilePreferences(
+        row.profile_preferences
+      ),
 
     status:
       row.status,
@@ -473,9 +613,8 @@ export async function softDeleteUser(
 /**
  * Updates safe mutable profile fields for an authenticated user.
  *
- * v1 intentionally limits profile mutation to full_name because
- * username, avatar/photo, preferences, and interests do not exist
- * on app.users yet and need separate product/database decisions.
+ * Full profile data is intentionally limited to app.users profile
+ * columns. Binary image uploads must use a separate storage pipeline.
  */
 export async function updateUserProfile(
   input: UpdateUserProfileInput,
@@ -488,7 +627,11 @@ export async function updateUserProfile(
       `
         UPDATE app.users
         SET
-          full_name = $3
+          full_name = CASE WHEN $3::boolean THEN $4 ELSE full_name END,
+          username = CASE WHEN $5::boolean THEN $6 ELSE username END,
+          profile_image_url = CASE WHEN $7::boolean THEN $8 ELSE profile_image_url END,
+          profile_interests = CASE WHEN $9::boolean THEN $10::jsonb ELSE profile_interests END,
+          profile_preferences = CASE WHEN $11::boolean THEN $12::jsonb ELSE profile_preferences END
         WHERE
           id = $1::uuid
           AND row_version = $2::bigint
@@ -499,7 +642,24 @@ export async function updateUserProfile(
       [
         input.userId,
         input.expectedRowVersion,
-        input.fullName,
+        input.fullName !== undefined,
+        input.fullName ?? null,
+        input.username !== undefined,
+        input.username ?? null,
+        input.profileImageUrl !== undefined,
+        input.profileImageUrl ?? null,
+        input.profileInterests !== undefined,
+        input.profileInterests
+          ? JSON.stringify(
+              input.profileInterests
+            )
+          : null,
+        input.profilePreferences !== undefined,
+        input.profilePreferences
+          ? JSON.stringify(
+              input.profilePreferences
+            )
+          : null,
       ],
       executor
     );
