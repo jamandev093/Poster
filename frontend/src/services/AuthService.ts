@@ -10,6 +10,9 @@ const AUTH_STORAGE_KEYS = {
   ACCESS_TOKEN:
     "poster.auth.access-token",
 
+  ACCESS_TOKEN_EXPIRES_AT:
+    "poster.auth.access-token-expires-at",
+
   REFRESH_TOKEN:
     "poster.auth.refresh-token",
 } as const;
@@ -20,10 +23,52 @@ const DEFAULT_POSTER_API_BASE_URL =
 const API_VERSION_PREFIX =
   "/api/v1";
 
+const AUTHENTICATION_ACCESS_TOKEN_HEADER =
+  "x-poster-access-token";
+
+const AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER =
+  "x-poster-access-token-expires-at";
+
 export interface AuthTokens {
   accessToken: string;
 
   refreshToken: string;
+}
+
+export interface AccessSessionTokens {
+  accessToken: string;
+
+  accessTokenExpiresAt: string;
+}
+
+export interface LoginInput {
+  email: string;
+
+  password: string;
+}
+
+export interface AuthenticationSession {
+  id: string;
+
+  userId: string;
+
+  organizationId: string | null;
+
+  createdAt: string;
+
+  expiresAt: string;
+}
+
+export interface LoginResponse {
+  account:
+    AuthenticationAccount;
+
+  session:
+    AuthenticationSession;
+
+  accessToken: string;
+
+  accessTokenExpiresAt: string;
 }
 
 export interface AuthenticationAccount {
@@ -297,6 +342,9 @@ async function postAuthenticationJson<TResponse>(
             "application/json",
         },
 
+        credentials:
+          "include",
+
         body:
           JSON.stringify(
             body
@@ -324,6 +372,89 @@ async function postAuthenticationJson<TResponse>(
   }
 
   return responseBody as TResponse;
+}
+
+async function postAuthenticationLogin(
+  body: Record<string, unknown>
+): Promise<LoginResponse> {
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/login"
+      ),
+      {
+        method:
+          "POST",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          "Content-Type":
+            "application/json",
+        },
+
+        credentials:
+          "include",
+
+        body:
+          JSON.stringify(
+            body
+          ),
+      }
+    );
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  if (!response.ok) {
+    const errorDetails =
+      getErrorMessageFromBody(
+        responseBody
+      );
+
+    throw new AuthenticationApiError(
+      errorDetails.message ??
+        "Authentication request failed. Please try again.",
+      response.status,
+      errorDetails.code
+    );
+  }
+
+  const accessToken =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_HEADER
+    );
+
+  const accessTokenExpiresAt =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER
+    );
+
+  if (
+    !accessToken ||
+    !accessTokenExpiresAt
+  ) {
+    throw new AuthenticationApiError(
+      "The authentication response did not include an access token.",
+      response.status,
+      null
+    );
+  }
+
+  return {
+    ...(responseBody as Omit<
+      LoginResponse,
+      | "accessToken"
+      | "accessTokenExpiresAt"
+    >),
+
+    accessToken,
+
+    accessTokenExpiresAt,
+  };
 }
 
 async function ensureSecureStorageAvailable(): Promise<void> {
@@ -357,6 +488,31 @@ class AuthService {
       );
 
     return operation;
+  }
+
+  async login(
+    input: LoginInput
+  ): Promise<LoginResponse> {
+    const result =
+      await postAuthenticationLogin({
+        email:
+          normalizeEmail(
+            input.email
+          ),
+
+        password:
+          input.password,
+      });
+
+    await this.saveAccessSession({
+      accessToken:
+        result.accessToken,
+
+      accessTokenExpiresAt:
+        result.accessTokenExpiresAt,
+    });
+
+    return result;
   }
 
   async signup(
@@ -410,6 +566,71 @@ class AuthService {
           normalizeEmail(
             input.email
           ),
+      }
+    );
+  }
+
+  private async saveAccessSession(
+    tokens: AccessSessionTokens
+  ): Promise<void> {
+    const accessToken =
+      normalizeToken(
+        tokens.accessToken
+      );
+
+    const accessTokenExpiresAt =
+      normalizeRequiredText(
+        tokens.accessTokenExpiresAt
+      );
+
+    if (
+      !accessToken ||
+      !accessTokenExpiresAt
+    ) {
+      throw new Error(
+        "A valid access token and expiry are required."
+      );
+    }
+
+    await this.runMutation(
+      async () => {
+        await ensureSecureStorageAvailable();
+
+        try {
+          await SecureStore.setItemAsync(
+            AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+            accessToken,
+            {
+              keychainAccessible:
+                SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+            }
+          );
+
+          await SecureStore.setItemAsync(
+            AUTH_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT,
+            accessTokenExpiresAt,
+            {
+              keychainAccessible:
+                SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+            }
+          );
+
+          await SecureStore.deleteItemAsync(
+            AUTH_STORAGE_KEYS.REFRESH_TOKEN
+          );
+        } catch (error) {
+          await Promise.allSettled([
+            SecureStore.deleteItemAsync(
+              AUTH_STORAGE_KEYS.ACCESS_TOKEN
+            ),
+
+            SecureStore.deleteItemAsync(
+              AUTH_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT
+            ),
+          ]);
+
+          throw error;
+        }
       }
     );
   }
@@ -487,6 +708,18 @@ class AuthService {
     );
   }
 
+  async getAccessTokenExpiresAt(): Promise<
+    string | null
+  > {
+    await this.mutationQueue;
+
+    await ensureSecureStorageAvailable();
+
+    return SecureStore.getItemAsync(
+      AUTH_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT
+    );
+  }
+
   async getRefreshToken(): Promise<
     string | null
   > {
@@ -533,10 +766,10 @@ class AuthService {
   }
 
   async hasSession(): Promise<boolean> {
-    const tokens =
-      await this.getTokens();
+    const accessToken =
+      await this.getAccessToken();
 
-    return tokens !== null;
+    return accessToken !== null;
   }
 
   async clearSession(): Promise<void> {
@@ -547,6 +780,10 @@ class AuthService {
         await Promise.all([
           SecureStore.deleteItemAsync(
             AUTH_STORAGE_KEYS.ACCESS_TOKEN
+          ),
+
+          SecureStore.deleteItemAsync(
+            AUTH_STORAGE_KEYS.ACCESS_TOKEN_EXPIRES_AT
           ),
 
           SecureStore.deleteItemAsync(
