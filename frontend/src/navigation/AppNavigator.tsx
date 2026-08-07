@@ -18,6 +18,7 @@ import SplashScreen from "../screens/splash/SplashScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import SignupScreen from "../screens/auth/SignupScreen";
 import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
+import ResetPasswordConfirmScreen from "../screens/auth/ResetPasswordConfirmScreen";
 import OtpVerificationScreen from "../screens/auth/OtpVerificationScreen";
 import UsernameScreen from "../screens/auth/UsernameScreen";
 import InterestSelectionScreen from "../screens/auth/InterestSelectionScreen";
@@ -37,6 +38,12 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   ForgotPassword: undefined;
+
+  ResetPasswordConfirm:
+    | {
+        email?: string;
+      }
+    | undefined;
 
   OtpVerification:
     | {
@@ -141,6 +148,13 @@ export default function AppNavigator() {
           name="ForgotPassword"
           component={
             ForgotPasswordScreen
+          }
+        />
+
+        <Stack.Screen
+          name="ResetPasswordConfirm"
+          component={
+            ResetPasswordConfirmScreen
           }
         />
 
