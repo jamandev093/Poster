@@ -42,7 +42,6 @@ import {
   getFeaturedInterestCategories,
   getSearchableInterestTopics,
 } from "../../data/interests";
-import { mockFeed } from "../../data/mockFeed";
 import {
   trendingSearches,
 } from "../../data/mockSearch";
@@ -50,6 +49,10 @@ import {
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
 import InteractionService from "../../services/InteractionService";
+import MobileDiscoveryService, {
+  MobileDiscoveryFeedResponse,
+  MobileDiscoveryRefreshMode,
+} from "../../services/MobileDiscoveryService";
 import ScreenRefreshService from "../../services/ScreenRefreshService";
 import SearchHistoryService from "../../services/SearchHistoryService";
 import SearchService, {
@@ -91,6 +94,50 @@ interface SearchFilterOption {
   label: string;
 
   topicNames: readonly string[];
+}
+
+const SEARCH_FEED_PAGE_SIZE =
+  20;
+
+const MINIMUM_INITIAL_LOADING_DURATION_MS =
+  1000;
+
+const MINIMUM_LOAD_MORE_DURATION_MS =
+  1000;
+
+const MINIMUM_REFRESH_AFTER_SECONDS =
+  30;
+
+interface ArticleInteractionState {
+  bookmarkedIds:
+    readonly string[];
+
+  recommendedIds:
+    readonly string[];
+
+  helpfulIds:
+    readonly string[];
+}
+
+interface SearchFeedLoadInput {
+  query:
+    | string
+    | null;
+
+  refreshMode:
+    MobileDiscoveryRefreshMode;
+
+  cursor?:
+    | string
+    | null;
+
+  category?:
+    | string
+    | null;
+}
+
+interface RefreshOptions {
+  silent?: boolean;
 }
 
 function normalizeText(
@@ -142,6 +189,69 @@ function createUniqueValues(
   });
 
   return result;
+}
+
+function mergeFeedItems(
+  currentItems:
+    readonly FeedItem[],
+  incomingItems:
+    readonly FeedItem[]
+): FeedItem[] {
+  const byId =
+    new Map<
+      string,
+      FeedItem
+    >();
+
+  currentItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  incomingItems.forEach(
+    (item) => {
+      byId.set(
+        item.id,
+        item
+      );
+    }
+  );
+
+  return Array.from(
+    byId.values()
+  );
+}
+
+function normalizeRefreshAfterSeconds(
+  value: number
+): number {
+  if (
+    !Number.isFinite(value) ||
+    value < MINIMUM_REFRESH_AFTER_SECONDS
+  ) {
+    return MINIMUM_REFRESH_AFTER_SECONDS;
+  }
+
+  return Math.trunc(
+    value
+  );
+}
+
+function delay(
+  milliseconds: number
+): Promise<void> {
+  return new Promise(
+    (resolve) => {
+      setTimeout(
+        resolve,
+        milliseconds
+      );
+    }
+  );
 }
 
 function calculateSearchScore(
@@ -341,6 +451,29 @@ export default function SearchScreen() {
   const loadMoreRequestRef =
     useRef(false);
 
+  const nextCursorRef =
+    useRef<string | null>(
+      null
+    );
+
+  const refreshAfterSecondsRef =
+    useRef(
+      180
+    );
+
+  const hasMoreRef =
+    useRef(
+      false
+    );
+
+  const initialLoadingRef =
+    useRef(
+      true
+    );
+
+  const articlesRef =
+    useRef<FeedItem[]>([]);
+
   const completedInitialFocusRef =
     useRef(false);
 
@@ -404,12 +537,15 @@ export default function SearchScreen() {
     );
 
   const [articles, setArticles] =
-    useState<FeedItem[]>(mockFeed);
+    useState<FeedItem[]>([]);
 
   const [refreshing, setRefreshing] =
     useState(false);
 
   const [loadingMore, setLoadingMore] =
+    useState(false);
+
+  const [hasMore, setHasMore] =
     useState(false);
 
   const [
@@ -496,8 +632,18 @@ export default function SearchScreen() {
       selectedFilterId,
     ]);
 
+  useEffect(() => {
+    articlesRef.current =
+      articles;
+  }, [articles]);
+
+  useEffect(() => {
+    initialLoadingRef.current =
+      initialLoading;
+  }, [initialLoading]);
+
   const getInteractionState =
-    useCallback(async () => {
+    useCallback(async (): Promise<ArticleInteractionState> => {
       const [
         bookmarkedIds,
         interactionState,
@@ -516,6 +662,103 @@ export default function SearchScreen() {
           interactionState.helpfulIds,
       };
     }, []);
+
+  const applyDiscoveryResponse =
+    useCallback(
+      async (
+        response:
+          MobileDiscoveryFeedResponse,
+        refreshMode:
+          MobileDiscoveryRefreshMode
+      ) => {
+        const interactionState =
+          await getInteractionState();
+
+        const discoveryArticles =
+          MobileDiscoveryService
+            .mapToArticles(
+              response,
+              interactionState
+            );
+
+        const nextSourceArticles =
+          refreshMode === "older"
+            ? mergeFeedItems(
+                articlesRef.current,
+                discoveryArticles
+              )
+            : discoveryArticles;
+
+        const synchronizedArticles =
+          applyArticleInteractionState(
+            nextSourceArticles,
+            interactionState
+          );
+
+        setArticles(
+          synchronizedArticles
+        );
+
+        nextCursorRef.current =
+          response.pagination.nextCursor;
+
+        hasMoreRef.current =
+          response.pagination.hasMore;
+
+        setHasMore(
+          response.pagination.hasMore
+        );
+
+        refreshAfterSecondsRef.current =
+          normalizeRefreshAfterSeconds(
+            response.pagination.refreshAfterSeconds
+          );
+
+        ScreenRefreshService.markRefreshed(
+          "search"
+        );
+      },
+      [
+        getInteractionState,
+      ]
+    );
+
+  const loadSearchFeed =
+    useCallback(
+      async (
+        input:
+          SearchFeedLoadInput
+      ) => {
+        const response =
+          await MobileDiscoveryService
+            .search({
+              limit:
+                SEARCH_FEED_PAGE_SIZE,
+
+              cursor:
+                input.cursor ??
+                null,
+
+              refreshMode:
+                input.refreshMode,
+
+              query:
+                input.query,
+
+              category:
+                input.category ??
+                null,
+            });
+
+        await applyDiscoveryResponse(
+          response,
+          input.refreshMode
+        );
+      },
+      [
+        applyDiscoveryResponse,
+      ]
+    );
 
   const synchronizeInteractionState =
     useCallback(async () => {
@@ -592,51 +835,25 @@ export default function SearchScreen() {
       const loadingStartedAt =
         Date.now();
 
-      const minimumLoadingDuration =
-        1000;
-
       setInitialLoading(true);
+      initialLoadingRef.current =
+        true;
 
       try {
-        // TODO:
-        // GET /search/discover
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 450)
-        );
-
-        const [
-          bookmarkedIds,
-          interactionState,
-          searchHistory,
-        ] = await Promise.all([
-          BookmarkService.getBookmarkedIds(),
-          InteractionService.getState(),
-          SearchHistoryService.getHistory(),
-        ]);
-
-        setArticles(
-          applyArticleInteractionState(
-            mockFeed,
-            {
-              bookmarkedIds,
-
-              recommendedIds:
-                interactionState.recommendedIds,
-
-              helpfulIds:
-                interactionState.helpfulIds,
-            }
-          )
-        );
+        const searchHistory =
+          await SearchHistoryService.getHistory();
 
         setSavedRecentSearches(
           searchHistory
         );
 
-        ScreenRefreshService.markRefreshed(
-          "search"
-        );
+        await loadSearchFeed({
+          query:
+            null,
+
+          refreshMode:
+            "initial",
+        });
       } catch {
         showError(
           "Search unavailable",
@@ -657,23 +874,25 @@ export default function SearchScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_INITIAL_LOADING_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
 
+        initialLoadingRef.current =
+          false;
+
         setInitialLoading(false);
       }
-    }, [showError]);
+    }, [
+      loadSearchFeed,
+      showError,
+    ]);
 
   const resetSearchToDiscover =
     useCallback(() => {
@@ -698,103 +917,168 @@ export default function SearchScreen() {
 
       setSelectedFilterId("all");
 
+      nextCursorRef.current =
+        null;
+
+      hasMoreRef.current =
+        false;
+
+      setHasMore(false);
+
       setIsFocused(false);
 
       searchInputRef.current?.blur();
-    }, []);
+
+      void loadSearchFeed({
+        query:
+          null,
+
+        refreshMode:
+          "initial",
+      });
+    }, [loadSearchFeed]);
 
   const refreshScreen =
-    useCallback(async () => {
-      if (
-        refreshRequestRef.current
-      ) {
-        return;
-      }
+    useCallback(
+      async (
+        options:
+          RefreshOptions =
+          {}
+      ) => {
+        if (
+          refreshRequestRef.current
+        ) {
+          return;
+        }
 
-      refreshRequestRef.current =
-        true;
-
-      setRefreshing(true);
-
-      resetSearchToDiscover();
-
-      listRef.current?.scrollToOffset({
-        offset: 0,
-        animated: false,
-      });
-
-      try {
-        // TODO:
-        // GET /search/discover
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 800)
-        );
-
-        const [
-          bookmarkedIds,
-          interactionState,
-          searchHistory,
-        ] = await Promise.all([
-          BookmarkService.getBookmarkedIds(),
-          InteractionService.getState(),
-          SearchHistoryService.getHistory(),
-        ]);
-
-        setArticles(
-          applyArticleInteractionState(
-            mockFeed,
-            {
-              bookmarkedIds,
-
-              recommendedIds:
-                interactionState.recommendedIds,
-
-              helpfulIds:
-                interactionState.helpfulIds,
-            }
-          )
-        );
-
-        setSavedRecentSearches(
-          searchHistory
-        );
-
-        ScreenRefreshService.markRefreshed(
-          "search"
-        );
-
-        showSuccess(
-          "Discovery refreshed",
-          "Search and discovery content are up to date."
-        );
-      } catch {
-        showError(
-          "Refresh failed",
-          "Poster could not update Search.",
-          {
-            label: "Retry",
-
-            onPress: () => {
-              void refreshScreen();
-            },
-          }
-        );
-      } finally {
         refreshRequestRef.current =
-          false;
+          true;
 
-        setRefreshing(false);
-      }
-    }, [
-      resetSearchToDiscover,
-      showError,
-      showSuccess,
-    ]);
+        setRefreshing(true);
+
+        try {
+          const searchHistory =
+            await SearchHistoryService.getHistory();
+
+          setSavedRecentSearches(
+            searchHistory
+          );
+
+          await loadSearchFeed({
+            query:
+              submittedSearch.trim() ||
+              null,
+
+            refreshMode:
+              "refresh",
+
+            category:
+              selectedFilterId === "all"
+                ? null
+                : selectedFilter?.label ??
+                  null,
+          });
+
+          if (!options.silent) {
+            showSuccess(
+              "Discovery refreshed",
+              "Search and discovery content are up to date."
+            );
+          }
+        } catch {
+          if (!options.silent) {
+            showError(
+              "Refresh failed",
+              "Poster could not update Search.",
+              {
+                label: "Retry",
+
+                onPress: () => {
+                  void refreshScreen();
+                },
+              }
+            );
+          }
+        } finally {
+          refreshRequestRef.current =
+            false;
+
+          setRefreshing(false);
+        }
+      },
+      [
+        loadSearchFeed,
+        selectedFilter,
+        selectedFilterId,
+        showError,
+        showSuccess,
+        submittedSearch,
+      ]
+    );
 
   useEffect(() => {
     void loadInitial();
   }, [loadInitial]);
+
+  useEffect(() => {
+    let active =
+      true;
+
+    let timeoutId:
+      | ReturnType<typeof setTimeout>
+      | null =
+      null;
+
+    const scheduleRefresh = () => {
+      const delayMs =
+        refreshAfterSecondsRef.current *
+        1000;
+
+      timeoutId =
+        setTimeout(
+          () => {
+            if (!active) {
+              return;
+            }
+
+            const canRefresh =
+              !initialLoadingRef.current &&
+              !refreshRequestRef.current &&
+              !loadMoreRequestRef.current;
+
+            const refreshOperation =
+              canRefresh
+                ? refreshScreen({
+                    silent:
+                      true,
+                  })
+                : Promise.resolve();
+
+            void refreshOperation.finally(
+              () => {
+                if (active) {
+                  scheduleRefresh();
+                }
+              }
+            );
+          },
+          delayMs
+        );
+    };
+
+    scheduleRefresh();
+
+    return () => {
+      active =
+        false;
+
+      if (timeoutId) {
+        clearTimeout(
+          timeoutId
+        );
+      }
+    };
+  }, [refreshScreen]);
 
   useFocusEffect(
     useCallback(() => {
@@ -1038,18 +1322,17 @@ export default function SearchScreen() {
           article,
 
           score:
-            calculateExpandedSearchScore(
-              article,
-              submittedSearch,
-              committedSearchPlan
-                ?.expandedSearchTerms ??
-                []
+            Math.max(
+              1,
+              calculateExpandedSearchScore(
+                article,
+                submittedSearch,
+                committedSearchPlan
+                  ?.expandedSearchTerms ??
+                  []
+              )
             ),
         }))
-        .filter(
-          (item) =>
-            item.score > 0
-        )
         .sort(
           (first, second) =>
             second.score -
@@ -1067,7 +1350,7 @@ export default function SearchScreen() {
       return rankedArticles
         .filter(
           (item) =>
-            item.score >= 55
+            item.score >= 1
         )
         .map(
           (item) =>
@@ -1283,6 +1566,28 @@ export default function SearchScreen() {
             trimmedValue
           );
 
+          nextCursorRef.current =
+            null;
+
+          hasMoreRef.current =
+            false;
+
+          setHasMore(false);
+
+          await loadSearchFeed({
+            query:
+              trimmedValue,
+
+            refreshMode:
+              "initial",
+
+            category:
+              selectedFilterId === "all"
+                ? null
+                : selectedFilter?.label ??
+                  null,
+          });
+
           void saveSearchQuery(
             trimmedValue
           );
@@ -1301,7 +1606,10 @@ export default function SearchScreen() {
         }
       },
       [
+        loadSearchFeed,
         saveSearchQuery,
+        selectedFilter,
+        selectedFilterId,
         showError,
         showInfo,
       ]
@@ -1348,10 +1656,26 @@ export default function SearchScreen() {
 
       setSubmittedSearch("");
 
+      nextCursorRef.current =
+        null;
+
+      hasMoreRef.current =
+        false;
+
+      setHasMore(false);
+
       setIsFocused(false);
 
       searchInputRef.current?.blur();
-    }, []);
+
+      void loadSearchFeed({
+        query:
+          null,
+
+        refreshMode:
+          "initial",
+      });
+    }, [loadSearchFeed]);
 
   const handleRemoveRecentSearch =
     useCallback(
@@ -1423,6 +1747,14 @@ export default function SearchScreen() {
           filter.id
         );
 
+        nextCursorRef.current =
+          null;
+
+        hasMoreRef.current =
+          false;
+
+        setHasMore(false);
+
         if (
           filter.id !== "all" &&
           !search.trim()
@@ -1430,11 +1762,29 @@ export default function SearchScreen() {
           void commitSearchQuery(
             filter.label
           );
+
+          return;
         }
+
+        void loadSearchFeed({
+          query:
+            submittedSearch.trim() ||
+            null,
+
+          refreshMode:
+            "initial",
+
+          category:
+            filter.id === "all"
+              ? null
+              : filter.label,
+        });
       },
       [
         commitSearchQuery,
+        loadSearchFeed,
         search,
+        submittedSearch,
       ]
     );
 
@@ -1457,7 +1807,9 @@ export default function SearchScreen() {
   const handleLoadMore =
     useCallback(async () => {
       if (
-        loadMoreRequestRef.current
+        loadMoreRequestRef.current ||
+        !hasMoreRef.current ||
+        !nextCursorRef.current
       ) {
         return;
       }
@@ -1467,9 +1819,6 @@ export default function SearchScreen() {
 
       const loadingStartedAt =
         Date.now();
-
-      const minimumLoadingDuration =
-        1000;
 
       setLoadingMore(true);
 
@@ -1483,15 +1832,23 @@ export default function SearchScreen() {
             );
         }
 
-        // TODO:
-        // GET /search?cursor=...
-        //
-        // Mock data contains one page.
-        // Do not append mockFeed again.
+        await loadSearchFeed({
+          query:
+            submittedSearch.trim() ||
+            null,
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, 400)
-        );
+          refreshMode:
+            "older",
+
+          cursor:
+            nextCursorRef.current,
+
+          category:
+            selectedFilterId === "all"
+              ? null
+              : selectedFilter?.label ??
+                null,
+        });
       } catch {
         showError(
           "More results unavailable",
@@ -1505,17 +1862,13 @@ export default function SearchScreen() {
         const remainingTime =
           Math.max(
             0,
-            minimumLoadingDuration -
+            MINIMUM_LOAD_MORE_DURATION_MS -
               elapsedTime
           );
 
         if (remainingTime > 0) {
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                remainingTime
-              )
+          await delay(
+            remainingTime
           );
         }
 
@@ -1524,7 +1877,13 @@ export default function SearchScreen() {
         loadMoreRequestRef.current =
           false;
       }
-    }, [showError]);
+    }, [
+      loadSearchFeed,
+      selectedFilter,
+      selectedFilterId,
+      showError,
+      submittedSearch,
+    ]);
 
   const handleOpenArticle =
     useCallback(
@@ -2499,12 +2858,16 @@ export default function SearchScreen() {
       return (
         <View style={styles.footer}>
           <ActivityIndicator
-            animating={loadingMore}
+            animating={
+              loadingMore &&
+              hasMore
+            }
             size="small"
             color={colors.primary}
             style={{
               opacity:
-                loadingMore
+                loadingMore &&
+                hasMore
                   ? 1
                   : 0,
             }}
@@ -2513,6 +2876,7 @@ export default function SearchScreen() {
       );
     }, [
       colors.primary,
+      hasMore,
       loadingMore,
     ]);
 
@@ -2597,9 +2961,9 @@ export default function SearchScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={
-              refreshScreen
-            }
+            onRefresh={() => {
+              void refreshScreen();
+            }}
             tintColor={
               colors.primary
             }
