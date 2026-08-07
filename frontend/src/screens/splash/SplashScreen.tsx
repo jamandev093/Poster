@@ -64,11 +64,18 @@ export default function SplashScreen({
       async () => {
         const sessionPromise =
           AuthService
-            .hasSession()
-            .catch(() => false);
+            .refreshSession()
+            .then(() => true)
+            .catch(async () => {
+              await AuthService
+                .clearSession()
+                .catch(() => undefined);
+
+              return false;
+            });
 
         const [
-          hasSession,
+          sessionIsValid,
         ] = await Promise.all([
           sessionPromise,
 
@@ -82,7 +89,7 @@ export default function SplashScreen({
         }
 
         navigation.replace(
-          hasSession
+          sessionIsValid
             ? "Main"
             : "Login"
         );
