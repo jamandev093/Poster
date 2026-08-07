@@ -37,6 +37,7 @@ import PreferenceService from "../../services/PreferenceService";
 import ProfileService, {
   UserProfile,
 } from "../../services/ProfileService";
+import AuthService from "../../services/AuthService";
 
 import {
   Spacing,
@@ -632,10 +633,20 @@ export default function ProfileScreen() {
         true
       );
 
-      try {
-        await ProfileService.clearLocalSession();
+      let serverLogoutFailed =
+        false;
 
+      try {
+        await AuthService.logout();
+      } catch {
+        serverLogoutFailed =
+          true;
+      } finally {
         setConfirmationType(null);
+
+        setConfirmationLoading(
+          false
+        );
 
         navigation.reset({
           index: 0,
@@ -646,14 +657,14 @@ export default function ProfileScreen() {
             },
           ],
         });
-      } catch {
+      }
+
+      if (
+        serverLogoutFailed
+      ) {
         Alert.alert(
-          "Unable to log out",
-          "Poster could not end your session."
-        );
-      } finally {
-        setConfirmationLoading(
-          false
+          "Signed out locally",
+          "Poster could not confirm logout with the server. Your local session was cleared on this device."
         );
       }
     }, [navigation]);
