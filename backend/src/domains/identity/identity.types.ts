@@ -235,6 +235,15 @@ export interface UpdateUserStatusInput {
 }
 
 
+export interface UpdateUserProfileInput {
+  userId: string;
+
+  expectedRowVersion: string;
+
+  fullName: string;
+}
+
+
 export interface SoftDeleteUserInput {
   userId: string;
 

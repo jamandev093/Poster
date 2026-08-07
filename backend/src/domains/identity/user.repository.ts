@@ -14,6 +14,7 @@ import {
   type MarkUserEmailVerifiedInput,
   type RecordSuccessfulUserLoginInput,
   type SoftDeleteUserInput,
+  type UpdateUserProfileInput,
   type UpdateUserPasswordInput,
   type UpdateUserStatusInput,
   type UserIdentityRecord,
@@ -460,6 +461,45 @@ export async function softDeleteUser(
         input.userId,
         input.expectedRowVersion,
         input.deletedAt,
+      ],
+      executor
+    );
+
+  return mapOptionalUserRow(
+    result.rows[0]
+  );
+}
+
+/**
+ * Updates safe mutable profile fields for an authenticated user.
+ *
+ * v1 intentionally limits profile mutation to full_name because
+ * username, avatar/photo, preferences, and interests do not exist
+ * on app.users yet and need separate product/database decisions.
+ */
+export async function updateUserProfile(
+  input: UpdateUserProfileInput,
+  executor?: DatabaseQueryExecutor
+): Promise<UserIdentityRecord | null> {
+  const result =
+    await executeDatabaseQuery<
+      UserDatabaseRow
+    >(
+      `
+        UPDATE app.users
+        SET
+          full_name = $3
+        WHERE
+          id = $1::uuid
+          AND row_version = $2::bigint
+          AND deleted_at IS NULL
+        RETURNING
+          ${USER_RETURNING_COLUMNS}
+      `,
+      [
+        input.userId,
+        input.expectedRowVersion,
+        input.fullName,
       ],
       executor
     );

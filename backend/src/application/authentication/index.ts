@@ -18,3 +18,8 @@ export * from "./password-reset.service.js";
 export * from "./account-deletion.types.js";
 
 export * from "./account-deletion.service.js";
+
+
+export * from "./account-profile.types.js";
+
+export * from "./account-profile.service.js";
