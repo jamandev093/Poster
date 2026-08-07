@@ -141,6 +141,11 @@ import {
 } from "./application/authentication/password-reset.service.js";
 
 import {
+  createAccountDeletionService,
+  type AccountDeletionService,
+} from "./application/authentication/account-deletion.service.js";
+
+import {
   createSessionLifecycleService,
   type SessionLifecycleService,
 } from "./application/authentication/session-lifecycle.service.js";
@@ -322,6 +327,9 @@ export interface BuildAppOptions {
 
   passwordResetService?:
     PasswordResetService;
+
+  accountDeletionService?:
+    AccountDeletionService;
 }
 
 const CLIENT_WALLET_ORGANIZATION_ROLES =
@@ -712,6 +720,11 @@ await app.register(
       emailDeliveryProvider,
     });
 
+  const accountDeletionService =
+    options
+      .accountDeletionService ??
+    createAccountDeletionService();
+
   await app.register(
     authenticationRoutes,
     {
@@ -738,6 +751,8 @@ await app.register(
         createSessionLifecycleService(),
 
       passwordResetService,
+
+      accountDeletionService,
 
       isProduction:
         environment.NODE_ENV ===

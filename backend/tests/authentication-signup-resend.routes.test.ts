@@ -106,6 +106,9 @@ describe(
             passwordResetService:
               createUnusedService() as never,
 
+            accountDeletionService:
+              createUnusedService() as never,
+
             isProduction:
               false,
           }
@@ -232,6 +235,9 @@ describe(
               createUnusedService() as never,
 
             passwordResetService:
+              createUnusedService() as never,
+
+            accountDeletionService:
               createUnusedService() as never,
 
             isProduction:

@@ -16,6 +16,10 @@ import type {
 } from "../application/authentication/password-reset.service.js";
 
 import type {
+  AccountDeletionService,
+} from "../application/authentication/account-deletion.service.js";
+
+import type {
   AuthenticationSessionSummary,
 } from "../application/authentication/login-session.types.js";
 
@@ -49,6 +53,10 @@ import {
   readAuthenticationRefreshToken,
   setAuthenticationRefreshCookie,
 } from "../http/authentication-cookie.js";
+
+import {
+  requireAuthenticatedRequest,
+} from "../http/authorization-context.js";
 
 import {
   parseHttpRequestBody,
@@ -351,6 +359,9 @@ export interface AuthenticationRoutesOptions {
 
   passwordResetService:
     PasswordResetService;
+
+  accountDeletionService:
+    AccountDeletionService;
 
   isProduction: boolean;
 }
@@ -685,6 +696,40 @@ export const authenticationRoutes:
             .logout({
               refreshToken,
             });
+        }
+
+        return reply
+          .status(
+            204
+          )
+          .send();
+      }
+    );
+
+
+    app.delete(
+      "/account",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requireAuthenticatedRequest(
+            request
+          );
+
+        try {
+          await options
+            .accountDeletionService
+            .deleteAccount({
+              userId:
+                authorization.userId,
+            });
+        } finally {
+          clearAuthenticationRefreshCookie(
+            reply,
+            options.isProduction
+          );
         }
 
         return reply
