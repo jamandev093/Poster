@@ -31,3 +31,4 @@ export * from "./mobile-discovery.routes.js";
 export { mobileUserActionsRoutes } from "./mobile-actions.routes.js";
 export { mobileEngagementRoutes } from "./mobile-engagement.routes.js";
 export * from "./account-selected-interests.routes.js";
+export * from "./poster-brain-ranked-feed.routes.js";
