@@ -152,6 +152,11 @@ import {
 } from "./application/authentication/account-profile.service.js";
 
 import {
+  createProductionAccountSelectedInterestsService,
+  type AccountSelectedInterestsService,
+} from "./application/authentication/account-selected-interests.service.js";
+
+import {
   createMobileDiscoveryService,
   type MobileDiscoveryService,
 } from "./application/mobile-discovery/index.js";
@@ -209,6 +214,7 @@ import {
   adminReportsRoutes,
   adminSourceRoutes,
   adminSystemStatusRoutes,
+  accountSelectedInterestsRoutes,
   authenticationRoutes,
   clientCommercialRequestRoutes,
   healthRoutes,
@@ -358,6 +364,9 @@ export interface BuildAppOptions {
 
   accountProfileService?:
     AccountProfileService;
+
+  accountSelectedInterestsService?:
+    AccountSelectedInterestsService;
 
   mobileDiscoveryService?:
     MobileDiscoveryService;
@@ -768,6 +777,11 @@ await app.register(
       .accountProfileService ??
     createAccountProfileService();
 
+  const accountSelectedInterestsService =
+    options
+      .accountSelectedInterestsService ??
+    createProductionAccountSelectedInterestsService();
+
   const mobileDiscoveryService =
     options
       .mobileDiscoveryService ??
@@ -849,6 +863,17 @@ await app.register(
 
       service:
         mobileEngagementService,
+    }
+  );
+
+  await app.register(
+    accountSelectedInterestsRoutes,
+    {
+      prefix:
+        "/api/v1/auth",
+
+      service:
+        accountSelectedInterestsService,
     }
   );
 

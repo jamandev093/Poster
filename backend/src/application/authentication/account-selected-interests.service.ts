@@ -1,8 +1,15 @@
-import type {
-  AccountSelectedInterestsRepository,
-  AccountSelectedInterestsSnapshot,
-  GetAccountSelectedInterestsInput,
-  ReplaceAccountSelectedInterestsInput,
+import {
+  runDatabaseTransaction,
+  type DatabaseQueryExecutor,
+} from "../../database/index.js";
+
+import {
+  createPostgresAccountSelectedInterestsRepository,
+  type AccountSelectedInterestsRepository,
+  type AccountSelectedInterestsSnapshot,
+  type GetAccountSelectedInterestsInput,
+  type QueryableDatabase,
+  type ReplaceAccountSelectedInterestsInput,
 } from "../../domains/interests/index.js";
 
 const MAX_SELECTED_INTERESTS =
@@ -154,4 +161,57 @@ export function createAccountSelectedInterestsService(
   return new DefaultAccountSelectedInterestsService(
     repository
   );
+}
+
+function createScopedSelectedInterestsService(
+  executor:
+    DatabaseQueryExecutor
+): AccountSelectedInterestsService {
+  const repository =
+    createPostgresAccountSelectedInterestsRepository(
+      executor as QueryableDatabase
+    );
+
+  return createAccountSelectedInterestsService(
+    repository
+  );
+}
+
+export function createProductionAccountSelectedInterestsService():
+  AccountSelectedInterestsService {
+  return {
+    getSelectedInterests:
+      async (
+        input
+      ) =>
+        runDatabaseTransaction(
+          async (
+            executor
+          ) =>
+            createScopedSelectedInterestsService(
+              executor
+            ).getSelectedInterests(
+              input
+            ),
+          {
+            readOnly:
+              true,
+          }
+        ),
+
+    replaceSelectedInterests:
+      async (
+        input
+      ) =>
+        runDatabaseTransaction(
+          async (
+            executor
+          ) =>
+            createScopedSelectedInterestsService(
+              executor
+            ).replaceSelectedInterests(
+              input
+            )
+        ),
+  };
 }

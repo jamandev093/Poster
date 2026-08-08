@@ -30,3 +30,4 @@ export * from "./public-copyright.routes.js";
 export * from "./mobile-discovery.routes.js";
 export { mobileUserActionsRoutes } from "./mobile-actions.routes.js";
 export { mobileEngagementRoutes } from "./mobile-engagement.routes.js";
+export * from "./account-selected-interests.routes.js";
