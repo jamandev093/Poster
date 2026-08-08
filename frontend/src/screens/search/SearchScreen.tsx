@@ -44,7 +44,7 @@ import {
 } from "../../data/interests";
 import {
   trendingSearches,
-} from "../../data/mockSearch";
+} from "../../data/searchSuggestions";
 
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
