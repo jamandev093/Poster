@@ -40,6 +40,7 @@ import {
 import InterestCatalogService, {
   InterestCatalogTopic,
 } from "../../services/InterestCatalogService";
+import ProfileService from "../../services/ProfileService";
 import PreferenceService from "../../services/PreferenceService";
 
 import {
@@ -556,12 +557,25 @@ export default function InterestSelectionScreen({
         ...legacyInterestNames,
       ];
 
+      const selectedTopicIdsToSync = [
+        ...selectedTopicIds,
+      ];
+
       setSaving(true);
 
       try {
         await PreferenceService.saveInterests(
           namesToSave
         );
+
+        try {
+          await ProfileService.updateSelectedInterests(
+            selectedTopicIdsToSync
+          );
+        } catch {
+          // Keep onboarding available when the Backend write is unavailable.
+          // Local PreferenceService remains the offline/cache fallback.
+        }
 
         navigation.replace(
           "OnboardingComplete"
@@ -581,6 +595,7 @@ export default function InterestSelectionScreen({
       canContinue,
       legacyInterestNames,
       navigation,
+      selectedTopicIds,
       selectedTopics,
       showError,
       showWarning,

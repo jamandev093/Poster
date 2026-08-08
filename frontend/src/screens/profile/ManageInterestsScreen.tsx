@@ -40,6 +40,7 @@ import {
 import InterestCatalogService, {
   InterestCatalogTopic,
 } from "../../services/InterestCatalogService";
+import ProfileService from "../../services/ProfileService";
 import PreferenceService from "../../services/PreferenceService";
 
 import {
@@ -804,6 +805,7 @@ export default function ManageInterestsScreen({
       );
     }, [
       originalSelectedNames,
+      selectedTopicIds,
       selectedNames,
     ]);
 
@@ -894,9 +896,22 @@ export default function ManageInterestsScreen({
       setSaving(true);
 
       try {
+        const selectedTopicIdsToSync = [
+          ...selectedTopicIds,
+        ];
+
         await PreferenceService.saveInterests(
           selectedNames
         );
+
+        try {
+          await ProfileService.updateSelectedInterests(
+            selectedTopicIdsToSync
+          );
+        } catch {
+          // Preserve the local account-interest save when Backend sync is unavailable.
+          // The next successful authenticated save can reconcile Backend state.
+        }
 
         showSuccess(
           "Interests updated",
