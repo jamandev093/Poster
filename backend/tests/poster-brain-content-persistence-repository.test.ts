@@ -170,7 +170,7 @@ describe("Poster Brain content persistence repository", () => {
           "pending",
       })
     );
-    expect(contentValues?.[18]).toBe(0.9);
+    expect(contentValues?.[18]).toBe(0.5);
   });
 
   it("exposes the repository through a factory", async () => {

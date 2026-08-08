@@ -143,6 +143,7 @@ describe("Poster Brain content persistence mapper", () => {
       regionCode: "IN",
       publishedAt: "2026-08-08T10:00:00.000Z",
       discoveredAt: "2026-08-08T12:00:00.000Z",
+      qualityScore: 0.5,
       rankingScore: 0,
       trendingScore: 0,
       sourcePriorityScore: 0.9,
@@ -165,6 +166,47 @@ describe("Poster Brain content persistence mapper", () => {
     });
     expect(content.aiClassification).toMatchObject({
       status: "pending",
+    });
+  });
+
+  it("applies classification values to content persistence input", () => {
+    const plan =
+      createPosterBrainContentPersistencePlan({
+        source,
+        items: [item],
+        discoveredAt: "2026-08-08T12:00:00.000Z",
+        classifications: [
+          {
+            externalContentId: "example-news:guid:story-1",
+            category: "AI",
+            canonicalTopicIds: ["ai", "policy"],
+            evolvingTopicIds: ["machine-learning"],
+            qualityScore: 0.86,
+            aiClassification: {
+              status: "classified",
+              provider: "poster_rule_seed",
+            },
+          },
+        ],
+      });
+
+    const content = plan.contentItems[0];
+
+    expect(content).toBeDefined();
+
+    if (!content) {
+      throw new Error("Expected content persistence input.");
+    }
+
+    expect(content).toMatchObject({
+      category: "AI",
+      qualityScore: 0.86,
+    });
+    expect(content.canonicalTopicIds).toEqual(["ai", "policy"]);
+    expect(content.evolvingTopicIds).toEqual(["machine-learning"]);
+    expect(content.aiClassification).toMatchObject({
+      status: "classified",
+      provider: "poster_rule_seed",
     });
   });
 

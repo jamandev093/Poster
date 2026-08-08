@@ -46,6 +46,15 @@ export interface PosterBrainPublisherDomainPersistenceInput {
   readonly metadata: PosterBrainJsonObject;
 }
 
+export interface PosterBrainContentPersistenceClassificationInput {
+  readonly externalContentId: string;
+  readonly category: string | null;
+  readonly canonicalTopicIds: readonly string[];
+  readonly evolvingTopicIds: readonly string[];
+  readonly qualityScore: number;
+  readonly aiClassification: PosterBrainJsonObject;
+}
+
 export interface PosterBrainDiscoveryContentPersistenceInput {
   readonly externalContentId: string;
   readonly sourceKey: string;
@@ -67,6 +76,7 @@ export interface PosterBrainDiscoveryContentPersistenceInput {
   readonly regionCode: string | null;
   readonly publishedAt: string | null;
   readonly discoveredAt: string;
+  readonly qualityScore: number;
   readonly rankingScore: number;
   readonly trendingScore: number;
   readonly sourcePriorityScore: number;

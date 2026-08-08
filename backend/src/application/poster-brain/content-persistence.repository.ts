@@ -257,10 +257,10 @@ async function upsertContentItem(input: {
         jsonb({
           ...input.contentItem.metadata,
           sourcePriorityScore:
-            input.contentItem.sourcePriorityScore,
+            input.contentItem.qualityScore,
         }),
         jsonb(input.contentItem.aiClassification),
-        input.contentItem.sourcePriorityScore,
+        input.contentItem.qualityScore,
         0,
         0,
         0,
