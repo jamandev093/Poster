@@ -10,3 +10,4 @@ export * from "./ranked-feed-read.service.js";
 export * from "./content-classification.service.js";
 export * from "./source-feed-job-executor.service.js";
 export * from "./source-feed-batch-runner.service.js";
+export * from "./feed-xml-http-fetcher.service.js";
