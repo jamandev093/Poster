@@ -1576,6 +1576,7 @@ export default function SearchScreen() {
 
           await loadSearchFeed({
             query:
+              plan.normalizedQuery ||
               trimmedValue,
 
             refreshMode:
@@ -1768,6 +1769,9 @@ export default function SearchScreen() {
 
         void loadSearchFeed({
           query:
+            committedSearchPlanRef.current
+              ?.normalizedQuery
+              .trim() ||
             submittedSearch.trim() ||
             null,
 
@@ -1834,6 +1838,9 @@ export default function SearchScreen() {
 
         await loadSearchFeed({
           query:
+            committedSearchPlanRef.current
+              ?.normalizedQuery
+              .trim() ||
             submittedSearch.trim() ||
             null,
 
