@@ -23,3 +23,4 @@ export * from "./account-deletion.service.js";
 export * from "./account-profile.types.js";
 
 export * from "./account-profile.service.js";
+export * from "./account-selected-interests.service.js";
