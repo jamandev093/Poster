@@ -1,6 +1,7 @@
 export interface PosterBrainDiscoveryContentRankingRow {
   readonly externalContentId: string;
   readonly title: string;
+  readonly originalUrl?: string | null;
   readonly publisherName: string;
   readonly publishedAt: string | Date | null;
   readonly discoveredAt: string | Date;

@@ -19,3 +19,4 @@ export * from "./source-ingestion-state-update.service.js";
 export * from "./source-feed-run-report.service.js";
 export * from "./source-feed-scheduler-run.service.js";
 export * from "./source-feed-scheduler-stack.service.js";
+export * from "./ranked-feed-route-adapter.service.js";

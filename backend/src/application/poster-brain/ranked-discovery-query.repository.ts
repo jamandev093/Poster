@@ -87,6 +87,7 @@ export async function listPosterBrainRankedDiscoveryRows(input: {
         SELECT
           c.external_content_id AS "externalContentId",
           c.title AS "title",
+          c.original_url AS "originalUrl",
           COALESCE(pd.publisher_name, s.display_name) AS "publisherName",
           c.published_at AS "publishedAt",
           c.discovered_at AS "discoveredAt",
