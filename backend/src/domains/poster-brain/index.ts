@@ -10,3 +10,5 @@ export * from "./source-ingestion-planner.js";
 export * from "./source-ingestion-planner.types.js";
 export * from "./ranking-candidate-mapper.js";
 export * from "./ranking-candidate-mapper.types.js";
+export * from "./content-classification.js";
+export * from "./content-classification.types.js";

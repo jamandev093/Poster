@@ -7,3 +7,4 @@ export * from "./ranking-scoring.service.js";
 export * from "./ranked-feed-assembly.service.js";
 export * from "./ranked-discovery-query.repository.js";
 export * from "./ranked-feed-read.service.js";
+export * from "./content-classification.service.js";
