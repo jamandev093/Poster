@@ -14,6 +14,58 @@ function normalizeQuery(
     .replace(/\s+/g, " ");
 }
 
+function normalizeComparisonKey(
+  value: string
+): string {
+  return normalizeQuery(value)
+    .toLowerCase();
+}
+
+function dedupeAndLimitHistory(
+  values: readonly string[]
+): string[] {
+  const seen =
+    new Set<string>();
+
+  const result:
+    string[] = [];
+
+  values.forEach((value) => {
+    const normalizedValue =
+      normalizeQuery(value);
+
+    if (!normalizedValue) {
+      return;
+    }
+
+    const comparisonKey =
+      normalizeComparisonKey(
+        normalizedValue
+      );
+
+    if (
+      seen.has(
+        comparisonKey
+      )
+    ) {
+      return;
+    }
+
+    seen.add(
+      comparisonKey
+    );
+
+    result.push(
+      normalizedValue
+    );
+  });
+
+  return result.slice(
+    0,
+    MAX_HISTORY_ITEMS
+  );
+}
+
 function parseHistory(
   value: string | null
 ): string[] {
@@ -29,36 +81,14 @@ function parseHistory(
       return [];
     }
 
-    const validQueries =
-      parsed
-        .filter(
-          (item): item is string =>
-            typeof item === "string"
-        )
-        .map(normalizeQuery)
-        .filter(Boolean);
-
-    const uniqueQueries:
-      string[] = [];
-
-    validQueries.forEach(
-      (query) => {
-        const alreadyExists =
-          uniqueQueries.some(
-            (existingQuery) =>
-              existingQuery.toLowerCase() ===
-              query.toLowerCase()
-          );
-
-        if (!alreadyExists) {
-          uniqueQueries.push(query);
-        }
-      }
-    );
-
-    return uniqueQueries.slice(
-      0,
-      MAX_HISTORY_ITEMS
+    return dedupeAndLimitHistory(
+      parsed.filter(
+        (
+          item
+        ): item is string =>
+          typeof item ===
+          "string"
+      )
     );
   } catch {
     return [];
@@ -66,16 +96,67 @@ function parseHistory(
 }
 
 export default class SearchHistoryService {
+  /**
+   * AsyncStorage has no atomic
+   * read-modify-write operation.
+   *
+   * Serializing search-history mutations
+   * prevents rapid submit/remove/clear
+   * actions from overwriting each other.
+   */
+  private static mutationQueue:
+    Promise<void> =
+      Promise.resolve();
+
+  private static runMutation<T>(
+    mutation: () => Promise<T>
+  ): Promise<T> {
+    const operation =
+      SearchHistoryService
+        .mutationQueue
+        .then(mutation);
+
+    SearchHistoryService
+      .mutationQueue =
+        operation.then(
+          () => undefined,
+          () => undefined
+        );
+
+    return operation;
+  }
+
+  private static async readHistory(): Promise<
+    string[]
+  > {
+    const value =
+      await AsyncStorage.getItem(
+        STORAGE_KEYS.SEARCH_HISTORY
+      );
+
+    return parseHistory(value);
+  }
+
+  private static async writeHistory(
+    history: readonly string[]
+  ): Promise<string[]> {
+    const nextHistory =
+      dedupeAndLimitHistory(history);
+
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.SEARCH_HISTORY,
+      JSON.stringify(nextHistory)
+    );
+
+    return nextHistory;
+  }
+
   static async getHistory(): Promise<
     string[]
   > {
     try {
-      const value =
-        await AsyncStorage.getItem(
-          STORAGE_KEYS.SEARCH_HISTORY
-        );
-
-      return parseHistory(value);
+      return await SearchHistoryService
+        .readHistory();
     } catch {
       return [];
     }
@@ -88,33 +169,22 @@ export default class SearchHistoryService {
       normalizeQuery(query);
 
     if (!normalizedQuery) {
-      return SearchHistoryService.getHistory();
+      return SearchHistoryService
+        .getHistory();
     }
 
-    const currentHistory =
-      await SearchHistoryService.getHistory();
+    return SearchHistoryService
+      .runMutation(async () => {
+        const currentHistory =
+          await SearchHistoryService
+            .readHistory();
 
-    const filteredHistory =
-      currentHistory.filter(
-        (item) =>
-          item.toLowerCase() !==
-          normalizedQuery.toLowerCase()
-      );
-
-    const nextHistory = [
-      normalizedQuery,
-      ...filteredHistory,
-    ].slice(
-      0,
-      MAX_HISTORY_ITEMS
-    );
-
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.SEARCH_HISTORY,
-      JSON.stringify(nextHistory)
-    );
-
-    return nextHistory;
+        return SearchHistoryService
+          .writeHistory([
+            normalizedQuery,
+            ...currentHistory,
+          ]);
+      });
   }
 
   static async remove(
@@ -123,27 +193,43 @@ export default class SearchHistoryService {
     const normalizedQuery =
       normalizeQuery(query);
 
-    const currentHistory =
-      await SearchHistoryService.getHistory();
+    if (!normalizedQuery) {
+      return SearchHistoryService
+        .getHistory();
+    }
 
-    const nextHistory =
-      currentHistory.filter(
-        (item) =>
-          item.toLowerCase() !==
-          normalizedQuery.toLowerCase()
+    const comparisonKey =
+      normalizeComparisonKey(
+        normalizedQuery
       );
 
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.SEARCH_HISTORY,
-      JSON.stringify(nextHistory)
-    );
+    return SearchHistoryService
+      .runMutation(async () => {
+        const currentHistory =
+          await SearchHistoryService
+            .readHistory();
 
-    return nextHistory;
+        const nextHistory =
+          currentHistory.filter(
+            (item) =>
+              normalizeComparisonKey(
+                item
+              ) !== comparisonKey
+          );
+
+        return SearchHistoryService
+          .writeHistory(
+            nextHistory
+          );
+      });
   }
 
   static async clear(): Promise<void> {
-    await AsyncStorage.removeItem(
-      STORAGE_KEYS.SEARCH_HISTORY
-    );
+    await SearchHistoryService
+      .runMutation(async () => {
+        await AsyncStorage.removeItem(
+          STORAGE_KEYS.SEARCH_HISTORY
+        );
+      });
   }
 }
