@@ -267,7 +267,6 @@ import {
 import {
   createPosterBrainRankedDiscoveryQueryRepository,
   createPosterBrainRankedFeedRouteAdapterService,
-  createPosterBrainContentSourcesRouteAdapterService,
 } from "./application/poster-brain/index.js";
 
 import {
@@ -278,17 +277,9 @@ import {
   posterBrainRankedFeedRoutes,
   type PosterBrainRankedFeedRouteService,
 } from "./routes/poster-brain-ranked-feed.routes.js";
-
-import {
-  posterBrainContentSourcesRoutes,
-  type PosterBrainContentSourcesRouteService,
-} from "./routes/poster-brain-content-sources.routes.js";
 export interface BuildAppOptions {
   posterBrainRankedFeedService?:
     PosterBrainRankedFeedRouteService;
-
-  posterBrainContentSourcesService?:
-    PosterBrainContentSourcesRouteService;
 
   adminAnalyticsService?:
     AdminAnalyticsService;
@@ -632,30 +623,6 @@ function createPosterBrainRankedFeedService():
     },
   };
 }
-function createPosterBrainContentSourcesService():
-  PosterBrainContentSourcesRouteService {
-  let service:
-    PosterBrainContentSourcesRouteService |
-    null =
-    null;
-
-  return {
-    listSources(input) {
-      service ??=
-        createPosterBrainContentSourcesRouteAdapterService({
-          rankedDiscoveryQueryRepository:
-            createPosterBrainRankedDiscoveryQueryRepository(
-              getDatabasePool()
-            ),
-        });
-
-      return service.listSources(
-        input
-      );
-    },
-  };
-}
-
 export async function buildApp(
   options:
     BuildAppOptions =
@@ -833,22 +800,6 @@ await app.register(
 
       service:
         posterBrainRankedFeedService,
-    }
-  );
-
-  const posterBrainContentSourcesService =
-    options
-      .posterBrainContentSourcesService ??
-    createPosterBrainContentSourcesService();
-
-  await app.register(
-    posterBrainContentSourcesRoutes,
-    {
-      prefix:
-        "/api/v1/poster-brain",
-
-      service:
-        posterBrainContentSourcesService,
     }
   );
 
