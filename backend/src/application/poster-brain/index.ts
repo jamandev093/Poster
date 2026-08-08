@@ -5,3 +5,4 @@ export * from "./rss-ingestion.service.js";
 export * from "./source-ingestion-planner.service.js";
 export * from "./ranking-scoring.service.js";
 export * from "./ranked-feed-assembly.service.js";
+export * from "./ranked-discovery-query.repository.js";
