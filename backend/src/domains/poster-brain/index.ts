@@ -8,3 +8,5 @@ export * from "./rss-normalization.js";
 export * from "./rss-xml-parser.js";
 export * from "./source-ingestion-planner.js";
 export * from "./source-ingestion-planner.types.js";
+export * from "./ranking-candidate-mapper.js";
+export * from "./ranking-candidate-mapper.types.js";
