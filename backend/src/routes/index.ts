@@ -32,3 +32,4 @@ export { mobileUserActionsRoutes } from "./mobile-actions.routes.js";
 export { mobileEngagementRoutes } from "./mobile-engagement.routes.js";
 export * from "./account-selected-interests.routes.js";
 export * from "./poster-brain-ranked-feed.routes.js";
+export * from "./poster-brain-content-sources.routes.js";
