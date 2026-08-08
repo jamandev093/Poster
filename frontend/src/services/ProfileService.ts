@@ -83,6 +83,36 @@ interface AccountProfileApiResponse {
   };
 }
 
+export interface SelectedInterestDetails {
+  topicId: string;
+
+  topicSlug: string;
+
+  topicName: string;
+
+  personalizationAllowed: boolean;
+
+  campaignTargetingAllowed: boolean;
+
+  selectedAt:
+    | string
+    | null;
+
+  consentUpdatedAt:
+    | string
+    | null;
+}
+
+export interface SelectedInterestsSnapshot {
+  userId: string;
+
+  selectedInterests: string[];
+
+  interests: SelectedInterestDetails[];
+
+  updatedAt: string;
+}
+
 const DEFAULT_PROFILE:
   UserProfile = {
   name:
@@ -498,6 +528,98 @@ function isAccountProfileApiResponse(
   );
 }
 
+function isNullableString(
+  value: unknown
+): value is string | null {
+  return (
+    typeof value === "string" ||
+    value === null
+  );
+}
+
+function isSelectedInterestDetails(
+  value: unknown
+): value is SelectedInterestDetails {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.topicId === "string" &&
+    typeof value.topicSlug === "string" &&
+    typeof value.topicName === "string" &&
+    typeof value.personalizationAllowed === "boolean" &&
+    typeof value.campaignTargetingAllowed === "boolean" &&
+    isNullableString(value.selectedAt) &&
+    isNullableString(value.consentUpdatedAt)
+  );
+}
+
+function isSelectedInterestsSnapshot(
+  value: unknown
+): value is SelectedInterestsSnapshot {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.userId === "string" &&
+    isStringArray(value.selectedInterests) &&
+    Array.isArray(value.interests) &&
+    value.interests.every(
+      isSelectedInterestDetails
+    ) &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function normalizeSelectedInterestIdentifiers(
+  selectedInterests:
+    readonly string[]
+): string[] {
+  if (selectedInterests.length > 80) {
+    throw new AuthenticationApiError(
+      "Selected interests cannot exceed 80.",
+      400,
+      "REQUEST_VALIDATION_FAILED"
+    );
+  }
+
+  const seen =
+    new Set<string>();
+
+  const normalized:
+    string[] = [];
+
+  selectedInterests.forEach((interest) => {
+    const value =
+      interest
+        .normalize("NFKC")
+        .trim()
+        .replace(/\s+/g, "-")
+        .toLowerCase();
+
+    if (
+      !value ||
+      seen.has(
+        value
+      )
+    ) {
+      return;
+    }
+
+    seen.add(
+      value
+    );
+
+    normalized.push(
+      value
+    );
+  });
+
+  return normalized;
+}
+
 async function getRequiredAccessToken(): Promise<string> {
   const accessToken =
     await AuthService.getAccessToken();
@@ -586,6 +708,95 @@ async function requestAccountProfile(
   ) {
     throw new AuthenticationApiError(
       "Poster returned an invalid profile response.",
+      response.status,
+      null
+    );
+  }
+
+  return responseBody;
+}
+
+async function requestAccountSelectedInterests(
+  method: "GET" | "PATCH",
+  selectedInterests?:
+    readonly string[]
+): Promise<SelectedInterestsSnapshot> {
+  const accessToken =
+    await getRequiredAccessToken();
+
+  const body =
+    method === "PATCH"
+      ? {
+          selectedInterests:
+            normalizeSelectedInterestIdentifiers(
+              selectedInterests ?? []
+            ),
+        }
+      : undefined;
+
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/account/interests"
+      ),
+      {
+        method,
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...(body
+            ? {
+                "Content-Type":
+                  "application/json",
+              }
+            : {}),
+
+          Authorization:
+            `Bearer ${accessToken}`,
+        },
+
+        credentials:
+          "include",
+
+        ...(body
+          ? {
+              body:
+                JSON.stringify(
+                  body
+                ),
+            }
+          : {}),
+      }
+    );
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  if (!response.ok) {
+    const errorDetails =
+      getApiErrorDetails(
+        responseBody
+      );
+
+    throw new AuthenticationApiError(
+      errorDetails.message ??
+        "Poster could not update your selected interests. Please try again.",
+      response.status,
+      errorDetails.code
+    );
+  }
+
+  if (
+    !isSelectedInterestsSnapshot(
+      responseBody
+    )
+  ) {
+    throw new AuthenticationApiError(
+      "Poster returned an invalid selected interests response.",
       response.status,
       null
     );
@@ -869,6 +1080,21 @@ class ProfileService {
     }
   }
 
+  async getSelectedInterests(): Promise<SelectedInterestsSnapshot> {
+    return requestAccountSelectedInterests(
+      "GET"
+    );
+  }
+
+  async updateSelectedInterests(
+    selectedInterests:
+      readonly string[]
+  ): Promise<SelectedInterestsSnapshot> {
+    return requestAccountSelectedInterests(
+      "PATCH",
+      selectedInterests
+    );
+  }
   async saveProfile(
     profile: UserProfile
   ): Promise<void> {
