@@ -4,3 +4,5 @@ export * from "./content-persistence.types.js";
 export * from "./rss-ingestion.types.js";
 export * from "./rss-normalization.js";
 export * from "./rss-xml-parser.js";
+export * from "./source-ingestion-planner.js";
+export * from "./source-ingestion-planner.types.js";
