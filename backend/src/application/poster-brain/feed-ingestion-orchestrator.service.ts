@@ -66,7 +66,7 @@ export function createPosterBrainFeedIngestionService(
         });
 
       const persistencePlan =
-        contentIngestionService.createPersistencePlan({
+        contentIngestionService.createClassifiedPersistencePlan({
           source:
             input.source,
           items:
