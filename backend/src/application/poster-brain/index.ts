@@ -20,3 +20,4 @@ export * from "./source-feed-run-report.service.js";
 export * from "./source-feed-scheduler-run.service.js";
 export * from "./source-feed-scheduler-stack.service.js";
 export * from "./ranked-feed-route-adapter.service.js";
+export * from "./content-sources-route-adapter.service.js";
