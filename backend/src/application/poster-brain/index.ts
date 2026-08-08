@@ -8,3 +8,4 @@ export * from "./ranked-feed-assembly.service.js";
 export * from "./ranked-discovery-query.repository.js";
 export * from "./ranked-feed-read.service.js";
 export * from "./content-classification.service.js";
+export * from "./source-feed-job-executor.service.js";
