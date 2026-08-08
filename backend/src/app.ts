@@ -264,7 +264,23 @@ import {
 import {
   adminWalletOperationsRoutes,
 } from "./routes/admin-wallet-operations.routes.js";
+import {
+  createPosterBrainRankedDiscoveryQueryRepository,
+  createPosterBrainRankedFeedRouteAdapterService,
+} from "./application/poster-brain/index.js";
+
+import {
+  getDatabasePool,
+} from "./database/database.pool.js";
+
+import {
+  posterBrainRankedFeedRoutes,
+  type PosterBrainRankedFeedRouteService,
+} from "./routes/poster-brain-ranked-feed.routes.js";
 export interface BuildAppOptions {
+  posterBrainRankedFeedService?:
+    PosterBrainRankedFeedRouteService;
+
   adminAnalyticsService?:
     AdminAnalyticsService;
   adminCampaignService?:
@@ -578,6 +594,35 @@ function createRuntimeRazorpayWebhookVerifier(
     },
   };
 }
+function createPosterBrainRankedFeedService():
+  PosterBrainRankedFeedRouteService {
+  let service:
+    PosterBrainRankedFeedRouteService |
+    null =
+    null;
+
+  return {
+    readRankedFeed(input) {
+      service ??=
+        createPosterBrainRankedFeedRouteAdapterService({
+          rankedDiscoveryQueryRepository:
+            createPosterBrainRankedDiscoveryQueryRepository(
+              getDatabasePool()
+            ),
+
+          now:
+            () =>
+              new Date()
+                .toISOString(),
+        });
+
+      return service
+        .readRankedFeed(
+          input
+        );
+    },
+  };
+}
 export async function buildApp(
   options:
     BuildAppOptions =
@@ -741,6 +786,20 @@ await app.register(
     {
       prefix:
         "/api/v1",
+    }
+  );
+  const posterBrainRankedFeedService =
+    options
+      .posterBrainRankedFeedService ??
+    createPosterBrainRankedFeedService();
+  await app.register(
+    posterBrainRankedFeedRoutes,
+    {
+      prefix:
+        "/api/v1/poster-brain",
+
+      service:
+        posterBrainRankedFeedService,
     }
   );
 
