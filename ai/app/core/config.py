@@ -57,6 +57,7 @@ class AiServiceSettings:
     environment: str
     provider_name: str
     model_name: str
+    embedding_model_name: str
     auto_learning_enabled: bool
     training_min_events: int
     model_promotion_requires_eval_pass: bool
@@ -69,6 +70,10 @@ def load_settings() -> AiServiceSettings:
         environment=_read_text("AI_SERVICE_ENVIRONMENT", "development"),
         provider_name=_read_text("AI_PROVIDER_NAME", "poster-python-ai"),
         model_name=_read_text("AI_MODEL_NAME", "poster-rule-classifier-v1"),
+        embedding_model_name=_read_text(
+            "AI_EMBEDDING_MODEL_NAME",
+            "unconfigured",
+        ),
         auto_learning_enabled=_read_bool("AUTO_LEARNING_ENABLED", True),
         training_min_events=_read_training_min_events(),
         model_promotion_requires_eval_pass=_read_bool(
