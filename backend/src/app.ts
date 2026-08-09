@@ -267,6 +267,10 @@ import {
 import {
   createPosterBrainRankedDiscoveryQueryRepository,
   createPosterBrainRankedFeedRouteAdapterService,
+  createPosterBrainContentSourcesRouteAdapterService,
+  type PosterBrainContentSourceIngestionRunExecutor,
+  type PosterBrainContentSourceRegistryRepository,
+  type PosterBrainContentSourceRegistryRow,
 } from "./application/poster-brain/index.js";
 
 import {
@@ -277,9 +281,17 @@ import {
   posterBrainRankedFeedRoutes,
   type PosterBrainRankedFeedRouteService,
 } from "./routes/poster-brain-ranked-feed.routes.js";
+
+import {
+  posterBrainContentSourcesRoutes,
+  type PosterBrainContentSourcesRouteService,
+} from "./routes/poster-brain-content-sources.routes.js";
 export interface BuildAppOptions {
   posterBrainRankedFeedService?:
     PosterBrainRankedFeedRouteService;
+
+  posterBrainContentSourcesService?:
+    PosterBrainContentSourcesRouteService;
 
   adminAnalyticsService?:
     AdminAnalyticsService;
@@ -623,6 +635,221 @@ function createPosterBrainRankedFeedService():
     },
   };
 }
+function createPosterBrainContentSourceRegistryRepository():
+  PosterBrainContentSourceRegistryRepository {
+  const pool =
+    getDatabasePool();
+
+  return {
+    async listSources(input) {
+      const search =
+        input.search?.trim();
+
+      const result =
+        await pool.query<PosterBrainContentSourceRegistryRow>(
+          `
+            WITH source_rows AS (
+              SELECT
+                to_jsonb(discovery_sources.*) AS source_row
+              FROM app.discovery_sources
+            ),
+            normalized_sources AS (
+              SELECT
+                COALESCE(
+                  source_row ->> 'sourceKey',
+                  source_row ->> 'source_key',
+                  source_row ->> 'key',
+                  source_row ->> 'id'
+                ) AS "sourceKey",
+
+                COALESCE(
+                  source_row ->> 'displayName',
+                  source_row ->> 'display_name',
+                  source_row ->> 'name',
+                  source_row ->> 'source_name',
+                  source_row ->> 'source_key',
+                  source_row ->> 'id'
+                ) AS "displayName",
+
+                COALESCE(
+                  source_row ->> 'feedUrl',
+                  source_row ->> 'feed_url',
+                  source_row ->> 'rss_url',
+                  source_row ->> 'url'
+                ) AS "feedUrl",
+
+                CASE COALESCE(
+                  source_row ->> 'status',
+                  source_row ->> 'source_status',
+                  source_row ->> 'ingestion_status'
+                )
+                  WHEN 'paused' THEN 'paused'
+                  WHEN 'disabled' THEN 'disabled'
+                  WHEN 'blocked' THEN 'blocked'
+                  ELSE 'active'
+                END AS "status",
+
+                CASE COALESCE(
+                  source_row ->> 'health',
+                  source_row ->> 'health_status',
+                  source_row ->> 'source_health'
+                )
+                  WHEN 'healthy' THEN 'healthy'
+                  WHEN 'degraded' THEN 'degraded'
+                  WHEN 'failing' THEN 'failing'
+                  ELSE 'unknown'
+                END AS "health",
+
+                CASE
+                  WHEN COALESCE(
+                    source_row ->> 'priority',
+                    source_row ->> 'ingestion_priority',
+                    '0'
+                  ) ~ '^-?[0-9]+$'
+                  THEN COALESCE(
+                    source_row ->> 'priority',
+                    source_row ->> 'ingestion_priority',
+                    '0'
+                  )::integer
+                  ELSE 0
+                END AS "priority",
+
+                COALESCE(
+                  source_row ->> 'lastFetchedAt',
+                  source_row ->> 'last_fetched_at',
+                  source_row ->> 'last_successful_fetch_at'
+                ) AS "lastFetchedAt",
+
+                COALESCE(
+                  source_row ->> 'nextAllowedAt',
+                  source_row ->> 'next_allowed_at',
+                  source_row ->> 'next_allowed_fetch_at'
+                ) AS "nextAllowedAt"
+              FROM source_rows
+            )
+            SELECT
+              "sourceKey",
+              "displayName",
+              "feedUrl",
+              "status",
+              "health",
+              "priority",
+              "lastFetchedAt",
+              "nextAllowedAt"
+            FROM normalized_sources
+            WHERE "sourceKey" IS NOT NULL
+              AND "feedUrl" IS NOT NULL
+              AND ($1::text IS NULL OR "status" = $1::text)
+              AND (
+                $2::text IS NULL
+                OR "sourceKey" ILIKE '%' || $2::text || '%'
+                OR "displayName" ILIKE '%' || $2::text || '%'
+                OR "feedUrl" ILIKE '%' || $2::text || '%'
+              )
+            ORDER BY
+              "priority" DESC,
+              "displayName" ASC
+            LIMIT $3::integer
+          `,
+          [
+            input.status ?? null,
+            search && search.length > 0
+              ? search
+              : null,
+            input.limit,
+          ]
+        );
+
+      return result.rows;
+    },
+  };
+}
+
+function createPosterBrainContentSourceIngestionRunExecutor():
+  PosterBrainContentSourceIngestionRunExecutor {
+  return {
+    async requestRun(input) {
+      const requestedSourceCount =
+        input.sourceKeys?.length ??
+        input.maxSources;
+
+      return {
+        runId:
+          `manual-ingestion-${Date.now()}`,
+
+        status:
+          "rejected",
+
+        requestedAt:
+          input.requestedAt,
+
+        summary: {
+          plannedSources:
+            requestedSourceCount,
+
+          fetchedSources:
+            0,
+
+          failedSources:
+            0,
+
+          persistedItems:
+            0,
+        },
+      };
+    },
+  };
+}
+
+function createPosterBrainContentSourcesService():
+  PosterBrainContentSourcesRouteService {
+  let service:
+    PosterBrainContentSourcesRouteService |
+    null =
+    null;
+
+  return {
+    listSources(input) {
+      service ??=
+        createPosterBrainContentSourcesRouteAdapterService({
+          sourceRegistryRepository:
+            createPosterBrainContentSourceRegistryRepository(),
+
+          ingestionRunExecutor:
+            createPosterBrainContentSourceIngestionRunExecutor(),
+
+          now:
+            () =>
+              new Date()
+                .toISOString(),
+        });
+
+      return service.listSources(
+        input
+      );
+    },
+
+    requestIngestionRun(input) {
+      service ??=
+        createPosterBrainContentSourcesRouteAdapterService({
+          sourceRegistryRepository:
+            createPosterBrainContentSourceRegistryRepository(),
+
+          ingestionRunExecutor:
+            createPosterBrainContentSourceIngestionRunExecutor(),
+
+          now:
+            () =>
+              new Date()
+                .toISOString(),
+        });
+
+      return service.requestIngestionRun(
+        input
+      );
+    },
+  };
+}
 export async function buildApp(
   options:
     BuildAppOptions =
@@ -803,6 +1030,21 @@ await app.register(
     }
   );
 
+  const posterBrainContentSourcesService =
+    options
+      .posterBrainContentSourcesService ??
+    createPosterBrainContentSourcesService();
+
+  await app.register(
+    posterBrainContentSourcesRoutes,
+    {
+      prefix:
+        "/api/v1/poster-brain",
+
+      service:
+        posterBrainContentSourcesService,
+    }
+  );
   const emailDeliveryProvider =
     options
       .emailDeliveryProvider ??
