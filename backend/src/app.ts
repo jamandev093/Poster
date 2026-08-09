@@ -265,12 +265,12 @@ import {
   adminWalletOperationsRoutes,
 } from "./routes/admin-wallet-operations.routes.js";
 import {
-  createPosterBrainClassifiedFeedIngestionRunner,
+  createPosterBrainAiClassificationProviderFromRuntimeEnv,
+  createPosterBrainAiClassifiedFeedIngestionRunner,
   createPosterBrainContentPersistenceRepository,
   createPosterBrainContentSourceIngestionJobProvider,
   createPosterBrainContentSourceIngestionRunExecutor as createPosterBrainContentSourceIngestionRunExecutorBridge,
   createPosterBrainContentSourcesRouteAdapterService,
-  createPosterBrainFeedIngestionService,
   createPosterBrainRankedDiscoveryQueryRepository,
   createPosterBrainRankedFeedRouteAdapterService,
   createPosterBrainSourceFeedSchedulerStack,
@@ -813,13 +813,18 @@ function createPosterBrainContentSourceIngestionRunExecutor():
                 globalThis.fetch.bind(globalThis),
 
               classifiedFeedIngestionRunner:
-                createPosterBrainClassifiedFeedIngestionRunner({
-                  feedIngestionService:
-                    createPosterBrainFeedIngestionService({
-                      contentPersistenceRepository:
-                        createPosterBrainContentPersistenceRepository(
-                          getDatabasePool()
-                        ),
+
+                createPosterBrainAiClassifiedFeedIngestionRunner({
+                  contentPersistenceRepository:
+
+                    createPosterBrainContentPersistenceRepository(
+                      getDatabasePool()
+                    ),
+
+                  aiClassificationProvider:
+
+                    createPosterBrainAiClassificationProviderFromRuntimeEnv({
+                      now,
                     }),
                 }),
 

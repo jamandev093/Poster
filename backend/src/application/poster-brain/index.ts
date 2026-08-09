@@ -29,3 +29,4 @@ export * from "./rule-based-ai-classification-provider.service.js";
 export * from "./ai-http-classification-provider.service.js";
 export * from "./ai-learning-policy.service.js";
 export * from "./ai-runtime-classification-provider.service.js";
+export * from "./ai-classified-feed-ingestion-runner.service.js";
