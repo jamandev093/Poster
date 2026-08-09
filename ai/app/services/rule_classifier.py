@@ -214,10 +214,25 @@ def classify_content(
         primary_category = "general"
         confidence = 0.35
 
-    topics = _unique(
+    topic_seeds = (
         [
             primary_category,
             *(categories or []),
+        ]
+        if scores
+        else (
+            [
+                *(categories or []),
+                primary_category,
+            ]
+            if categories
+            else [primary_category]
+        )
+    )
+
+    topics = _unique(
+        [
+            *topic_seeds,
             *[
                 category
                 for category, score in sorted(
