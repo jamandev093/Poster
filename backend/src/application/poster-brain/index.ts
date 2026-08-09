@@ -25,3 +25,4 @@ export * from "./content-source-ingestion-run-executor.service.js";
 export * from "./content-source-ingestion-job-provider.service.js";
 export * from "./classified-feed-ingestion-runner.service.js";
 export * from "./ai-classification-provider-gateway.service.js";
+export * from "./rule-based-ai-classification-provider.service.js";
