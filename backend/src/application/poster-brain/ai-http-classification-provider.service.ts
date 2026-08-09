@@ -28,7 +28,7 @@ export interface PosterBrainAiHttpClassificationProviderDependencies {
   readonly now: () => string;
   readonly apiKey?: string;
   readonly providerName?: string;
-  readonly defaultModel?: string;
+  readonly defaultModel?: string | undefined;
 }
 
 export class PosterBrainAiHttpClassificationProviderError extends Error {
@@ -215,7 +215,7 @@ function createClassification(input: {
   readonly body: Record<string, unknown>;
   readonly now: string;
   readonly providerName: string;
-  readonly defaultModel?: string;
+  readonly defaultModel?: string | undefined;
 }): PosterBrainAiClassification {
   const primaryCategory =
     cleanString(
