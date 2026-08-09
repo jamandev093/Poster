@@ -157,7 +157,7 @@ import {
 } from "./application/authentication/account-selected-interests.service.js";
 
 import {
-  createMobileDiscoveryService,
+  createPosterBrainMobileDiscoveryService,
   type MobileDiscoveryService,
 } from "./application/mobile-discovery/index.js";
 
@@ -1122,7 +1122,10 @@ await app.register(
   const mobileDiscoveryService =
     options
       .mobileDiscoveryService ??
-    createMobileDiscoveryService();
+    createPosterBrainMobileDiscoveryService({
+      rankedFeedService:
+        createPosterBrainRankedFeedService(),
+    });
 
   const mobileUserActionsService =
     options
