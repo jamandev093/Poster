@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.api.classification import router as classification_router
 from app.api.embedding import router as embedding_router
 from app.api.health import router as health_router
+from app.api.training_handoff import router as training_handoff_router
 from app.core.config import load_settings
 
 
@@ -20,6 +21,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(classification_router)
     app.include_router(embedding_router)
+    app.include_router(training_handoff_router)
 
     return app
 
