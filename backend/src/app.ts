@@ -265,12 +265,19 @@ import {
   adminWalletOperationsRoutes,
 } from "./routes/admin-wallet-operations.routes.js";
 import {
+  createPosterBrainClassifiedFeedIngestionRunner,
+  createPosterBrainContentPersistenceRepository,
+  createPosterBrainContentSourceIngestionJobProvider,
+  createPosterBrainContentSourceIngestionRunExecutor as createPosterBrainContentSourceIngestionRunExecutorBridge,
+  createPosterBrainContentSourcesRouteAdapterService,
+  createPosterBrainFeedIngestionService,
   createPosterBrainRankedDiscoveryQueryRepository,
   createPosterBrainRankedFeedRouteAdapterService,
-  createPosterBrainContentSourcesRouteAdapterService,
+  createPosterBrainSourceFeedSchedulerStack,
   type PosterBrainContentSourceIngestionRunExecutor,
   type PosterBrainContentSourceRegistryRepository,
   type PosterBrainContentSourceRegistryRow,
+  type PosterBrainSourceIngestionOutcomePolicy,
 } from "./application/poster-brain/index.js";
 
 import {
@@ -606,6 +613,19 @@ function createRuntimeRazorpayWebhookVerifier(
     },
   };
 }
+const POSTER_BRAIN_SOURCE_INGESTION_POLICY = {
+  successIntervalMinutes:
+    30,
+  retryBaseMinutes:
+    5,
+  retryMaxMinutes:
+    60,
+  degradedFailureThreshold:
+    1,
+  failingFailureThreshold:
+    3,
+} satisfies PosterBrainSourceIngestionOutcomePolicy;
+
 function createPosterBrainRankedFeedService():
   PosterBrainRankedFeedRouteService {
   let service:
@@ -767,39 +787,52 @@ function createPosterBrainContentSourceRegistryRepository():
 
 function createPosterBrainContentSourceIngestionRunExecutor():
   PosterBrainContentSourceIngestionRunExecutor {
+  let executor:
+    PosterBrainContentSourceIngestionRunExecutor |
+    null =
+    null;
+
+  const now =
+    () =>
+      new Date()
+        .toISOString();
+
   return {
-    async requestRun(input) {
-      const requestedSourceCount =
-        input.sourceKeys?.length ??
-        input.maxSources;
+    requestRun(input) {
+      executor ??=
+        createPosterBrainContentSourceIngestionRunExecutorBridge({
+          jobProvider:
+            createPosterBrainContentSourceIngestionJobProvider({
+              executor:
+                getDatabasePool(),
+            }),
 
-      return {
-        runId:
-          `manual-ingestion-${Date.now()}`,
+          schedulerRunService:
+            createPosterBrainSourceFeedSchedulerStack({
+              fetchImplementation:
+                globalThis.fetch.bind(globalThis),
 
-        status:
-          "rejected",
+              classifiedFeedIngestionRunner:
+                createPosterBrainClassifiedFeedIngestionRunner({
+                  feedIngestionService:
+                    createPosterBrainFeedIngestionService({
+                      contentPersistenceRepository:
+                        createPosterBrainContentPersistenceRepository(
+                          getDatabasePool()
+                        ),
+                    }),
+                }),
 
-        requestedAt:
-          input.requestedAt,
+              now,
+            }).sourceFeedSchedulerRunService,
 
-        summary: {
-          plannedSources:
-            requestedSourceCount,
+          policy:
+            POSTER_BRAIN_SOURCE_INGESTION_POLICY,
 
-          attemptedSources:
-            0,
+          now,
+        });
 
-          succeededSources:
-            0,
-
-          failedSources:
-            0,
-
-          persistedItems:
-            0,
-        },
-      };
+      return executor.requestRun(input);
     },
   };
 }
