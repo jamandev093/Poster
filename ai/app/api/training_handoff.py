@@ -3,6 +3,10 @@ from __future__ import annotations
 import json
 
 from collections.abc import Iterator
+from datetime import (
+    datetime,
+    timezone,
+)
 from tempfile import SpooledTemporaryFile
 from typing import Any, BinaryIO
 
@@ -26,6 +30,15 @@ from app.models.training_dataset import (
 from app.services.training_dataset_handoff import (
     TrainingDatasetHandoffValidationError,
     validate_training_dataset_handoff,
+)
+from app.models.training_run import (
+    TrainingCandidateMetrics,
+    TrainingCandidateModel,
+    TrainingDatasetTrainResponse,
+)
+from app.services.training_engine import (
+    TrainedEngagementModel,
+    train_engagement_model,
 )
 
 
@@ -332,6 +345,274 @@ async def validate_training_dataset_http_handoff(
             contentCount=result.content_count,
             sourceCutoffAt=result.source_cutoff_at,
             trainingStarted=False,
+        )
+
+    except ValidationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="training_dataset_contract_invalid",
+        ) from error
+
+    except TrainingDatasetHttpTransportError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="training_dataset_transport_invalid",
+        ) from error
+
+    except TrainingDatasetHandoffValidationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="training_dataset_handoff_invalid",
+        ) from error
+
+    finally:
+        file.close()
+
+def _utc_now_milliseconds() -> str:
+    return (
+        datetime.now(
+            timezone.utc
+        )
+        .isoformat(
+            timespec="milliseconds"
+        )
+        .replace(
+            "+00:00",
+            "Z",
+        )
+    )
+
+
+def _iter_training_events(
+    file: BinaryIO,
+) -> Iterator:
+    file.seek(
+        0
+    )
+
+    manifest_payload = _read_json_line(
+        file,
+        line_number=1,
+    )
+
+    if manifest_payload is None:
+        raise TrainingDatasetHttpTransportError(
+            "Training dataset handoff is missing its manifest."
+        )
+
+    if (
+        manifest_payload.get(
+            "kind"
+        ) !=
+        "manifest"
+    ):
+        raise TrainingDatasetHttpTransportError(
+            "The first training dataset NDJSON line must be the manifest."
+        )
+
+    TrainingDatasetHandoffManifestLine.model_validate(
+        manifest_payload
+    )
+
+    for page in _iter_page_lines(
+        file
+    ):
+        for event in page.events:
+            yield event
+
+
+def _candidate_response(
+    model: TrainedEngagementModel,
+) -> TrainingCandidateModel:
+    return TrainingCandidateModel(
+        modelId=model.model_id,
+        modelType=model.model_type,
+        trainingEngineVersion=(
+            model.training_engine_version
+        ),
+        featureVersion=model.feature_version,
+        featureDimension=model.feature_dimension,
+        datasetId=model.dataset_id,
+        datasetChecksum=model.dataset_checksum,
+        trainedAt=model.trained_at,
+        materializedEventCount=(
+            model.materialized_event_count
+        ),
+        labeledEventCount=(
+            model.labeled_event_count
+        ),
+        trainingEventCount=(
+            model.training_event_count
+        ),
+        trainingPositiveCount=(
+            model.training_positive_count
+        ),
+        trainingNegativeCount=(
+            model.training_negative_count
+        ),
+        intercept=model.intercept,
+        weights=list(
+            model.weights
+        ),
+        metrics=TrainingCandidateMetrics(
+            validationEventCount=(
+                model.metrics
+                .validation_event_count
+            ),
+            validationPositiveCount=(
+                model.metrics
+                .validation_positive_count
+            ),
+            validationNegativeCount=(
+                model.metrics
+                .validation_negative_count
+            ),
+            accuracy=model.metrics.accuracy,
+            logLoss=model.metrics.log_loss,
+            rocAuc=model.metrics.roc_auc,
+        ),
+        modelChecksum=model.model_checksum,
+    )
+
+
+@router.post(
+    "/training-dataset/train",
+    response_model=TrainingDatasetTrainResponse,
+)
+async def train_training_dataset_http(
+    request: Request,
+) -> TrainingDatasetTrainResponse:
+    if (
+        _normalized_content_type(
+            request
+        ) !=
+        TRAINING_DATASET_HANDOFF_CONTENT_TYPE
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="training_dataset_handoff_requires_ndjson",
+        )
+
+    try:
+        file = await _spool_request(
+            request
+        )
+    except HTTPException:
+        raise
+    except TrainingDatasetHttpTransportError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="training_dataset_transport_invalid",
+        ) from error
+
+    try:
+        manifest_payload = _read_json_line(
+            file,
+            line_number=1,
+        )
+
+        if manifest_payload is None:
+            raise TrainingDatasetHttpTransportError(
+                "Training dataset handoff is missing its manifest."
+            )
+
+        if (
+            manifest_payload.get(
+                "kind"
+            ) !=
+            "manifest"
+        ):
+            raise TrainingDatasetHttpTransportError(
+                "The first training dataset NDJSON line must be the manifest."
+            )
+
+        manifest_line = (
+            TrainingDatasetHandoffManifestLine.model_validate(
+                manifest_payload
+            )
+        )
+
+        validation_result = (
+            validate_training_dataset_handoff(
+                manifest_line.handoff,
+                _iter_page_lines(
+                    file
+                ),
+            )
+        )
+
+        manifest = (
+            manifest_line.handoff.manifest
+        )
+
+        training_result = (
+            train_engagement_model(
+                events=_iter_training_events(
+                    file
+                ),
+                dataset_id=manifest.datasetId,
+                dataset_checksum=(
+                    manifest.datasetChecksum
+                ),
+                materialized_event_count=(
+                    manifest.materializedEventCount
+                ),
+                trained_at=(
+                    _utc_now_milliseconds()
+                ),
+            )
+        )
+
+        candidate = (
+            None
+            if training_result.model is None
+            else _candidate_response(
+                training_result.model
+            )
+        )
+
+        return TrainingDatasetTrainResponse(
+            status=training_result.status,
+            accepted=True,
+            datasetId=validation_result.dataset_id,
+            schemaVersion=(
+                validation_result.schema_version
+            ),
+            datasetChecksum=(
+                validation_result.dataset_checksum
+            ),
+            sourceCutoffAt=(
+                validation_result.source_cutoff_at.astimezone(
+                    timezone.utc
+                ).isoformat(
+                    timespec="milliseconds"
+                ).replace(
+                    "+00:00",
+                    "Z",
+                )
+            ),
+            pageCount=validation_result.page_count,
+            eventCount=validation_result.event_count,
+            contentCount=validation_result.content_count,
+            labeledEventCount=(
+                training_result.labeled_event_count
+            ),
+            positiveEventCount=(
+                training_result.positive_event_count
+            ),
+            negativeEventCount=(
+                training_result.negative_event_count
+            ),
+            skippedEventCount=(
+                training_result.skipped_event_count
+            ),
+            reason=training_result.reason,
+            trainingAttempted=True,
+            candidateCreated=(
+                candidate is not None
+            ),
+            candidate=candidate,
+            promoted=False,
         )
 
     except ValidationError as error:
