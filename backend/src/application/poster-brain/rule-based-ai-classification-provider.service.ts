@@ -156,6 +156,12 @@ function toTopics(input: {
   readonly request: PosterBrainAiClassificationRequest;
   readonly primaryCategory: string;
 }): readonly string[] {
+  if (input.classification.category == null) {
+    return [
+      input.primaryCategory.toLowerCase(),
+    ];
+  }
+
   const topics =
     uniqueValues([
       ...input.classification.canonicalTopicIds,
