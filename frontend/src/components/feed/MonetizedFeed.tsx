@@ -564,8 +564,11 @@ function MonetizedFeedComponent(
               .add(impressionId);
 
             recordEntryImpression(
-              viewToken.item
-            );
+                viewToken.item,
+                placement,
+                query,
+                topic
+              );
           }
         );
       }
