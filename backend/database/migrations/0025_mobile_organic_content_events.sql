@@ -1,4 +1,4 @@
--- 0024_mobile_organic_content_events.sql
+-- 0025_mobile_organic_content_events.sql
 --
 -- Organic article impression and open-original/click events for
 -- Poster Brain ranking and learning data.
