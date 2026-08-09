@@ -18,11 +18,8 @@ const DEFAULT_POSTER_API_BASE_URL =
 const API_VERSION_PREFIX =
   "/api/v1";
 
-const POSTER_BRAIN_DISCOVERY_PREFIX =
-  "/poster-brain";
-
-const POSTER_BRAIN_RANKED_FEED_PATH =
-  "/ranked-feed";
+const MOBILE_DISCOVERY_PREFIX =
+  "/mobile";
 
 const AUTHENTICATION_REQUIRED_CODE =
   "AUTHENTICATION_REQUIRED";
@@ -338,25 +335,6 @@ function appendQueryParam(
   );
 }
 
-function getPosterBrainSurfaceFromLegacyPath(
-  path: string
-): MobileDiscoverySurface {
-  const normalizedPath =
-    normalizePath(
-      path
-    );
-
-  if (normalizedPath === "/search") {
-    return "search";
-  }
-
-  if (normalizedPath === "/feed/trending") {
-    return "trending";
-  }
-
-  return "home";
-}
-
 function buildMobileDiscoveryUrl(
   path: string,
   request:
@@ -372,24 +350,26 @@ function buildMobileDiscoveryUrl(
 
   appendQueryParam(
     queryParams,
-    "surface",
-    getPosterBrainSurfaceFromLegacyPath(
-      path
-    )
-  );
-
-  appendQueryParam(
-    queryParams,
     "limit",
     request.limit ?? null
   );
 
   appendQueryParam(
     queryParams,
-    "searchQuery",
-    normalizeOptionalText(
-      request.query
-    )
+    "cursor",
+    request.cursor ?? null
+  );
+
+  appendQueryParam(
+    queryParams,
+    "refreshMode",
+    request.refreshMode ?? null
+  );
+
+  appendQueryParam(
+    queryParams,
+    "query",
+    request.query ?? null
   );
 
   appendQueryParam(
@@ -418,10 +398,8 @@ function buildMobileDiscoveryUrl(
   return [
     baseUrl,
     API_VERSION_PREFIX,
-    POSTER_BRAIN_DISCOVERY_PREFIX,
-    normalizePath(
-      POSTER_BRAIN_RANKED_FEED_PATH
-    ),
+    MOBILE_DISCOVERY_PREFIX,
+    normalizePath(path),
     queryString,
   ].join("");
 }
@@ -1098,352 +1076,9 @@ function parseAiHandoff(
   };
 }
 
-function getStringArrayOrEmpty(
-  value: unknown
-): string[] {
-  return isStringArray(
-    value
-  )
-    ? value
-    : [];
-}
-
-function getRankedFeedMetadata(
-  value: Record<string, unknown>
-): Record<string, unknown> {
-  const metadata =
-       value
-  )
-    ? value
-    : [];
-}
-
-function getRankedFeedMetadata(
-  value: Record value.metadata;
-
-  return isRecord(
-    metadata
-  )
-    ? metadata
-    : {};
-}
-
-function isPosterBrainRankedFeedResponse(
-  value: unknown
-): value is Record<string, unknown> {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return isSurface(value.surface) &&
-    Array.isArray(value.items) &&
-    getString(value, "generatedAt") !== null &&
-    !("adSlots" in value);
-}
-
-function parsePosterBrainRankedFeedItem(
-  value: unknown,
-  generatedAt: string
-): MobileDiscoveryFeedItem {
-  if (!isRecord(value)) {
-    throw new Error(
-      "Poster Brain ranked feed item is invalid."
-    );
-  }
-
-  const metadata =
-    getRankedFeedMetadata(
-      value
-    );
-
-  const id =
-    getString(
-      value,
-      "id"
-    );
-
-  const title =
-    getString(
-      value,
-      "title"
-    );
-
-  const originalUrl =
-    getString(
-      value,
-      "originalUrl"
-    );
-
-  const publisherName =
-    getString(
-      value,
-      "publisherName"
-    );
-
-  if (!id || !title || !originalUrl || !publisherName) {
-    throw new Error(
-      "Poster Brain ranked feed item contract is incomplete."
-    );
-  }
-
-  const excerpt =
-    getString(
-      metadata,
-      "excerpt"
-    ) ??
-    getString(
-      metadata,
-      "summary"
-    ) ??
-    title;
-
-  const sourceId =
-    getString(
-      metadata,
-      "sourceId"
-    ) ??
-    getString(
-      metadata,
-      "sourceKey"
-    ) ??
-    getString(
-      metadata,
-      "source"
-    ) ??
-    id;
-
-  return {
-    kind:
-      "organic",
-
-    id,
-
-    sourceId,
-
-    publisher: {
-      name:
-        publisherName,
-
-      domain:
-        getString(
-          metadata,
-          "publisherDomain"
-        ),
-    },
-
-    title,
-
-    excerpt,
-
-    originalUrl,
-
-    imageUrl:
-      getString(
-        metadata,
-        "imageUrl"
-      ),
-
-    mediaType:
-      getString(
-        metadata,
-        "mediaType"
-      ) ??
-      "article",
-
-    category:
-      getString(
-        metadata,
-        "category"
-      ),
-
-    topics:
-      getStringArrayOrEmpty(
-        metadata.topics
-      ),
-
-    tags:
-      getStringArrayOrEmpty(
-        metadata.tags
-      ),
-
-    languageCode:
-      getString(
-        metadata,
-        "languageCode"
-      ) ??
-      "en",
-
-    regionCode:
-      getString(
-        metadata,
-        "regionCode"
-      ),
-
-    publishedAt:
-      getString(
-        value,
-        "publishedAt"
-      ),
-
-    discoveredAt:
-      generatedAt,
-
-    actions: {
-      canOpenOriginal:
-        true,
-
-      canSave:
-        true,
-
-      canShare:
-        true,
-
-      canHide:
-        true,
-
-      canGiveFeedback:
-        true,
-    },
-  };
-}
-
-function parsePosterBrainRankedFeedResponse(
-  value: Record<string, unknown>
-): MobileDiscoveryFeedResponse {
-  const surface =
-    isSurface(value.surface)
-      ? value.surface
-      : "home";
-
-  const generatedAt =
-    getString(
-      value,
-      "generatedAt"
-    ) ??
-    new Date()
-      .toISOString();
-
-  const query =
-    getRecord(
-      value,
-      "query"
-    );
-
-  return {
-    surface,
-
-    items:
-      Array.isArray(value.items)
-        ? value.items.map(
-            item =>
-              parsePosterBrainRankedFeedItem(
-                item,
-                generatedAt
-              )
-          )
-        : [],
-
-    adSlots:
-      [],
-
-    pagination: {
-      nextCursor:
-        null,
-
-      hasMore:
-        false,
-
-      refreshAfterSeconds:
-        60,
-
-      refreshMode:
-        "initial",
-    },
-
-    searchEngine: {
-      engine:
-        "postgres_full_text",
-
-      query:
-        query
-          ? normalizeOptionalText(
-              getString(
-                query,
-                "searchQuery"
-              )
-            )
-          : null,
-
-      fullTextEnabled:
-        true,
-
-      semanticSearchReady:
-        false,
-
-      publisherSearchReady:
-        true,
-
-      topicSearchReady:
-        true,
-
-      committedQueryRequiredForTaxonomyMutation:
-        true,
-    },
-
-    recommendation: {
-      organicRankingFirst:
-        true,
-
-      personalizationReady:
-        true,
-
-      sourceDiversityReady:
-        true,
-
-      negativeFeedbackReady:
-        true,
-
-      repeatedExposureControlReady:
-        true,
-
-      monetizationInsertedAfterOrganicRanking:
-        true,
-    },
-
-    aiHandoff: {
-      apiBackendLanguage:
-        "typescript",
-
-      aiServiceLanguage:
-        "python",
-
-      classificationReady:
-        true,
-
-      embeddingsReady:
-        false,
-
-      semanticDeduplicationReady:
-        false,
-
-      rankingAssistReady:
-        true,
-
-      trendIntelligenceReady:
-        true,
-    },
-
-    generatedAt,
-  };
-}
-
 function parseFeedResponse(
   value: unknown
 ): MobileDiscoveryFeedResponse {
-  if (isPosterBrainRankedFeedResponse(value)) {
-    return parsePosterBrainRankedFeedResponse(value);
-  }
-
   if (!isRecord(value)) {
     throw new Error(
       "Discovery feed response is invalid."
