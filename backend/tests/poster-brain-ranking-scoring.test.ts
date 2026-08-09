@@ -90,6 +90,21 @@ describe("Poster Brain ranking scoring domain", () => {
     expect(high).toBeGreaterThan(low);
   });
 
+  it("uses volume-only engagement when impression exposure is unavailable", () => {
+    const score =
+      calculatePosterBrainEngagementScore({
+        impressions: 0,
+        clicks: 0,
+        shares: 1,
+        bookmarks: 0,
+        reports: 0,
+        hides: 0,
+      });
+
+    expect(score).toBeGreaterThan(0);
+    expect(score).toBeLessThan(0.2);
+  });
+
   it("matches user interests against topics, tags, and keywords", () => {
     const score = calculatePosterBrainInterestMatchScore({
       candidate: candidate(),

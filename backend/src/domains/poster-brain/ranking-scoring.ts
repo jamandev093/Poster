@@ -59,9 +59,13 @@ export function calculatePosterBrainEngagementScore(
   signals: PosterBrainEngagementSignals
 ): number {
   const positive = signals.clicks * 2 + signals.shares * 3 + signals.bookmarks * 2.5;
-  const exposure = Math.max(1, signals.impressions);
-  const rateScore = positive / exposure;
   const volumeBoost = Math.log1p(positive) / 10;
+
+  if (signals.impressions <= 0) {
+    return clamp01(volumeBoost);
+  }
+
+  const rateScore = positive / signals.impressions;
 
   return clamp01(rateScore + volumeBoost);
 }

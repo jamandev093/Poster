@@ -99,10 +99,29 @@ export async function listPosterBrainRankedDiscoveryRows(input: {
           COALESCE(c.search_keywords, '[]'::jsonb) AS "searchKeywords",
           0 AS "impressions",
           0 AS "clicks",
-          0 AS "shares",
-          0 AS "bookmarks",
-          0 AS "reports",
-          0 AS "hides"
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_share_events share_events
+            WHERE share_events.content_id = c.id
+          ) AS "shares",
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_bookmarks bookmarks
+            WHERE bookmarks.content_id = c.id
+              AND bookmarks.deleted_at IS NULL
+          ) AS "bookmarks",
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_report_events reports
+            WHERE reports.content_id = c.id
+              AND reports.status IN ('pending', 'triaged')
+          ) AS "reports",
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_article_feedback feedback
+            WHERE feedback.content_id = c.id
+              AND feedback.reason_id = 'not_interested'
+          ) AS "hides"
         FROM app.discovery_content_items c
         INNER JOIN app.discovery_sources s
           ON s.id = c.source_id

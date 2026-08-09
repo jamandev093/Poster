@@ -83,6 +83,46 @@ describe("Poster Brain ranked discovery query repository", () => {
     expect(executor.calls[0]?.text).toContain(
       "WHERE c.status = 'active'"
     );
+
+    const sql =
+      executor.calls[0]?.text ??
+      "";
+
+    expect(sql).toContain(
+      "FROM app.mobile_user_share_events"
+    );
+
+    expect(sql).toContain(
+      "FROM app.mobile_user_bookmarks"
+    );
+
+    expect(sql).toContain(
+      "bookmarks.deleted_at IS NULL"
+    );
+
+    expect(sql).toContain(
+      "FROM app.mobile_user_report_events"
+    );
+
+    expect(sql).toContain(
+      "reports.status IN ('pending', 'triaged')"
+    );
+
+    expect(sql).toContain(
+      "FROM app.mobile_user_article_feedback"
+    );
+
+    expect(sql).toContain(
+      "feedback.reason_id = 'not_interested'"
+    );
+
+    expect(sql).toContain(
+      '0 AS "impressions"'
+    );
+
+    expect(sql).toContain(
+      '0 AS "clicks"'
+    );
   });
 
   it("binds optional filters, limit, and offset safely", async () => {
