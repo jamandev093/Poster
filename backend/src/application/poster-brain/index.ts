@@ -23,3 +23,4 @@ export * from "./ranked-feed-route-adapter.service.js";
 export * from "./content-sources-route-adapter.service.js";
 export * from "./content-source-ingestion-run-executor.service.js";
 export * from "./content-source-ingestion-job-provider.service.js";
+export * from "./classified-feed-ingestion-runner.service.js";
