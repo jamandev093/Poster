@@ -108,6 +108,20 @@ function createMobileEngagementService():
             "ad-interaction-1",
         })
       ),
+
+    recordOrganicContentEvent:
+      vi.fn(
+        async () => ({
+          success:
+            true as const,
+
+          duplicate:
+            false,
+
+          eventId:
+            "organic-content-event-1",
+        })
+      ),
   };
 }
 

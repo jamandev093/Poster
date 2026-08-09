@@ -2,6 +2,8 @@ import type {
   MobileEngagementRepository,
   RecordMobileAdInteractionInput,
   RecordMobileAdInteractionResult,
+  RecordMobileOrganicContentEventInput,
+  RecordMobileOrganicContentEventResult,
   RecordMobileReportEventInput,
   RecordMobileReportEventResult,
   RecordMobileShareEventInput,
@@ -145,6 +147,63 @@ export class PostgresMobileEngagementRepository
         row === null,
 
       reportId:
+        row?.id ??
+        null,
+    };
+  }
+
+  async recordOrganicContentEvent(
+    input:
+      RecordMobileOrganicContentEventInput
+  ): Promise<RecordMobileOrganicContentEventResult> {
+    const result =
+      await this.database.query<IdentifierRow>(
+        `
+          INSERT INTO app.mobile_user_content_events (
+            user_id,
+            content_id,
+            event_type,
+            surface,
+            source_context,
+            deduplication_key,
+            occurred_at,
+            metadata
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7::timestamptz, NOW()), $8::jsonb)
+          ON CONFLICT (deduplication_key)
+            WHERE deduplication_key IS NOT NULL
+          DO NOTHING
+          RETURNING id
+        `,
+        [
+          input.userId,
+          input.contentId,
+          input.eventType,
+          input.surface,
+          input.sourceContext ??
+            null,
+          input.deduplicationKey ??
+            null,
+          input.occurredAt ??
+            null,
+          stringifyMetadata(
+            input.metadata
+          ),
+        ]
+      );
+
+    const row =
+      result.rows[0] ??
+      null;
+
+    return {
+      success:
+        true,
+
+      duplicate:
+        row === null,
+
+      eventId:
         row?.id ??
         null,
     };

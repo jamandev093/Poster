@@ -117,11 +117,15 @@ describe("Poster Brain ranked discovery query repository", () => {
     );
 
     expect(sql).toContain(
-      '0 AS "impressions"'
+      "FROM app.mobile_user_content_events"
     );
 
     expect(sql).toContain(
-      '0 AS "clicks"'
+      "content_events.event_type = 'impression'"
+    );
+
+    expect(sql).toContain(
+      "content_events.event_type = 'open_original_click'"
     );
   });
 

@@ -101,6 +101,57 @@ const ReportRequestSchema =
     })
     .strict();
 
+const OrganicContentEventRequestSchema =
+  z
+    .object({
+      contentId:
+        z
+          .string()
+          .uuid(),
+
+      eventType:
+        z
+          .enum([
+            "impression",
+            "open_original_click",
+          ]),
+
+      surface:
+        z
+          .enum([
+            "home",
+            "search",
+            "trending",
+            "bookmarks",
+          ]),
+
+      sourceContext:
+        NullableTrimmedTextSchema
+          .min(1)
+          .max(160)
+          .nullable()
+          .optional(),
+
+      deduplicationKey:
+        NullableTrimmedTextSchema
+          .min(8)
+          .max(240)
+          .nullable()
+          .optional(),
+
+      occurredAt:
+        NullableTrimmedTextSchema
+          .min(1)
+          .max(80)
+          .nullable()
+          .optional(),
+
+      metadata:
+        MetadataSchema
+          .optional(),
+    })
+    .strict();
+
 const AdInteractionRequestSchema =
   z
     .object({
@@ -301,6 +352,57 @@ export const mobileEngagementRoutes:
 
             reportContext:
               body.reportContext ??
+              {},
+          });
+      }
+    );
+
+    app.post(
+      "/actions/content-events",
+      async (
+        request
+      ) => {
+        const authorization =
+          requireAuthenticatedRequest(
+            request
+          );
+
+        const body =
+          parseRequestValue(
+            OrganicContentEventRequestSchema,
+            request.body,
+            "body"
+          );
+
+        return await options
+          .service
+          .recordOrganicContentEvent({
+            userId:
+              authorization.userId,
+
+            contentId:
+              body.contentId,
+
+            eventType:
+              body.eventType,
+
+            surface:
+              body.surface,
+
+            sourceContext:
+              body.sourceContext ??
+              null,
+
+            deduplicationKey:
+              body.deduplicationKey ??
+              null,
+
+            occurredAt:
+              body.occurredAt ??
+              null,
+
+            metadata:
+              body.metadata ??
               {},
           });
       }

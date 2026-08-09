@@ -2,8 +2,12 @@ import type {
   MobileAdInteractionEventType,
   MobileEngagementMetadata,
   MobileEngagementRepository,
+  MobileOrganicContentEventSurface,
+  MobileOrganicContentEventType,
   RecordMobileAdInteractionInput,
   RecordMobileAdInteractionResult,
+  RecordMobileOrganicContentEventInput,
+  RecordMobileOrganicContentEventResult,
   RecordMobileReportEventInput,
   RecordMobileReportEventResult,
   RecordMobileShareEventInput,
@@ -25,6 +29,20 @@ const SUPPORTED_AD_EVENT_TYPES =
     "hide",
   ]);
 
+const SUPPORTED_ORGANIC_CONTENT_EVENT_TYPES =
+  new Set<MobileOrganicContentEventType>([
+    "impression",
+    "open_original_click",
+  ]);
+
+const SUPPORTED_ORGANIC_CONTENT_SURFACES =
+  new Set<MobileOrganicContentEventSurface>([
+    "home",
+    "search",
+    "trending",
+    "bookmarks",
+  ]);
+
 export interface MobileEngagementService {
   recordShareEvent(
     input:
@@ -35,6 +53,11 @@ export interface MobileEngagementService {
     input:
       RecordMobileReportEventInput
   ): Promise<RecordMobileReportEventResult>;
+
+  recordOrganicContentEvent(
+    input:
+      RecordMobileOrganicContentEventInput
+  ): Promise<RecordMobileOrganicContentEventResult>;
 
   recordAdInteraction(
     input:
@@ -277,6 +300,40 @@ function normalizeOccurredAt(
   ).toISOString();
 }
 
+function normalizeOrganicContentEventType(
+  value:
+    MobileOrganicContentEventType
+): MobileOrganicContentEventType {
+  if (
+    !SUPPORTED_ORGANIC_CONTENT_EVENT_TYPES.has(
+      value
+    )
+  ) {
+    throw new Error(
+      "Organic content event type is invalid."
+    );
+  }
+
+  return value;
+}
+
+function normalizeOrganicContentSurface(
+  value:
+    MobileOrganicContentEventSurface
+): MobileOrganicContentEventSurface {
+  if (
+    !SUPPORTED_ORGANIC_CONTENT_SURFACES.has(
+      value
+    )
+  ) {
+    throw new Error(
+      "Organic content event surface is invalid."
+    );
+  }
+
+  return value;
+}
+
 function normalizeAdEventType(
   value:
     MobileAdInteractionEventType
@@ -385,6 +442,60 @@ export class DefaultMobileEngagementService
         normalizeMetadata(
           input.reportContext,
           "Report context"
+        ),
+    });
+  }
+
+  async recordOrganicContentEvent(
+    input:
+      RecordMobileOrganicContentEventInput
+  ): Promise<RecordMobileOrganicContentEventResult> {
+    return this.repository.recordOrganicContentEvent({
+      userId:
+        normalizeUuid(
+          input.userId,
+          "User ID"
+        ),
+
+      contentId:
+        normalizeUuid(
+          input.contentId,
+          "Content ID"
+        ),
+
+      eventType:
+        normalizeOrganicContentEventType(
+          input.eventType
+        ),
+
+      surface:
+        normalizeOrganicContentSurface(
+          input.surface
+        ),
+
+      sourceContext:
+        normalizeOptionalText(
+          input.sourceContext,
+          "Source context",
+          160
+        ),
+
+      deduplicationKey:
+        normalizeOptionalText(
+          input.deduplicationKey,
+          "Deduplication key",
+          240
+        ),
+
+      occurredAt:
+        normalizeOccurredAt(
+          input.occurredAt
+        ),
+
+      metadata:
+        normalizeMetadata(
+          input.metadata,
+          "Organic content event metadata"
         ),
     });
   }

@@ -97,8 +97,18 @@ export async function listPosterBrainRankedDiscoveryRows(input: {
           COALESCE(c.canonical_topic_ids, '[]'::jsonb) AS "canonicalTopicIds",
           COALESCE(c.evolving_topic_ids, '[]'::jsonb) AS "evolvingTopicIds",
           COALESCE(c.search_keywords, '[]'::jsonb) AS "searchKeywords",
-          0 AS "impressions",
-          0 AS "clicks",
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_content_events content_events
+            WHERE content_events.content_id = c.id
+              AND content_events.event_type = 'impression'
+          ) AS "impressions",
+          (
+            SELECT COUNT(*)::bigint
+            FROM app.mobile_user_content_events content_events
+            WHERE content_events.content_id = c.id
+              AND content_events.event_type = 'open_original_click'
+          ) AS "clicks",
           (
             SELECT COUNT(*)::bigint
             FROM app.mobile_user_share_events share_events

@@ -12,6 +12,8 @@ import type {
   MobileEngagementRepository,
   RecordMobileAdInteractionInput,
   RecordMobileAdInteractionResult,
+  RecordMobileOrganicContentEventInput,
+  RecordMobileOrganicContentEventResult,
   RecordMobileReportEventInput,
   RecordMobileReportEventResult,
   RecordMobileShareEventInput,
@@ -44,10 +46,17 @@ class InMemoryMobileEngagementRepository
     RecordMobileAdInteractionInput[] =
     [];
 
+  readonly organicContentEvents:
+    RecordMobileOrganicContentEventInput[] =
+    [];
+
   private readonly reportKeys =
     new Set<string>();
 
   private readonly adDeduplicationKeys =
+    new Set<string>();
+
+  private readonly organicContentDeduplicationKeys =
     new Set<string>();
 
   async recordShareEvent(
@@ -105,6 +114,42 @@ class InMemoryMobileEngagementRepository
         duplicate
           ? null
           : `report-${this.reports.length}`,
+    };
+  }
+
+  async recordOrganicContentEvent(
+    input:
+      RecordMobileOrganicContentEventInput
+  ): Promise<RecordMobileOrganicContentEventResult> {
+    const duplicate =
+      input.deduplicationKey
+        ? this.organicContentDeduplicationKeys.has(
+            input.deduplicationKey
+          )
+        : false;
+
+    if (input.deduplicationKey) {
+      this.organicContentDeduplicationKeys.add(
+        input.deduplicationKey
+      );
+    }
+
+    if (!duplicate) {
+      this.organicContentEvents.push(
+        input
+      );
+    }
+
+    return {
+      success:
+        true,
+
+      duplicate,
+
+      eventId:
+        duplicate
+          ? null
+          : `organic-content-event-${this.organicContentEvents.length}`,
     };
   }
 

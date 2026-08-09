@@ -5,6 +5,16 @@ export type MobileAdInteractionEventType =
   | "dismiss"
   | "hide";
 
+export type MobileOrganicContentEventType =
+  | "impression"
+  | "open_original_click";
+
+export type MobileOrganicContentEventSurface =
+  | "home"
+  | "search"
+  | "trending"
+  | "bookmarks";
+
 export interface MobileEngagementMetadata {
   [key:
     string]:
@@ -52,6 +62,36 @@ export interface RecordMobileReportEventInput {
     null;
 
   reportContext?:
+    MobileEngagementMetadata |
+    null;
+}
+
+export interface RecordMobileOrganicContentEventInput {
+  userId:
+    string;
+
+  contentId:
+    string;
+
+  eventType:
+    MobileOrganicContentEventType;
+
+  surface:
+    MobileOrganicContentEventSurface;
+
+  sourceContext?:
+    string |
+    null;
+
+  deduplicationKey?:
+    string |
+    null;
+
+  occurredAt?:
+    string |
+    null;
+
+  metadata?:
     MobileEngagementMetadata |
     null;
 }
@@ -115,6 +155,18 @@ export interface RecordMobileReportEventResult {
     null;
 }
 
+export interface RecordMobileOrganicContentEventResult {
+  success:
+    true;
+
+  duplicate:
+    boolean;
+
+  eventId:
+    string |
+    null;
+}
+
 export interface RecordMobileAdInteractionResult {
   success:
     true;
@@ -137,6 +189,11 @@ export interface MobileEngagementRepository {
     input:
       RecordMobileReportEventInput
   ): Promise<RecordMobileReportEventResult>;
+
+  recordOrganicContentEvent(
+    input:
+      RecordMobileOrganicContentEventInput
+  ): Promise<RecordMobileOrganicContentEventResult>;
 
   recordAdInteraction(
     input:
