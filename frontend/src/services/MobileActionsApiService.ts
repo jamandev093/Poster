@@ -136,6 +136,73 @@ export type MobileActionAdInteractionEventType =
   | "dismiss"
   | "hide";
 
+export type MobileActionOrganicContentEventType =
+  | "impression"
+  | "open_original_click";
+
+export type MobileActionOrganicContentSurface =
+  | "home"
+  | "search"
+  | "trending"
+  | "bookmarks";
+
+export interface MobileActionOrganicContentEventInput {
+  contentId:
+    string;
+
+  eventType:
+    MobileActionOrganicContentEventType;
+
+  surface:
+    MobileActionOrganicContentSurface;
+
+  sourceContext?:
+    string |
+    null;
+
+  deduplicationKey?:
+    string |
+    null;
+
+  occurredAt?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata |
+    null;
+}
+
+export interface MobileActionOrganicContentEventOptions {
+  sourceContext?:
+    string |
+    null;
+
+  deduplicationKey?:
+    string |
+    null;
+
+  occurredAt?:
+    string |
+    null;
+
+  metadata?:
+    MobileActionEngagementMetadata |
+    null;
+}
+
+export interface MobileActionOrganicContentEventResult {
+  success:
+    true;
+
+  duplicate:
+    boolean;
+
+  eventId:
+    string |
+    null;
+}
+
 export interface MobileActionShareEventInput {
   contentId:
     string;
@@ -850,6 +917,37 @@ function parseShareEventResult(
   };
 }
 
+function parseOrganicContentEventResult(
+  value:
+    unknown
+): MobileActionOrganicContentEventResult {
+  if (
+    !isMobileEngagementRecord(
+      value
+    ) ||
+    typeof value.duplicate !== "boolean" ||
+    (
+      value.eventId !== null &&
+      typeof value.eventId !== "string"
+    )
+  ) {
+    throw new Error(
+      "Organic content event response contract is invalid."
+    );
+  }
+
+  return {
+    success:
+      true,
+
+    duplicate:
+      value.duplicate,
+
+    eventId:
+      value.eventId,
+  };
+}
+
 function parseReportEventResult(
   value:
     unknown
@@ -1106,6 +1204,131 @@ export default class MobileActionsApiService {
       parseFeedbackResult
     );
   }
+  static buildOrganicContentEventInput(
+    article:
+      Article,
+    eventType:
+      MobileActionOrganicContentEventType,
+    surface:
+      MobileActionOrganicContentSurface,
+    options:
+      MobileActionOrganicContentEventOptions =
+      {}
+  ): MobileActionOrganicContentEventInput {
+    return {
+      contentId:
+        article.id,
+
+      eventType,
+
+      surface,
+
+      sourceContext:
+        options.sourceContext ??
+        null,
+
+      deduplicationKey:
+        options.deduplicationKey ??
+        [
+          surface,
+          eventType,
+          article.id,
+        ].join(":"),
+
+      occurredAt:
+        options.occurredAt ??
+        null,
+
+      metadata:
+        options.metadata ??
+        {},
+    };
+  }
+
+  static async recordOrganicContentEvent(
+    input:
+      MobileActionOrganicContentEventInput
+  ): Promise<MobileActionOrganicContentEventResult> {
+    return requestMobileActionsJson(
+      "/content-events",
+      {
+        method:
+          "POST",
+
+        body:
+          {
+            contentId:
+              input.contentId,
+
+            eventType:
+              input.eventType,
+
+            surface:
+              input.surface,
+
+            sourceContext:
+              input.sourceContext ??
+              null,
+
+            deduplicationKey:
+              input.deduplicationKey ??
+              null,
+
+            occurredAt:
+              input.occurredAt ??
+              null,
+
+            metadata:
+              input.metadata ??
+              {},
+          },
+      },
+      parseOrganicContentEventResult
+    );
+  }
+
+  static async recordArticleImpression(
+    article:
+      Article,
+    surface:
+      MobileActionOrganicContentSurface,
+    options:
+      MobileActionOrganicContentEventOptions =
+      {}
+  ): Promise<MobileActionOrganicContentEventResult> {
+    return MobileActionsApiService
+      .recordOrganicContentEvent(
+        MobileActionsApiService
+          .buildOrganicContentEventInput(
+            article,
+            "impression",
+            surface,
+            options
+          )
+      );
+  }
+
+  static async recordArticleOpenOriginalClick(
+    article:
+      Article,
+    surface:
+      MobileActionOrganicContentSurface,
+    options:
+      MobileActionOrganicContentEventOptions =
+      {}
+  ): Promise<MobileActionOrganicContentEventResult> {
+    return MobileActionsApiService
+      .recordOrganicContentEvent(
+        MobileActionsApiService
+          .buildOrganicContentEventInput(
+            article,
+            "open_original_click",
+            surface,
+            options
+          )
+      );
+  }
+
   static buildShareEventInput(
     article:
       Article,

@@ -36,6 +36,9 @@ import useFeedback from "../../context/FeedbackContext";
 
 import AdvertisingPreferenceService from "../../services/AdvertisingPreferenceService";
 import MobileAdInteractionService from "../../services/MobileAdInteractionService";
+import MobileActionsApiService, {
+  type MobileActionOrganicContentSurface,
+} from "../../services/MobileActionsApiService";
 
 import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";
 import MonetizationService from "../../services/MonetizationService";
@@ -112,8 +115,47 @@ interface MonetizedFeedProps
     MonetizationActions;
 }
 
+function resolveOrganicContentSurface(
+  placement:
+    MonetizationPlacement
+): MobileActionOrganicContentSurface | null {
+  const normalized =
+    String(
+      placement
+    ).toLowerCase();
+
+  if (
+    normalized.includes(
+      "home"
+    )
+  ) {
+    return "home";
+  }
+
+  if (
+    normalized.includes(
+      "search"
+    )
+  ) {
+    return "search";
+  }
+
+  if (
+    normalized.includes(
+      "trending"
+    )
+  ) {
+    return "trending";
+  }
+
+  return null;
+}
+
 function recordEntryImpression(
-  entry: FeedEntry
+  entry: FeedEntry,
+  placement: MonetizationPlacement,
+  query?: string,
+  topic?: string
 ): void {
   void MobileAdInteractionService.recordImpression(
     entry
