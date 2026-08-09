@@ -6,7 +6,6 @@ import type {
   ListMobileDiscoveryFeedInput,
   MobileDiscoveryAdSlotContract,
   MobileDiscoveryFeedItem,
-  MobileDiscoveryFeedResponse,
   MobileDiscoveryRefreshMode,
 } from "./mobile-discovery.types.js";
 
