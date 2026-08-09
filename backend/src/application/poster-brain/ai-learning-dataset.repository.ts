@@ -130,6 +130,16 @@ export interface PosterBrainAiLearningDatasetQuery {
   readonly cursor?:
     string |
     null;
+
+  /**
+   * Freezes dataset membership at the snapshot start time.
+   *
+   * Source rows created after this timestamp are excluded even
+   * when their semantic occurredAt/submittedAt value is older.
+   */
+  readonly sourceCutoffAt?:
+    string |
+    null;
 }
 
 export interface PosterBrainAiLearningDatasetRepository {
@@ -604,6 +614,15 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
         query.cursor
       );
 
+    const sourceCutoffAt =
+      query.sourceCutoffAt === undefined ||
+      query.sourceCutoffAt === null
+        ? null
+        : normalizeTimestamp(
+            query.sourceCutoffAt,
+            "sourceCutoffAt"
+          );
+
     const result =
       await this.database.query<
         PosterBrainAiLearningDatasetRow
@@ -633,6 +652,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               e.content_id
                 AS content_id
             FROM app.mobile_user_content_events e
+            WHERE
+              $3::timestamptz IS NULL
+              OR e.created_at <= $3::timestamptz
 
             UNION ALL
 
@@ -648,6 +670,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               NULL::boolean,
               s.content_id
             FROM app.mobile_user_share_events s
+            WHERE
+              $3::timestamptz IS NULL
+              OR s.created_at <= $3::timestamptz
 
             UNION ALL
 
@@ -663,6 +688,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               NULL::boolean,
               r.content_id
             FROM app.mobile_user_report_events r
+            WHERE
+              $3::timestamptz IS NULL
+              OR r.created_at <= $3::timestamptz
 
             UNION ALL
 
@@ -678,6 +706,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               (b.deleted_at IS NULL),
               b.content_id
             FROM app.mobile_user_bookmarks b
+            WHERE
+              $3::timestamptz IS NULL
+              OR b.created_at <= $3::timestamptz
 
             UNION ALL
 
@@ -693,6 +724,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               NULL::boolean,
               i.content_id
             FROM app.mobile_user_article_interactions i
+            WHERE
+              $3::timestamptz IS NULL
+              OR i.created_at <= $3::timestamptz
 
             UNION ALL
 
@@ -708,6 +742,9 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
               NULL::boolean,
               f.content_id
             FROM app.mobile_user_article_feedback f
+            WHERE
+              $3::timestamptz IS NULL
+              OR f.created_at <= $3::timestamptz
           )
 
           SELECT
@@ -817,7 +854,7 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
             os.occurred_at DESC,
             os.event_key DESC
 
-          LIMIT $3
+          LIMIT $4
         `,
         [
           cursor?.occurredAt ??
@@ -825,6 +862,8 @@ export class PostgreSqlPosterBrainAiLearningDatasetRepository
 
           cursor?.eventKey ??
             null,
+
+          sourceCutoffAt,
 
           limit + 1,
         ]

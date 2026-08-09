@@ -34,3 +34,5 @@ export * from "./ai-learning-event-count.repository.js";
 export * from "./ai-learning-event-count.service.js";
 export * from "./ai-learning-dataset.types.js";
 export * from "./ai-learning-dataset.repository.js";
+export * from "./ai-learning-dataset-snapshot.repository.js";
+export * from "./ai-learning-dataset-snapshot-builder.service.js";
