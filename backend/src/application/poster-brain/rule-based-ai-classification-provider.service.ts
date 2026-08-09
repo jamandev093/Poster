@@ -183,34 +183,35 @@ function toTopics(input: {
   ];
 }
 
+function readOptionalJsonString(
+  value: unknown
+): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed =
+    value.trim();
+
+  return trimmed.length > 0
+    ? trimmed
+    : undefined;
+}
+
 function toProviderName(
   classification: PosterBrainContentClassificationResult
 ): string {
-  const provider =
-    classification
-      .aiClassification
-      .provider
-      .trim();
-
-  return provider.length > 0
-    ? provider
-    : "poster_rule_seed";
+  return readOptionalJsonString(
+    classification.aiClassification.provider
+  ) ?? "poster_rule_seed";
 }
 
 function toModel(
   classification: PosterBrainContentClassificationResult
 ): string | undefined {
-  const version =
-    classification
-      .aiClassification
-      .version
-      ?.trim();
-
-  if (version === undefined || version.length === 0) {
-    return undefined;
-  }
-
-  return version;
+  return readOptionalJsonString(
+    classification.aiClassification.version
+  );
 }
 
 function toAiClassification(input: {
