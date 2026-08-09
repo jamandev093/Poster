@@ -43,12 +43,7 @@ export interface PosterBrainMobileDiscoveryRankedFeedResult {
 export interface PosterBrainMobileDiscoveryRankedFeedService {
   readRankedFeed(
     input: PosterBrainMobileDiscoveryRankedFeedInput
-  ): Promise<PosterBrainMobileFeedItem[];
-  readonly totalItems: number;
-  readonly generatedAt: string;
-}
-
-export interface PosterBrainMobileDiscoveryDiscoveryRankedFeedResult>;
+  ): Promise<PosterBrainMobileDiscoveryRankedFeedResult>;
 }
 
 export interface PosterBrainMobileDiscoveryServiceDependencies {
@@ -195,7 +190,6 @@ function readStringArray(
     }
 
     seen.add(key);
-
     result.push(trimmed);
   }
 
@@ -345,7 +339,8 @@ function mapRankedFeedItem(
       readString(
         metadata,
         "languageCode"
-      ),
+      ) ??
+      "en",
 
     regionCode:
       readString(
