@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import MobileActionsApiService from "../../services/MobileActionsApiService";
 import {
   ActivityIndicator,
   FlatList,
@@ -699,6 +700,33 @@ export default function HomeScreen() {
           await Linking.openURL(
             article.originalUrl
           );
+
+          void MobileActionsApiService
+            .recordArticleOpenOriginalClick(
+              article,
+              "home",
+              {
+                sourceContext:
+                  "feed",
+
+                deduplicationKey:
+                  [
+                    "home",
+                    "open_original_click",
+                    article.id,
+                  ].join(
+                    ":"
+                  ),
+
+                metadata: {
+                  surface:
+                    "home",
+                },
+              }
+            )
+            .catch(() => {
+              // Organic analytics failure must never affect publisher navigation.
+            });
         } catch {
           showError(
             "Unable to open article",

@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import MobileActionsApiService from "../../services/MobileActionsApiService";
 import {
   ActivityIndicator,
   FlatList,
@@ -1138,6 +1139,33 @@ export default function TrendingScreen() {
           await Linking.openURL(
             article.originalUrl
           );
+
+          void MobileActionsApiService
+            .recordArticleOpenOriginalClick(
+              article,
+              "trending",
+              {
+                sourceContext:
+                  "feed",
+
+                deduplicationKey:
+                  [
+                    "trending",
+                    "open_original_click",
+                    article.id,
+                  ].join(
+                    ":"
+                  ),
+
+                metadata: {
+                  surface:
+                    "trending",
+                },
+              }
+            )
+            .catch(() => {
+              // Organic analytics failure must never affect publisher navigation.
+            });
         } catch {
           showError(
             "Unable to open article",

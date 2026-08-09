@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import MobileActionsApiService from "../../services/MobileActionsApiService";
 import {
   ActivityIndicator,
   FlatList,
@@ -1913,6 +1914,33 @@ export default function SearchScreen() {
           await Linking.openURL(
             article.originalUrl
           );
+
+          void MobileActionsApiService
+            .recordArticleOpenOriginalClick(
+              article,
+              "search",
+              {
+                sourceContext:
+                  "feed",
+
+                deduplicationKey:
+                  [
+                    "search",
+                    "open_original_click",
+                    article.id,
+                  ].join(
+                    ":"
+                  ),
+
+                metadata: {
+                  surface:
+                    "search",
+                },
+              }
+            )
+            .catch(() => {
+              // Organic analytics failure must never affect publisher navigation.
+            });
         } catch {
           showError(
             "Unable to open article",

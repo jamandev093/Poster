@@ -4,6 +4,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import MobileActionsApiService from "../../services/MobileActionsApiService";
 import {
   ActivityIndicator,
   FlatList,
@@ -260,6 +261,33 @@ export default function BookmarksScreen() {
           await Linking.openURL(
             article.originalUrl
           );
+
+          void MobileActionsApiService
+            .recordArticleOpenOriginalClick(
+              article,
+              "bookmarks",
+              {
+                sourceContext:
+                  "bookmarks",
+
+                deduplicationKey:
+                  [
+                    "bookmarks",
+                    "open_original_click",
+                    article.id,
+                  ].join(
+                    ":"
+                  ),
+
+                metadata: {
+                  surface:
+                    "bookmarks",
+                },
+              }
+            )
+            .catch(() => {
+              // Organic analytics failure must never affect publisher navigation.
+            });
         } catch {
           showError(
             "Unable to open article",
