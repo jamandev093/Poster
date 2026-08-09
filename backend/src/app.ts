@@ -787,7 +787,10 @@ function createPosterBrainContentSourceIngestionRunExecutor():
           plannedSources:
             requestedSourceCount,
 
-          fetchedSources:
+          attemptedSources:
+            0,
+
+          succeededSources:
             0,
 
           failedSources:
