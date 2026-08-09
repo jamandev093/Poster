@@ -57,7 +57,7 @@ describe(
               "AI",
               "Infrastructure",
             ],
-          } as PosterBrainNormalizedContentItem;
+          } as unknown as PosterBrainNormalizedContentItem;
 
         const baseline:
           PosterBrainContentClassificationResult =
@@ -435,7 +435,7 @@ describe(
 
             tags:
               [],
-          } as PosterBrainNormalizedContentItem;
+          } as unknown as PosterBrainNormalizedContentItem;
 
         const baseline:
           PosterBrainContentClassificationResult =
