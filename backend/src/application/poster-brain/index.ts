@@ -32,3 +32,5 @@ export * from "./ai-runtime-classification-provider.service.js";
 export * from "./ai-classified-feed-ingestion-runner.service.js";
 export * from "./ai-learning-event-count.repository.js";
 export * from "./ai-learning-event-count.service.js";
+export * from "./ai-learning-dataset.types.js";
+export * from "./ai-learning-dataset.repository.js";
