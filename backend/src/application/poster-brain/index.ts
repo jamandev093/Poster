@@ -87,3 +87,4 @@ export * from "./evolving-topic-ingestion-runner.service.js";
 export * from "./evolving-topic-canonical-promotion.service.js";
 export * from "./source-discovery-runtime.repository.js";
 export * from "./source-discovery-runtime.service.js";
+export * from "./source-discovery-runtime-composition.service.js";

@@ -18,7 +18,8 @@
         "test:watch": "vitest",
         "db:check": "tsx src/database/database-check.ts",
         "db:migrate": "tsx src/database/migrate.ts",
-        "db:migrate:status": "tsx src/database/migrate.ts --status"
+        "db:migrate:status": "tsx src/database/migrate.ts --status",
+        "poster-brain:discover-sources": "node dist/jobs/poster-brain-source-discovery.js"
     },
     "dependencies": {
         "@fastify/cookie": "11.1.2",
