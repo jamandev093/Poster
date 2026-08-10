@@ -243,6 +243,14 @@ export async function fetchPosterBrainOfficialApiJson(
 
     readonly fetchImplementation?:
       PosterBrainOfficialApiHttpFetch;
+
+    readonly headers?:
+      Readonly<
+        Record<
+          string,
+          string
+        >
+      >;
   }
 ): Promise<unknown> {
   const fetchImplementation =
@@ -259,6 +267,11 @@ export async function fetchPosterBrainOfficialApiJson(
         headers: {
           accept:
             "application/json",
+
+          ...(
+            input.headers ??
+            {}
+          ),
         },
 
         signal:

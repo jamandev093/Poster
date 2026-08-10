@@ -638,6 +638,8 @@ describe(
         ).toEqual([
           "youtube",
           "nasa-images",
+          "x",
+          "facebook-pages",
         ]);
 
         const registry =

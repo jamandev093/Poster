@@ -53,3 +53,6 @@ export * from "./official-content-api-http.js";
 export * from "./youtube-content-api.provider.js";
 export * from "./nasa-images-content-api.provider.js";
 export * from "./official-content-api-providers.runtime.js";
+export * from "./x-content-api.provider.js";
+export * from "./facebook-pages-content-api.provider.js";
+export * from "./official-content-api-provider-catalog.js";
