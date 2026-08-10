@@ -8,3 +8,6 @@ export * from "./advertising-ai-learning-snapshot.types.js";
 export * from "./advertising-ai-learning-snapshot.repository.js";
 export * from "./advertising-ai-learning-snapshot-builder.service.js";
 export * from "./advertising-ai-training-handoff.service.js";
+export * from "./advertising-ai-model-lifecycle.types.js";
+export * from "./advertising-ai-model-registry.repository.js";
+export * from "./advertising-ai-model-evaluation.service.js";
