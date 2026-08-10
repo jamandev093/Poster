@@ -38,6 +38,7 @@ export interface PosterBrainSemanticLookupInput {
 
 export interface PosterBrainSemanticContentMatch {
   readonly contentId: string;
+  readonly externalContentId: string;
   readonly title: string;
   readonly excerpt: string;
   readonly originalUrl: string;
@@ -69,6 +70,7 @@ interface EmbeddingRow {
 
 interface SemanticRow {
   readonly contentId: string;
+  readonly externalContentId: string;
   readonly title: string;
   readonly excerpt: string;
   readonly originalUrl: string;
@@ -438,6 +440,9 @@ export class PostgreSqlPosterBrainContentEmbeddingRepository
             content.id::text
               AS "contentId",
 
+            content.external_content_id
+              AS "externalContentId",
+
             content.title
               AS "title",
 
@@ -556,6 +561,9 @@ export class PostgreSqlPosterBrainContentEmbeddingRepository
       row => ({
         contentId:
           row.contentId,
+
+        externalContentId:
+          row.externalContentId,
 
         title:
           row.title,

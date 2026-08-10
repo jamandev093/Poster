@@ -151,6 +151,7 @@ describe("Poster Brain ranked discovery query repository", () => {
       "IN",
       "AI",
       "ai policy",
+      null,
       100,
       0,
     ]);

@@ -22,6 +22,7 @@ export interface PosterBrainRankedDiscoveryQueryInput {
   readonly languageCode?: string | null;
   readonly regionCode?: string | null;
   readonly category?: string | null;
+  readonly externalContentIds?: readonly string[] | null;
 }
 
 export interface PosterBrainRankedDiscoveryQueryRepository {
@@ -80,6 +81,17 @@ export async function listPosterBrainRankedDiscoveryRows(input: {
   const languageCode = normalizeOptionalText(input.query.languageCode);
   const regionCode = normalizeOptionalText(input.query.regionCode);
   const category = normalizeOptionalText(input.query.category);
+  const externalContentIds =
+    input.query.externalContentIds === undefined ||
+    input.query.externalContentIds === null
+      ? null
+      : [
+          ...new Set(
+            input.query.externalContentIds
+              .map(value => value.trim())
+              .filter(value => value.length > 0)
+          ),
+        ];
 
   const result =
     await input.executor.query<PosterBrainDiscoveryContentRankingRow>(
@@ -148,15 +160,20 @@ export async function listPosterBrainRankedDiscoveryRows(input: {
             OR c.search_keywords::text ILIKE '%' || $4 || '%'
             OR c.tags::text ILIKE '%' || $4 || '%'
           )
+          AND (
+            $5::text[] IS NULL
+            OR c.external_content_id = ANY($5::text[])
+          )
         ORDER BY ${createOrderClause(input.query.surface)}
-        LIMIT $5
-        OFFSET $6
+        LIMIT $6
+        OFFSET $7
       `,
       [
         languageCode,
         regionCode,
         category,
         searchQuery,
+        externalContentIds,
         limit,
         offset,
       ]
