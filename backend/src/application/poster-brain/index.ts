@@ -66,3 +66,5 @@ export * from "./official-api-generic.provider.js";
 export * from "./official-api-provider-activation.policy.js";
 export * from "./official-api-manifest-catalog.js";
 export * from "./official-api-manifest-runtime.service.js";
+export * from "./large-discovery-api-manifest-catalog.js";
+export * from "./large-discovery-api-runtime.service.js";

@@ -311,6 +311,9 @@ function nextCursor(
     readonly currentCursor:
       string | null;
 
+    readonly pageSize:
+      number;
+
     readonly manifest:
       PosterBrainOfficialApiProviderManifest;
   }
@@ -389,6 +392,43 @@ function nextCursor(
       )
     );
 
+  if (!Number.isFinite(total)) {
+    return null;
+  }
+
+  if (
+    pagination.type ===
+    "page_total_results"
+  ) {
+    const currentPage =
+      input.currentCursor ===
+        null
+        ? 1
+        : Number(
+            input.currentCursor
+          );
+
+    if (
+      !Number.isSafeInteger(
+        currentPage
+      ) ||
+      currentPage < 1
+    ) {
+      return null;
+    }
+
+    const consumed =
+      currentPage *
+      input.pageSize;
+
+    return consumed < total
+      ? String(
+          currentPage +
+          1
+        )
+      : null;
+  }
+
   const current =
     input.currentCursor ===
       null
@@ -401,8 +441,7 @@ function nextCursor(
     !Number.isSafeInteger(
       current
     ) ||
-    current < 0 ||
-    !Number.isFinite(total)
+    current < 0
   ) {
     return null;
   }
@@ -441,6 +480,7 @@ export function createPosterBrainGenericOfficialApiProvider(
         true,
 
       providerClass:
+        manifest.providerClass ??
         "official",
 
       supportedContentKinds: [
@@ -522,7 +562,14 @@ export function createPosterBrainGenericOfficialApiProvider(
         url.searchParams.set(
           manifest.request
             .queryParameter,
-          request.query
+          (
+            request.query +
+            (
+              manifest.request
+                .querySuffix ??
+              ""
+            )
+          ).trim()
         );
       }
 
@@ -585,8 +632,12 @@ export function createPosterBrainGenericOfficialApiProvider(
             pagination.type ===
             "offset"
               ? "0"
-              : pagination.type ===
-                  "page"
+              : (
+                  pagination.type ===
+                    "page" ||
+                  pagination.type ===
+                    "page_total_results"
+                )
                 ? "1"
                 : pagination.type ===
                     "cursor"
@@ -869,6 +920,12 @@ export function createPosterBrainGenericOfficialApiProvider(
 
             currentCursor:
               request.cursor,
+
+            pageSize:
+              Math.min(
+                request.pageSize,
+                manifest.maxPageSize
+              ),
 
             manifest,
           }),

@@ -78,6 +78,16 @@ export type PosterBrainOfficialApiManifestPagination =
 
       readonly responseTotalPath:
         string;
+    }
+  | {
+      readonly type:
+        "page_total_results";
+
+      readonly requestParameter:
+        string;
+
+      readonly responseTotalPath:
+        string;
     };
 
 export type PosterBrainOfficialApiValueMapping =
@@ -106,6 +116,9 @@ export interface PosterBrainOfficialApiManifestRequest {
     >;
 
   readonly queryParameter?:
+    string;
+
+  readonly querySuffix?:
     string;
 
   readonly sourceParameter?:
@@ -219,6 +232,10 @@ export interface PosterBrainOfficialApiManifestActivation {
 export interface PosterBrainOfficialApiProviderManifest {
   readonly providerKey:
     string;
+
+  readonly providerClass?:
+    "official" |
+    "aggregator";
 
   readonly displayName:
     string;
