@@ -158,4 +158,98 @@ export const POSTER_BRAIN_OFFICIAL_CONTENT_API_PROVIDER_CATALOG:
         "META_GRAPH_ACCESS_TOKEN",
       ],
     },
+
+    {
+      providerKey:
+        "guardian",
+
+      operator:
+        "Guardian News and Media",
+
+      /*
+       * Poster is a commercial product.
+       * Do not assume a free developer key authorizes production use.
+       */
+      accessMode:
+        "permission_review",
+
+      discoveryMode:
+        "query_and_source",
+
+      metadataOnly:
+        true,
+
+      originalPublisherUrlRequired:
+        true,
+
+      playbackAssetsAllowed:
+        false,
+
+      fullContentBodyAllowed:
+        false,
+
+      requiredEnvironmentKeys: [
+        "GUARDIAN_API_KEY",
+      ],
+    },
+
+    {
+      providerKey:
+        "pubmed",
+
+      operator:
+        "NCBI / U.S. National Library of Medicine",
+
+      accessMode:
+        "public",
+
+      discoveryMode:
+        "query_and_source",
+
+      metadataOnly:
+        true,
+
+      originalPublisherUrlRequired:
+        true,
+
+      playbackAssetsAllowed:
+        false,
+
+      fullContentBodyAllowed:
+        false,
+
+      requiredEnvironmentKeys: [
+        "NCBI_EUTILS_EMAIL",
+      ],
+    },
+
+    {
+      providerKey:
+        "smithsonian",
+
+      operator:
+        "Smithsonian Institution",
+
+      accessMode:
+        "credential",
+
+      discoveryMode:
+        "query",
+
+      metadataOnly:
+        true,
+
+      originalPublisherUrlRequired:
+        true,
+
+      playbackAssetsAllowed:
+        false,
+
+      fullContentBodyAllowed:
+        false,
+
+      requiredEnvironmentKeys: [
+        "SMITHSONIAN_API_KEY",
+      ],
+    },
   ];

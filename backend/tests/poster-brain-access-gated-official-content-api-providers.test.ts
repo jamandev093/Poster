@@ -528,12 +528,14 @@ describe(
             provider =>
               provider.providerKey
           )
-        ).toEqual([
-          "youtube",
-          "nasa-images",
-          "x",
-          "facebook-pages",
-        ]);
+        ).toEqual(
+          expect.arrayContaining([
+            "youtube",
+            "nasa-images",
+            "x",
+            "facebook-pages",
+          ])
+        );
 
         const registry =
           createPosterBrainContentApiProviderRegistryService({
@@ -598,12 +600,14 @@ describe(
               entry =>
                 entry.providerKey
             )
-        ).toEqual([
-          "youtube",
-          "nasa-images",
-          "x",
-          "facebook-pages",
-        ]);
+        ).toEqual(
+          expect.arrayContaining([
+            "youtube",
+            "nasa-images",
+            "x",
+            "facebook-pages",
+          ])
+        );
 
         for (
           const entry

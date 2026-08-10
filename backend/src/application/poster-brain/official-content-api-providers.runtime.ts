@@ -11,8 +11,20 @@ import {
 } from "./facebook-pages-content-api.provider.js";
 
 import {
+  createPosterBrainGuardianContentApiProvider,
+} from "./guardian-content-api.provider.js";
+
+import {
   createPosterBrainNasaImagesContentApiProvider,
 } from "./nasa-images-content-api.provider.js";
+
+import {
+  createPosterBrainPubMedContentApiProvider,
+} from "./pubmed-content-api.provider.js";
+
+import {
+  createPosterBrainSmithsonianContentApiProvider,
+} from "./smithsonian-content-api.provider.js";
 
 import {
   createPosterBrainXContentApiProvider,
@@ -43,94 +55,139 @@ export function createPosterBrainOfficialContentApiProvidersFromRuntimeEnv(
     dependencies.environment ??
     process.env;
 
+  const fetchImplementation =
+    dependencies.fetchImplementation;
+
   const youtubeKey =
-    environment
-      .YOUTUBE_API_KEY
-      ?.trim() ??
+    environment.YOUTUBE_API_KEY?.trim() ??
     "";
 
   const xBearerToken =
-    environment
-      .X_BEARER_TOKEN
-      ?.trim() ??
+    environment.X_BEARER_TOKEN?.trim() ??
     "";
 
   const metaAccessToken =
-    environment
-      .META_GRAPH_ACCESS_TOKEN
-      ?.trim() ??
+    environment.META_GRAPH_ACCESS_TOKEN?.trim() ??
     "";
 
   const metaGraphVersion =
-    environment
-      .META_GRAPH_API_VERSION
-      ?.trim() ||
+    environment.META_GRAPH_API_VERSION?.trim() ||
     "v26.0";
 
-  const youtube =
-    dependencies.fetchImplementation ===
-    undefined
-      ? createPosterBrainYouTubeContentApiProvider({
-          apiKey:
-            youtubeKey,
-        })
-      : createPosterBrainYouTubeContentApiProvider({
-          apiKey:
-            youtubeKey,
+  const guardianKey =
+    environment.GUARDIAN_API_KEY?.trim() ??
+    "";
 
-          fetchImplementation:
-            dependencies.fetchImplementation,
-        });
+  const ncbiEmail =
+    environment.NCBI_EUTILS_EMAIL?.trim() ??
+    "";
+
+  const ncbiApiKey =
+    environment.NCBI_EUTILS_API_KEY?.trim() ??
+    "";
+
+  const smithsonianKey =
+    environment.SMITHSONIAN_API_KEY?.trim() ??
+    "";
+
+  const youtube =
+    createPosterBrainYouTubeContentApiProvider({
+      apiKey:
+        youtubeKey,
+
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
 
   const nasa =
-    dependencies.fetchImplementation ===
-    undefined
-      ? createPosterBrainNasaImagesContentApiProvider()
-      : createPosterBrainNasaImagesContentApiProvider({
-          fetchImplementation:
-            dependencies.fetchImplementation,
-        });
+    createPosterBrainNasaImagesContentApiProvider(
+      fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }
+    );
 
   const x =
-    dependencies.fetchImplementation ===
-    undefined
-      ? createPosterBrainXContentApiProvider({
-          bearerToken:
-            xBearerToken,
-        })
-      : createPosterBrainXContentApiProvider({
-          bearerToken:
-            xBearerToken,
+    createPosterBrainXContentApiProvider({
+      bearerToken:
+        xBearerToken,
 
-          fetchImplementation:
-            dependencies.fetchImplementation,
-        });
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
 
   const facebook =
-    dependencies.fetchImplementation ===
-    undefined
-      ? createPosterBrainFacebookPagesContentApiProvider({
-          accessToken:
-            metaAccessToken,
+    createPosterBrainFacebookPagesContentApiProvider({
+      accessToken:
+        metaAccessToken,
 
-          apiVersion:
-            metaGraphVersion,
-        })
-      : createPosterBrainFacebookPagesContentApiProvider({
-          accessToken:
-            metaAccessToken,
+      apiVersion:
+        metaGraphVersion,
 
-          apiVersion:
-            metaGraphVersion,
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
 
-          fetchImplementation:
-            dependencies.fetchImplementation,
-        });
+  const guardian =
+    createPosterBrainGuardianContentApiProvider({
+      apiKey:
+        guardianKey,
+
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
+
+  const pubmed =
+    createPosterBrainPubMedContentApiProvider({
+      developerEmail:
+        ncbiEmail,
+
+      ...(ncbiApiKey
+        ? {
+            apiKey:
+              ncbiApiKey,
+          }
+        : {}),
+
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
+
+  const smithsonian =
+    createPosterBrainSmithsonianContentApiProvider({
+      apiKey:
+        smithsonianKey,
+
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
 
   return [
     youtube,
     nasa,
     x,
     facebook,
+    guardian,
+    pubmed,
+    smithsonian,
   ];
 }
