@@ -11,3 +11,5 @@ export * from "./advertising-ai-training-handoff.service.js";
 export * from "./advertising-ai-model-lifecycle.types.js";
 export * from "./advertising-ai-model-registry.repository.js";
 export * from "./advertising-ai-model-evaluation.service.js";
+export * from "./advertising-ai-challenger-evaluation.service.js";
+export * from "./advertising-ai-model-lifecycle.service.js";

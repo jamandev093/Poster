@@ -238,6 +238,42 @@ export interface AdvertisingAiModelRegistryRepository {
     Promise<
       AdvertisingAiStoredModel
     >;
+
+  applyEvaluationDecision(
+    input: {
+      readonly candidate:
+        AdvertisingAiStoredModel;
+
+      readonly incumbent:
+        AdvertisingAiStoredModel |
+        null;
+
+      readonly evaluation:
+        AdvertisingAiCandidateEvaluationResult;
+
+      readonly decidedAt:
+        string;
+    }
+  ):
+    Promise<
+      AdvertisingAiStoredModel
+    >;
+
+  rollbackToModel(
+    input: {
+      readonly target:
+        AdvertisingAiStoredModel;
+
+      readonly reason:
+        string;
+
+      readonly rolledBackAt:
+        string;
+    }
+  ):
+    Promise<
+      AdvertisingAiStoredModel
+    >;
 }
 
 const MODEL_COLUMNS = `
@@ -885,6 +921,122 @@ export function createAdvertisingAiModelRegistryRepository(
         result.rows,
         "candidate rejection"
       );
+    },
+    async applyEvaluationDecision(
+      input
+    ) {
+      await database
+        .query<{
+          readonly candidate_model_id:
+            string;
+
+          readonly previous_promoted_model_id:
+            string |
+            null;
+
+          readonly resulting_status:
+            string;
+        }>(
+          `
+            SELECT
+              candidate_model_id,
+              previous_promoted_model_id,
+              resulting_status
+
+            FROM app.apply_advertising_ai_model_evaluation(
+              $1::uuid,
+              $2::uuid,
+              $3,
+              $4,
+              $5,
+              $6,
+              $7,
+              $8,
+              $9,
+              $10,
+              $11,
+              $12::timestamptz
+            )
+          `,
+          [
+            input.candidate.id,
+            input.incumbent?.id ??
+              null,
+            input.evaluation.decision,
+            input.evaluation.reason,
+            input.evaluation.baselineLogLoss,
+            input.evaluation.candidateLogLoss,
+            input.evaluation.candidateRocAuc,
+            input.evaluation.candidateAccuracy,
+            input.evaluation.validationEventCount,
+            input.evaluation.validationPositiveCount,
+            input.evaluation.validationNegativeCount,
+            input.decidedAt,
+          ]
+        );
+
+      const updated =
+        await this.findByModelId(
+          input.candidate
+            .modelId
+        );
+
+      if (
+        updated ===
+        null
+      ) {
+        throw new Error(
+          "Advertising AI lifecycle decision model disappeared."
+        );
+      }
+
+      return updated;
+    },
+
+    async rollbackToModel(
+      input
+    ) {
+      await database
+        .query<{
+          readonly promoted_model_id:
+            string;
+
+          readonly retired_model_id:
+            string;
+        }>(
+          `
+            SELECT
+              promoted_model_id,
+              retired_model_id
+
+            FROM app.rollback_advertising_ai_model(
+              $1::uuid,
+              $2,
+              $3::timestamptz
+            )
+          `,
+          [
+            input.target.id,
+            input.reason,
+            input.rolledBackAt,
+          ]
+        );
+
+      const updated =
+        await this.findByModelId(
+          input.target.modelId
+        );
+
+      if (
+        updated ===
+        null
+      ) {
+        throw new Error(
+          "Advertising AI rollback target disappeared."
+        );
+      }
+
+      return updated;
     },
   };
 }

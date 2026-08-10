@@ -183,3 +183,22 @@ export interface AdvertisingAiCandidateEvaluationResult {
   readonly validationNegativeCount:
     number;
 }
+export interface AdvertisingAiModelLifecycleDecisionResult {
+  readonly evaluation:
+    AdvertisingAiCandidateEvaluationResult;
+
+  readonly model:
+    AdvertisingAiStoredModel;
+
+  readonly previousPromotedModelId:
+    string |
+    null;
+}
+
+export interface AdvertisingAiModelRollbackResult {
+  readonly model:
+    AdvertisingAiStoredModel;
+
+  readonly retiredModelId:
+    string;
+}
