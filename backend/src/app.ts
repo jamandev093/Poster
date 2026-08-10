@@ -268,6 +268,9 @@ import {
   createPosterBrainAiClassificationProviderFromRuntimeEnv,
   createPosterBrainAiContentEmbeddingServiceFromRuntimeEnv,
   createPosterBrainAiClassifiedFeedIngestionRunner,
+  createPosterBrainEvolvingTopicIngestionRunner,
+  createPosterBrainEvolvingTopicLifecycleService,
+  createPosterBrainEvolvingTopicRepository,
   createPosterBrainContentPersistenceRepository,
   createPosterBrainEmbeddingContentPersistenceRepository,
   createPosterBrainContentSourceIngestionJobProvider,
@@ -815,29 +818,42 @@ function createPosterBrainContentSourceIngestionRunExecutor():
                 globalThis.fetch.bind(globalThis),
 
               classifiedFeedIngestionRunner:
+createPosterBrainEvolvingTopicIngestionRunner({
+  delegate:
 
-                createPosterBrainAiClassifiedFeedIngestionRunner({
-                  contentPersistenceRepository:
-                    createPosterBrainEmbeddingContentPersistenceRepository({
+                    createPosterBrainAiClassifiedFeedIngestionRunner({
                       contentPersistenceRepository:
-                        createPosterBrainContentPersistenceRepository(
-                          getDatabasePool()
-                        ),
+                        createPosterBrainEmbeddingContentPersistenceRepository({
+                          contentPersistenceRepository:
+                            createPosterBrainContentPersistenceRepository(
+                              getDatabasePool()
+                            ),
 
-                      embeddingService:
-                        createPosterBrainAiContentEmbeddingServiceFromRuntimeEnv({
-                          database:
-                            getDatabasePool(),
+                          embeddingService:
+                            createPosterBrainAiContentEmbeddingServiceFromRuntimeEnv({
+                              database:
+                                getDatabasePool(),
+                            }),
+                        }),
+
+                      aiClassificationProvider:
+
+                        createPosterBrainAiClassificationProviderFromRuntimeEnv({
+                          now,
                         }),
                     }),
 
-                  aiClassificationProvider:
 
-                    createPosterBrainAiClassificationProviderFromRuntimeEnv({
-                      now,
-                    }),
-                }),
+  lifecycleService:
 
+    createPosterBrainEvolvingTopicLifecycleService({
+      repository:
+
+        createPosterBrainEvolvingTopicRepository(
+          getDatabasePool()
+        ),
+    }),
+}),
               now,
             }).sourceFeedSchedulerRunService,
 
