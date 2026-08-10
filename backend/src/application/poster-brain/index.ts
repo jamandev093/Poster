@@ -37,3 +37,5 @@ export * from "./ai-learning-dataset.repository.js";
 export * from "./ai-learning-dataset-snapshot.repository.js";
 export * from "./ai-learning-dataset-snapshot-builder.service.js";
 export * from "./ai-model-registry.repository.js";
+export * from "./ai-training-candidate.service.js";
+export * from "./ai-training-candidate-runtime.service.js";
