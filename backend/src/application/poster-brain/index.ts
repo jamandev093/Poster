@@ -44,3 +44,4 @@ export * from "./ai-model-lifecycle.service.js";
 export * from "./content-embedding.repository.js";
 export * from "./ai-content-embedding.service.js";
 export * from "./ai-content-embedding-runtime.service.js";
+export * from "./embedding-content-persistence.repository.js";

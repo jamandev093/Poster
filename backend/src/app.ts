@@ -266,8 +266,10 @@ import {
 } from "./routes/admin-wallet-operations.routes.js";
 import {
   createPosterBrainAiClassificationProviderFromRuntimeEnv,
+  createPosterBrainAiContentEmbeddingServiceFromRuntimeEnv,
   createPosterBrainAiClassifiedFeedIngestionRunner,
   createPosterBrainContentPersistenceRepository,
+  createPosterBrainEmbeddingContentPersistenceRepository,
   createPosterBrainContentSourceIngestionJobProvider,
   createPosterBrainContentSourceIngestionRunExecutor as createPosterBrainContentSourceIngestionRunExecutorBridge,
   createPosterBrainContentSourcesRouteAdapterService,
@@ -816,10 +818,18 @@ function createPosterBrainContentSourceIngestionRunExecutor():
 
                 createPosterBrainAiClassifiedFeedIngestionRunner({
                   contentPersistenceRepository:
+                    createPosterBrainEmbeddingContentPersistenceRepository({
+                      contentPersistenceRepository:
+                        createPosterBrainContentPersistenceRepository(
+                          getDatabasePool()
+                        ),
 
-                    createPosterBrainContentPersistenceRepository(
-                      getDatabasePool()
-                    ),
+                      embeddingService:
+                        createPosterBrainAiContentEmbeddingServiceFromRuntimeEnv({
+                          database:
+                            getDatabasePool(),
+                        }),
+                    }),
 
                   aiClassificationProvider:
 
