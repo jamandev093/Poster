@@ -68,3 +68,7 @@ export * from "./official-api-manifest-catalog.js";
 export * from "./official-api-manifest-runtime.service.js";
 export * from "./large-discovery-api-manifest-catalog.js";
 export * from "./large-discovery-api-runtime.service.js";
+export * from "./source-candidate.types.js";
+export * from "./source-candidate-extractor.service.js";
+export * from "./source-candidate-memory-registry.service.js";
+export * from "./source-candidate.repository.js";
