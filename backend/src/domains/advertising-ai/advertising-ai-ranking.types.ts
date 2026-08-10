@@ -2,6 +2,7 @@ import type {
   AdvertisingAiCandidate,
   AdvertisingAiRequestContext,
   AdvertisingAiScoreComponents,
+  AdvertisingAiScoringEngine,
 } from "./advertising-ai.types.js";
 
 import type {
@@ -56,9 +57,10 @@ export interface AdvertisingAiRankedCandidate {
     AdvertisingAiScoreComponents;
 
   readonly engine:
-    "deterministic_fallback_v1";
+    AdvertisingAiScoringEngine;
 
   readonly modelVersion:
+    string |
     null;
 
   readonly learningDomain:

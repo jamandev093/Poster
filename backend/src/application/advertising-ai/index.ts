@@ -13,3 +13,5 @@ export * from "./advertising-ai-model-registry.repository.js";
 export * from "./advertising-ai-model-evaluation.service.js";
 export * from "./advertising-ai-challenger-evaluation.service.js";
 export * from "./advertising-ai-model-lifecycle.service.js";
+export * from "./advertising-ai-promoted-model-scoring.service.js";
+export * from "./advertising-ai-runtime-ranking.service.js";

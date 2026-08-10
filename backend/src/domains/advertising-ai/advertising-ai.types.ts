@@ -170,6 +170,10 @@ export interface AdvertisingAiScoreComponents {
     number;
 }
 
+export type AdvertisingAiScoringEngine =
+  | "deterministic_fallback_v1"
+  | "promoted_model_v1";
+
 export interface AdvertisingAiScoreResult {
   readonly candidateId:
     string;
@@ -187,9 +191,10 @@ export interface AdvertisingAiScoreResult {
     readonly string[];
 
   readonly engine:
-    "deterministic_fallback_v1";
+    AdvertisingAiScoringEngine;
 
   readonly modelVersion:
+    string |
     null;
 
   readonly learningDomain:
