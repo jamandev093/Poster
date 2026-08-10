@@ -588,7 +588,13 @@ export function createPosterBrainGenericOfficialApiProvider(
               : pagination.type ===
                   "page"
                 ? "1"
-                : null
+                : pagination.type ===
+                    "cursor"
+                  ? (
+                      pagination.initialCursor ??
+                      null
+                    )
+                  : null
           );
 
         if (value !== null) {
@@ -804,7 +810,7 @@ export function createPosterBrainGenericOfficialApiProvider(
               manifest.response
                 .languageCode
             ) ??
-            "en",
+            "und",
 
           regionCode:
             mappedText(

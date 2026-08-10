@@ -7,6 +7,10 @@ import type {
 } from "./official-content-api-http.js";
 
 import {
+  createPosterBrainManifestDrivenOfficialApiProvidersFromRuntimeEnv,
+} from "./official-api-manifest-runtime.service.js";
+
+import {
   createPosterBrainFacebookPagesContentApiProvider,
 } from "./facebook-pages-content-api.provider.js";
 
@@ -181,6 +185,17 @@ export function createPosterBrainOfficialContentApiProvidersFromRuntimeEnv(
           }),
     });
 
+  const manifestDriven =
+    createPosterBrainManifestDrivenOfficialApiProvidersFromRuntimeEnv({
+      environment,
+
+      ...(fetchImplementation === undefined
+        ? {}
+        : {
+            fetchImplementation,
+          }),
+    });
+
   return [
     youtube,
     nasa,
@@ -189,5 +204,6 @@ export function createPosterBrainOfficialContentApiProvidersFromRuntimeEnv(
     guardian,
     pubmed,
     smithsonian,
+    ...manifestDriven.providers,
   ];
 }

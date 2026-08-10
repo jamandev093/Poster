@@ -52,6 +52,9 @@ export type PosterBrainOfficialApiManifestPagination =
 
       readonly responseNextCursorPath:
         string;
+
+      readonly initialCursor?:
+        string;
     }
   | {
       readonly type:

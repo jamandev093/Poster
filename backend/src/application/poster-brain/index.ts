@@ -64,3 +64,5 @@ export * from "./official-api-json-path.js";
 export * from "./official-api-provider-manifest.registry.js";
 export * from "./official-api-generic.provider.js";
 export * from "./official-api-provider-activation.policy.js";
+export * from "./official-api-manifest-catalog.js";
+export * from "./official-api-manifest-runtime.service.js";

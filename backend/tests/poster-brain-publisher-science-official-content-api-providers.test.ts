@@ -667,6 +667,8 @@ describe(
           "guardian",
           "pubmed",
           "smithsonian",
+          "crossref",
+          "openalex",
         ]);
 
         const registry =
