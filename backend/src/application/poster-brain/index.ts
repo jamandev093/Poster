@@ -36,3 +36,4 @@ export * from "./ai-learning-dataset.types.js";
 export * from "./ai-learning-dataset.repository.js";
 export * from "./ai-learning-dataset-snapshot.repository.js";
 export * from "./ai-learning-dataset-snapshot-builder.service.js";
+export * from "./ai-model-registry.repository.js";
