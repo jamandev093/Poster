@@ -41,3 +41,4 @@ export * from "./ai-training-candidate.service.js";
 export * from "./ai-training-candidate-runtime.service.js";
 export * from "./ai-model-lifecycle.repository.js";
 export * from "./ai-model-lifecycle.service.js";
+export * from "./content-embedding.repository.js";
