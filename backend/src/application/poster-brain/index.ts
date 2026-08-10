@@ -47,3 +47,5 @@ export * from "./ai-content-embedding-runtime.service.js";
 export * from "./embedding-content-persistence.repository.js";
 export * from "./ai-semantic-query.service.js";
 export * from "./semantic-ranked-discovery.service.js";
+export * from "./content-api-provider.types.js";
+export * from "./content-api-provider-registry.service.js";
