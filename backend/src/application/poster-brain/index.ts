@@ -59,3 +59,8 @@ export * from "./official-content-api-provider-catalog.js";
 export * from "./guardian-content-api.provider.js";
 export * from "./pubmed-content-api.provider.js";
 export * from "./smithsonian-content-api.provider.js";
+export * from "./official-api-provider-manifest.types.js";
+export * from "./official-api-json-path.js";
+export * from "./official-api-provider-manifest.registry.js";
+export * from "./official-api-generic.provider.js";
+export * from "./official-api-provider-activation.policy.js";
