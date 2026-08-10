@@ -635,3 +635,20 @@ async def train_training_dataset_http(
 
     finally:
         file.close()
+# Advertising AI training remains isolated from the organic
+# Poster Brain training contract above.
+from fastapi import Request as AdvertisingTrainingRequest
+from app.api.advertising_training import handle_advertising_training_request
+from app.models.advertising_training_http import AdvertisingTrainingHttpResponse
+
+
+@router.post(
+    "/advertising-training/train",
+    response_model=AdvertisingTrainingHttpResponse,
+)
+async def train_advertising_dataset(
+    request: AdvertisingTrainingRequest,
+) -> AdvertisingTrainingHttpResponse:
+    return await handle_advertising_training_request(
+        request
+    )
