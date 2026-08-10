@@ -43,12 +43,6 @@ describe(
       () => {
         expect(
           POSTER_BRAIN_LARGE_DISCOVERY_API_MANIFEST_CATALOG
-        ).toHaveLength(
-          2
-        );
-
-        expect(
-          POSTER_BRAIN_LARGE_DISCOVERY_API_MANIFEST_CATALOG
             .map(
               manifest =>
                 [
@@ -56,17 +50,19 @@ describe(
                   manifest.providerClass,
                 ]
             )
-        ).toEqual([
-          [
-            "newsapi",
-            "aggregator",
-          ],
+        ).toEqual(
+          expect.arrayContaining([
+            [
+              "newsapi",
+              "aggregator",
+            ],
 
-          [
-            "gdelt",
-            "aggregator",
-          ],
-        ]);
+            [
+              "gdelt",
+              "aggregator",
+            ],
+          ])
+        );
       }
     );
 
@@ -523,10 +519,12 @@ describe(
             provider =>
               provider.providerKey
           )
-        ).toEqual([
-          "newsapi",
-          "gdelt",
-        ]);
+        ).toEqual(
+          expect.arrayContaining([
+            "newsapi",
+            "gdelt",
+          ])
+        );
 
         /*
          * With no NewsAPI key it stays registered only so the

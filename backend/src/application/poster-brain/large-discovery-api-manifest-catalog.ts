@@ -347,9 +347,441 @@ export const POSTER_BRAIN_GDELT_DISCOVERY_MANIFEST:
     },
   };
 
+/*
+ * NewsCatcher News API
+ *
+ * Uses the official GET search interface so Poster can reuse the
+ * existing generic manifest transport.
+ *
+ * The upstream response can contain article content. Poster never
+ * maps that field. Only discovery metadata, image reference and the
+ * original publisher URL enter Poster.
+ *
+ * Production activation remains held until Poster explicitly
+ * approves the applicable commercial/API terms.
+ */
+export const POSTER_BRAIN_NEWSCATCHER_DISCOVERY_MANIFEST:
+  PosterBrainOfficialApiProviderManifest =
+  {
+    providerKey:
+      "newscatcher",
+
+    providerClass:
+      "aggregator",
+
+    displayName:
+      "NewsCatcher News API",
+
+    operator:
+      "NewsCatcher",
+
+    maxPageSize:
+      100,
+
+    auth: {
+      type:
+        "api_key_header",
+
+      environmentKey:
+        "NEWSCATCHER_API_KEY",
+
+      headerName:
+        "x-api-token",
+    },
+
+    request: {
+      baseUrl:
+        "https://v3-api.newscatcherapi.com",
+
+      endpointPath:
+        "/api/search",
+
+      fixedParameters: {
+        lang:
+          "en",
+
+        search_in:
+          "title_content",
+
+        include_translation_fields:
+          "false",
+
+        include_nlp_data:
+          "false",
+
+        exclude_duplicates:
+          "true",
+
+        robots_compliant:
+          "true",
+      },
+
+      queryParameter:
+        "q",
+
+      sourceParameter:
+        "sources",
+
+      pageSizeParameter:
+        "page_size",
+
+      pagination: {
+        type:
+          "page",
+
+        requestParameter:
+          "page",
+
+        responseCurrentPagePath:
+          "page",
+
+        responseTotalPagesPath:
+          "total_pages",
+      },
+    },
+
+    response: {
+      collectionPath:
+        "articles",
+
+      contentKind:
+        "article",
+
+      id: {
+        path:
+          "id",
+      },
+
+      title: {
+        path:
+          "title",
+      },
+
+      excerpt: {
+        path:
+          "description",
+      },
+
+      originalUrl: {
+        path:
+          "link",
+      },
+
+      thumbnailUrl: {
+        path:
+          "media",
+      },
+
+      publisherName: {
+        path:
+          "name_source",
+      },
+
+      sourceExternalId: {
+        path:
+          "domain_url",
+      },
+
+      sourceName: {
+        path:
+          "name_source",
+      },
+
+      sourceUrl: {
+        path:
+          "parent_url",
+      },
+
+      languageCode: {
+        path:
+          "language",
+      },
+
+      /*
+       * NewsCatcher commonly returns published_date using a
+       * SQL-like UTC representation rather than Poster's
+       * canonical ISO timestamp contract. Preserve provenance
+       * in metadata instead of injecting an unsafe timestamp.
+       */
+      metadata: {
+        newsCatcherId:
+          "id",
+
+        publishedDate:
+          "published_date",
+
+        domain:
+          "domain_url",
+
+        fullDomain:
+          "full_domain_url",
+
+        author:
+          "author",
+
+        country:
+          "country",
+
+        rights:
+          "rights",
+
+        rank:
+          "rank",
+
+        paidContent:
+          "paid_content",
+      },
+    },
+
+    activation: {
+      enabled:
+        true,
+
+      technicalStatus:
+        "validated",
+
+      rightsStatus:
+        "pending",
+
+      commercialUseStatus:
+        "pending",
+    },
+
+    policy: {
+      metadataOnly:
+        true,
+
+      originalPublisherUrlRequired:
+        true,
+
+      playbackAssetsAllowed:
+        false,
+
+      downloadableMediaAllowed:
+        false,
+
+      fullContentBodyAllowed:
+        false,
+    },
+  };
+
+/*
+ * Event Registry / NewsAPI.ai
+ *
+ * Event Registry can return full article bodies by default.
+ * Poster explicitly requests includeArticleBody=false and never
+ * maps body, videos, article links or original-article payloads.
+ *
+ * Production activation remains held until rights/commercial
+ * approval is explicitly completed.
+ */
+export const POSTER_BRAIN_EVENT_REGISTRY_DISCOVERY_MANIFEST:
+  PosterBrainOfficialApiProviderManifest =
+  {
+    providerKey:
+      "event-registry",
+
+    providerClass:
+      "aggregator",
+
+    displayName:
+      "Event Registry / NewsAPI.ai",
+
+    operator:
+      "Event Registry",
+
+    maxPageSize:
+      100,
+
+    auth: {
+      type:
+        "api_key_query",
+
+      environmentKey:
+        "EVENT_REGISTRY_API_KEY",
+
+      parameterName:
+        "apiKey",
+    },
+
+    request: {
+      baseUrl:
+        "https://eventregistry.org",
+
+      endpointPath:
+        "/api/v1/article/getArticles",
+
+      fixedParameters: {
+        resultType:
+          "articles",
+
+        lang:
+          "eng",
+
+        dataType:
+          "news",
+
+        articlesSortBy:
+          "date",
+
+        articlesSortByAsc:
+          "false",
+
+        isDuplicateFilter:
+          "skipDuplicates",
+
+        includeArticleTitle:
+          "true",
+
+        includeArticleBasicInfo:
+          "true",
+
+        includeArticleBody:
+          "false",
+
+        includeArticleImage:
+          "true",
+
+        includeArticleVideos:
+          "false",
+
+        includeArticleLinks:
+          "false",
+
+        includeArticleOriginalArticle:
+          "false",
+      },
+
+      queryParameter:
+        "keyword",
+
+      sourceParameter:
+        "sourceUri",
+
+      pageSizeParameter:
+        "articlesCount",
+
+      pagination: {
+        type:
+          "page",
+
+        requestParameter:
+          "articlesPage",
+
+        responseCurrentPagePath:
+          "articles.page",
+
+        responseTotalPagesPath:
+          "articles.pages",
+      },
+    },
+
+    response: {
+      collectionPath:
+        "articles.results",
+
+      contentKind:
+        "article",
+
+      id: {
+        path:
+          "uri",
+      },
+
+      title: {
+        path:
+          "title",
+      },
+
+      originalUrl: {
+        path:
+          "url",
+      },
+
+      thumbnailUrl: {
+        path:
+          "image",
+      },
+
+      publisherName: {
+        path:
+          "source.title",
+      },
+
+      sourceExternalId: {
+        path:
+          "source.uri",
+      },
+
+      sourceName: {
+        path:
+          "source.title",
+      },
+
+      languageCode: {
+        literal:
+          "en",
+      },
+
+      publishedAt: {
+        path:
+          "dateTime",
+      },
+
+      metadata: {
+        eventRegistryUri:
+          "uri",
+
+        dataType:
+          "dataType",
+
+        eventUri:
+          "eventUri",
+
+        relevance:
+          "relevance",
+
+        sourceUri:
+          "source.uri",
+      },
+    },
+
+    activation: {
+      enabled:
+        true,
+
+      technicalStatus:
+        "validated",
+
+      rightsStatus:
+        "pending",
+
+      commercialUseStatus:
+        "pending",
+    },
+
+    policy: {
+      metadataOnly:
+        true,
+
+      originalPublisherUrlRequired:
+        true,
+
+      playbackAssetsAllowed:
+        false,
+
+      downloadableMediaAllowed:
+        false,
+
+      fullContentBodyAllowed:
+        false,
+    },
+  };
 export const POSTER_BRAIN_LARGE_DISCOVERY_API_MANIFEST_CATALOG:
   readonly PosterBrainOfficialApiProviderManifest[] =
   [
     POSTER_BRAIN_NEWSAPI_DISCOVERY_MANIFEST,
     POSTER_BRAIN_GDELT_DISCOVERY_MANIFEST,
+    POSTER_BRAIN_NEWSCATCHER_DISCOVERY_MANIFEST,
+    POSTER_BRAIN_EVENT_REGISTRY_DISCOVERY_MANIFEST,
   ];
