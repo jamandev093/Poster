@@ -49,3 +49,7 @@ export * from "./ai-semantic-query.service.js";
 export * from "./semantic-ranked-discovery.service.js";
 export * from "./content-api-provider.types.js";
 export * from "./content-api-provider-registry.service.js";
+export * from "./official-content-api-http.js";
+export * from "./youtube-content-api.provider.js";
+export * from "./nasa-images-content-api.provider.js";
+export * from "./official-content-api-providers.runtime.js";
