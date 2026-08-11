@@ -1,54 +1,60 @@
 {
-    "expo":  {
-                 "name":  "frontend",
-                 "slug":  "frontend",
-                 "version":  "1.0.0",
-                 "orientation":  "portrait",
-                 "icon":  "./assets/icon.png",
-                 "userInterfaceStyle":  "automatic",
-                 "newArchEnabled":  true,
-                 "splash":  {
-                                "image":  "./assets/splash-icon.png",
-                                "resizeMode":  "contain",
-                                "backgroundColor":  "#ffffff"
-                            },
-                 "ios":  {
-                             "supportsTablet":  true,
-                             "config":  {
-                                            "usesNonExemptEncryption":  false
-                                        },
-                             "bundleIdentifier":  "com.getpostar.poster"
-                         },
-                 "android":  {
-                                 "adaptiveIcon":  {
-                                                      "foregroundImage":  "./assets/adaptive-icon.png",
-                                                      "backgroundColor":  "#ffffff"
-                                                  },
-                                 "edgeToEdgeEnabled":  true,
-                                 "package":  "com.getpostar.poster"
-                             },
-                 "web":  {
-                             "favicon":  "./assets/favicon.png"
-                         },
-                 "plugins":  [
-                                 [
-                                     "expo-secure-store",
-                                     {
-                                         "configureAndroidBackup":  true,
-                                         "faceIDPermission":  "Allow Poster to use Face ID to protect your account."
-                                     }
-                                 ],
-                                 "expo-font",
-                                 "expo-video",
-                                 [
-                                     "react-native-google-mobile-ads",
-                                     {
-                                         "androidAppId":  "ca-app-pub-3940256099942544~3347511713",
-                                         "iosAppId":  "ca-app-pub-3940256099942544~1458002511",
-                                         "delayAppMeasurementInit":  true,
-                                         "userTrackingUsageDescription":  "Poster uses this identifier to deliver and measure ads when you allow tracking."
-                                     }
-                                 ]
-                             ]
-             }
+  "expo": {
+    "name": "Poster",
+    "slug": "poster",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.getpostar.poster"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.getpostar.poster"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow Poster to use Face ID to protect your account."
+        }
+      ],
+      "expo-font",
+      "expo-video",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "delayAppMeasurementInit": true,
+          "userTrackingUsageDescription": "Poster uses this identifier to deliver and measure ads when you allow tracking."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "79669034-b501-4ea1-a9c9-21f6f1c2765e"
+      }
+    },
+    "owner": "jaman05c"
+  }
 }
