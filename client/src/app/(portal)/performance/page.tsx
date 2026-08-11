@@ -14,9 +14,8 @@ export default function PerformancePage() {
           </h1>
 
           <p className="pageDescription">
-            View Backend-derived campaign delivery and Wallet spend visibility.
-            Detailed analytics will activate after Client analytics APIs are
-            connected.
+            View Backend-derived campaign delivery, validated analytics, and
+            Wallet spend visibility.
           </p>
         </div>
       </header>

@@ -18,8 +18,8 @@ import type {
 } from "@/features/workspace/workspace.types";
 
 import {
-  useClientCampaigns,
-} from "@/features/campaigns/useClientCampaigns";
+  useClientPerformanceCampaigns,
+} from "./useClientPerformanceCampaigns";
 
 import type {
   ClientCampaignListItem,
@@ -335,7 +335,8 @@ export default function PerformanceDashboard() {
     walletErrorMessage,
     refresh,
   } =
-    useClientCampaigns(
+    useClientPerformanceCampaigns(
+      selectedWindow,
       100
     );
 
@@ -447,9 +448,8 @@ export default function PerformanceDashboard() {
           </h2>
 
           <p>
-            Performance now uses Backend-derived campaign records and Backend
-            Wallet allocations. Detailed analytics remain pending until a
-            Client-facing analytics read endpoint is connected.
+            Performance uses Backend-derived campaign records, validated
+            analytics, and Backend Wallet allocations for the selected range.
           </p>
         </div>
 
@@ -705,8 +705,8 @@ export default function PerformanceDashboard() {
             </h3>
 
             <p>
-              Analytics values stay conservative until validated Client
-              analytics reporting is available.
+              Analytics values use validated Client reporting for the selected
+              date range.
             </p>
           </div>
 
@@ -875,13 +875,12 @@ export default function PerformanceDashboard() {
             <h3
               id="analytics-readiness-title"
             >
-              Validated analytics pending
+              Validated analytics connected
             </h3>
 
             <p>
-              This page no longer uses local campaign fixtures. Client analytics
-              will become fully live after the dedicated Client analytics
-              Backend read endpoint is connected.
+              Campaign records, validated analytics, and Wallet allocations now
+              load through authenticated Poster Backend services.
             </p>
           </div>
         </div>
@@ -951,9 +950,8 @@ export default function PerformanceDashboard() {
             styles.backendNote
           }
         >
-          Placement performance, trend charts, invalid-traffic filtering, and
-          finalized analytics remain intentionally conservative until Client
-          analytics APIs are connected.
+          Validated delivery analytics now use organization-scoped Poster
+          Backend reporting; campaigns without validated rows remain pending.
         </p>
       </section>
     </section>

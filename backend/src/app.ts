@@ -104,6 +104,11 @@ import {
 } from "./application/monetization/client-commercial-request.service.js";
 
 import {
+  createClientAnalyticsService,
+  type ClientAnalyticsService,
+} from "./application/monetization/client-analytics.service.js";
+
+import {
   createProductionClientWalletAllocationService,
   createProductionClientWalletReadService,
   createProductionWalletCreditingService,
@@ -225,6 +230,10 @@ import {
 } from "./routes/index.js";
 
 import {
+  createClientAnalyticsRoutes,
+} from "./routes/client-analytics.routes.js";
+
+import {
   createClientWalletReadRoutes,
 } from "./routes/client-wallet-read.routes.js";
 
@@ -324,6 +333,9 @@ export interface BuildAppOptions {
 
   clientAccountService?:
     ClientAccountService;
+
+  clientAnalyticsService?:
+    ClientAnalyticsService;
 
   walletReadService?:
     ClientWalletReadService;
@@ -1371,6 +1383,18 @@ await app.register(
       prefix:
         "/api/v1/client",
     }
+  );
+
+  await app.register(
+    createClientAnalyticsRoutes({
+      authenticateClientRequest:
+        authenticateClientWalletRequest,
+
+      service:
+        options
+          .clientAnalyticsService ??
+        createClientAnalyticsService(),
+    })
   );
 
   await app.register(
