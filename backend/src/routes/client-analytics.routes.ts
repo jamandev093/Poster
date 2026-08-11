@@ -18,10 +18,6 @@ import type {
   MonetizationAnalyticsOverviewRecord,
 } from "../domains/monetization/index.js";
 
-import {
-  ClientWalletRouteAuthenticationError,
-} from "./client-wallet.routes.js";
-
 const AnalyticsQuerySchema =
   z
     .object({
