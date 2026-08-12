@@ -16,9 +16,10 @@ import {
 } from "../data/interests";
 
 import {
-  googleNativeAdPlaceholder,
   posterPromotion,
 } from "../data/mockMonetization";
+
+import GoogleMobileAdsService from "./GoogleMobileAdsService";
 
 import UnifiedTopicRegistryService, {
   UnifiedTopic,
@@ -752,7 +753,9 @@ function getCandidateItems():
       .googleAdsEnabled
   ) {
     candidates.push(
-      googleNativeAdPlaceholder
+      GoogleMobileAdsService.createCandidate("home"),
+      GoogleMobileAdsService.createCandidate("search"),
+      GoogleMobileAdsService.createCandidate("trending")
     );
   }
 

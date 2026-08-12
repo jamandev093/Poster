@@ -1,5 +1,4 @@
-﻿import {
-  GoogleNativeAdPlaceholder,
+import {
   PosterPromotion,
 } from "../components/ads";
 
@@ -39,25 +38,6 @@ export const posterPromotion:
     "Explore Digest",
 };
 
-export const googleNativeAdPlaceholder:
-  GoogleNativeAdPlaceholder = {
-  id:
-    "google-native-home-placeholder",
-
-  type:
-    "google_native_ad",
-
-  placement:
-    "home",
-
-  status:
-    "idle",
-
-  adUnitId:
-    undefined,
-};
-
 export const mockMonetizationItems = [
   posterPromotion,
-  googleNativeAdPlaceholder,
 ] as const;

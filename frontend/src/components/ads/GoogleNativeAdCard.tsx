@@ -1,28 +1,38 @@
-import React from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import {
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-
-import AdCardShell from "./AdCardShell";
-import AdDisclosure from "./AdDisclosure";
 
 import {
-  GoogleNativeAdPlaceholder,
-} from "./ad.types";
+  NativeAd,
+  NativeAdView,
+  NativeAsset,
+  NativeAssetType,
+  NativeMediaView,
+} from "react-native-google-mobile-ads";
+
+import GoogleMobileAdsService from "../../services/GoogleMobileAdsService";
 
 import useTheme from "../../theme/useTheme";
 
 import {
-  Icons,
   Radius,
   Spacing,
   Typography,
 } from "../../theme";
+
+import AdCardShell from "./AdCardShell";
+import AdDisclosure from "./AdDisclosure";
+
+import type {
+  GoogleNativeAdPlaceholder,
+} from "./ad.types";
 
 interface GoogleNativeAdCardProps {
   ad:
@@ -32,190 +42,307 @@ interface GoogleNativeAdCardProps {
 export default function GoogleNativeAdCard({
   ad,
 }: GoogleNativeAdCardProps) {
-  const { colors } = useTheme();
+  const {
+    colors,
+  } =
+    useTheme();
 
-  if (
-    ad.status === "no_fill" ||
-    ad.status === "failed"
-  ) {
+  const [
+    nativeAd,
+    setNativeAd,
+  ] =
+    useState<
+      NativeAd |
+      null
+    >(null);
+
+  useEffect(
+    () => {
+      let disposed =
+        false;
+
+      let loadedAd:
+        NativeAd |
+        null = null;
+
+      setNativeAd(
+        null
+      );
+
+      void GoogleMobileAdsService
+        .loadNativeAd(
+          ad
+        )
+        .then(
+          (
+            resolvedAd
+          ) => {
+            if (!resolvedAd) {
+              return;
+            }
+
+            if (disposed) {
+              resolvedAd.destroy();
+              return;
+            }
+
+            loadedAd =
+              resolvedAd;
+
+            setNativeAd(
+              resolvedAd
+            );
+          }
+        )
+        .catch(
+          () => {
+            if (!disposed) {
+              setNativeAd(
+                null
+              );
+            }
+          }
+        );
+
+      return () => {
+        disposed =
+          true;
+
+        if (loadedAd) {
+          loadedAd.destroy();
+        }
+      };
+    },
+    [
+      ad.adUnitId,
+      ad.id,
+      ad.placement,
+      ad.status,
+    ]
+  );
+
+  if (!nativeAd) {
     return null;
   }
 
+  const advertiser =
+    nativeAd.advertiser
+      ?.trim();
+
+  const body =
+    nativeAd.body
+      .trim();
+
+  const callToAction =
+    nativeAd.callToAction
+      .trim();
+
   return (
     <AdCardShell>
-      <View style={styles.header}>
-        <AdDisclosure
-          type="google"
-        />
-
-        <Text
-          style={[
-            styles.providerText,
-            {
-              color:
-                colors.textSecondary,
-            },
-          ]}
-        >
-          Google advertising placeholder
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.placeholder,
-          {
-            backgroundColor:
-              colors.surface,
-
-            borderColor:
-              colors.border,
-          },
-        ]}
+      <NativeAdView
+        nativeAd={
+          nativeAd
+        }
+        style={
+          styles.nativeAd
+        }
       >
-        <MaterialCommunityIcons
-          name={
-            ad.status === "loading"
-              ? "progress-clock"
-              : "advertisements"
-          }
-          size={Icons.hero}
-          color={colors.primary}
-        />
-
-        <Text
-          style={[
-            styles.title,
-            {
-              color: colors.text,
-            },
-          ]}
-        >
-          {ad.status === "loading"
-            ? "Loading Google ad"
-            : "Google native ad"}
-        </Text>
-
-        <Text
-          style={[
-            styles.description,
-            {
-              color:
-                colors.textSecondary,
-            },
-          ]}
-        >
-          This placeholder will later be replaced by assets supplied through the Google Mobile Ads SDK.
-        </Text>
-
         <View
+          style={
+            styles.header
+          }
+        >
+          <AdDisclosure
+            type="google"
+          />
+
+          {advertiser ? (
+            <NativeAsset
+              assetType={NativeAssetType.ADVERTISER}
+            >
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.advertiser,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                {advertiser}
+              </Text>
+            </NativeAsset>
+          ) : null}
+        </View>
+
+        <NativeMediaView
+          resizeMode="cover"
           style={[
-            styles.statusBadge,
+            styles.media,
             {
               backgroundColor:
-                colors.card,
-
-              borderColor:
-                colors.border,
+                colors.surface,
             },
           ]}
+        />
+
+        <View
+          style={
+            styles.content
+          }
         >
-          <Text
-            style={[
-              styles.statusText,
-              {
-                color:
-                  colors.textSecondary,
-              },
-            ]}
+          <NativeAsset
+            assetType={NativeAssetType.HEADLINE}
           >
-            UI placeholder · {ad.placement}
-          </Text>
+            <Text
+              accessibilityRole="header"
+              style={[
+                styles.headline,
+                {
+                  color:
+                    colors.text,
+                },
+              ]}
+            >
+              {nativeAd.headline}
+            </Text>
+          </NativeAsset>
+
+          {body ? (
+            <NativeAsset
+              assetType={NativeAssetType.BODY}
+            >
+              <Text
+                style={[
+                  styles.body,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                {body}
+              </Text>
+            </NativeAsset>
+          ) : null}
+
+          {callToAction ? (
+            <NativeAsset
+              assetType={NativeAssetType.CALL_TO_ACTION}
+            >
+              <View
+                accessibilityRole="button"
+                style={[
+                  styles.callToAction,
+                  {
+                    borderColor:
+                      colors.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.callToActionText,
+                    {
+                      color:
+                        colors.primary,
+                    },
+                  ]}
+                >
+                  {callToAction}
+                </Text>
+              </View>
+            </NativeAsset>
+          ) : null}
         </View>
-      </View>
+      </NativeAdView>
     </AdCardShell>
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal:
-      Spacing.screen,
+const styles =
+  StyleSheet.create({
+    nativeAd: {
+      width:
+        "100%",
+    },
 
-    paddingBottom:
-      Spacing.md,
-  },
+    header: {
+      paddingHorizontal:
+        Spacing.screen,
 
-  providerText: {
-    ...Typography.small,
+      paddingBottom:
+        Spacing.md,
+    },
 
-    marginTop:
-      Spacing.md,
-  },
+    advertiser: {
+      ...Typography.small,
 
-  placeholder: {
-    minHeight: 260,
+      marginTop:
+        Spacing.sm,
 
-    alignItems: "center",
+      fontWeight:
+        "700",
+    },
 
-    justifyContent: "center",
+    media: {
+      width:
+        "100%",
 
-    marginHorizontal:
-      Spacing.screen,
+      minHeight:
+        180,
+    },
 
-    paddingHorizontal:
-      Spacing.xl,
+    content: {
+      paddingHorizontal:
+        Spacing.screen,
 
-    paddingVertical:
-      Spacing.xxl,
+      paddingTop:
+        Spacing.lg,
 
-    borderWidth:
-      StyleSheet.hairlineWidth,
+      paddingBottom:
+        Spacing.lg,
+    },
 
-    borderRadius:
-      Radius.lg,
-  },
+    headline: {
+      ...Typography.headline,
 
-  title: {
-    ...Typography.headline,
+      fontWeight:
+        "800",
+    },
 
-    fontWeight: "800",
+    body: {
+      ...Typography.body,
 
-    textAlign: "center",
+      marginTop:
+        Spacing.sm,
+    },
 
-    marginTop:
-      Spacing.lg,
-  },
+    callToAction: {
+      alignSelf:
+        "flex-start",
 
-  description: {
-    ...Typography.body,
+      marginTop:
+        Spacing.lg,
 
-    textAlign: "center",
+      paddingHorizontal:
+        Spacing.lg,
 
-    marginTop:
-      Spacing.sm,
-  },
+      paddingVertical:
+        Spacing.sm,
 
-  statusBadge: {
-    paddingHorizontal:
-      Spacing.md,
+      borderWidth:
+        1,
 
-    paddingVertical:
-      Spacing.sm,
+      borderRadius:
+        Radius.round,
+    },
 
-    marginTop:
-      Spacing.lg,
+    callToActionText: {
+      ...Typography.body,
 
-    borderWidth:
-      StyleSheet.hairlineWidth,
-
-    borderRadius:
-      Radius.round,
-  },
-
-  statusText: {
-    ...Typography.small,
-
-    fontWeight: "700",
-  },
-});
+      fontWeight:
+        "800",
+    },
+  });

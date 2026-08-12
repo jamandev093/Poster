@@ -22,6 +22,7 @@ import {
 } from "@react-navigation/native";
 
 import AdvertisingPreferenceService from "../../services/AdvertisingPreferenceService";
+import GoogleMobileAdsService from "../../services/GoogleMobileAdsService";
 
 import {
   Icons,
@@ -189,10 +190,18 @@ export default function PrivacyAdvertisingScreen() {
     setRestoringHiddenItems,
   ] = useState(false);
 
+  const [
+    managingGooglePrivacy,
+    setManagingGooglePrivacy,
+  ] = useState(false);
+
   const preferenceRequestRef =
     useRef(false);
 
   const restoreRequestRef =
+    useRef(false);
+
+  const googlePrivacyRequestRef =
     useRef(false);
 
   const loadPreferences =
@@ -276,6 +285,38 @@ export default function PrivacyAdvertisingScreen() {
         personalizedAdsEnabled,
       ]
     );
+
+  const handleGooglePrivacyOptions =
+    useCallback(async () => {
+      if (
+        googlePrivacyRequestRef.current
+      ) {
+        return;
+      }
+
+      googlePrivacyRequestRef.current =
+        true;
+
+      setManagingGooglePrivacy(
+        true
+      );
+
+      try {
+        await GoogleMobileAdsService.showPrivacyOptions();
+      } catch {
+        Alert.alert(
+          "Google privacy options unavailable",
+          "Google advertising privacy choices are not available right now."
+        );
+      } finally {
+        setManagingGooglePrivacy(
+          false
+        );
+
+        googlePrivacyRequestRef.current =
+          false;
+      }
+    }, []);
 
   const restoreHiddenItems =
     useCallback(async () => {
@@ -512,6 +553,77 @@ export default function PrivacyAdvertisingScreen() {
               }
             />
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Google ad privacy choices"
+            accessibilityState={{
+              disabled:
+                managingGooglePrivacy,
+            }}
+            disabled={
+              managingGooglePrivacy
+            }
+            style={({ pressed }) => [
+              styles.settingRow,
+              {
+                opacity:
+                  managingGooglePrivacy
+                    ? 0.5
+                    : pressed
+                    ? 0.55
+                    : 1,
+              },
+            ]}
+            onPress={
+              handleGooglePrivacyOptions
+            }
+          >
+            <View
+              style={
+                styles.settingText
+              }
+            >
+              <Text
+                style={[
+                  styles.settingTitle,
+                  {
+                    color:
+                      colors.text,
+                  },
+                ]}
+              >
+                Google ad privacy choices
+              </Text>
+
+              <Text
+                style={[
+                  styles.settingDescription,
+                  {
+                    color:
+                      colors.textSecondary,
+                  },
+                ]}
+              >
+                Manage Google advertising privacy choices when available.
+              </Text>
+            </View>
+
+            {managingGooglePrivacy ? (
+              <ActivityIndicator
+                size="small"
+                color={colors.primary}
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={Icons.md}
+                color={
+                  colors.placeholder
+                }
+              />
+            )}
+          </Pressable>
 
           <Pressable
             accessibilityRole="button"
