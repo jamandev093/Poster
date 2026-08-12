@@ -40,6 +40,128 @@ export type MobileDiscoveryCommercialType =
   | "direct_sponsorship"
   | "programmatic";
 
+export type MobileDiscoveryDeliveredCommercialType =
+  | "affiliate_promotion"
+  | "direct_sponsorship";
+
+export type MobileDiscoveryCommercialMediaType =
+  | "image"
+  | "video";
+
+export type MobileDiscoveryCommercialCreativeFormat =
+  | "standard"
+  | "sliding";
+
+export interface MobileDiscoveryCommercialMediaItem {
+  id: string;
+
+  mediaType:
+    MobileDiscoveryCommercialMediaType;
+
+  imageUrl:
+    | string
+    | null;
+
+  videoUrl:
+    | string
+    | null;
+
+  thumbnailUrl:
+    | string
+    | null;
+
+  title:
+    | string
+    | null;
+}
+
+export interface MobileDiscoveryCommercialDeliveryBase {
+  kind:
+    "commercial";
+
+  id: string;
+
+  commercialType:
+    MobileDiscoveryDeliveredCommercialType;
+
+  campaignId: string;
+
+  placement:
+    MobileDiscoverySurface;
+
+  placements:
+    MobileDiscoverySurface[];
+
+  status:
+    "active";
+
+  title: string;
+
+  description:
+    | string
+    | null;
+
+  destinationUrl: string;
+
+  callToAction: string;
+
+  startAt: string;
+
+  endAt: string;
+
+  creativeFormat:
+    MobileDiscoveryCommercialCreativeFormat;
+
+  mediaType:
+    | MobileDiscoveryCommercialMediaType
+    | null;
+
+  imageUrl:
+    | string
+    | null;
+
+  videoUrl:
+    | string
+    | null;
+
+  thumbnailUrl:
+    | string
+    | null;
+
+  mediaItems:
+    MobileDiscoveryCommercialMediaItem[];
+}
+
+export interface MobileDiscoveryDirectSponsorshipDelivery
+  extends MobileDiscoveryCommercialDeliveryBase {
+  commercialType:
+    "direct_sponsorship";
+
+  advertiserName: string;
+
+  advertiserDomain: string;
+
+  disclosure: string;
+}
+
+export interface MobileDiscoveryAffiliatePromotionDelivery
+  extends MobileDiscoveryCommercialDeliveryBase {
+  commercialType:
+    "affiliate_promotion";
+
+  partnerName: string;
+
+  disclosure: string;
+
+  trackingUrl: string;
+
+  canonicalDestinationUrl: string;
+}
+
+export type MobileDiscoveryCommercialDelivery =
+  | MobileDiscoveryDirectSponsorshipDelivery
+  | MobileDiscoveryAffiliatePromotionDelivery;
+
 export interface MobileDiscoveryOrganicActions {
   canOpenOriginal: true;
 
@@ -112,6 +234,16 @@ export interface MobileDiscoveryAdSlotContract {
   afterOrganicIndex: number;
 
   commercialType: MobileDiscoveryCommercialType;
+
+  /**
+   * Parsed real Backend delivery.
+   *
+   * Null means the slot exists but Backend has no
+   * currently eligible campaign for it.
+   */
+  delivery:
+    | MobileDiscoveryCommercialDelivery
+    | null;
 
   commercialSaveAllowed: false;
 
@@ -804,12 +936,345 @@ function parseFeedItem(
   };
 }
 
+function isDeliveredCommercialType(
+  value: unknown
+): value is MobileDiscoveryDeliveredCommercialType {
+  return value ===
+      "direct_sponsorship" ||
+    value ===
+      "affiliate_promotion";
+}
+
+function isCommercialMediaType(
+  value: unknown
+): value is MobileDiscoveryCommercialMediaType {
+  return value ===
+      "image" ||
+    value ===
+      "video";
+}
+
+function isCommercialCreativeFormat(
+  value: unknown
+): value is MobileDiscoveryCommercialCreativeFormat {
+  return value ===
+      "standard" ||
+    value ===
+      "sliding";
+}
+
+function parseNullableString(
+  value: unknown,
+  fieldName: string
+): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (
+    typeof value !==
+      "string"
+  ) {
+    throw new Error(
+      `Discovery commercial ${fieldName} is invalid.`
+    );
+  }
+
+  return value;
+}
+
+function parseCommercialMediaItem(
+  value: unknown
+): MobileDiscoveryCommercialMediaItem {
+  if (!isRecord(value)) {
+    throw new Error(
+      "Discovery commercial media item is invalid."
+    );
+  }
+
+  const id =
+    value.id;
+
+  const mediaType =
+    value.mediaType;
+
+  if (
+    typeof id !==
+      "string" ||
+    !id.trim() ||
+    !isCommercialMediaType(
+      mediaType
+    )
+  ) {
+    throw new Error(
+      "Discovery commercial media item contract is incomplete."
+    );
+  }
+
+  return {
+    id,
+
+    mediaType,
+
+    imageUrl:
+      parseNullableString(
+        value.imageUrl,
+        "media image URL"
+      ),
+
+    videoUrl:
+      parseNullableString(
+        value.videoUrl,
+        "media video URL"
+      ),
+
+    thumbnailUrl:
+      parseNullableString(
+        value.thumbnailUrl,
+        "media thumbnail URL"
+      ),
+
+    title:
+      parseNullableString(
+        value.title,
+        "media title"
+      ),
+  };
+}
+
+function parseCommercialDelivery(
+  value: unknown
+): MobileDiscoveryCommercialDelivery {
+  if (!isRecord(value)) {
+    throw new Error(
+      "Discovery commercial delivery is invalid."
+    );
+  }
+
+  const commercialType =
+    value.commercialType;
+
+  const placement =
+    value.placement;
+
+  const placements =
+    value.placements;
+
+  const creativeFormat =
+    value.creativeFormat;
+
+  const mediaType =
+    value.mediaType;
+
+  const mediaItems =
+    value.mediaItems;
+
+  if (
+    value.kind !==
+      "commercial" ||
+    !isDeliveredCommercialType(
+      commercialType
+    ) ||
+    typeof value.id !==
+      "string" ||
+    !value.id.trim() ||
+    typeof value.campaignId !==
+      "string" ||
+    !value.campaignId.trim() ||
+    !isSurface(
+      placement
+    ) ||
+    !Array.isArray(
+      placements
+    ) ||
+    !placements.every(
+      isSurface
+    ) ||
+    value.status !==
+      "active" ||
+    typeof value.title !==
+      "string" ||
+    !value.title.trim() ||
+    typeof value.destinationUrl !==
+      "string" ||
+    !value.destinationUrl.trim() ||
+    typeof value.callToAction !==
+      "string" ||
+    !value.callToAction.trim() ||
+    typeof value.startAt !==
+      "string" ||
+    typeof value.endAt !==
+      "string" ||
+    !isCommercialCreativeFormat(
+      creativeFormat
+    ) ||
+    (
+      mediaType !==
+        null &&
+      !isCommercialMediaType(
+        mediaType
+      )
+    ) ||
+    !Array.isArray(
+      mediaItems
+    )
+  ) {
+    throw new Error(
+      "Discovery commercial delivery contract is incomplete."
+    );
+  }
+
+  const base = {
+    kind:
+      "commercial" as const,
+
+    id:
+      value.id,
+
+    commercialType,
+
+    campaignId:
+      value.campaignId,
+
+    placement,
+
+    placements:
+      [...placements],
+
+    status:
+      "active" as const,
+
+    title:
+      value.title,
+
+    description:
+      parseNullableString(
+        value.description,
+        "description"
+      ),
+
+    destinationUrl:
+      value.destinationUrl,
+
+    callToAction:
+      value.callToAction,
+
+    startAt:
+      value.startAt,
+
+    endAt:
+      value.endAt,
+
+    creativeFormat,
+
+    mediaType,
+
+    imageUrl:
+      parseNullableString(
+        value.imageUrl,
+        "image URL"
+      ),
+
+    videoUrl:
+      parseNullableString(
+        value.videoUrl,
+        "video URL"
+      ),
+
+    thumbnailUrl:
+      parseNullableString(
+        value.thumbnailUrl,
+        "thumbnail URL"
+      ),
+
+    mediaItems:
+      mediaItems.map(
+        parseCommercialMediaItem
+      ),
+  };
+
+  if (
+    commercialType ===
+      "direct_sponsorship"
+  ) {
+    if (
+      typeof value.advertiserName !==
+        "string" ||
+      !value.advertiserName.trim() ||
+      typeof value.advertiserDomain !==
+        "string" ||
+      !value.advertiserDomain.trim() ||
+      typeof value.disclosure !==
+        "string" ||
+      !value.disclosure.trim()
+    ) {
+      throw new Error(
+        "Discovery direct-sponsorship delivery contract is incomplete."
+      );
+    }
+
+    return {
+      ...base,
+
+      commercialType:
+        "direct_sponsorship",
+
+      advertiserName:
+        value.advertiserName,
+
+      advertiserDomain:
+        value.advertiserDomain,
+
+      disclosure:
+        value.disclosure,
+    };
+  }
+
+  if (
+    typeof value.partnerName !==
+      "string" ||
+    !value.partnerName.trim() ||
+    typeof value.disclosure !==
+      "string" ||
+    !value.disclosure.trim() ||
+    typeof value.trackingUrl !==
+      "string" ||
+    !value.trackingUrl.trim() ||
+    typeof value.canonicalDestinationUrl !==
+      "string" ||
+    !value.canonicalDestinationUrl.trim()
+  ) {
+    throw new Error(
+      "Discovery affiliate delivery contract is incomplete."
+    );
+  }
+
+  return {
+    ...base,
+
+    commercialType:
+      "affiliate_promotion",
+
+    partnerName:
+      value.partnerName,
+
+    disclosure:
+      value.disclosure,
+
+    trackingUrl:
+      value.trackingUrl,
+
+    canonicalDestinationUrl:
+      value.canonicalDestinationUrl,
+  };
+}
+
 function parseAdSlot(
   value: unknown
 ): MobileDiscoveryAdSlotContract {
   if (!isRecord(value)) {
     throw new Error(
-      "Discovery ad slot contract is invalid."
+      "Discovery ad-slot contract is invalid."
     );
   }
 
@@ -835,20 +1300,71 @@ function parseAdSlot(
     );
 
   if (
-    value.kind !== "ad_slot" ||
+    value.kind !==
+      "ad_slot" ||
     !placementKey ||
-    !isSurface(surface) ||
-    !isCommercialType(commercialType) ||
-    typeof afterOrganicIndex !== "number" ||
-    value.commercialSaveAllowed !== false ||
+    !isSurface(
+      surface
+    ) ||
+    !isCommercialType(
+      commercialType
+    ) ||
+    typeof afterOrganicIndex !==
+      "number" ||
+    !Number.isFinite(
+      afterOrganicIndex
+    ) ||
+    afterOrganicIndex <
+      0 ||
+    value.commercialSaveAllowed !==
+      false ||
     !allowedActions ||
-    getBoolean(allowedActions, "canOpen") !== true ||
-    getBoolean(allowedActions, "canShare") !== true ||
-    getBoolean(allowedActions, "canHide") !== true ||
-    getBoolean(allowedActions, "canReport") !== true
+    getBoolean(
+      allowedActions,
+      "canOpen"
+    ) !== true ||
+    getBoolean(
+      allowedActions,
+      "canShare"
+    ) !== true ||
+    getBoolean(
+      allowedActions,
+      "canHide"
+    ) !== true ||
+    getBoolean(
+      allowedActions,
+      "canReport"
+    ) !== true
   ) {
     throw new Error(
-      "Discovery ad slot contract is incomplete."
+      "Discovery ad-slot contract is incomplete."
+    );
+  }
+
+  const rawDelivery =
+    value.delivery;
+
+  const delivery =
+    rawDelivery ===
+        undefined ||
+      rawDelivery ===
+        null
+      ? null
+      : parseCommercialDelivery(
+          rawDelivery
+        );
+
+  if (
+    delivery &&
+    (
+      delivery.placement !==
+        surface ||
+      delivery.commercialType !==
+        commercialType
+    )
+  ) {
+    throw new Error(
+      "Discovery ad-slot delivery does not match its slot."
     );
   }
 
@@ -863,6 +1379,8 @@ function parseAdSlot(
     afterOrganicIndex,
 
     commercialType,
+
+    delivery,
 
     commercialSaveAllowed:
       false,

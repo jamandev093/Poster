@@ -40,8 +40,13 @@ import MobileActionsApiService, {
   type MobileActionOrganicContentSurface,
 } from "../../services/MobileActionsApiService";
 
-import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";
-import MonetizationService from "../../services/MonetizationService";
+import type {
+  MobileDiscoveryAdSlotContract,
+} from "../../services/MobileDiscoveryService";
+
+import composeMobileCommercialFeedEntries from "../../services/MobileCommercialFeedComposer";
+
+import MonetizationAnalyticsService from "../../services/MonetizationAnalyticsService";import MonetizationService from "../../services/MonetizationService";
 
 import {
   Article,
@@ -104,6 +109,8 @@ interface MonetizedFeedProps
   placement:
     MonetizationPlacement;
 
+  commercialAdSlots?:
+    readonly MobileDiscoveryAdSlotContract[];
   query?: string;
 
   topic?: string;
@@ -262,8 +269,8 @@ function MonetizedFeedComponent(
   {
     articles,
     placement,
-    query,
-    topic,
+    commercialAdSlots,
+    query,    topic,
     articleActions,
     monetizationActions,
     ...flatListProps
@@ -457,11 +464,35 @@ function MonetizedFeedComponent(
         });
       }
 
-      return MonetizationService.composeFeed({
-        articles,
+      /*
+       * Local composition now owns only the commercial
+       * paths that have not yet migrated:
+       *
+       * - Poster Promotion;
+       * - Google / programmatic SDK placeholder.
+       *
+       * Direct Sponsorship + Affiliate are inserted
+       * afterwards from Backend Mobile Discovery slots.
+       */
+      const localEntries =
+        MonetizationService.composeFeed({
+          articles,
+          placement,
+          query,
+          topic,
+          hiddenItemIds,
+        });
+
+      return composeMobileCommercialFeedEntries({
+        entries:
+          localEntries,
+
+        adSlots:
+          commercialAdSlots ??
+          [],
+
         placement,
-        query,
-        topic,
+
         hiddenItemIds,
       });
     }, [
@@ -471,6 +502,7 @@ function MonetizedFeedComponent(
       topic,
       hiddenItemIds,
       taxonomyContextVersion,
+      commercialAdSlots,
     ]);
 
   /**

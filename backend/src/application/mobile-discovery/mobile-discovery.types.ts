@@ -4,6 +4,10 @@ import type {
   DiscoverySurface,
 } from "../../domains/mobile-discovery/index.js";
 
+import type {
+  MobileCommercialDeliveryItem,
+} from "../monetization/mobile-commercial-delivery.service.js";
+
 export type MobileDiscoveryRefreshMode =
   | "initial"
   | "older"
@@ -85,6 +89,19 @@ export interface MobileDiscoveryAdSlotContract {
     | "affiliate_promotion"
     | "direct_sponsorship"
     | "programmatic";
+
+  /**
+   * Real delivery payload resolved by Backend.
+   *
+   * Optional while Mobile is migrated away from the
+   * legacy local monetization candidate layer.
+   *
+   * A null payload means the placement exists but no
+   * currently eligible commercial item was available.
+   */
+  delivery?:
+    | MobileCommercialDeliveryItem
+    | null;
 
   commercialSaveAllowed: false;
 

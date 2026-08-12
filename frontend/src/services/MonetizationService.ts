@@ -1,4 +1,4 @@
-﻿import {
+import {
   MonetizationItem,
   MonetizationPlacement,
 } from "../components/ads";
@@ -16,9 +16,7 @@ import {
 } from "../data/interests";
 
 import {
-  directSponsoredCampaign,
   googleNativeAdPlaceholder,
-  posterAffiliatePromotion,
   posterPromotion,
 } from "../data/mockMonetization";
 
@@ -736,23 +734,18 @@ function getCandidateItems():
   const candidates:
     MonetizationItem[] = [];
 
-  if (
-    MONETIZATION_CONFIG
-      .directSponsorshipsEnabled
-  ) {
-    candidates.push(
-      directSponsoredCampaign
-    );
-  }
-
-  if (
-    MONETIZATION_CONFIG
-      .affiliatePromotionsEnabled
-  ) {
-    candidates.push(
-      posterAffiliatePromotion
-    );
-  }
+  /*
+   * Direct Sponsorship and Affiliate are not local
+   * Mobile candidates anymore.
+   *
+   * Mobile Discovery Backend owns:
+   * - delivery eligibility;
+   * - selected campaign;
+   * - exact organic slot position.
+   *
+   * Poster Promotion and Google remain on their
+   * existing local paths until their own migration.
+   */
 
   if (
     MONETIZATION_CONFIG
@@ -774,7 +767,6 @@ function getCandidateItems():
 
   return candidates;
 }
-
 export default class MonetizationService {
   /**
    * Warms the synchronous targeting cache
@@ -949,20 +941,6 @@ export default class MonetizationService {
           hiddenItemIds,
         });
 
-    const directCampaign =
-      eligibleItems.find(
-        (item) =>
-          item.type ===
-          "direct_sponsorship"
-      );
-
-    const affiliatePromotion =
-      eligibleItems.find(
-        (item) =>
-          item.type ===
-          "poster_affiliate"
-      );
-
     const googleAd =
       eligibleItems.find(
         (item) =>
@@ -987,20 +965,6 @@ export default class MonetizationService {
       articles,
 
       placement,
-
-      directCampaign:
-        directCampaign
-          ?.type ===
-        "direct_sponsorship"
-          ? directCampaign
-          : undefined,
-
-      affiliatePromotion:
-        affiliatePromotion
-          ?.type ===
-        "poster_affiliate"
-          ? affiliatePromotion
-          : undefined,
 
       googleAd:
         googleAd?.type ===

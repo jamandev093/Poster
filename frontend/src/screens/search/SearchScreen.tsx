@@ -50,8 +50,12 @@ import {
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
 import InteractionService from "../../services/InteractionService";
+import {
+  mergeMobileDiscoveryAdSlots,
+} from "../../services/MobileCommercialFeedComposer";
+
 import MobileDiscoveryService, {
-  MobileDiscoveryFeedResponse,
+  type MobileDiscoveryAdSlotContract,  MobileDiscoveryFeedResponse,
   MobileDiscoveryRefreshMode,
 } from "../../services/MobileDiscoveryService";
 import ScreenRefreshService from "../../services/ScreenRefreshService";
@@ -540,6 +544,12 @@ export default function SearchScreen() {
   const [articles, setArticles] =
     useState<FeedItem[]>([]);
 
+  const [
+    commercialAdSlots,
+    setCommercialAdSlots,
+  ] = useState<
+    MobileDiscoveryAdSlotContract[]
+  >([]);
   const [refreshing, setRefreshing] =
     useState(false);
 
@@ -700,6 +710,16 @@ export default function SearchScreen() {
           synchronizedArticles
         );
 
+        setCommercialAdSlots(
+          (currentSlots) =>
+            refreshMode ===
+            "older"
+              ? mergeMobileDiscoveryAdSlots(
+                  currentSlots,
+                  response.adSlots
+                )
+              : response.adSlots
+        );
         nextCursorRef.current =
           response.pagination.nextCursor;
 
@@ -2996,7 +3016,9 @@ export default function SearchScreen() {
       <MonetizedFeed
         ref={listRef}
         placement="search"
-        query={monetizationQuery}
+        commercialAdSlots={
+          commercialAdSlots
+        }        query={monetizationQuery}
         topic={monetizationTopic}
         articles={visibleArticles}
         articleActions={

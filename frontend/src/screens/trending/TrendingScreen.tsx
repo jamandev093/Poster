@@ -48,8 +48,12 @@ import InteractionService from "../../services/InteractionService";
 import InterestCatalogService, {
   InterestCatalogTopic,
 } from "../../services/InterestCatalogService";
+import {
+  mergeMobileDiscoveryAdSlots,
+} from "../../services/MobileCommercialFeedComposer";
+
 import MobileDiscoveryService, {
-  MobileDiscoveryFeedResponse,
+  type MobileDiscoveryAdSlotContract,  MobileDiscoveryFeedResponse,
   MobileDiscoveryRefreshMode,
 } from "../../services/MobileDiscoveryService";
 import ScreenRefreshService from "../../services/ScreenRefreshService";
@@ -320,6 +324,12 @@ export default function TrendingScreen() {
   const [articles, setArticles] =
     useState<FeedItem[]>([]);
 
+  const [
+    commercialAdSlots,
+    setCommercialAdSlots,
+  ] = useState<
+    MobileDiscoveryAdSlotContract[]
+  >([]);
   const [
     evolvingTopics,
     setEvolvingTopics,
@@ -724,6 +734,16 @@ export default function TrendingScreen() {
           synchronizedArticles
         );
 
+        setCommercialAdSlots(
+          (currentSlots) =>
+            refreshMode ===
+            "older"
+              ? mergeMobileDiscoveryAdSlots(
+                  currentSlots,
+                  response.adSlots
+                )
+              : response.adSlots
+        );
         nextCursorRef.current =
           response.pagination.nextCursor;
 
@@ -1803,7 +1823,9 @@ export default function TrendingScreen() {
       <MonetizedFeed
         ref={listRef}
         placement="trending"
-        topic={monetizationTopic}
+        commercialAdSlots={
+          commercialAdSlots
+        }        topic={monetizationTopic}
         articles={visibleArticles}
         articleActions={
           articleActions

@@ -35,8 +35,12 @@ import useFeedback from "../../context/FeedbackContext";
 import BookmarkService from "../../services/BookmarkService";
 import FeedbackService from "../../services/FeedbackService";
 import InteractionService from "../../services/InteractionService";
+import {
+  mergeMobileDiscoveryAdSlots,
+} from "../../services/MobileCommercialFeedComposer";
+
 import MobileDiscoveryService, {
-  MobileDiscoveryFeedResponse,
+  type MobileDiscoveryAdSlotContract,  MobileDiscoveryFeedResponse,
   MobileDiscoveryRefreshMode,
 } from "../../services/MobileDiscoveryService";
 import RecommendationRankingService from "../../services/RecommendationRankingService";
@@ -165,6 +169,12 @@ export default function HomeScreen() {
   const [articles, setArticles] =
     useState<FeedItem[]>([]);
 
+  const [
+    commercialAdSlots,
+    setCommercialAdSlots,
+  ] = useState<
+    MobileDiscoveryAdSlotContract[]
+  >([]);
   const articlesRef =
     useRef<FeedItem[]>([]);
 
@@ -350,6 +360,16 @@ export default function HomeScreen() {
           personalizedArticles
         );
 
+        setCommercialAdSlots(
+          (currentSlots) =>
+            refreshMode ===
+            "older"
+              ? mergeMobileDiscoveryAdSlots(
+                  currentSlots,
+                  response.adSlots
+                )
+              : response.adSlots
+        );
         nextCursorRef.current =
           response.pagination.nextCursor;
 
@@ -1205,7 +1225,9 @@ export default function HomeScreen() {
       <MonetizedFeed
         ref={listRef}
         placement="home"
-        articles={articles}
+        commercialAdSlots={
+          commercialAdSlots
+        }        articles={articles}
         articleActions={
           articleActions
         }

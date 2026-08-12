@@ -3,6 +3,11 @@ import type {
 } from "../../domains/mobile-discovery/index.js";
 
 import type {
+  MobileCommercialDeliveryItem,
+  MobileCommercialDeliveryService,
+} from "../monetization/mobile-commercial-delivery.service.js";
+
+import type {
   ListMobileDiscoveryFeedInput,
   MobileDiscoveryAdSlotContract,
   MobileDiscoveryFeedItem,
@@ -47,6 +52,19 @@ export interface PosterBrainMobileDiscoveryRankedFeedService {
 
 export interface PosterBrainMobileDiscoveryServiceDependencies {
   readonly rankedFeedService: PosterBrainMobileDiscoveryRankedFeedService;
+
+  /**
+   * Optional for isolated service tests and compatibility.
+   *
+   * Production app wiring supplies the real DB-backed
+   * Mobile commercial-delivery service.
+   */
+  readonly commercialDeliveryService?:
+    Pick<
+      MobileCommercialDeliveryService,
+      "listForPlacement"
+    >;
+
   readonly actorUserId?: string;
 }
 
@@ -372,9 +390,28 @@ function mapRankedFeedItem(
   };
 }
 
+function findCommercialDelivery(
+  items:
+    readonly MobileCommercialDeliveryItem[],
+  commercialType:
+    MobileCommercialDeliveryItem["commercialType"]
+): MobileCommercialDeliveryItem | null {
+  return (
+    items.find(
+      item =>
+        item.commercialType ===
+        commercialType
+    ) ??
+    null
+  );
+}
+
 function createAdSlotContracts(
   surface: DiscoverySurface,
-  organicCount: number
+  organicCount: number,
+  commercialItems:
+    readonly MobileCommercialDeliveryItem[] =
+    []
 ): MobileDiscoveryAdSlotContract[] {
   const contracts:
     MobileDiscoveryAdSlotContract[] =
@@ -386,7 +423,8 @@ function createAdSlotContracts(
         "ad_slot",
 
       placementKey:
-        surface + ":direct-sponsorship:after-4",
+        surface +
+        ":direct-sponsorship:after-4",
 
       surface,
 
@@ -395,6 +433,12 @@ function createAdSlotContracts(
 
       commercialType:
         "direct_sponsorship",
+
+      delivery:
+        findCommercialDelivery(
+          commercialItems,
+          "direct_sponsorship"
+        ),
 
       commercialSaveAllowed:
         false,
@@ -421,7 +465,8 @@ function createAdSlotContracts(
         "ad_slot",
 
       placementKey:
-        surface + ":affiliate:after-10",
+        surface +
+        ":affiliate:after-10",
 
       surface,
 
@@ -430,6 +475,12 @@ function createAdSlotContracts(
 
       commercialType:
         "affiliate_promotion",
+
+      delivery:
+        findCommercialDelivery(
+          commercialItems,
+          "affiliate_promotion"
+        ),
 
       commercialSaveAllowed:
         false,
@@ -452,7 +503,6 @@ function createAdSlotContracts(
 
   return contracts;
 }
-
 export function createPosterBrainMobileDiscoveryService(
   dependencies: PosterBrainMobileDiscoveryServiceDependencies
 ): MobileDiscoveryService {
@@ -510,6 +560,41 @@ export function createPosterBrainMobileDiscoveryService(
             })
           );
 
+
+      let commercialItems:
+        readonly MobileCommercialDeliveryItem[] =
+        [];
+
+      /*
+       * Commercial delivery must never make the organic
+       * knowledge feed unavailable.
+       *
+       * If the monetization read fails, Poster continues
+       * with the ranked organic response and empty ad
+       * deliveries.
+       */
+      if (
+        result.items.length >=
+          4 &&
+        dependencies
+          .commercialDeliveryService
+      ) {
+        try {
+          commercialItems =
+            await dependencies
+              .commercialDeliveryService
+              .listForPlacement({
+                placement:
+                  input.surface,
+
+                limit:
+                  2,
+              });
+        } catch {
+          commercialItems =
+            [];
+        }
+      }
       return {
         surface:
           input.surface,
@@ -528,7 +613,8 @@ export function createPosterBrainMobileDiscoveryService(
         adSlots:
           createAdSlotContracts(
             input.surface,
-            result.items.length
+            result.items.length,
+            commercialItems
           ),
 
         pagination: {

@@ -162,6 +162,10 @@ import {
 } from "./application/authentication/account-selected-interests.service.js";
 
 import {
+  createMobileCommercialDeliveryService,
+} from "./application/monetization/mobile-commercial-delivery.service.js";
+
+import {
   createPosterBrainMobileDiscoveryService,
   type MobileDiscoveryService,
 } from "./application/mobile-discovery/index.js";
@@ -1168,6 +1172,9 @@ await app.register(
     createPosterBrainMobileDiscoveryService({
       rankedFeedService:
         createPosterBrainRankedFeedService(),
+
+      commercialDeliveryService:
+        createMobileCommercialDeliveryService(),
     });
 
   const mobileUserActionsService =

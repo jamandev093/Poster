@@ -25,3 +25,4 @@ export * from "./affiliate.repository.js";
 export * from "./programmatic.types.js";
 export * from "./programmatic.validation.js";
 export * from "./programmatic.repository.js";
+export * from "./mobile-commercial-delivery.repository.js";

@@ -18,3 +18,4 @@ export * from "./affiliate.errors.js";
 export * from "./admin-affiliate.service.js";
 export * from "./programmatic.errors.js";
 export * from "./admin-programmatic.service.js";
+export * from "./mobile-commercial-delivery.service.js";
