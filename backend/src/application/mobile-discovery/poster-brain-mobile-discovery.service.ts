@@ -407,17 +407,22 @@ function findCommercialDelivery(
 }
 
 function createAdSlotContracts(
-  surface: DiscoverySurface,
-  organicCount: number,
+  surface:
+    DiscoverySurface,
+  organicCount:
+    number,
   commercialItems:
     readonly MobileCommercialDeliveryItem[] =
-    []
+      []
 ): MobileDiscoveryAdSlotContract[] {
   const contracts:
     MobileDiscoveryAdSlotContract[] =
-    [];
+      [];
 
-  if (organicCount >= 4) {
+  if (
+    organicCount >=
+    4
+  ) {
     contracts.push({
       kind:
         "ad_slot",
@@ -459,7 +464,63 @@ function createAdSlotContracts(
     });
   }
 
-  if (organicCount >= 10) {
+  /*
+   * Poster Promotion is delivery-backed only.
+   * No empty local Poster placeholder is emitted.
+   */
+  const posterPromotion =
+    findCommercialDelivery(
+      commercialItems,
+      "poster_promotion"
+    );
+
+  if (
+    organicCount >=
+      6 &&
+    posterPromotion
+  ) {
+    contracts.push({
+      kind:
+        "ad_slot",
+
+      placementKey:
+        surface +
+        ":poster-promotion:after-6",
+
+      surface,
+
+      afterOrganicIndex:
+        6,
+
+      commercialType:
+        "poster_promotion",
+
+      delivery:
+        posterPromotion,
+
+      commercialSaveAllowed:
+        false,
+
+      allowedActions: {
+        canOpen:
+          true,
+
+        canShare:
+          true,
+
+        canHide:
+          true,
+
+        canReport:
+          true,
+      },
+    });
+  }
+
+  if (
+    organicCount >=
+    10
+  ) {
     contracts.push({
       kind:
         "ad_slot",
@@ -503,6 +564,7 @@ function createAdSlotContracts(
 
   return contracts;
 }
+
 export function createPosterBrainMobileDiscoveryService(
   dependencies: PosterBrainMobileDiscoveryServiceDependencies
 ): MobileDiscoveryService {

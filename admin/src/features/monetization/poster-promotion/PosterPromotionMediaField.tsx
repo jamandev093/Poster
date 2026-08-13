@@ -1,14 +1,19 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 
-import type {
-  ChangeEvent,
+import {
+  useState,
+  type ChangeEvent,
 } from "react";
 
 import type {
   PosterPromotionMedia,
 } from "./poster-promotion.types";
+
+import {
+  uploadPosterPromotionMedia,
+} from "./poster-promotion-media-upload.service";
 
 import {
   validatePosterPromotionMedia,
@@ -57,91 +62,187 @@ export default function PosterPromotionMediaField(
   props:
     PosterPromotionMediaFieldProps
 ) {
-  const handleFileChange = (
-    event:
-      ChangeEvent<HTMLInputElement>
-  ) => {
-    const file =
-      event.target.files?.[0];
+  const [
+    uploading,
+    setUploading,
+  ] =
+    useState(
+      false
+    );
 
-    if (!file) {
-      return;
-    }
+  const [
+    uploadMessage,
+    setUploadMessage,
+  ] =
+    useState<string | null>(
+      null
+    );
 
-    const type =
-      mediaTypeFromFile(
-        file
-      );
+  const handleFileChange =
+    async (
+      event:
+        ChangeEvent<HTMLInputElement>
+    ) => {
+      const input =
+        event.currentTarget;
 
-    if (!type) {
-      props.onChange(
-        null
-      );
+      const file =
+        input.files?.[0];
 
-      event.target.value =
-        "";
+      if (!file) {
+        return;
+      }
 
-      return;
-    }
+      const type =
+        mediaTypeFromFile(
+          file
+        );
 
-    const media:
-      PosterPromotionMedia = {
-      type,
+      if (!type) {
+        props.onChange(
+          null
+        );
 
-      fileName:
-        file.name,
+        setUploadMessage(
+          "Choose a supported image or video file."
+        );
 
-      previewUrl:
+        input.value =
+          "";
+
+        return;
+      }
+
+      const previewUrl =
         URL.createObjectURL(
           file
-        ),
+        );
 
-      mimeType:
-        file.type,
+      const media:
+        PosterPromotionMedia = {
+        type,
 
-      sizeBytes:
-        file.size,
-    };
+        fileName:
+          file.name,
 
-    const validationError =
-      validatePosterPromotionMedia(
+        previewUrl,
+
+        mimeType:
+          file.type,
+
+        sizeBytes:
+          file.size,
+      };
+
+      const validationError =
+        validatePosterPromotionMedia(
+          media
+        );
+
+      if (validationError) {
+        URL.revokeObjectURL(
+          previewUrl
+        );
+
+        props.onChange(
+          null
+        );
+
+        setUploadMessage(
+          validationError
+        );
+
+        input.value =
+          "";
+
+        return;
+      }
+
+      if (
+        props.media?.previewUrl.startsWith(
+          "blob:"
+        )
+      ) {
+        URL.revokeObjectURL(
+          props.media.previewUrl
+        );
+      }
+
+      props.onChange(
         media
       );
 
-    if (
-      validationError
-    ) {
-      URL.revokeObjectURL(
-        media.previewUrl
+      setUploading(
+        true
       );
 
-      props.onChange(
-        null
+      setUploadMessage(
+        "Uploading and verifying media..."
       );
 
-      event.target.value =
-        "";
+      try {
+        const verified =
+          await uploadPosterPromotionMedia(
+            file,
+            type
+          );
 
-      return;
-    }
+        props.onChange({
+          ...media,
 
-    if (
-      props.media?.previewUrl.startsWith(
-        "blob:"
-      )
-    ) {
-      URL.revokeObjectURL(
-        props.media.previewUrl
-      );
-    }
+          assetId:
+            verified.assetId,
 
-    props.onChange(
-      media
-    );
-  };
+          type:
+            verified.type,
+
+          fileName:
+            verified.fileName,
+
+          mimeType:
+            verified.mimeType,
+
+          sizeBytes:
+            verified.sizeBytes,
+        });
+
+        setUploadMessage(
+          "Media upload verified and ready."
+        );
+      } catch (error: unknown) {
+        URL.revokeObjectURL(
+          previewUrl
+        );
+
+        props.onChange(
+          null
+        );
+
+        setUploadMessage(
+          error instanceof Error
+            ? error.message
+            : "Poster Promotion media upload failed."
+        );
+      } finally {
+        setUploading(
+          false
+        );
+
+        input.value =
+          "";
+      }
+    };
 
   const removeMedia =
     () => {
+      if (uploading) {
+        return;
+      }
+
+      setUploadMessage(
+        null
+      );
+
       if (
         props.media?.previewUrl.startsWith(
           "blob:"
@@ -174,7 +275,10 @@ export default function PosterPromotionMediaField(
           </strong>
 
           <p>
-            Upload one landscape image or short landscape video.
+            {
+              uploadMessage ??
+              "Upload one landscape image or short landscape video."
+            }
           </p>
         </div>
 
@@ -200,6 +304,9 @@ export default function PosterPromotionMediaField(
       >
         <input
           type="file"
+          disabled={
+            uploading
+          }
           accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
           onChange={
             handleFileChange

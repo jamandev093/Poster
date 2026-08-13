@@ -3,6 +3,7 @@ import type {
   MonetizationItem,
   MonetizationMediaItem,
   PosterAffiliatePromotion,
+  PosterPromotion,
 } from "../components/ads";
 
 import type {
@@ -151,6 +152,87 @@ function mapDirectSponsorship(
   };
 }
 
+function mapPosterPromotion(
+  delivery:
+    Extract<
+      MobileDiscoveryCommercialDelivery,
+      {
+        commercialType:
+          "poster_promotion";
+      }
+    >
+): PosterPromotion {
+  return {
+    id:
+      delivery.id,
+
+    type:
+      "poster_promotion",
+
+    placement:
+      delivery.placement,
+
+    placements:
+      [...delivery.placements],
+
+    status:
+      "active",
+
+    creativeFormat:
+      delivery.creativeFormat,
+
+    sourceName:
+      "Poster",
+
+    disclosure:
+      "Promoted by Poster",
+
+    title:
+      delivery.title,
+
+    description:
+      optionalText(
+        delivery.description
+      ),
+
+    mediaType:
+      delivery.mediaType ??
+      undefined,
+
+    imageUrl:
+      optionalText(
+        delivery.imageUrl
+      ),
+
+    videoUrl:
+      optionalText(
+        delivery.videoUrl
+      ),
+
+    thumbnailUrl:
+      optionalText(
+        delivery.thumbnailUrl
+      ),
+
+    mediaItems:
+      delivery.mediaItems.map(
+        mapMediaItem
+      ),
+
+    destinationUrl:
+      delivery.destinationUrl,
+
+    callToAction:
+      delivery.callToAction,
+
+    startAt:
+      delivery.startAt,
+
+    endAt:
+      delivery.endAt,
+  };
+}
+
 function mapAffiliatePromotion(
   delivery:
     Extract<
@@ -261,6 +343,15 @@ function mapDelivery(
     );
   }
 
+  if (
+    delivery.commercialType ===
+      "poster_promotion"
+  ) {
+    return mapPosterPromotion(
+      delivery
+    );
+  }
+
   return mapAffiliatePromotion(
     delivery
   );
@@ -270,8 +361,8 @@ function mapDelivery(
  * Converts only Backend-resolved delivery payloads.
  *
  * Empty/null ad slots produce no local commercial item.
- * Poster Promotion and Google SDK advertising are not
- * manufactured here.
+ * Poster Promotion arrives only through Backend delivery.
+ * Google SDK advertising is not manufactured here.
  */
 export function mapMobileDiscoveryCommercialItems(
   adSlots:

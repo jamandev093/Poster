@@ -231,6 +231,71 @@ const AFFILIATE_DELIVERY:
     "https://academy.example/ai",
 };
 
+const POSTER_DELIVERY:
+  MobileCommercialDeliveryItem = {
+  kind:
+    "commercial",
+
+  id:
+    "poster:33333333-3333-4333-8333-333333333333",
+
+  commercialType:
+    "poster_promotion",
+
+  campaignId:
+    "33333333-3333-4333-8333-333333333333",
+
+  placement:
+    "home",
+
+  placements: [
+    "home",
+  ],
+
+  status:
+    "active",
+
+  title:
+    "Poster Knowledge",
+
+  description:
+    "Explore a Poster-curated knowledge collection.",
+
+  destinationUrl:
+    "https://getpostar.com/collections/knowledge",
+
+  callToAction:
+    "Explore",
+
+  startAt:
+    "2026-08-01",
+
+  endAt:
+    "2026-08-31",
+
+  creativeFormat:
+    "standard",
+
+  mediaType:
+    "image",
+
+  imageUrl:
+    "https://storage.googleapis.com/signed-poster-image",
+
+  videoUrl:
+    null,
+
+  thumbnailUrl:
+    null,
+
+  mediaItems: [],
+
+  sourceName:
+    "Poster",
+
+  disclosure:
+    "Promoted by Poster",
+};
 describe(
   "Poster Brain Mobile commercial delivery bridge",
   () => {
@@ -241,6 +306,7 @@ describe(
           vi.fn(
             async () => [
               DIRECT_DELIVERY,
+              POSTER_DELIVERY,
               AFFILIATE_DELIVERY,
             ]
           );
@@ -283,7 +349,7 @@ describe(
           response.adSlots
         )
           .toHaveLength(
-            2
+            3
           );
 
         expect(
@@ -313,6 +379,31 @@ describe(
 
         expect(
           response.adSlots[1]
+        )
+          .toMatchObject({
+            placementKey:
+              "home:poster-promotion:after-6",
+
+            afterOrganicIndex:
+              6,
+
+            commercialType:
+              "poster_promotion",
+
+            commercialSaveAllowed:
+              false,
+
+            delivery: {
+              campaignId:
+                "33333333-3333-4333-8333-333333333333",
+
+              commercialType:
+                "poster_promotion",
+            },
+          });
+
+        expect(
+          response.adSlots[2]
         )
           .toMatchObject({
             placementKey:

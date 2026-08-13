@@ -94,6 +94,11 @@ import {
 } from "./application/monetization/index.js";
 
 import {
+  createProductionAdminPosterPromotionMediaService,
+  type AdminPosterPromotionMediaService,
+} from "./application/media/admin-poster-promotion-media.service.js";
+
+import {
   createAdminCommercialRequestService,
   type AdminCommercialRequestService,
 } from "./application/monetization/admin-commercial-request.service.js";
@@ -328,6 +333,9 @@ export interface BuildAppOptions {
 
   adminPosterPromotionService?:
     AdminPosterPromotionService;
+
+  adminPosterPromotionMediaService?:
+    AdminPosterPromotionMediaService;
 
   adminCommercialRequestService?:
     AdminCommercialRequestService;
@@ -1545,6 +1553,11 @@ await app.register(
         options
           .adminPosterPromotionService ??
         createProductionAdminPosterPromotionService(),
+
+      mediaService:
+        options
+          .adminPosterPromotionMediaService ??
+        createProductionAdminPosterPromotionMediaService(),
     }
   );
 

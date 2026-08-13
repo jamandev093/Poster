@@ -15,9 +15,6 @@ import {
   resolveInterestTopic,
 } from "../data/interests";
 
-import {
-  posterPromotion,
-} from "../data/mockMonetization";
 
 import GoogleMobileAdsService from "./GoogleMobileAdsService";
 
@@ -736,16 +733,16 @@ function getCandidateItems():
     MonetizationItem[] = [];
 
   /*
-   * Direct Sponsorship and Affiliate are not local
-   * Mobile candidates anymore.
+   * Direct Sponsorship, Affiliate, and Poster Promotion
+   * are Backend-authoritative Mobile deliveries.
    *
    * Mobile Discovery Backend owns:
    * - delivery eligibility;
    * - selected campaign;
    * - exact organic slot position.
    *
-   * Poster Promotion and Google remain on their
-   * existing local paths until their own migration.
+   * Google remains SDK-backed and locally represented
+   * only by its runtime candidate descriptor.
    */
 
   if (
@@ -759,14 +756,6 @@ function getCandidateItems():
     );
   }
 
-  if (
-    MONETIZATION_CONFIG
-      .posterPromotionsEnabled
-  ) {
-    candidates.push(
-      posterPromotion
-    );
-  }
 
   return candidates;
 }
@@ -951,12 +940,6 @@ export default class MonetizationService {
           "google_native_ad"
       );
 
-    const selectedPosterPromotion =
-      eligibleItems.find(
-        (item) =>
-          item.type ===
-          "poster_promotion"
-      );
 
     const placementConfig =
       MONETIZATION_CONFIG
@@ -975,12 +958,6 @@ export default class MonetizationService {
           ? googleAd
           : undefined,
 
-      posterPromotion:
-        selectedPosterPromotion
-          ?.type ===
-        "poster_promotion"
-          ? selectedPosterPromotion
-          : undefined,
 
       organicItemsBeforeFirstMonetized:
         placementConfig

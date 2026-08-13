@@ -79,6 +79,12 @@ function isBackendCommercialTypeEnabled(
           .affiliatePromotionsEnabled
       );
 
+    case "poster_promotion":
+      return (
+        MONETIZATION_CONFIG
+          .posterPromotionsEnabled
+      );
+
     default:
       return false;
   }
@@ -113,13 +119,22 @@ function mapBackendItemToFeedEntry(
           item,
       };
 
+    case "poster_promotion":
+      return {
+        id:
+          `poster-${item.id}`,
+
+        type:
+          "poster_promotion",
+
+        promotion:
+          item,
+      };
+
     default:
       /*
-       * Poster Promotion and Google advertising are
-       * intentionally composed by their existing paths.
-       *
-       * This composer owns only Backend-delivered
-       * Direct Sponsorship + Affiliate entries.
+       * Google advertising remains SDK-owned and is
+       * intentionally composed by its existing path.
        */
       return null;
   }
@@ -149,7 +164,9 @@ function createReadyCommercialSlot(
     slot.commercialType !==
       "direct_sponsorship" &&
     slot.commercialType !==
-      "affiliate_promotion"
+      "affiliate_promotion" &&
+    slot.commercialType !==
+      "poster_promotion"
   ) {
     return null;
   }

@@ -7,9 +7,14 @@ import {
   type MobileCommercialDeliverySourceRecord,
 } from "../../domains/monetization/mobile-commercial-delivery.repository.js";
 
+import {
+  listMobilePosterPromotionDeliveries,
+} from "./mobile-poster-promotion-delivery.service.js";
+
 export type MobileCommercialDeliveryType =
   | "direct_sponsorship"
-  | "affiliate_promotion";
+  | "affiliate_promotion"
+  | "poster_promotion";
 
 export type MobileCommercialCreativeFormat =
   | "standard"
@@ -125,9 +130,22 @@ export interface MobileAffiliatePromotionDeliveryItem
   canonicalDestinationUrl: string;
 }
 
+export interface MobilePosterPromotionDeliveryItem
+  extends MobileCommercialDeliveryBase {
+  commercialType:
+    "poster_promotion";
+
+  sourceName:
+    "Poster";
+
+  disclosure:
+    "Promoted by Poster";
+}
+
 export type MobileCommercialDeliveryItem =
   | MobileDirectSponsorshipDeliveryItem
-  | MobileAffiliatePromotionDeliveryItem;
+  | MobileAffiliatePromotionDeliveryItem
+  | MobilePosterPromotionDeliveryItem;
 
 export interface ListMobileCommercialDeliveryInput {
   placement:
@@ -136,6 +154,14 @@ export interface ListMobileCommercialDeliveryInput {
   limit?:
     number;
 }
+
+export type ListMobilePosterPromotionDeliveryOperation =
+  (
+    input:
+      ListMobileCommercialDeliveryInput
+  ) => Promise<
+    readonly MobilePosterPromotionDeliveryItem[]
+  >;
 
 export type ListMobileCommercialDeliverySourcesOperation =
   (
@@ -153,6 +179,9 @@ export type ListMobileCommercialDeliverySourcesOperation =
 export interface MobileCommercialDeliveryServiceDependencies {
   listSources?:
     ListMobileCommercialDeliverySourcesOperation;
+
+  listPosterPromotions?:
+    ListMobilePosterPromotionDeliveryOperation;
 }
 
 export interface MobileCommercialDeliveryService {
@@ -1144,6 +1173,16 @@ export function createMobileCommercialDeliveryService(
         )
     );
 
+  const listPosterPromotions:
+    ListMobilePosterPromotionDeliveryOperation =
+    dependencies
+      .listPosterPromotions ??
+    (
+      dependencies.listSources
+        ? async () => []
+        : listMobilePosterPromotionDeliveries
+    );
+
   return {
     async listForPlacement(
       input
@@ -1214,6 +1253,29 @@ export function createMobileCommercialDeliveryService(
             );
           }
         }
+      }
+
+      try {
+        const posterPromotions =
+          await listPosterPromotions({
+            placement,
+
+            limit:
+              normalizeLimit(
+                input.limit
+              ),
+          });
+
+        result.push(
+          ...posterPromotions
+        );
+      } catch {
+        /*
+         * Poster Promotion media signing is independent
+         * from Direct/Affiliate delivery. Missing storage
+         * configuration or a transient signing failure
+         * must not suppress other commercial delivery.
+         */
       }
 
       return result;

@@ -41,6 +41,7 @@ export type MobileDiscoveryCommercialType =
   | "programmatic";
 
 export type MobileDiscoveryDeliveredCommercialType =
+  | "poster_promotion"
   | "affiliate_promotion"
   | "direct_sponsorship";
 
@@ -132,6 +133,18 @@ export interface MobileDiscoveryCommercialDeliveryBase {
     MobileDiscoveryCommercialMediaItem[];
 }
 
+export interface MobileDiscoveryPosterPromotionDelivery
+  extends MobileDiscoveryCommercialDeliveryBase {
+  commercialType:
+    "poster_promotion";
+
+  sourceName:
+    "Poster";
+
+  disclosure:
+    "Promoted by Poster";
+}
+
 export interface MobileDiscoveryDirectSponsorshipDelivery
   extends MobileDiscoveryCommercialDeliveryBase {
   commercialType:
@@ -159,6 +172,7 @@ export interface MobileDiscoveryAffiliatePromotionDelivery
 }
 
 export type MobileDiscoveryCommercialDelivery =
+  | MobileDiscoveryPosterPromotionDelivery
   | MobileDiscoveryDirectSponsorshipDelivery
   | MobileDiscoveryAffiliatePromotionDelivery;
 
@@ -940,6 +954,8 @@ function isDeliveredCommercialType(
   value: unknown
 ): value is MobileDiscoveryDeliveredCommercialType {
   return value ===
+      "poster_promotion" ||
+    value ===
       "direct_sponsorship" ||
     value ===
       "affiliate_promotion";
@@ -1227,6 +1243,35 @@ function parseCommercialDelivery(
 
       disclosure:
         value.disclosure,
+    };
+  }
+
+  if (
+    commercialType ===
+      "poster_promotion"
+  ) {
+    if (
+      value.sourceName !==
+        "Poster" ||
+      value.disclosure !==
+        "Promoted by Poster"
+    ) {
+      throw new Error(
+        "Discovery Poster Promotion delivery contract is incomplete."
+      );
+    }
+
+    return {
+      ...base,
+
+      commercialType:
+        "poster_promotion",
+
+      sourceName:
+        "Poster",
+
+      disclosure:
+        "Promoted by Poster",
     };
   }
 

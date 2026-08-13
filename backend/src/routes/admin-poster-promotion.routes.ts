@@ -17,6 +17,11 @@ import type {
 } from "../application/monetization/admin-poster-promotion.service.js";
 
 import {
+  createProductionAdminPosterPromotionMediaService,
+  type AdminPosterPromotionMediaService,
+} from "../application/media/admin-poster-promotion-media.service.js";
+
+import {
   MONETIZATION_PLACEMENTS,
   type PosterPromotionCreativeRecord,
   type PosterPromotionRecord,
@@ -218,6 +223,133 @@ const PosterPromotionUpdateBodySchema =
     })
     .strict();
 
+const PosterPromotionMediaUploadBodySchema =
+  z
+    .object({
+      type:
+        z.enum([
+          "image",
+          "video",
+        ]),
+
+      fileName:
+        z
+          .string()
+          .trim()
+          .min(
+            1
+          )
+          .max(
+            255
+          ),
+
+      mimeType:
+        z
+          .string()
+          .trim()
+          .min(
+            1
+          )
+          .max(
+            255
+          ),
+
+      sizeBytes:
+        z
+          .number()
+          .int()
+          .positive()
+          .max(
+            20 *
+            1024 *
+            1024
+          ),
+    })
+    .superRefine(
+      (
+        value,
+        context
+      ) => {
+        const mimeType =
+          value.mimeType
+            .trim()
+            .toLowerCase();
+
+        const accepted =
+          value.type ===
+            "image"
+            ? [
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+              ]
+            : [
+                "video/mp4",
+                "video/webm",
+              ];
+
+        if (
+          !accepted.includes(
+            mimeType
+          )
+        ) {
+          context.addIssue({
+            code:
+              "custom",
+
+            path: [
+              "mimeType",
+            ],
+
+            message:
+              "Unsupported Poster Promotion media MIME type.",
+          });
+        }
+
+        if (
+          value.type ===
+            "image" &&
+          value.sizeBytes >
+            10 *
+            1024 *
+            1024
+        ) {
+          context.addIssue({
+            code:
+              "custom",
+
+            path: [
+              "sizeBytes",
+            ],
+
+            message:
+              "Poster Promotion images must not exceed 10 MB.",
+          });
+        }
+      }
+    );
+
+const PosterPromotionMediaAssetParamsSchema =
+  z
+    .object({
+      assetId:
+        z
+          .string()
+          .uuid(),
+    })
+    .strict();
+
+const PosterPromotionMediaVerifyBodySchema =
+  z
+    .object({
+      expectedRowVersion:
+        z
+          .string()
+          .regex(
+            /^(0|[1-9]\d*)$/
+          ),
+    })
+    .strict();
 function parseRequestValue<
   TSchema extends z.ZodType
 >(
@@ -347,6 +479,9 @@ function sendNotFound(
 export interface AdminPosterPromotionRoutesOptions {
   service:
     AdminPosterPromotionService;
+
+  mediaService?:
+    AdminPosterPromotionMediaService;
 }
 
 export const adminPosterPromotionRoutes:
@@ -357,6 +492,272 @@ export const adminPosterPromotionRoutes:
     app,
     options
   ) => {
+    const mediaService =
+      options.mediaService ??
+      createProductionAdminPosterPromotionMediaService();
+
+    app.post(
+      "/monetization/poster-promotions/media/uploads",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requirePlatformPermission(
+            request,
+            "monetization.campaigns.manage"
+          );
+
+        const body =
+          parseRequestValue(
+            PosterPromotionMediaUploadBodySchema,
+            request.body,
+            "body"
+          );
+
+        const result =
+          await mediaService
+            .createUpload({
+              actorUserId:
+                authorization.userId,
+
+              type:
+                body.type,
+
+              fileName:
+                body.fileName,
+
+              mimeType:
+                body.mimeType,
+
+              sizeBytes:
+                body.sizeBytes,
+            });
+
+        return reply
+          .status(
+            201
+          )
+          .send({
+            media: {
+              assetId:
+                result.asset.assetId,
+
+              type:
+                result.asset.mediaType,
+
+              fileName:
+                result.asset.fileName,
+
+              mimeType:
+                result.asset.mimeType,
+
+              sizeBytes:
+                result.asset.sizeBytes,
+
+              status:
+                result.asset.status,
+
+              rowVersion:
+                result.asset.rowVersion,
+            },
+
+            upload: {
+              url:
+                result.upload.url,
+
+              method:
+                result.upload.method,
+
+              expiresAt:
+                result.upload
+                  .expiresAt
+                  .toISOString(),
+
+              requiredHeaders:
+                result.upload
+                  .requiredHeaders,
+            },
+          });
+      }
+    );
+
+    app.post(
+      "/monetization/poster-promotions/media/:assetId/verify",
+      async (
+        request,
+        reply
+      ) => {
+        requirePlatformPermission(
+          request,
+          "monetization.campaigns.manage"
+        );
+
+        const params =
+          parseRequestValue(
+            PosterPromotionMediaAssetParamsSchema,
+            request.params,
+            "params"
+          );
+
+        const body =
+          parseRequestValue(
+            PosterPromotionMediaVerifyBodySchema,
+            request.body,
+            "body"
+          );
+
+        const result =
+          await mediaService
+            .verifyUpload({
+              assetId:
+                params.assetId,
+
+              expectedRowVersion:
+                body.expectedRowVersion,
+            });
+
+        if (
+          result.status ===
+          "ready"
+        ) {
+          return reply
+            .status(
+              200
+            )
+            .send({
+              status:
+                "ready",
+
+              media: {
+                assetId:
+                  result.asset.assetId,
+
+                type:
+                  result.asset.mediaType,
+
+                fileName:
+                  result.asset.fileName,
+
+                mimeType:
+                  result.asset.mimeType,
+
+                sizeBytes:
+                  result.asset.sizeBytes,
+
+                rowVersion:
+                  result.asset.rowVersion,
+              },
+            });
+        }
+
+        if (
+          result.status ===
+          "not_found"
+        ) {
+          return reply
+            .status(
+              404
+            )
+            .send({
+              error: {
+                code:
+                  "POSTER_PROMOTION_MEDIA_NOT_FOUND",
+
+                message:
+                  "Poster Promotion media asset was not found.",
+
+                requestId:
+                  request.id,
+              },
+            });
+        }
+
+        if (
+          result.status ===
+          "not_uploaded"
+        ) {
+          return reply
+            .status(
+              409
+            )
+            .send({
+              error: {
+                code:
+                  "POSTER_PROMOTION_MEDIA_NOT_UPLOADED",
+
+                message:
+                  "Poster Promotion media upload is not available in storage yet.",
+
+                requestId:
+                  request.id,
+              },
+            });
+        }
+
+        if (
+          result.status ===
+          "invalid_upload"
+        ) {
+          return reply
+            .status(
+              422
+            )
+            .send({
+              error: {
+                code:
+                  "POSTER_PROMOTION_MEDIA_INVALID",
+
+                message:
+                  "Uploaded Poster Promotion media does not match the expected content type or size.",
+
+                requestId:
+                  request.id,
+              },
+            });
+        }
+
+        if (
+          result.status ===
+          "conflict"
+        ) {
+          return reply
+            .status(
+              409
+            )
+            .send({
+              error: {
+                code:
+                  "POSTER_PROMOTION_MEDIA_CONFLICT",
+
+                message:
+                  "Poster Promotion media changed before verification completed.",
+
+                requestId:
+                  request.id,
+              },
+            });
+        }
+
+        return reply
+          .status(
+            409
+          )
+          .send({
+            error: {
+              code:
+                "POSTER_PROMOTION_MEDIA_INVALID_STATE",
+
+              message:
+                "Poster Promotion media is not in a verifiable upload state.",
+
+              requestId:
+                request.id,
+            },
+          });
+      }
+    );
+
     app.post(
       "/monetization/poster-promotions",
       async (
