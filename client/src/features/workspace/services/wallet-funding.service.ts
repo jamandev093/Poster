@@ -7,6 +7,7 @@ import type {
 import {
   requestPosterApiJson,
 } from "./client-api.service";
+import { createSecureRandomToken } from "./secure-random-token";
 
 interface BackendWalletFundingOrder {
   id?: string;
@@ -45,7 +46,7 @@ function createFundingIdempotencyKey(
     input.walletId,
     input.amountMinor,
     Date.now(),
-    Math.random().toString(36).slice(2),
+    createSecureRandomToken(),
   ].join(":");
 }
 

@@ -6,6 +6,7 @@ import type {
   ClientWalletApiCampaignAllocation,
   ClientWalletApiWallet,
 } from "./client-wallet-read.service";
+import { createSecureRandomToken } from "./secure-random-token";
 
 export type ClientWalletAllocationCurrency =
   "INR";
@@ -59,7 +60,7 @@ function createClientWalletAllocationIdempotencyKey(
     action,
     campaignId,
     Date.now(),
-    Math.random().toString(36).slice(2),
+    createSecureRandomToken(),
   ].join(":");
 }
 
