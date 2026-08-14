@@ -36,7 +36,10 @@ const mocks =
                 string;
             }
           ) =>
-            null
+            {
+              void _props;
+              return null;
+            }
         ),
     })
   );
