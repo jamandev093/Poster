@@ -71,6 +71,22 @@ export interface LoginResponse {
   accessTokenExpiresAt: string;
 }
 
+export type GoogleAuthenticationMode =
+  | "login"
+  | "signup";
+
+export interface GoogleAuthenticationInput {
+  idToken: string;
+
+  mode:
+    GoogleAuthenticationMode;
+}
+
+export interface GoogleAuthenticationResponse
+  extends LoginResponse {
+  isNewAccount: boolean;
+}
+
 export interface AuthenticationAccount {
   id: string;
 
@@ -480,6 +496,92 @@ async function postAuthenticationLogin(
   };
 }
 
+
+async function postGoogleAuthentication(
+  body: Record<string, unknown>
+): Promise<
+  GoogleAuthenticationResponse
+> {
+  const response =
+    await fetch(
+      buildAuthenticationUrl(
+        "/google"
+      ),
+      {
+        method:
+          "POST",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          "Content-Type":
+            "application/json",
+        },
+
+        credentials:
+          "include",
+
+        body:
+          JSON.stringify(
+            body
+          ),
+      }
+    );
+
+  const responseBody =
+    await readJsonResponse(
+      response
+    );
+
+  if (!response.ok) {
+    const errorDetails =
+      getErrorMessageFromBody(
+        responseBody
+      );
+
+    throw new AuthenticationApiError(
+      errorDetails.message ??
+        "Google authentication failed. Please try again.",
+      response.status,
+      errorDetails.code
+    );
+  }
+
+  const accessToken =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_HEADER
+    );
+
+  const accessTokenExpiresAt =
+    response.headers.get(
+      AUTHENTICATION_ACCESS_TOKEN_EXPIRES_HEADER
+    );
+
+  if (
+    !accessToken ||
+    !accessTokenExpiresAt
+  ) {
+    throw new AuthenticationApiError(
+      "The Google authentication response did not include an access token.",
+      response.status,
+      null
+    );
+  }
+
+  return {
+    ...(responseBody as Omit<
+      GoogleAuthenticationResponse,
+      | "accessToken"
+      | "accessTokenExpiresAt"
+    >),
+
+    accessToken,
+
+    accessTokenExpiresAt,
+  };
+}
+
 async function postAuthenticationRefreshSession(): Promise<RefreshSessionResponse> {
   const response =
     await fetch(
@@ -775,6 +877,42 @@ class AuthService {
 
         password:
           input.password,
+      });
+
+    await this.saveAccessSession({
+      accessToken:
+        result.accessToken,
+
+      accessTokenExpiresAt:
+        result.accessTokenExpiresAt,
+    });
+
+    return result;
+  }
+
+  async googleAuthenticate(
+    input:
+      GoogleAuthenticationInput
+  ): Promise<
+    GoogleAuthenticationResponse
+  > {
+    const idToken =
+      normalizeRequiredText(
+        input.idToken
+      );
+
+    if (!idToken) {
+      throw new Error(
+        "A Google identity token is required."
+      );
+    }
+
+    const result =
+      await postGoogleAuthentication({
+        idToken,
+
+        mode:
+          input.mode,
       });
 
     await this.saveAccessSession({

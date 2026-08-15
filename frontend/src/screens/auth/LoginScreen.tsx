@@ -25,6 +25,7 @@ import SocialButton from "../../components/buttons/SocialButton";
 import Card from "../../components/cards/Card";
 
 import AuthService from "../../services/AuthService";
+import GoogleIdentityService from "../../services/GoogleIdentityService";
 import Divider from "../../components/common/Divider";
 import Logo from "../../components/common/Logo";
 import Input from "../../components/forms/Input";
@@ -229,21 +230,33 @@ export default function LoginScreen({
       setErrors({});
 
       try {
-        // TODO:
-        // Add Google authentication
-        // through AuthService.
-        //
-        // await AuthService.socialLogin(
-        //   "google"
-        // );
+        const idToken =
+          await GoogleIdentityService
+            .requestIdToken(
+              "login"
+            );
+
+        if (!idToken) {
+          return;
+        }
+
+        await AuthService
+          .googleAuthenticate({
+            idToken,
+
+            mode:
+              "login",
+          });
 
         navigation.replace(
           "Main"
         );
-      } catch {
+      } catch (error) {
         setErrors({
           form:
-            "We couldn't continue with Google. Please try again.",
+            error instanceof Error
+              ? error.message
+              : "We couldn't continue with Google. Please try again.",
         });
       } finally {
         authRequestRef.current =

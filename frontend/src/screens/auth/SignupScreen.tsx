@@ -26,6 +26,7 @@ import PrimaryButton from "../../components/buttons/PrimaryButton";
 import SocialButton from "../../components/buttons/SocialButton";
 
 import AuthService from "../../services/AuthService";
+import GoogleIdentityService from "../../services/GoogleIdentityService";
 import Divider from "../../components/common/Divider";
 
 import {
@@ -531,6 +532,15 @@ export default function SignupScreen({
         return;
       }
 
+      if (!termsAccepted) {
+        setErrors({
+          terms:
+            "Accept the Terms and Privacy Policy.",
+        });
+
+        return;
+      }
+
       signupRequestRef.current =
         true;
 
@@ -541,17 +551,36 @@ export default function SignupScreen({
       setErrors({});
 
       try {
-        // TODO:
-        // Implement Google signup
-        // through AuthService.
+        const idToken =
+          await GoogleIdentityService
+            .requestIdToken(
+              "signup"
+            );
+
+        if (!idToken) {
+          return;
+        }
+
+        const result =
+          await AuthService
+            .googleAuthenticate({
+              idToken,
+
+              mode:
+                "signup",
+            });
 
         navigation.replace(
-          "Username"
+          result.isNewAccount
+            ? "Username"
+            : "Main"
         );
-      } catch {
+      } catch (error) {
         setErrors({
           form:
-            "We couldn't continue with Google. Please try again.",
+            error instanceof Error
+              ? error.message
+              : "We couldn't continue with Google. Please try again.",
         });
       } finally {
         signupRequestRef.current =
@@ -561,7 +590,10 @@ export default function SignupScreen({
           null
         );
       }
-    }, [navigation]);
+    }, [
+      navigation,
+      termsAccepted,
+    ]);
 
   return (
     <SafeAreaView
