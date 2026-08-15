@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
 
   placeholder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
 
     justifyContent: "center",
 
