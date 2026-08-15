@@ -1,3 +1,4 @@
+import useFeedback from "../../context/FeedbackContext";
 import React, {
   useCallback,
 } from "react";
@@ -66,6 +67,8 @@ export default function DirectSponsoredCard({
   const { colors } =
     useTheme();
 
+  const { showError } = useFeedback();
+
   const openUrl =
     useCallback(
       async (
@@ -83,11 +86,10 @@ export default function DirectSponsoredCard({
             );
           }
         } catch {
-          // TODO:
-          // Route through shared user feedback.
+                    showError("Unable to open this link. Please try again.");
         }
       },
-      []
+      [showError]
     );
 
   const handleOpen =
