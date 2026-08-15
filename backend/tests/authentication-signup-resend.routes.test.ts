@@ -100,6 +100,9 @@ describe(
             loginSessionService:
               createUnusedService() as never,
 
+            googleAuthenticationService:
+              createUnusedService() as never,
+
             sessionLifecycleService:
               createUnusedService() as never,
 
@@ -232,6 +235,9 @@ describe(
               vi.fn(),
 
             loginSessionService:
+              createUnusedService() as never,
+
+            googleAuthenticationService:
               createUnusedService() as never,
 
             sessionLifecycleService:

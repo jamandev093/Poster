@@ -146,6 +146,11 @@ import {
 } from "./application/authentication/login-session.service.js";
 
 import {
+  createGoogleAuthenticationService,
+  type GoogleAuthenticationService,
+} from "./application/authentication/google-authentication.service.js";
+
+import {
   createPasswordResetService,
   type PasswordResetService,
 } from "./application/authentication/password-reset.service.js";
@@ -415,6 +420,9 @@ export interface BuildAppOptions {
 
   loginSessionService?:
     LoginSessionService;
+
+  googleAuthenticationService?:
+    GoogleAuthenticationService;
 
   sessionLifecycleService?:
     SessionLifecycleService;
@@ -1214,6 +1222,11 @@ await app.register(
         options
           .loginSessionService ??
         createLoginSessionService(),
+
+      googleAuthenticationService:
+        options
+          .googleAuthenticationService ??
+        createGoogleAuthenticationService(),
 
       sessionLifecycleService:
         options

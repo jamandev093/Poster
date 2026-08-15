@@ -12,6 +12,10 @@ import type {
 } from "../application/authentication/login-session.service.js";
 
 import type {
+  GoogleAuthenticationService,
+} from "../application/authentication/google-authentication.service.js";
+
+import type {
   PasswordResetService,
 } from "../application/authentication/password-reset.service.js";
 
@@ -158,6 +162,30 @@ const LoginRequestSchema =
             PASSWORD_MAXIMUM_LENGTH,
             "Password is too long."
           ),
+    })
+    .strict();
+
+const GoogleAuthenticationRequestSchema =
+  z
+    .object({
+      idToken:
+        z
+          .string()
+          .trim()
+          .min(
+            1,
+            "Google ID token is required."
+          )
+          .max(
+            16_384,
+            "Google ID token is too long."
+          ),
+
+      mode:
+        z.enum([
+          "login",
+          "signup",
+        ]),
     })
     .strict();
 
@@ -313,6 +341,11 @@ interface LoginHttpResponse {
 
   session:
     AuthenticationSessionResponse;
+}
+
+interface GoogleAuthenticationHttpResponse
+  extends LoginHttpResponse {
+  isNewAccount: boolean;
 }
 
 interface SignupHttpResponse {
@@ -474,6 +507,9 @@ export interface AuthenticationRoutesOptions {
 
   loginSessionService:
     LoginSessionService;
+
+  googleAuthenticationService:
+    GoogleAuthenticationService;
 
   sessionLifecycleService:
     SessionLifecycleService;
@@ -677,6 +713,94 @@ export const authenticationRoutes:
                 result.session
               ),
           };
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
+
+    app.post(
+      "/google",
+      async (
+        request,
+        reply
+      ) => {
+        const input =
+          parseHttpRequestBody(
+            GoogleAuthenticationRequestSchema,
+            request.body
+          );
+
+        const result =
+          await options
+            .googleAuthenticationService
+            .authenticate({
+              idToken:
+                input.idToken,
+
+              mode:
+                input.mode,
+
+              ipAddress:
+                request.ip,
+
+              userAgent:
+                request.headers[
+                  "user-agent"
+                ] ??
+                null,
+            });
+
+        const accessToken =
+          options
+            .accessTokenService
+            .issue({
+              userId:
+                result.account.id,
+
+              sessionId:
+                result.session.id,
+            });
+
+        writeAccessTokenHeaders(
+          reply,
+          accessToken
+        );
+
+        setAuthenticationRefreshCookie(
+          reply,
+          result.refreshToken,
+          {
+            expiresAt:
+              result
+                .session
+                .expiresAt,
+
+            isProduction:
+              options.isProduction,
+          }
+        );
+
+        const response:
+          GoogleAuthenticationHttpResponse = {
+          account:
+            mapAuthenticationAccount(
+              result.account
+            ),
+
+          session:
+            mapAuthenticationSession(
+              result.session
+            ),
+
+          isNewAccount:
+            result.isNewAccount,
+        };
 
         return reply
           .status(
