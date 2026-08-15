@@ -49,6 +49,14 @@
           "image": "./assets/splash-icon.png",
           "resizeMode": "contain"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
+          }
+        }
       ]
     ],
     "extra": {
