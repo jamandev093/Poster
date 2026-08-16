@@ -225,10 +225,19 @@ export default function UsernameScreen({
       setFormError(null);
 
       try {
-        // TODO:
-        // Confirm availability through
-        // AuthService when the backend
-        // username endpoint exists.
+        const usernameAvailable =
+          await ProfileService
+            .checkUsernameAvailability(
+              cleanUsername
+            );
+
+        if (!usernameAvailable) {
+          setFormError(
+            "This username is unavailable"
+          );
+
+          return;
+        }
 
         const currentProfile =
           await ProfileService.getProfile();

@@ -668,3 +668,48 @@ export async function updateUserProfile(
     result.rows[0]
   );
 }
+
+
+/**
+ * Checks case-insensitive username availability against the same
+ * app.users authority protected by the database unique index.
+ *
+ * The authenticated user is excluded so their own current username
+ * is considered available. PostgreSQL remains the final race-safe
+ * uniqueness authority when profile persistence occurs.
+ */
+export async function isUsernameAvailable(
+  username: string,
+  excludeUserId: string,
+  executor?: DatabaseQueryExecutor
+): Promise<boolean> {
+  const normalizedUsername =
+    username
+      .trim()
+      .toLowerCase();
+
+  const result =
+    await executeDatabaseQuery<
+      QueryResultRow & {
+        available: boolean;
+      }
+    >(
+      `
+        SELECT
+          NOT EXISTS (
+            SELECT 1
+            FROM app.users
+            WHERE
+              lower(username) = lower($1)
+              AND id <> $2::uuid
+          ) AS available
+      `,
+      [
+        normalizedUsername,
+        excludeUserId,
+      ],
+      executor
+    );
+
+  return result.rows[0]?.available === true;
+}

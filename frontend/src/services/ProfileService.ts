@@ -1054,6 +1054,72 @@ class ProfileService {
     );
   }
 
+  async checkUsernameAvailability(
+    username: string
+  ): Promise<boolean> {
+    const normalizedUsername =
+      normalizeUsername(
+        username
+      );
+
+    if (!normalizedUsername) {
+      return false;
+    }
+
+    const accessToken =
+      await getRequiredAccessToken();
+
+    const response =
+      await fetch(
+        buildAuthenticationUrl(
+          "/account/username-availability"
+        ),
+        {
+          method: "POST",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+
+          body:
+            JSON.stringify({
+              username:
+                normalizedUsername,
+            }),
+        }
+      );
+
+    if (response.status !== 200) {
+      throw new Error(
+        "Unable to check username availability."
+      );
+    }
+
+    const payload: unknown =
+      await response.json();
+
+    if (
+      !isRecord(payload) ||
+      payload.username !==
+        normalizedUsername ||
+      typeof payload.available !==
+        "boolean"
+    ) {
+      throw new Error(
+        "Poster returned an invalid username availability response."
+      );
+    }
+
+    return payload.available;
+  }
+
   async getProfile(): Promise<UserProfile> {
     const cachedProfile =
       await this.readCachedProfile();

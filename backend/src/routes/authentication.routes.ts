@@ -1,3 +1,7 @@
+import {
+  checkUsernameAvailability,
+  type CheckUsernameAvailabilityOperation,
+} from "../application/authentication/username-availability.service.js";
 import type {
   FastifyPluginAsync,
   FastifyReply,
@@ -422,6 +426,21 @@ const AccountProfilePreferencesRequestSchema =
     })
     .strict();
 
+const UsernameAvailabilityRequestSchema =
+  z
+    .object({
+      username:
+        z
+          .string()
+          .trim()
+          .toLowerCase()
+          .regex(
+            /^[a-z0-9_]{3,30}$/,
+            "Username must be 3 to 30 characters and use lowercase letters, numbers, or underscores."
+          ),
+    })
+    .strict();
+
 const AccountProfileUpdateRequestSchema =
   z
     .object({
@@ -523,6 +542,9 @@ export interface AuthenticationRoutesOptions {
 
   accountProfileService:
     AccountProfileService;
+
+  checkUsernameAvailability?:
+    CheckUsernameAvailabilityOperation;
 
   isProduction: boolean;
 }
@@ -955,6 +977,45 @@ export const authenticationRoutes:
       }
     );
 
+
+    app.post(
+      "/account/username-availability",
+      async (
+        request,
+        reply
+      ) => {
+        const authorization =
+          requireAuthenticatedRequest(
+            request
+          );
+
+        const input =
+          parseHttpRequestBody(
+            UsernameAvailabilityRequestSchema,
+            request.body
+          );
+
+        const operation =
+          options.checkUsernameAvailability ??
+          checkUsernameAvailability;
+
+        const response =
+          await operation({
+            userId:
+              authorization.userId,
+            username:
+              input.username,
+          });
+
+        return reply
+          .status(
+            200
+          )
+          .send(
+            response
+          );
+      }
+    );
 
     app.get(
       "/account/profile",
